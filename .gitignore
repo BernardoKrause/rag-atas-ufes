@@ -1,0 +1,46 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# --- Env / Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Docker / Data volumes ---
+docker/volumes/
+*.log
+
+# --- Alembic ---
+# (versions/ tracked; nada a ignorar aqui além do padrão Python acima)
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+
+# --- OS ---
+.DS_Store
+Thumbs.db
