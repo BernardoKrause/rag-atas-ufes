@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -13,13 +14,13 @@ class Settings(BaseSettings):
     )
 
     postgres_user: str
-    postgres_password: str
+    postgres_password: SecretStr
     postgres_db: str
     postgres_host: str = "localhost"
     postgres_port: int = 5433
 
     neo4j_user: str
-    neo4j_password: str
+    neo4j_password: SecretStr
     neo4j_host: str = "localhost"
     neo4j_bolt_port: int = 7687
 
@@ -32,7 +33,7 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         return (
-            f"postgresql+psycopg2://{self.postgres_user}:{self.postgres_password}"
+            f"postgresql+psycopg2://{self.postgres_user}:{self.postgres_password.get_secret_value()}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
