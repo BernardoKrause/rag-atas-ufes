@@ -37,7 +37,8 @@ class Documento(Base):
     curso: Mapped[str | None] = mapped_column(String(80), nullable=True)
     area_tematica: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
-    numero_reuniao: Mapped[int] = mapped_column(Integer, nullable=False)
+    # nulo para orgaos que nao numeram suas atas na fonte (ex.: CAR, CEFD)
+    numero_reuniao: Mapped[int | None] = mapped_column(Integer, nullable=True)
     tipo_reuniao: Mapped[str] = mapped_column(String(20), nullable=False)
     data_reuniao: Mapped[date] = mapped_column(Date, nullable=False)
     horario_inicio: Mapped[str | None] = mapped_column(String(10), nullable=True)
