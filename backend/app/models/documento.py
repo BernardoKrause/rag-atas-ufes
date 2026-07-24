@@ -31,7 +31,9 @@ class Documento(Base):
     status_aprovacao: Mapped[str] = mapped_column(String(30), default=StatusAprovacao.APROVADA.value)
 
     centro: Mapped[str] = mapped_column(String(20), nullable=False)
-    campus: Mapped[str] = mapped_column(String(30), nullable=False)
+    # nulo quando o documento nao declara o campus explicitamente (a maioria
+    # dos modelos de ata B1/B2/C nao tem essa informacao no texto)
+    campus: Mapped[str | None] = mapped_column(String(30), nullable=True)
     tipo_orgao: Mapped[str] = mapped_column(String(1), nullable=False)
     departamento: Mapped[str | None] = mapped_column(String(50), nullable=True)
     curso: Mapped[str | None] = mapped_column(String(80), nullable=True)
