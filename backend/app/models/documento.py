@@ -41,7 +41,9 @@ class Documento(Base):
 
     # nulo para orgaos que nao numeram suas atas na fonte (ex.: CAR, CEFD)
     numero_reuniao: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    tipo_reuniao: Mapped[str] = mapped_column(String(20), nullable=False)
+    # nulo quando o orgao nao declara o carater (ordinaria/extraordinaria) da
+    # reuniao na fonte (CAR, CT, CEFD e outros — confirmado no CSV real: 50/288)
+    tipo_reuniao: Mapped[str | None] = mapped_column(String(20), nullable=True)
     data_reuniao: Mapped[date] = mapped_column(Date, nullable=False)
     horario_inicio: Mapped[str | None] = mapped_column(String(10), nullable=True)
     modalidade: Mapped[str | None] = mapped_column(String(30), nullable=True)
