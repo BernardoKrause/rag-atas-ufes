@@ -18,6 +18,10 @@ env:
   QDRANT_HTTP_PORT: 6333
   QDRANT_GRPC_PORT: 6334
   OLLAMA_PORT: 11434
+  # placeholder: nenhum teste le o corpus real por essa variavel, so os 6
+  # fixtures em tests/fixtures/atas_sample (passados explicitamente aos testes)
+  ANONYMIZATION_SECRET_KEY: ci-placeholder-secret-key-nao-usar-em-producao
+  ATAS_CORPUS_PATH: /tmp/atas-corpus-placeholder
 
 jobs:
   backend:
@@ -25,6 +29,20 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - "5433:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -39,6 +57,9 @@ jobs:
 
       - name: Lint
         run: ruff check .
+
+      - name: Apply migrations
+        run: alembic upgrade head
 
       - name: Test
         run: pytest -v
