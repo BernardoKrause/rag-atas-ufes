@@ -14,12 +14,17 @@ RE_PROCESSO_SIPAC = re.compile(r"23068\.\d{6}/\d{4}-\d{2}")
 
 MODELO_NER = "Gpaiva/NERDE-base"
 
-# margem segura de caracteres por janela: a config do tokenizer do NERDE-base
-# nao declara model_max_length (fica no default gigante da lib), entao a
-# pipeline nao trunca sozinha — sem isso, uma ata inteira (milhares de tokens)
-# estoura o limite real de 512 posicoes do BERT por baixo dos panos
-LARGURA_JANELA_NER = 1500
-SOBREPOSICAO_JANELA_NER = 200
+# margem segura de TOKENS por janela (nao caracteres): a config do tokenizer
+# do NERDE-base nao declara model_max_length (fica no default gigante da lib),
+# entao a pipeline nao trunca sozinha — sem isso, uma ata inteira (milhares de
+# tokens) estoura o limite real de 512 posicoes do BERT por baixo dos panos.
+# Um corte por contagem de caracteres foi tentado primeiro e se mostrou
+# insuficiente: texto juridico denso tokeniza numa razao muito pior que a
+# assumida (1500 caracteres viraram 673 tokens num teste real, estourando o
+# limite) — cortar pela tokenizacao real do proprio modelo eh a unica forma
+# confiavel de garantir a margem.
+LARGURA_JANELA_NER_TOKENS = 400
+SOBREPOSICAO_JANELA_NER_TOKENS = 50
 
 _ner_pipeline = None
 
@@ -33,21 +38,28 @@ def _carregar_ner():
     return _ner_pipeline
 
 
-def _janelas_para_ner(texto: str) -> list[tuple[int, str]]:
-    """Divide o texto em janelas sobrepostas de caracteres, cada uma bem abaixo
-    do limite de tokens do BERT. A sobreposicao garante que um nome cortado no
-    fim de uma janela apareca inteiro na janela seguinte."""
-    if len(texto) <= LARGURA_JANELA_NER:
+def _janelas_para_ner(texto: str, tokenizer) -> list[tuple[int, str]]:
+    """Divide o texto em janelas sobrepostas, cortando pela tokenizacao real do
+    modelo (nao por contagem de caracteres) — garante que nenhuma janela
+    estoure o limite de 512 posicoes do BERT independente da densidade do
+    texto. A sobreposicao (em tokens) garante que um nome cortado no fim de
+    uma janela apareca inteiro na janela seguinte."""
+    offsets = tokenizer(texto, return_offsets_mapping=True, add_special_tokens=False)[
+        "offset_mapping"
+    ]
+    if len(offsets) <= LARGURA_JANELA_NER_TOKENS:
         return [(0, texto)]
 
     janelas = []
-    inicio = 0
+    inicio_token = 0
     while True:
-        fim = min(inicio + LARGURA_JANELA_NER, len(texto))
-        janelas.append((inicio, texto[inicio:fim]))
-        if fim == len(texto):
+        fim_token = min(inicio_token + LARGURA_JANELA_NER_TOKENS, len(offsets))
+        inicio_char = offsets[inicio_token][0]
+        fim_char = offsets[fim_token - 1][1]
+        janelas.append((inicio_char, texto[inicio_char:fim_char]))
+        if fim_token == len(offsets):
             break
-        inicio = fim - SOBREPOSICAO_JANELA_NER
+        inicio_token = fim_token - SOBREPOSICAO_JANELA_NER_TOKENS
     return janelas
 
 
@@ -68,7 +80,7 @@ def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, in
 def _achar_entidades_pessoa(texto: str) -> list[tuple[int, int]]:
     ner = _carregar_ner()
     intervalos: list[tuple[int, int]] = []
-    for offset, janela in _janelas_para_ner(texto):
+    for offset, janela in _janelas_para_ner(texto, ner.tokenizer):
         for entidade in ner(janela):
             if entidade["entity_group"] != "PER":
                 continue
