@@ -9,9 +9,29 @@ RE_HORA_COMPACTA = re.compile(r"(\d{1,2})[Hh](\d{2})")
 RE_HORA_HHMM = re.compile(r"(\d{1,2}):(\d{2})")
 
 JANELA_ABERTURA = 3000
-JANELA_CABECALHO = 500
 
 PALAVRAS_HORA = set(NUM_UNIDADE) | set(NUM_10_19) | set(NUM_DEZENA) | set(ZERO)
+
+# cada centro do corpus fica em exatamente um campus fisico da UFES — nao ha
+# necessidade (nem confiabilidade) em tentar re-descobrir isso fazendo regex
+# no texto da ata, que so cita o campus explicitamente em alguns modelos
+CENTRO_CAMPUS = {
+    "CAR": "Goiabeiras",
+    "CCHN": "Goiabeiras",
+    "CE": "Goiabeiras",
+    "CEFD": "Goiabeiras",
+    "CT": "Goiabeiras",
+    "CCAE": "Alegre",
+    "CCENS": "São Mateus",
+    "CEUNES": "São Mateus",
+}
+
+
+def mapear_campus(centro: str) -> str:
+    try:
+        return CENTRO_CAMPUS[centro]
+    except KeyError:
+        raise ValueError(f"centro sem campus mapeado: {centro}") from None
 
 
 def _normalizar_espacos(texto: str) -> str:
@@ -36,33 +56,22 @@ def extrair_metadados_organizacionais(tipo: str, orgao: str) -> dict[str, str | 
     partes = orgao.split("_")
 
     if tipo_orgao == "A":
-        return {"centro": partes[0], "tipo_orgao": tipo_orgao, "departamento": "_".join(partes[1:]), "curso": None, "area_tematica": None}
+        centro = partes[0]
+        return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": "_".join(partes[1:]), "curso": None, "area_tematica": None}
     if tipo_orgao == "B":
-        return {"centro": orgao, "tipo_orgao": tipo_orgao, "departamento": None, "curso": None, "area_tematica": None}
+        return {"centro": orgao, "campus": mapear_campus(orgao), "tipo_orgao": tipo_orgao, "departamento": None, "curso": None, "area_tematica": None}
     if tipo_orgao == "C":
         # "{CENTRO}_CamaraLocal_{AREA}"
+        centro = partes[0]
         area = partes[2] if len(partes) > 2 else None
-        return {"centro": partes[0], "tipo_orgao": tipo_orgao, "departamento": None, "curso": None, "area_tematica": area}
+        return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": None, "curso": None, "area_tematica": area}
     if tipo_orgao == "D":
         # "{CENTRO}_Colegiado_{CURSO}"
+        centro = partes[0]
         curso = partes[2] if len(partes) > 2 else None
-        return {"centro": partes[0], "tipo_orgao": tipo_orgao, "departamento": None, "curso": curso, "area_tematica": None}
+        return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": None, "curso": curso, "area_tematica": None}
 
     raise ValueError(f"tipo_orgao desconhecido: {tipo_orgao}")
-
-
-def extrair_campus(texto: str) -> str | None:
-    # restrito ao cabecalho (primeiros JANELA_CABECALHO caracteres) — buscar no
-    # documento inteiro gera falso positivo (ex.: "CEUA-ALEGRE", nome de comissao,
-    # nao tem nada a ver com o campus do documento)
-    cabecalho = texto[:JANELA_CABECALHO].upper()
-    if "CEUNES" in cabecalho:
-        return "São Mateus"
-    if "ALEGRE" in cabecalho:
-        return "Alegre"
-    if "GOIABEIRAS" in cabecalho:
-        return "Goiabeiras"
-    return None
 
 
 def _achar_inicio_numero(tokens: list[str], indice_ultimo_token: int) -> int:
@@ -173,7 +182,6 @@ def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
     return {
         **metadados,
         "texto_bruto": texto_bruto,
-        "campus": extrair_campus(texto_bruto),
         "horario_inicio": extrair_horario_inicio(texto_bruto),
         "modalidade": extrair_modalidade(texto_bruto),
         "local": extrair_local(texto_bruto),

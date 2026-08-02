@@ -1,14 +1,17 @@
 from pathlib import Path
 
+import pytest
+
 from app.ingestion.extractor import (
+    CENTRO_CAMPUS,
     extrair_campos,
-    extrair_campus,
     extrair_horario_inicio,
     extrair_local,
     extrair_metadados_organizacionais,
     extrair_modalidade,
     extrair_quorum_declarado,
     extrair_texto_bruto,
+    mapear_campus,
 )
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
@@ -17,29 +20,34 @@ FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
 def test_metadados_tipo_a_camara_departamental():
     meta = extrair_metadados_organizacionais("TIPO_A", "CCENS_DB")
     assert meta == {
-        "centro": "CCENS", "tipo_orgao": "A", "departamento": "DB", "curso": None, "area_tematica": None,
+        "centro": "CCENS", "campus": "São Mateus", "tipo_orgao": "A", "departamento": "DB", "curso": None, "area_tematica": None,
     }
 
 
 def test_metadados_tipo_b_conselho_do_centro():
     meta = extrair_metadados_organizacionais("TIPO_B", "CT")
     assert meta == {
-        "centro": "CT", "tipo_orgao": "B", "departamento": None, "curso": None, "area_tematica": None,
+        "centro": "CT", "campus": "Goiabeiras", "tipo_orgao": "B", "departamento": None, "curso": None, "area_tematica": None,
     }
 
 
 def test_metadados_tipo_c_camara_local_tematica():
     meta = extrair_metadados_organizacionais("TIPO_C", "CCHN_CamaraLocal_Graduacao")
     assert meta == {
-        "centro": "CCHN", "tipo_orgao": "C", "departamento": None, "curso": None, "area_tematica": "Graduacao",
+        "centro": "CCHN", "campus": "Goiabeiras", "tipo_orgao": "C", "departamento": None, "curso": None, "area_tematica": "Graduacao",
     }
 
 
 def test_metadados_tipo_d_colegiado_de_curso():
     meta = extrair_metadados_organizacionais("TIPO_D", "CE_Colegiado_Pedagogia")
     assert meta == {
-        "centro": "CE", "tipo_orgao": "D", "departamento": None, "curso": "Pedagogia", "area_tematica": None,
+        "centro": "CE", "campus": "Goiabeiras", "tipo_orgao": "D", "departamento": None, "curso": "Pedagogia", "area_tematica": None,
     }
+
+
+def test_metadados_centro_sem_campus_mapeado_levanta_erro():
+    with pytest.raises(ValueError, match="centro sem campus mapeado"):
+        extrair_metadados_organizacionais("TIPO_B", "CCJE")
 
 
 def test_extrair_texto_bruto_retorna_conteudo_nao_vazio():
@@ -120,19 +128,14 @@ def test_quorum_ausente_retorna_none():
     assert extrair_quorum_declarado("Ata da reunião ordinária, sem menção a quórum.") is None
 
 
-def test_campus_ceunes():
-    texto = "CENTRO UNIVERSITÁRIO NORTE DO ESPÍRITO SANTO - CEUNES"
-    assert extrair_campus(texto) == "São Mateus"
+@pytest.mark.parametrize("centro, campus_esperado", list(CENTRO_CAMPUS.items()))
+def test_mapear_campus_cobre_todos_os_centros_do_corpus(centro, campus_esperado):
+    assert mapear_campus(centro) == campus_esperado
 
 
-def test_campus_alegre_no_cabecalho():
-    texto = "Campus Universitário de Alegre\nCentro de Ciências Agrárias e Engenharias"
-    assert extrair_campus(texto) == "Alegre"
-
-
-def test_campus_ignora_mencao_fora_do_cabecalho():
-    texto = "x" * 600 + " comissão CEUA-ALEGRE tratou do assunto"
-    assert extrair_campus(texto) is None
+def test_mapear_campus_centro_desconhecido_levanta_erro():
+    with pytest.raises(ValueError, match="centro sem campus mapeado"):
+        mapear_campus("CCJE")
 
 
 def test_extrair_campos_fixture_ccae():
@@ -143,6 +146,7 @@ def test_extrair_campos_fixture_ccae():
     campos = extrair_campos("TIPO_B", "CCAE", caminho)
 
     assert campos["centro"] == "CCAE"
+    assert campos["campus"] == "Alegre"
     assert campos["tipo_orgao"] == "B"
     assert campos["horario_inicio"] == "14:00"
     assert campos["modalidade"] == "Presencial"
@@ -156,6 +160,7 @@ def test_extrair_campos_fixture_ct_layout_espacado():
     campos = extrair_campos("TIPO_B", "CT", caminho)
 
     assert campos["centro"] == "CT"
+    assert campos["campus"] == "Goiabeiras"
     assert campos["horario_inicio"] == "14:00"
     assert campos["modalidade"] == "Videoconferência"
     assert campos["quorum_declarado"] is True
