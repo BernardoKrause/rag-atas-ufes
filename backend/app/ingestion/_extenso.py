@@ -2,12 +2,9 @@
 
 import re
 
-_C_CEDILHA = chr(0xC7)  # Ç
-_E_AGUDO = chr(0xC9)  # É
-
 NUM_UNIDADE = {
     "UM": 1, "UMA": 1, "DOIS": 2, "DUAS": 2,
-    "TR" + _E_AGUDO + "S": 3, "TRES": 3,
+    "TRÊS": 3, "TRES": 3,
     "QUATRO": 4, "CINCO": 5, "SEIS": 6, "SETE": 7, "OITO": 8, "NOVE": 9,
 }
 NUM_10_19 = {
