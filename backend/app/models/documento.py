@@ -57,7 +57,10 @@ class Documento(Base):
 
 class EntidadeAnonimizada(Base):
     __tablename__ = "entidades_anonimizadas"
-    __table_args__ = (UniqueConstraint("hash_entidade", name="uq_entidades_anonimizadas_hash_entidade"),)
+    __table_args__ = (
+        UniqueConstraint("hash_entidade", name="uq_entidades_anonimizadas_hash_entidade"),
+        UniqueConstraint("tipo", "token", name="uq_entidades_anonimizadas_tipo_token"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     hash_entidade: Mapped[str] = mapped_column(String(64), nullable=False)

@@ -5,12 +5,22 @@ import hmac
 import re
 import unicodedata
 
+from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 from transformers import pipeline
 
 from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
 RE_PROCESSO_SIPAC = re.compile(r"23068\.\d{6}/\d{4}-\d{2}")
+
+# uma sequence do Postgres por tipo (ver migration f4ab1864de74): nextval() e
+# atomico e O(1) independente do tamanho da tabela, ao contrario do
+# COUNT(*)+1 anterior, que corria risco de colisao entre execucoes
+# concorrentes e ficava mais lento conforme a tabela crescia
+SEQUENCIA_NUMERACAO_TOKEN = {
+    TipoEntidade.PESSOA: Sequence("seq_entidades_anonimizadas_pessoa"),
+    TipoEntidade.PROCESSO: Sequence("seq_entidades_anonimizadas_processo"),
+}
 
 MODELO_NER = "Gpaiva/NERDE-base"
 
@@ -77,6 +87,47 @@ def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, in
     return mesclados
 
 
+def _subtrair_intervalo(
+    alvo: tuple[int, int], remover: tuple[int, int]
+) -> list[tuple[int, int]]:
+    """Retorna o que sobra de `alvo` fora de `remover` (0, 1 ou 2 pedacos)."""
+    inicio, fim = alvo
+    r_inicio, r_fim = remover
+    if r_fim <= inicio or r_inicio >= fim:
+        return [(inicio, fim)]
+
+    pedacos = []
+    if inicio < r_inicio:
+        pedacos.append((inicio, r_inicio))
+    if fim > r_fim:
+        pedacos.append((r_fim, fim))
+    return pedacos
+
+
+def _recortar_sobreposicao_com_processos(
+    intervalos_pessoa: list[tuple[int, int]],
+    intervalos_processo: list[tuple[int, int]],
+) -> list[tuple[int, int]]:
+    """Numeros de processo SIPAC vem de um regex exato; nomes vem de um modelo
+    de NER cujos limites podem errar (ex.: texto extraido de PDF sem espaco
+    entre nome e numero, "Silva23068.001234/2025-11"). anonimizar_texto
+    substitui as ocorrencias do fim pro comeco assumindo que elas nunca se
+    sobrepoem — um span de PESSOA que invade um span de PROCESSO quebra essa
+    premissa e corrompe a substituicao. Como o regex e a fonte confiavel aqui,
+    recorta do span de PESSOA a parte que cai dentro de um span de PROCESSO."""
+    ajustados: list[tuple[int, int]] = []
+    for inicio, fim in intervalos_pessoa:
+        pedacos = [(inicio, fim)]
+        for p_inicio, p_fim in intervalos_processo:
+            pedacos = [
+                pedaco
+                for i, f in pedacos
+                for pedaco in _subtrair_intervalo((i, f), (p_inicio, p_fim))
+            ]
+        ajustados.extend(pedacos)
+    return ajustados
+
+
 def _achar_entidades_pessoa(texto: str) -> list[tuple[int, int]]:
     ner = _carregar_ner()
     intervalos: list[tuple[int, int]] = []
@@ -111,7 +162,7 @@ def _obter_ou_criar_token(
     if existente is not None:
         return existente.token
 
-    numero = sessao.query(EntidadeAnonimizada).filter_by(tipo=tipo.value).count() + 1
+    numero = sessao.scalar(SEQUENCIA_NUMERACAO_TOKEN[tipo])
     token = f"{tipo.value.upper()}_{numero:04d}"
     sessao.add(
         EntidadeAnonimizada(hash_entidade=hash_entidade, tipo=tipo.value, token=token)
@@ -125,12 +176,16 @@ def anonimizar_texto(texto: str, secret_key: bytes, sessao: Session) -> str:
     deterministicos, consultando/gravando EntidadeAnonimizada — a mesma pessoa
     ou processo real sempre gera o mesmo token, inclusive entre atas e execucoes
     diferentes."""
+    intervalos_processo = [(m.start(), m.end()) for m in RE_PROCESSO_SIPAC.finditer(texto)]
+    intervalos_pessoa = _recortar_sobreposicao_com_processos(
+        _achar_entidades_pessoa(texto), intervalos_processo
+    )
+
     ocorrencias: list[tuple[int, int, TipoEntidade]] = [
-        (inicio, fim, TipoEntidade.PESSOA) for inicio, fim in _achar_entidades_pessoa(texto)
+        (inicio, fim, TipoEntidade.PESSOA) for inicio, fim in intervalos_pessoa
     ]
     ocorrencias += [
-        (m.start(), m.end(), TipoEntidade.PROCESSO)
-        for m in RE_PROCESSO_SIPAC.finditer(texto)
+        (inicio, fim, TipoEntidade.PROCESSO) for inicio, fim in intervalos_processo
     ]
 
     # ordem decrescente de inicio: substituir do fim pro comeco preserva os

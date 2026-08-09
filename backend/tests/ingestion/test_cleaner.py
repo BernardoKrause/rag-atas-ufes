@@ -1,5 +1,11 @@
-from app.ingestion.cleaner import anonimizar_texto
-from app.models.documento import EntidadeAnonimizada
+from app.ingestion import cleaner
+from app.ingestion.cleaner import (
+    _obter_ou_criar_token,
+    _recortar_sobreposicao_com_processos,
+    _subtrair_intervalo,
+    anonimizar_texto,
+)
+from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
 SECRET_KEY = b"chave-de-teste-nao-usar-em-producao"
 OUTRA_SECRET_KEY = b"outra-chave-de-teste"
@@ -49,6 +55,33 @@ def test_pessoas_diferentes_geram_tokens_diferentes(db_session):
     assert len(tokens) == 2
 
 
+def test_numeracao_do_token_incrementa_via_sequence_por_tipo(db_session):
+    # _obter_ou_criar_token numera via nextval() de uma sequence do Postgres
+    # por tipo (ver migration f4ab1864de74) em vez de COUNT(*)+1 — confirma
+    # que a numeracao efetivamente incrementa e que pessoa/processo tem
+    # contadores independentes entre si.
+    token_pessoa_1 = _obter_ou_criar_token(db_session, SECRET_KEY, TipoEntidade.PESSOA, "Fulano")
+    token_pessoa_2 = _obter_ou_criar_token(db_session, SECRET_KEY, TipoEntidade.PESSOA, "Beltrano")
+    token_processo_1 = _obter_ou_criar_token(
+        db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068.000001/2025-01"
+    )
+    token_processo_2 = _obter_ou_criar_token(
+        db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068.000002/2025-01"
+    )
+
+    numero_pessoa_1 = int(token_pessoa_1.split("_")[1])
+    numero_pessoa_2 = int(token_pessoa_2.split("_")[1])
+    numero_processo_1 = int(token_processo_1.split("_")[1])
+    numero_processo_2 = int(token_processo_2.split("_")[1])
+
+    assert token_pessoa_1.startswith("PESSOA_")
+    assert token_processo_1.startswith("PROCESSO_")
+    assert numero_pessoa_2 == numero_pessoa_1 + 1
+    # sequences sao independentes por tipo: a de processo incrementa por
+    # conta propria, nao acompanha quantas pessoas ja foram numeradas
+    assert numero_processo_2 == numero_processo_1 + 1
+
+
 def test_chave_secreta_diferente_gera_token_diferente_para_mesma_pessoa(db_session):
     texto = "O professor João da Silva Souza apresentou o relatório."
 
@@ -74,6 +107,66 @@ def test_mesmo_numero_de_processo_gera_sempre_o_mesmo_token(db_session):
 def test_texto_sem_pessoas_ou_processos_fica_inalterado(db_session):
     texto = "Ata da reunião ordinária, sem menção a quórum."
     assert anonimizar_texto(texto, SECRET_KEY, db_session) == texto
+
+
+def test_subtrair_intervalo_sem_sobreposicao_mantem_o_alvo():
+    assert _subtrair_intervalo((0, 5), (10, 15)) == [(0, 5)]
+    assert _subtrair_intervalo((10, 15), (0, 5)) == [(10, 15)]
+
+
+def test_subtrair_intervalo_remove_sobreposicao_no_fim():
+    assert _subtrair_intervalo((0, 10), (6, 15)) == [(0, 6)]
+
+
+def test_subtrair_intervalo_remove_sobreposicao_no_comeco():
+    assert _subtrair_intervalo((6, 15), (0, 10)) == [(10, 15)]
+
+
+def test_subtrair_intervalo_remove_alvo_totalmente_contido():
+    assert _subtrair_intervalo((5, 8), (0, 10)) == []
+
+
+def test_subtrair_intervalo_alvo_contem_intervalo_removido_gera_dois_pedacos():
+    assert _subtrair_intervalo((0, 10), (4, 6)) == [(0, 4), (6, 10)]
+
+
+def test_recortar_sobreposicao_com_processos_preserva_pessoa_sem_conflito():
+    pessoas = [(0, 10)]
+    processos = [(20, 30)]
+    assert _recortar_sobreposicao_com_processos(pessoas, processos) == pessoas
+
+
+def test_recortar_sobreposicao_com_processos_recorta_pessoa_grudada_no_numero():
+    # simula "Silva23068.001234/2025-11": o NER errou o limite e incluiu
+    # os primeiros digitos do numero de processo dentro do span de PESSOA
+    pessoas = [(0, 20)]
+    processos = [(15, 40)]
+    assert _recortar_sobreposicao_com_processos(pessoas, processos) == [(0, 15)]
+
+
+def test_anonimizar_texto_nao_corrompe_saida_quando_ner_se_sobrepoe_ao_processo(
+    db_session, monkeypatch
+):
+    # reproduz o bug do achado #1: um span de PESSOA que invade o span do
+    # PROCESSO nao pode corromper a substituicao feita de tras pra frente.
+    texto = "Assinado por Silva23068.001234/2025-11 em anexo."
+    inicio_processo = texto.index("23068.001234/2025-11")
+    inicio_pessoa = texto.index("Silva")
+    fim_pessoa_com_erro_de_limite = inicio_processo + 5  # invade o numero
+
+    monkeypatch.setattr(
+        cleaner,
+        "_achar_entidades_pessoa",
+        lambda _texto: [(inicio_pessoa, fim_pessoa_com_erro_de_limite)],
+    )
+
+    resultado = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    assert "23068.001234/2025-11" not in resultado
+    assert "Silva" not in resultado
+    assert resultado.startswith("Assinado por PESSOA_")
+    assert resultado.endswith(" em anexo.")
+    assert "PROCESSO_" in resultado
 
 
 def test_texto_maior_que_uma_janela_de_ner_ainda_anonimiza_o_final(db_session):
