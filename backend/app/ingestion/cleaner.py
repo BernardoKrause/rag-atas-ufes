@@ -13,10 +13,8 @@ from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
 RE_PROCESSO_SIPAC = re.compile(r"23068\.\d{6}/\d{4}-\d{2}")
 
-# uma sequence do Postgres por tipo (ver migration f4ab1864de74): nextval() e
-# atomico e O(1) independente do tamanho da tabela, ao contrario do
-# COUNT(*)+1 anterior, que corria risco de colisao entre execucoes
-# concorrentes e ficava mais lento conforme a tabela crescia
+# nextval() e atomico entre execucoes concorrentes, mas nao e transacional —
+# numeros podem ficar com buracos se uma insercao for revertida
 SEQUENCIA_NUMERACAO_TOKEN = {
     TipoEntidade.PESSOA: Sequence("seq_entidades_anonimizadas_pessoa"),
     TipoEntidade.PROCESSO: Sequence("seq_entidades_anonimizadas_processo"),
@@ -24,15 +22,11 @@ SEQUENCIA_NUMERACAO_TOKEN = {
 
 MODELO_NER = "Gpaiva/NERDE-base"
 
-# margem segura de TOKENS por janela (nao caracteres): a config do tokenizer
-# do NERDE-base nao declara model_max_length (fica no default gigante da lib),
-# entao a pipeline nao trunca sozinha — sem isso, uma ata inteira (milhares de
-# tokens) estoura o limite real de 512 posicoes do BERT por baixo dos panos.
-# Um corte por contagem de caracteres foi tentado primeiro e se mostrou
-# insuficiente: texto juridico denso tokeniza numa razao muito pior que a
-# assumida (1500 caracteres viraram 673 tokens num teste real, estourando o
-# limite) — cortar pela tokenizacao real do proprio modelo eh a unica forma
-# confiavel de garantir a margem.
+# o tokenizer do NERDE-base nao declara model_max_length, entao a pipeline
+# nao trunca sozinha — sem essa janela, uma ata inteira estoura o limite real
+# de 512 posicoes do BERT. Contagem em tokens, nao caracteres: a razao
+# caractere/token varia demais em texto juridico denso pra um corte por
+# caracteres garantir a margem.
 LARGURA_JANELA_NER_TOKENS = 400
 SOBREPOSICAO_JANELA_NER_TOKENS = 50
 
@@ -49,11 +43,9 @@ def _carregar_ner():
 
 
 def _janelas_para_ner(texto: str, tokenizer) -> list[tuple[int, str]]:
-    """Divide o texto em janelas sobrepostas, cortando pela tokenizacao real do
-    modelo (nao por contagem de caracteres) — garante que nenhuma janela
-    estoure o limite de 512 posicoes do BERT independente da densidade do
-    texto. A sobreposicao (em tokens) garante que um nome cortado no fim de
-    uma janela apareca inteiro na janela seguinte."""
+    """Corta pela tokenizacao real do modelo, nao por contagem de caracteres,
+    pra nunca estourar o limite de tokens do BERT. A sobreposicao garante que
+    um nome cortado no fim de uma janela apareca inteiro na seguinte."""
     offsets = tokenizer(texto, return_offsets_mapping=True, add_special_tokens=False)[
         "offset_mapping"
     ]
@@ -74,9 +66,9 @@ def _janelas_para_ner(texto: str, tokenizer) -> list[tuple[int, str]]:
 
 
 def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, int]]:
-    """Mescla intervalos sobrepostos/adjacentes — cobre tanto a mesma entidade
-    detectada duas vezes (zona de sobreposicao entre janelas) quanto um nome
-    cortado que aparece como fragmento numa janela e inteiro na vizinha."""
+    """Mescla intervalos sobrepostos/adjacentes: cobre tanto a mesma entidade
+    detectada em janelas vizinhas quanto um nome que aparece fragmentado numa
+    janela e inteiro na outra."""
     intervalos = sorted(intervalos)
     mesclados: list[tuple[int, int]] = []
     for inicio, fim in intervalos:
@@ -90,7 +82,6 @@ def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, in
 def _subtrair_intervalo(
     alvo: tuple[int, int], remover: tuple[int, int]
 ) -> list[tuple[int, int]]:
-    """Retorna o que sobra de `alvo` fora de `remover` (0, 1 ou 2 pedacos)."""
     inicio, fim = alvo
     r_inicio, r_fim = remover
     if r_fim <= inicio or r_inicio >= fim:
@@ -108,13 +99,10 @@ def _recortar_sobreposicao_com_processos(
     intervalos_pessoa: list[tuple[int, int]],
     intervalos_processo: list[tuple[int, int]],
 ) -> list[tuple[int, int]]:
-    """Numeros de processo SIPAC vem de um regex exato; nomes vem de um modelo
-    de NER cujos limites podem errar (ex.: texto extraido de PDF sem espaco
-    entre nome e numero, "Silva23068.001234/2025-11"). anonimizar_texto
-    substitui as ocorrencias do fim pro comeco assumindo que elas nunca se
-    sobrepoem — um span de PESSOA que invade um span de PROCESSO quebra essa
-    premissa e corrompe a substituicao. Como o regex e a fonte confiavel aqui,
-    recorta do span de PESSOA a parte que cai dentro de um span de PROCESSO."""
+    """Numeros de processo SIPAC vem de regex exato; nomes vem de NER, cujos
+    limites podem errar (ex.: "Silva23068.001234/2025-11" sem espaco no PDF).
+    Recorta do span de PESSOA a parte que cai dentro de um span de
+    PROCESSO."""
     ajustados: list[tuple[int, int]] = []
     for inicio, fim in intervalos_pessoa:
         pedacos = [(inicio, fim)]
