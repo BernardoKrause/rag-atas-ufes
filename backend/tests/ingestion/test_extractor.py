@@ -20,7 +20,7 @@ FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
 def test_metadados_tipo_a_camara_departamental():
     meta = extrair_metadados_organizacionais("TIPO_A", "CCENS_DB")
     assert meta == {
-        "centro": "CCENS", "campus": "São Mateus", "tipo_orgao": "A", "departamento": "DB", "curso": None, "area_tematica": None,
+        "centro": "CCENS", "campus": "Alegre", "tipo_orgao": "A", "departamento": "DB", "curso": None, "area_tematica": None,
     }
 
 

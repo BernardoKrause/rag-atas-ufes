@@ -22,7 +22,7 @@ CENTRO_CAMPUS = {
     "CEFD": "Goiabeiras",
     "CT": "Goiabeiras",
     "CCAE": "Alegre",
-    "CCENS": "São Mateus",
+    "CCENS": "Alegre",
     "CEUNES": "São Mateus",
 }
 
