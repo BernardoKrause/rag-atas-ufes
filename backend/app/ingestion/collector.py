@@ -1,4 +1,5 @@
 import csv
+import sys
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -23,7 +24,11 @@ def _path_seguro(caminho: Path) -> Path:
     # caracteres do Windows; o prefixo \\?\ pede ao SO pra tratar o caminho
     # como extended-length, sem precisar habilitar long paths globalmente
     texto = str(caminho)
-    if len(texto) >= LIMITE_PATH_WINDOWS and not texto.startswith("\\\\?\\"):
+    if (
+        sys.platform == "win32"
+        and len(texto) >= LIMITE_PATH_WINDOWS
+        and not texto.startswith("\\\\?\\")
+    ):
         return Path("\\\\?\\" + texto)
     return caminho
 
