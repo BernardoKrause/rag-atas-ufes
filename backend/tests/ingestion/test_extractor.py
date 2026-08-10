@@ -50,6 +50,21 @@ def test_metadados_centro_sem_campus_mapeado_levanta_erro():
         extrair_metadados_organizacionais("TIPO_B", "CCJE")
 
 
+def test_metadados_tipo_a_sem_departamento_retorna_none():
+    meta = extrair_metadados_organizacionais("TIPO_A", "CT")
+    assert meta["departamento"] is None
+
+
+def test_metadados_tipo_c_area_tematica_com_multiplos_segmentos_nao_trunca():
+    meta = extrair_metadados_organizacionais("TIPO_C", "CT_CamaraLocal_Ensino_Pesquisa")
+    assert meta["area_tematica"] == "Ensino_Pesquisa"
+
+
+def test_metadados_tipo_d_curso_com_multiplos_segmentos_nao_trunca():
+    meta = extrair_metadados_organizacionais("TIPO_D", "CE_Colegiado_Engenharia_Producao")
+    assert meta["curso"] == "Engenharia_Producao"
+
+
 def test_extrair_texto_bruto_retorna_conteudo_nao_vazio():
     caminho = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CAR" / "ata_05_02_2025.pdf"
     texto = extrair_texto_bruto(caminho)
@@ -81,6 +96,11 @@ def test_horario_tolera_layout_com_quebra_de_linha_entre_palavras():
     assert extrair_horario_inicio(texto) == "14:00"
 
 
+def test_horario_extenso_minuto_composto():
+    texto = "REALIZADA EM 4 DE MAIO DE 2022, ÀS QUATORZE HORAS E TRINTA E CINCO MINUTOS."
+    assert extrair_horario_inicio(texto) == "14:35"
+
+
 def test_modalidade_videoconferencia():
     assert extrair_modalidade("realizada por meio da webconferência, no dia tal") == "Videoconferência"
 
@@ -102,6 +122,11 @@ def test_modalidade_ausente_retorna_none():
     assert extrair_modalidade("Ata da reunião ordinária, sem modalidade declarada.") is None
 
 
+def test_modalidade_prioriza_ultimo_indicio_quando_modalidade_e_descartada_antes():
+    texto = "Diante da impossibilidade de webconferência, a reunião ocorreu presencialmente na sala de reuniões do centro."
+    assert extrair_modalidade(texto) == "Presencial"
+
+
 def test_local_extrai_link_de_videoconferencia():
     texto = "realizada por meio da webconferência, https://meet.google.com/abc-defg-hij, no dia tal"
     assert extrair_local(texto) == "https://meet.google.com/abc-defg-hij"
@@ -110,6 +135,11 @@ def test_local_extrai_link_de_videoconferencia():
 def test_local_extrai_sala_fisica():
     texto = "realizada na sala de reuniões dos conselhos departamentais, sob a presidência"
     assert extrair_local(texto) == "Sala De Reuniões Dos Conselhos Departamentais"
+
+
+def test_local_remove_parenteses_de_fechamento_do_link():
+    texto = "a reunião ocorreu por videoconferência (https://meet.google.com/abc-defg-hij)."
+    assert extrair_local(texto) == "https://meet.google.com/abc-defg-hij"
 
 
 def test_quorum_declarado_true():
@@ -126,6 +156,11 @@ def test_quorum_declarado_false():
 
 def test_quorum_ausente_retorna_none():
     assert extrair_quorum_declarado("Ata da reunião ordinária, sem menção a quórum.") is None
+
+
+def test_quorum_prioriza_ultimo_indicio_quando_falta_na_primeira_chamada_e_atinge_na_segunda():
+    texto = "Não houve quórum na primeira chamada. Havendo quórum na segunda chamada, deu-se início à sessão."
+    assert extrair_quorum_declarado(texto) is True
 
 
 @pytest.mark.parametrize("centro, campus_esperado", list(CENTRO_CAMPUS.items()))
