@@ -50,33 +50,33 @@ def extrair_texto_bruto(caminho_pdf: Path) -> str:
 
 
 def extrair_metadados_organizacionais(tipo: str, orgao: str) -> dict[str, str | None]:
-    """Deriva centro/tipo_orgao/departamento/curso/area_tematica dos codigos ja
-    curados no inventario (nao depende de parsing do PDF)."""
+    """Deriva os metadados a partir dos codigos do inventario, nao do PDF."""
     tipo_orgao = tipo.split("_")[-1]
     partes = orgao.split("_")
 
     if tipo_orgao == "A":
         centro = partes[0]
-        return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": "_".join(partes[1:]), "curso": None, "area_tematica": None}
+        departamento = "_".join(partes[1:]) or None
+        return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": departamento, "curso": None, "area_tematica": None}
     if tipo_orgao == "B":
         return {"centro": orgao, "campus": mapear_campus(orgao), "tipo_orgao": tipo_orgao, "departamento": None, "curso": None, "area_tematica": None}
     if tipo_orgao == "C":
         # "{CENTRO}_CamaraLocal_{AREA}"
         centro = partes[0]
-        area = partes[2] if len(partes) > 2 else None
+        area = "_".join(partes[2:]) or None
         return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": None, "curso": None, "area_tematica": area}
     if tipo_orgao == "D":
         # "{CENTRO}_Colegiado_{CURSO}"
         centro = partes[0]
-        curso = partes[2] if len(partes) > 2 else None
+        curso = "_".join(partes[2:]) or None
         return {"centro": centro, "campus": mapear_campus(centro), "tipo_orgao": tipo_orgao, "departamento": None, "curso": curso, "area_tematica": None}
 
     raise ValueError(f"tipo_orgao desconhecido: {tipo_orgao}")
 
 
 def _achar_inicio_numero(tokens: list[str], indice_ultimo_token: int) -> int:
-    """Dado o indice do ULTIMO token de um numeral cardinal, retorna o indice de
-    inicio (cobre o caso composto "DEZENA E UNIDADE", ex.: "VINTE E DOIS")."""
+    """Retorna o indice de inicio, cobrindo o caso composto "DEZENA E UNIDADE"
+    (ex.: "VINTE E DOIS")."""
     if (
         indice_ultimo_token >= 2
         and tokens[indice_ultimo_token] in NUM_UNIDADE
@@ -103,12 +103,15 @@ def extrair_horario_inicio(texto: str) -> str | None:
     # tem prioridade sobre um "HORAS" isolado que apareça antes na mesma frase,
     # ex.: "TREZE HORAS E TRINTA MINUTOS" nao pode parar em "TREZE HORAS")
     for idx, tok in enumerate(tokens):
-        if tok == "MINUTOS" and idx >= 3 and tokens[idx - 1] in PALAVRAS_HORA and tokens[idx - 2] == "E":
-            minuto, _ = parse_cardinal(tokens, idx - 1)
-            j = idx - 3
+        if tok == "MINUTOS" and idx >= 1 and tokens[idx - 1] in PALAVRAS_HORA:
+            inicio_minuto = _achar_inicio_numero(tokens, idx - 1)
+            if inicio_minuto < 1 or tokens[inicio_minuto - 1] != "E":
+                continue
+            minuto, _ = parse_cardinal(tokens, inicio_minuto)
+            j = inicio_minuto - 2
             if j >= 0 and tokens[j] == "HORAS":
                 j -= 1
-            if j < 0:
+            if j < 0 or minuto is None:
                 continue
             inicio_hora = _achar_inicio_numero(tokens, j)
             hora, _ = parse_cardinal(tokens, inicio_hora)
@@ -126,20 +129,33 @@ def extrair_horario_inicio(texto: str) -> str | None:
     return None
 
 
+_RE_MODALIDADE_VIDEO = re.compile(r"WEBCONFER|VIDEOCONFER|GOOGLE MEET|MEET\.GOOGLE\.COM")
+_RE_MODALIDADE_PRESENCIAL = re.compile(r"SALA DE REUNI")
+
+
 def extrair_modalidade(texto: str) -> str | None:
     janela = _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
-    if (
-        "WEBCONFER" in janela
-        or "VIDEOCONFER" in janela
-        or "GOOGLE MEET" in janela
-        or "MEET.GOOGLE.COM" in janela
-    ):
-        return "Videoconferência"
+
+    # cada modalidade concorre pelo seu ULTIMO indicio no texto — cobre o caso
+    # em que a ata primeiro descarta uma modalidade ("impossibilidade de
+    # webconferencia") e so depois relata a que de fato ocorreu
+    candidatos: list[tuple[int, str]] = []
+
+    fins = [m.end() for m in _RE_MODALIDADE_VIDEO.finditer(janela)]
+    if fins:
+        candidatos.append((max(fins), "Videoconferência"))
+
     if "CONSULTA ELETR" in janela or ("CONSULTA" in janela and "E-MAIL" in janela):
-        return "Consulta eletrônica"
-    if "SALA DE REUNI" in janela:
-        return "Presencial"
-    return None
+        fins = [m.end() for m in re.finditer("CONSULTA|E-MAIL", janela)]
+        candidatos.append((max(fins), "Consulta eletrônica"))
+
+    fins = [m.end() for m in _RE_MODALIDADE_PRESENCIAL.finditer(janela)]
+    if fins:
+        candidatos.append((max(fins), "Presencial"))
+
+    if not candidatos:
+        return None
+    return max(candidatos, key=lambda c: c[0])[1]
 
 
 def extrair_local(texto: str) -> str | None:
@@ -147,31 +163,38 @@ def extrair_local(texto: str) -> str | None:
 
     m = re.search(r"https?://\S+", janela)
     if m:
-        return m.group(0).rstrip(".,;")
+        return m.group(0).rstrip(".,;)]}")
 
-    m = re.search(r"N[AO]\s+(SALA[^,.]*)", janela, re.DOTALL | re.IGNORECASE)
+    m = re.search(r"N[AO]\s+(SALA[^,.]*)", janela, re.IGNORECASE)
     if m:
         return re.sub(r"\s+", " ", m.group(1)).strip().title()
 
     return None
 
 
+_RE_QUORUM_NEGATIVO = re.compile(r"N[ÃA]O\s+(HOUVE|H[ÁA]|HAVENDO)\s+QU[ÓO]RUM|SEM QUÓRUM")
+_RE_QUORUM_POSITIVO = re.compile(r"HAVENDO QU|MERO LEGAL DE MEMBROS")
+
+
 def extrair_quorum_declarado(texto: str) -> bool | None:
     janela = _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
-    if (
-        re.search(r"N[ÃA]O\s+(HOUVE|H[ÁA]|HAVENDO)\s+QU[ÓO]RUM", janela)
-        or "SEM QU" + chr(0xD3) + "RUM" in janela
-    ):
-        return False
-    if "HAVENDO QU" in janela or "MERO LEGAL DE MEMBROS" in janela:
+
+    # concorre pelo ULTIMO indicio de cada lado — cobre o caso em que a ata
+    # relata a falta de quorum na 1a chamada e o quorum atingido na 2a
+    fins_negativo = [m.end() for m in _RE_QUORUM_NEGATIVO.finditer(janela)]
+    fins_positivo = [m.end() for m in _RE_QUORUM_POSITIVO.finditer(janela)]
+
+    if not fins_negativo and not fins_positivo:
+        return None
+    if not fins_negativo:
         return True
-    return None
+    if not fins_positivo:
+        return False
+    return max(fins_positivo) > max(fins_negativo)
 
 
 def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
-    """Extrai texto bruto + todos os campos canonicos de uma ata.
-
-    quantidade_presentes, quantidade_ausentes e departamentos_representados
+    """quantidade_presentes, quantidade_ausentes e departamentos_representados
     ficam de fora de proposito: dependem de reconhecer nomes de pessoas de
     forma confiavel, o que e trabalho do NER do cleaner.py (proximo
     fragmento) — nao faz sentido duplicar essa logica aqui com regex fragil.
