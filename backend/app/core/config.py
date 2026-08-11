@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     ollama_host: str = "localhost"
     ollama_port: int = 11434
 
+    anonymization_secret_key: SecretStr
+    atas_corpus_path: Path
+
     @property
     def database_url(self) -> str:
         return (
