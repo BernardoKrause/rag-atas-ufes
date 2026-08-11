@@ -22,7 +22,14 @@ class TipoEntidade(str, enum.Enum):
 
 class Documento(Base):
     __tablename__ = "documentos"
-    __table_args__ = (UniqueConstraint("nome_arquivo", name="uq_documentos_nome_arquivo"),)
+    __table_args__ = (
+        # nome_arquivo sozinho nao e globalmente unico: orgaos diferentes podem
+        # nomear atas com o mesmo padrao generico (ex.: "10-2025.pdf"); tipo_orgao
+        # + orgao (codigo bruto do inventario) desambiguam a origem
+        UniqueConstraint(
+            "tipo_orgao", "orgao", "nome_arquivo", name="uq_documentos_tipo_orgao_orgao_nome_arquivo"
+        ),
+    )
 
     id_documento: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     nome_arquivo: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -33,6 +40,7 @@ class Documento(Base):
     centro: Mapped[str] = mapped_column(String(20), nullable=False)
     campus: Mapped[str] = mapped_column(String(30), nullable=False)
     tipo_orgao: Mapped[str] = mapped_column(String(1), nullable=False)
+    orgao: Mapped[str] = mapped_column(String(50), nullable=False)
     departamento: Mapped[str | None] = mapped_column(String(50), nullable=True)
     curso: Mapped[str | None] = mapped_column(String(80), nullable=True)
     area_tematica: Mapped[str | None] = mapped_column(String(80), nullable=True)

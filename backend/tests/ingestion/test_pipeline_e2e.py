@@ -1,6 +1,11 @@
+from datetime import date
 from pathlib import Path
 
-from app.ingestion.pipeline import executar_pipeline
+import pytest
+
+import app.ingestion.pipeline as pipeline_module
+from app.ingestion.collector import AtaParaProcessar
+from app.ingestion.pipeline import executar_pipeline, processar_ata
 from app.models.documento import Documento
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
@@ -52,3 +57,62 @@ def test_reprocessar_o_corpus_e_idempotente(db_session):
 
     assert len(documentos) == 6
     assert db_session.query(Documento).count() == 6
+
+
+def test_atas_de_orgaos_diferentes_com_mesmo_nome_de_arquivo_nao_colidem(db_session):
+    # regressao: processar_ata identificava o documento so por nome_arquivo,
+    # entao duas atas de orgaos diferentes com o mesmo nome de arquivo
+    # colapsavam na mesma linha e a segunda sobrescrevia a primeira
+    pdf_ccae = (
+        FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CCAE"
+        / "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf"
+    )
+    pdf_ct = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CT" / "10-2025.pdf"
+
+    ata_ccae = AtaParaProcessar(
+        tipo="TIPO_B", orgao="CCAE", numero_reuniao=1, caratere="Ordinaria",
+        data_reuniao=date(2025, 1, 28), arquivo="mesmo_nome.pdf", caminho_pdf=pdf_ccae,
+    )
+    ata_ct = AtaParaProcessar(
+        tipo="TIPO_B", orgao="CT", numero_reuniao=10, caratere="",
+        data_reuniao=date(2025, 6, 27), arquivo="mesmo_nome.pdf", caminho_pdf=pdf_ct,
+    )
+
+    doc_ccae = processar_ata(ata_ccae, SECRET_KEY, db_session)
+    doc_ct = processar_ata(ata_ct, SECRET_KEY, db_session)
+
+    assert doc_ccae.id_documento != doc_ct.id_documento
+    assert doc_ccae.centro == "CCAE"
+    assert doc_ct.centro == "CT"
+    assert db_session.query(Documento).filter_by(nome_arquivo="mesmo_nome.pdf").count() == 2
+
+
+def test_falha_no_meio_do_lote_preserva_atas_ja_processadas(db_session, monkeypatch):
+    # regressao: executar_pipeline so commitava uma vez, no final; uma ata
+    # com falha no meio do corpus descartava (via rollback implicito) todas
+    # as atas ja processadas com sucesso na mesma execucao
+    pdf_ccae = (
+        FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CCAE"
+        / "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf"
+    )
+    ata_boa = AtaParaProcessar(
+        tipo="TIPO_B", orgao="CCAE", numero_reuniao=1, caratere="Ordinaria",
+        data_reuniao=date(2025, 1, 28), arquivo="boa.pdf", caminho_pdf=pdf_ccae,
+    )
+    ata_com_pdf_inexistente = AtaParaProcessar(
+        tipo="TIPO_B", orgao="CT", numero_reuniao=2, caratere="Ordinaria",
+        data_reuniao=date(2025, 2, 1), arquivo="ruim.pdf",
+        caminho_pdf=FIXTURES / "nao_existe.pdf",
+    )
+    monkeypatch.setattr(
+        pipeline_module, "coletar_atas", lambda _: [ata_boa, ata_com_pdf_inexistente]
+    )
+
+    # extrair_texto_bruto usa pymupdf, cuja excecao de arquivo ausente e uma
+    # classe propria (pymupdf.FileNotFoundError), nao o FileNotFoundError do
+    # builtins — so importa que algo falhe, nao qual excecao especificamente
+    with pytest.raises(Exception):
+        executar_pipeline(Path("caminho-nao-usado"), SECRET_KEY, db_session)
+
+    assert db_session.query(Documento).filter_by(nome_arquivo="boa.pdf").count() == 1
+    assert db_session.query(Documento).filter_by(nome_arquivo="ruim.pdf").count() == 0

@@ -6,6 +6,7 @@ from pathlib import Path
 
 STATUS_PRESENTE = "presente"
 LIMITE_PATH_WINDOWS = 260
+PREFIXO_PATH_ESTENDIDO = "\\\\?\\"
 
 
 @dataclass(frozen=True)
@@ -27,9 +28,9 @@ def _path_seguro(caminho: Path) -> Path:
     if (
         sys.platform == "win32"
         and len(texto) >= LIMITE_PATH_WINDOWS
-        and not texto.startswith("\\\\?\\")
+        and not texto.startswith(PREFIXO_PATH_ESTENDIDO)
     ):
-        return Path("\\\\?\\" + texto)
+        return Path(PREFIXO_PATH_ESTENDIDO + texto)
     return caminho
 
 
