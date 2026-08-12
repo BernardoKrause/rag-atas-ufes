@@ -17,6 +17,7 @@ PALAVRAS_HORA = set(NUM_UNIDADE) | set(NUM_10_19) | set(NUM_DEZENA) | set(ZERO)
 # no texto da ata, que so cita o campus explicitamente em alguns modelos
 CENTRO_CAMPUS = {
     "CAR": "Goiabeiras",
+    "CCE": "Goiabeiras",
     "CCHN": "Goiabeiras",
     "CE": "Goiabeiras",
     "CEFD": "Goiabeiras",
@@ -24,6 +25,7 @@ CENTRO_CAMPUS = {
     "CCAE": "Alegre",
     "CCENS": "Alegre",
     "CEUNES": "São Mateus",
+    "CCS": "Maruípe",
 }
 
 
