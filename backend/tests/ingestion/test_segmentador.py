@@ -1,7 +1,9 @@
 from datetime import date
+from pathlib import Path
 
 import pytest
 
+from app.ingestion.pipeline import executar_pipeline
 from app.ingestion.segmentador import (
     SECAO_APROVACAO_ATA,
     SECAO_COMUNICACOES,
@@ -30,6 +32,9 @@ from app.ingestion.segmentador import (
 )
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
+
+FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
+SECRET_KEY_SEGMENTADOR = b"chave-de-teste-nao-usar-em-producao"
 
 
 def test_normalizar_com_mapa_colapsa_espacos_multiplos():
@@ -324,3 +329,66 @@ def test_segmentar_e_persistir_aplica_overflow_split(db_session):
         gerar_item_id_canonico(documento.id_documento, "ORDEM DO DIA", "1.1", i.fragmento_indice)
         for i in itens
     }
+
+
+def test_segmentar_as_6_fixtures_reais_bate_com_contagem_manual(db_session):
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
+    contagem_esperada = {
+        "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf": 4,   # Tipo A
+        # B1/CT: 27 itens estruturais, mas PAUTA 7 e 8 (votos em separado
+        # extensos) sofrem overflow-split em 2 fragmentos cada -> 29
+        "10-2025.pdf": 29,
+        "ata_05_02_2025.pdf": 14,                                           # B2/CAR
+        "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf": 8,          # B3/CCAE
+        "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf": 7,                # Tipo C
+        "ata_da_3a_reuniao_ordinaria_colped.pdf": 12,                       # Tipo D
+    }
+
+    for documento in documentos:
+        itens = segmentar_e_persistir(documento, db_session)
+        assert len(itens) == contagem_esperada[documento.nome_arquivo], (
+            f"{documento.nome_arquivo}: esperado {contagem_esperada[documento.nome_arquivo]}, "
+            f"obtido {len(itens)}"
+        )
+
+
+def test_segmentar_fixture_ccae_reclassifica_secoes_corretamente(db_session):
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
+    ccae = next(
+        d for d in documentos
+        if d.nome_arquivo == "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf"
+    )
+    itens = segmentar_e_persistir(ccae, db_session)
+    secoes = {i.secao for i in itens}
+    assert secoes == {SECAO_APROVACAO_ATA, SECAO_EXPEDIENTE, SECAO_ORDEM_DO_DIA, SECAO_COMUNICACOES}
+
+
+def test_segmentar_fixture_camara_local_reclassifica_exclusao_de_pauta(db_session):
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
+    camara_local = next(
+        d for d in documentos
+        if d.nome_arquivo == "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf"
+    )
+    itens = segmentar_e_persistir(camara_local, db_session)
+    exclusao = [i for i in itens if i.secao == SECAO_EXCLUSAO_DE_PAUTA]
+    assert len(exclusao) == 1
+    assert exclusao[0].numero_item == "2.1"
+
+
+def test_segmentar_fixture_ct_paginas_preenchidas(db_session):
+    # CT/10-2025.pdf tem 8 paginas — confirma que o mapeamento de pagina
+    # funciona de ponta a ponta (extrair_texto_bruto -> pipeline -> segmentador)
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
+    ct = next(d for d in documentos if d.nome_arquivo == "10-2025.pdf")
+    itens = segmentar_e_persistir(ct, db_session)
+
+    assert all(i.pagina_inicio is not None for i in itens)
+    paginas = {i.pagina_inicio for i in itens}
+    assert len(paginas) > 1  # itens espalhados por mais de uma pagina
+    assert min(paginas) == 1
+
+
+def test_segmentar_documento_sem_paginas_offsets_deixa_pagina_nula(db_session):
+    documento = _criar_documento(db_session, paginas_offsets=None, nome_arquivo="sem_paginas.pdf")
+    itens = segmentar_e_persistir(documento, db_session)
+    assert all(i.pagina_inicio is None and i.pagina_fim is None for i in itens)
