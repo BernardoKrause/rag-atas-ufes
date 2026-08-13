@@ -3,6 +3,7 @@ from app.ingestion.segmentador import (
     SECAO_COMUNICACOES,
     SECAO_EXCLUSAO_DE_PAUTA,
     SECAO_EXPEDIENTE,
+    SECAO_INFORMES,
     SECAO_ORDEM_DO_DIA,
     SECAO_PAUTA,
     ItemDetectado,
@@ -10,6 +11,7 @@ from app.ingestion.segmentador import (
     _normalizar_com_mapa,
     _reclassificar_exclusao_de_pauta,
     detectar_itens_familia_pontilhada,
+    detectar_itens_ct,
 )
 
 
@@ -119,3 +121,18 @@ def test_reclassificar_exclusao_de_pauta():
     resultado = _reclassificar_exclusao_de_pauta(itens)
     assert resultado[0].secao == SECAO_EXCLUSAO_DE_PAUTA
     assert resultado[1].secao == SECAO_EXPEDIENTE
+
+
+def test_detectar_itens_ct():
+    texto = (
+        "HAVENDO NÚMERO LEGAL, DECLAROU ABERTA A SESSÃO. INFORME 1: TEXTO DO INFORME UM. "
+        "INFORME 2: TEXTO DO INFORME DOIS. PAUTA 1: PRIMEIRO ITEM DE PAUTA. "
+        "PAUTA 2: SEGUNDO ITEM DE PAUTA."
+    )
+    itens = detectar_itens_ct(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]

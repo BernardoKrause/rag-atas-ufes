@@ -148,3 +148,29 @@ def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDet
         else:
             resultado.append(item)
     return resultado
+
+
+# CT (B1) nao tem uma secao "PAUTA" com subitens dentro — cada item ja e
+# "PAUTA N:" ou "INFORME N:" diretamente, entao a deteccao de secao e de
+# item sao a mesma passada, ao contrario da familia pontilhada
+RE_ITEM_CT = re.compile(r"(?<!\d)(INFORME|PAUTA)\s+(\d{1,2}):(?!\d)")
+
+_SECAO_CT = {"INFORME": SECAO_INFORMES, "PAUTA": SECAO_PAUTA}
+
+
+def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
+    matches = list(RE_ITEM_CT.finditer(texto_normalizado))
+    itens = []
+    for i, m in enumerate(matches):
+        inicio = m.start()
+        fim = matches[i + 1].start() if i + 1 < len(matches) else len(texto_normalizado)
+        itens.append(
+            ItemDetectado(
+                secao=_SECAO_CT[m.group(1)],
+                numero_item=m.group(2),
+                inicio=inicio,
+                fim=fim,
+                texto=texto_normalizado[inicio:fim].strip(),
+            )
+        )
+    return itens
