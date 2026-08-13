@@ -36,8 +36,8 @@ docker/volumes/
 # --- Alembic ---
 # (versions/ tracked; nada a ignorar aqui além do padrão Python acima)
 
-# --- Superpowers (planos de implementação locais, não versionados) ---
-docs/superpowers/plans/
+# --- Superpowers (artefatos locais, não versionados) ---
+docs/superpowers/
 
 # --- IDE ---
 .vscode/
