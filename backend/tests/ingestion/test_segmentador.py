@@ -6,6 +6,8 @@ from app.ingestion.segmentador import (
     SECAO_INFORMES,
     SECAO_ORDEM_DO_DIA,
     SECAO_PAUTA,
+    SECAO_PALAVRA_LIVRE,
+    SECAO_PROCESSOS_PROJETOS,
     ItemDetectado,
     _neutralizar_numeracao_de_margem,
     _normalizar_com_mapa,
@@ -13,6 +15,7 @@ from app.ingestion.segmentador import (
     detectar_itens_familia_pontilhada,
     detectar_itens_car,
     detectar_itens_ct,
+    detectar_itens_cefd,
 )
 
 
@@ -152,3 +155,24 @@ def test_detectar_itens_car():
 
 def test_detectar_itens_car_sem_pauta_retorna_vazio():
     assert detectar_itens_car("TEXTO SEM A PALAVRA PAUTA.") == []
+
+
+def test_detectar_itens_cefd():
+    texto = (
+        "EM PAUTA: LEITURA DA ATA APROVADA POR UNANIMIDADE. "
+        "COMUNICAÇÕES: O DIRETOR FEZ COMUNICADOS: [1] PRIMEIRO COMUNICADO. [2] SEGUNDO COMUNICADO. "
+        "PROCESSOS/PROJETOS: [1] HOMOLOGAÇÃO DE AFASTAMENTO. [2] OUTRO PROCESSO. "
+        "PALAVRA LIVRE: SEM REGISTRO."
+    )
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_COMUNICACOES, "1"),
+        (SECAO_COMUNICACOES, "2"),
+        (SECAO_PROCESSOS_PROJETOS, "1"),
+        (SECAO_PROCESSOS_PROJETOS, "2"),
+    ]
+
+
+def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
+    texto = "EM PAUTA: SEM ITENS NUMERADOS. PALAVRA LIVRE: NENHUM REGISTRO."
+    assert detectar_itens_cefd(texto) == []

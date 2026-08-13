@@ -203,3 +203,49 @@ def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
             )
         )
     return itens
+
+
+# CEFD tem vocabulario de secao proprio, fora do documentado no §7 original
+# (EM PAUTA em vez de PAUTA; PROCESSOS/PROJETOS nao tem equivalente em
+# nenhum outro variant) — descoberto na investigacao empirica da pendencia 3
+RE_SECAO_CEFD = re.compile(
+    r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE):"
+)
+RE_ITEM_CEFD = re.compile(r"(?<!\d)\[(\d{1,2})\](?!\d)")
+
+_SECAO_CEFD = {
+    "EM PAUTA": SECAO_PAUTA,
+    "COMUNICAÇÃO": SECAO_COMUNICACOES,
+    "COMUNICAÇÕES": SECAO_COMUNICACOES,
+    "PROCESSOS/PROJETOS": SECAO_PROCESSOS_PROJETOS,
+    "PALAVRA LIVRE": SECAO_PALAVRA_LIVRE,
+}
+
+
+def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
+    secoes = list(RE_SECAO_CEFD.finditer(texto_normalizado))
+    itens = []
+    for i, secao_match in enumerate(secoes):
+        secao = _SECAO_CEFD[secao_match.group(1)]
+        inicio_corpo = secao_match.end()
+        fim_corpo = secoes[i + 1].start() if i + 1 < len(secoes) else len(texto_normalizado)
+        corpo = texto_normalizado[inicio_corpo:fim_corpo]
+
+        matches_item = list(RE_ITEM_CEFD.finditer(corpo))
+        for j, item_match in enumerate(matches_item):
+            inicio_item = inicio_corpo + item_match.start()
+            fim_item = (
+                inicio_corpo + matches_item[j + 1].start()
+                if j + 1 < len(matches_item)
+                else fim_corpo
+            )
+            itens.append(
+                ItemDetectado(
+                    secao=secao,
+                    numero_item=item_match.group(1),
+                    inicio=inicio_item,
+                    fim=fim_item,
+                    texto=texto_normalizado[inicio_item:fim_item].strip(),
+                )
+            )
+    return itens
