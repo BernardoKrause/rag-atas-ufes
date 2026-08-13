@@ -21,6 +21,8 @@ from app.ingestion.segmentador import (
     detectar_itens_ct,
     detectar_itens_cefd,
     dividir_fragmentos,
+    gerar_item_id_canonico,
+    mapear_pagina,
     segmentar_texto,
 )
 
@@ -240,3 +242,33 @@ def test_dividir_fragmentos_texto_longo_divide_com_sobreposicao():
 def test_dividir_fragmentos_texto_no_limite_exato_retorna_fragmento_unico():
     texto = "x" * TAMANHO_MAX_FRAGMENTO
     assert dividir_fragmentos(texto) == [texto]
+
+
+def test_mapear_pagina_primeira_pagina():
+    assert mapear_pagina(0, [0, 1500, 3200]) == 1
+
+
+def test_mapear_pagina_segunda_pagina():
+    assert mapear_pagina(1600, [0, 1500, 3200]) == 2
+
+
+def test_mapear_pagina_terceira_pagina():
+    assert mapear_pagina(3500, [0, 1500, 3200]) == 3
+
+
+def test_mapear_pagina_sem_offsets_retorna_none():
+    assert mapear_pagina(100, None) is None
+    assert mapear_pagina(100, []) is None
+
+
+def test_gerar_item_id_canonico_sem_fragmento():
+    assert gerar_item_id_canonico(233, "PAUTA", "2.1", 0) == "233_PAUTA_2.1"
+
+
+def test_gerar_item_id_canonico_com_fragmento():
+    assert gerar_item_id_canonico(233, "PAUTA", "2.1", 2) == "233_PAUTA_2.1_F2"
+
+
+def test_gerar_item_id_canonico_remove_acento_e_barra_da_secao():
+    assert gerar_item_id_canonico(1, "PROCESSOS/PROJETOS", "1", 0) == "1_PROCESSOS_PROJETOS_1"
+    assert gerar_item_id_canonico(1, "EXCLUSÃO DE PAUTA", "2.1", 0) == "1_EXCLUSAO_DE_PAUTA_2.1"

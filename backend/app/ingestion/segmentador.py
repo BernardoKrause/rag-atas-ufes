@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import unicodedata
+from bisect import bisect_right
 from dataclasses import dataclass
 from typing import Callable
 
@@ -304,3 +306,24 @@ def dividir_fragmentos(texto: str) -> list[str]:
             break
         inicio = fim - SOBREPOSICAO_FRAGMENTO
     return fragmentos
+
+
+def mapear_pagina(offset: int, paginas_offsets: list[int] | None) -> int | None:
+    """paginas_offsets[i] e o offset de inicio da pagina i (0-based) no
+    texto — bisect_right conta quantos inicios de pagina sao <= offset, que
+    e diretamente o numero de pagina 1-based."""
+    if not paginas_offsets:
+        return None
+    return bisect_right(paginas_offsets, offset)
+
+
+def _slug_secao(secao: str) -> str:
+    sem_acento = unicodedata.normalize("NFKD", secao).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
+
+
+def gerar_item_id_canonico(documento_id: int, secao: str, numero_item: str, fragmento_indice: int) -> str:
+    base = f"{documento_id}_{_slug_secao(secao)}_{numero_item}"
+    if fragmento_indice > 0:
+        return f"{base}_F{fragmento_indice}"
+    return base
