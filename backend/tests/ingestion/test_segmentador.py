@@ -206,7 +206,7 @@ def test_segmentar_texto_cefd_via_config():
 
 
 def test_segmentar_texto_variant_desconhecido_levanta_erro():
-    with pytest.raises(ValueError, match="variant sem detector mapeado"):
+    with pytest.raises(ValueError, match="variante sem detector mapeado"):
         segmentar_texto("B", "CCJE", "QUALQUER TEXTO")
 
 

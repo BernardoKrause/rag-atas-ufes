@@ -273,7 +273,7 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
         return CONFIG_VARIANTES[(tipo_orgao, centro)]
     if (tipo_orgao, "*") in CONFIG_VARIANTES:
         return CONFIG_VARIANTES[(tipo_orgao, "*")]
-    raise ValueError(f"variant sem detector mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
+    raise ValueError(f"variante sem detector mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
 
 
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> list[ItemDetectado]:
