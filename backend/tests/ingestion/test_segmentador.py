@@ -11,6 +11,7 @@ from app.ingestion.segmentador import (
     _normalizar_com_mapa,
     _reclassificar_exclusao_de_pauta,
     detectar_itens_familia_pontilhada,
+    detectar_itens_car,
     detectar_itens_ct,
 )
 
@@ -136,3 +137,18 @@ def test_detectar_itens_ct():
         (SECAO_PAUTA, "1"),
         (SECAO_PAUTA, "2"),
     ]
+
+
+def test_detectar_itens_car():
+    # padding inconsistente no corpus real: "1)", "2)", "04)", "05)", "6)"...
+    texto = "INFORMES: PAUTA: 1) PRIMEIRO ITEM. 2) SEGUNDO ITEM. 04) TERCEIRO ITEM COM PADDING."
+    itens = detectar_itens_car(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+        (SECAO_PAUTA, "04"),
+    ]
+
+
+def test_detectar_itens_car_sem_pauta_retorna_vazio():
+    assert detectar_itens_car("TEXTO SEM A PALAVRA PAUTA.") == []

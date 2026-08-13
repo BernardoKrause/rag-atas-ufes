@@ -174,3 +174,32 @@ def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
             )
         )
     return itens
+
+
+RE_ITEM_CAR = re.compile(r"(?<!\d)(\d{1,2})\)(?!\d)")
+
+
+def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
+    """CAR (B2) nao numera a secao de informes (fica vazia/implicita — ver
+    edge case de secao sem itens detectaveis); todos os itens caem direto
+    em PAUTA, numerados sem padding fixo ("1)", "04)", "6)"...)."""
+    indice_pauta = texto_normalizado.find("PAUTA:")
+    if indice_pauta == -1:
+        return []
+
+    corpo = texto_normalizado[indice_pauta + len("PAUTA:"):]
+    matches = list(RE_ITEM_CAR.finditer(corpo))
+    itens = []
+    for i, m in enumerate(matches):
+        inicio = m.start()
+        fim = matches[i + 1].start() if i + 1 < len(matches) else len(corpo)
+        itens.append(
+            ItemDetectado(
+                secao=SECAO_PAUTA,
+                numero_item=m.group(1),
+                inicio=indice_pauta + len("PAUTA:") + inicio,
+                fim=indice_pauta + len("PAUTA:") + fim,
+                texto=corpo[inicio:fim].strip(),
+            )
+        )
+    return itens
