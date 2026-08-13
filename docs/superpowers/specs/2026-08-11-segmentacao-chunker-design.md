@@ -1,6 +1,6 @@
 # Parte 3 — Segmentação Estrutural (Chunker)
 
-> Status: **pausado antes da revisão final** — todas as 5 seções abaixo foram apresentadas e aprovadas pelo usuário, mas a sessão de brainstorming foi pausada antes do self-review da spec e da aprovação final do documento escrito. Ao retomar: reler este doc com o usuário, rodar o self-review (placeholders/inconsistência/escopo/ambiguidade), pedir aprovação explícita, e só então invocar a skill `writing-plans`. Não reabrir as decisões já tomadas abaixo sem motivo novo.
+> Status: **aprovado, pronto para `writing-plans`** — self-review feito, risco da seção 4 investigado empiricamente contra o corpus real e resolvido, documento aprovado pelo usuário em 2026-08-12. Não reabrir as decisões já tomadas abaixo sem motivo novo.
 
 ## Contexto
 
@@ -60,7 +60,12 @@ Duas fases:
 
 Rejeitadas: regex único de passada única sem ancorar em seção primeiro (risco de falso positivo com números soltos no meio de pareceres/processos SIPAC); função dedicada e independente por variant (duplicaria a lógica de detecção de seção, que a matriz comparativa mostra ser compartilhada).
 
-**Nota de risco não resolvida:** a matriz comparativa só documenta estrutura detalhada pros 3 variants nomeados de Tipo B (B1/CT, B2/CAR, B3/CCAE) — os outros centros de Tipo B no corpus (CE, CEFD, CCHN, CCE) não têm variant própria documentada, só os "elementos comuns" da seção B. Ao implementar, verificar empiricamente contra as fixtures/corpus real se esses centros seguem um dos 3 padrões nomeados ou precisam de entrada própria na tabela de config.
+**Risco investigado e resolvido (verificação empírica contra o corpus real, 2026-08-12):** a matriz comparativa só documenta estrutura detalhada pros 3 variants nomeados de Tipo B (B1/CT, B2/CAR, B3/CCAE). Os demais centros de Tipo B foram checados contra os 357 documentos já ingeridos (Postgres, 2 amostras por centro):
+
+- **CE e CCHN** (Conselho Departamental): usam subnumeração pontilhada (`\d+\.\d+`, ex.: `01.01.`, `3.04`) — o **mesmo padrão já previsto pros Tipos A/C/D**. As seções aparecem com número inline no próprio nome ("01. Apreciação de atas/relatórios", "02. Comunicações", "3. PAUTA"), mas o vocabulário de nomes de seção é o mesmo já mapeado. **Não precisam de entrada nova na tabela de config** — reaproveitam o padrão pontilhado existente.
+- **CEFD**: genuinamente diferente, confirmado em 2 documentos. Numeração de item por colchete (`[1]`, `[2]`, `[3]`...), não pontilhada. Vocabulário de seção com nomes fora da lista documentada: `EM PAUTA` (variante de "PAUTA") e `PROCESSOS/PROJETOS` (seção nova, sem equivalente em nenhum dos 6 variants mapeados). **Precisa de entrada nova**: padrão de numeração `\[\d+\]` na tabela de config pra `(B, CEFD)`, mais extensão do vocabulário de detecção de seção pra reconhecer `EM PAUTA` (alias de PAUTA) e `PROCESSOS/PROJETOS` (nova seção).
+
+CCE não foi verificado (sem documentos Tipo B desse centro nos 357 já ingeridos até o momento) — se aparecer no rerun de reprocessamento, tratar como os demais: cai no fallback `ValueError` até checagem manual, mesmo padrão de segurança já aprovado para variant desconhecido.
 
 ## 5. Overflow-split e casos de borda — APROVADO
 
@@ -78,6 +83,8 @@ Reaproveitar as 6 fixtures reais já commitadas (`backend/tests/fixtures/atas_sa
 
 ## Pendências antes de seguir pra `writing-plans`
 
-1. Self-review da spec (placeholders, contradições, escopo, ambiguidade) — ainda não rodado.
-2. Aprovação final do documento escrito pelo usuário — ainda não pedida (sessão pausada antes desse passo).
-3. A "nota de risco não resolvida" na seção 4 (centros de Tipo B sem variant documentada) pode virar uma pergunta de esclarecimento adicional ao retomar, ou ser resolvida empiricamente durante a implementação — decidir ao retomar.
+1. ~~Self-review da spec (placeholders, contradições, escopo, ambiguidade)~~ — feito em 2026-08-12, sem problemas bloqueantes.
+2. ~~Aprovação final do documento escrito pelo usuário~~ — aprovado em 2026-08-12.
+3. ~~Risco da seção 4 (centros de Tipo B sem variant documentada)~~ — investigado empiricamente contra o corpus real (ver seção 4): CE/CCHN reaproveitam o padrão pontilhado existente; CEFD precisa de entrada nova (`[\d+]` + vocabulário `EM PAUTA`/`PROCESSOS/PROJETOS`); CCE fica pendente de verificação futura (sem amostra Tipo B no corpus atual), coberto pelo fallback `ValueError`.
+
+Todas as pendências resolvidas — pronto para `writing-plans`.
