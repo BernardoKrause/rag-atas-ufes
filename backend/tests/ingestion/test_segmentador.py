@@ -1,3 +1,5 @@
+import pytest
+
 from app.ingestion.segmentador import (
     SECAO_APROVACAO_ATA,
     SECAO_COMUNICACOES,
@@ -16,6 +18,7 @@ from app.ingestion.segmentador import (
     detectar_itens_car,
     detectar_itens_ct,
     detectar_itens_cefd,
+    segmentar_texto,
 )
 
 
@@ -176,3 +179,38 @@ def test_detectar_itens_cefd():
 def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
     texto = "EM PAUTA: SEM ITENS NUMERADOS. PALAVRA LIVRE: NENHUM REGISTRO."
     assert detectar_itens_cefd(texto) == []
+
+
+def test_segmentar_texto_tipo_a():
+    texto = "1. ORDEM DO DIA. 1.1 ITEM ÚNICO."
+    itens = segmentar_texto("A", "CCENS", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_ORDEM_DO_DIA, "1.1")]
+
+
+def test_segmentar_texto_ct_via_config():
+    texto = "PAUTA 1: PRIMEIRO ITEM."
+    itens = segmentar_texto("B", "CT", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_segmentar_texto_car_via_config():
+    texto = "INFORMES: PAUTA: 1) PRIMEIRO ITEM."
+    itens = segmentar_texto("B", "CAR", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_segmentar_texto_cefd_via_config():
+    texto = "PROCESSOS/PROJETOS: [1] PRIMEIRO PROCESSO."
+    itens = segmentar_texto("B", "CEFD", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PROCESSOS_PROJETOS, "1")]
+
+
+def test_segmentar_texto_variant_desconhecido_levanta_erro():
+    with pytest.raises(ValueError, match="variant sem detector mapeado"):
+        segmentar_texto("B", "CCJE", "QUALQUER TEXTO")
+
+
+def test_segmentar_texto_tipo_d_neutraliza_margem_antes_de_segmentar():
+    texto = "1. ORDEM DO DIA:\n8\n1.1 ITEM COM NUMERO DE MARGEM NO MEIO."
+    itens = segmentar_texto("D", "CE", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_ORDEM_DO_DIA, "1.1")]

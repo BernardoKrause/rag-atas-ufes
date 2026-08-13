@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import Callable
 
 TAMANHO_MAX_FRAGMENTO = 3000
 SOBREPOSICAO_FRAGMENTO = 300
@@ -249,3 +250,39 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
                 )
             )
     return itens
+
+
+# (tipo_orgao, centro) -> funcao detectora de itens sobre o texto normalizado.
+# Mesmo estilo dict-driven de CENTRO_CAMPUS em extractor.py — variant sem
+# entrada aqui levanta ValueError explicito, nunca falha silenciosamente.
+CONFIG_VARIANTES: dict[tuple[str, str], Callable[[str], list[ItemDetectado]]] = {
+    ("A", "*"): detectar_itens_familia_pontilhada,
+    ("B", "CT"): detectar_itens_ct,
+    ("B", "CAR"): detectar_itens_car,
+    ("B", "CEFD"): detectar_itens_cefd,
+    ("B", "CCAE"): detectar_itens_familia_pontilhada,
+    ("B", "CE"): detectar_itens_familia_pontilhada,
+    ("B", "CCHN"): detectar_itens_familia_pontilhada,
+    ("C", "*"): detectar_itens_familia_pontilhada,
+    ("D", "*"): detectar_itens_familia_pontilhada,
+}
+
+
+def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDetectado]]:
+    if (tipo_orgao, centro) in CONFIG_VARIANTES:
+        return CONFIG_VARIANTES[(tipo_orgao, centro)]
+    if (tipo_orgao, "*") in CONFIG_VARIANTES:
+        return CONFIG_VARIANTES[(tipo_orgao, "*")]
+    raise ValueError(f"variant sem detector mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
+
+
+def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> list[ItemDetectado]:
+    detector = _obter_detector(tipo_orgao, centro)
+
+    texto_bruto = texto_limpo
+    if tipo_orgao == "D":
+        texto_bruto = _neutralizar_numeracao_de_margem(texto_bruto)
+
+    texto_normalizado, _mapa = _normalizar_com_mapa(texto_bruto)
+    itens = detector(texto_normalizado)
+    return _reclassificar_exclusao_de_pauta(itens)
