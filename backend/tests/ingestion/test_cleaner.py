@@ -1,3 +1,5 @@
+import re
+
 from app.ingestion import cleaner
 from app.ingestion.cleaner import (
     _obter_ou_criar_token,
@@ -47,12 +49,19 @@ def test_reprocessar_o_mesmo_texto_e_idempotente(db_session):
 
 
 def test_pessoas_diferentes_geram_tokens_diferentes(db_session):
-    anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
+    # filtra pelos tokens que aparecem no proprio resultado, nao pela tabela
+    # inteira — contra um Postgres de dev com o corpus real ja ingerido, um
+    # count() sem filtro contaria tambem entidades de outras execucoes
+    resultado = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
+    tokens_no_resultado = set(re.findall(r"PESSOA_\d+", resultado))
 
-    entidades = db_session.query(EntidadeAnonimizada).filter_by(tipo="pessoa").all()
-    tokens = {e.token for e in entidades}
+    entidades = (
+        db_session.query(EntidadeAnonimizada)
+        .filter(EntidadeAnonimizada.token.in_(tokens_no_resultado))
+        .all()
+    )
     assert len(entidades) == 2
-    assert len(tokens) == 2
+    assert {e.token for e in entidades} == tokens_no_resultado
 
 
 def test_numeracao_do_token_incrementa_via_sequence_por_tipo(db_session):
@@ -100,7 +109,10 @@ def test_mesmo_numero_de_processo_gera_sempre_o_mesmo_token(db_session):
     resultado_2 = anonimizar_texto(texto, SECRET_KEY, db_session)
 
     assert resultado_1 == resultado_2
-    entidades = db_session.query(EntidadeAnonimizada).filter_by(tipo="processo").all()
+    # filtra pelo token especifico gerado, nao pela tabela inteira — mesmo
+    # motivo do teste acima
+    token = re.search(r"PROCESSO_\d+", resultado_1).group(0)
+    entidades = db_session.query(EntidadeAnonimizada).filter_by(token=token).all()
     assert len(entidades) == 1
 
 

@@ -56,7 +56,11 @@ def test_reprocessar_o_corpus_e_idempotente(db_session):
     documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
 
     assert len(documentos) == 6
-    assert db_session.query(Documento).count() == 6
+    # filtra pelos ids especificos gerados, nao pela tabela inteira — contra
+    # um Postgres de dev com o corpus real ja ingerido, um count() sem filtro
+    # contaria tambem documentos de outras execucoes
+    ids = {d.id_documento for d in documentos}
+    assert db_session.query(Documento).filter(Documento.id_documento.in_(ids)).count() == 6
 
 
 def test_atas_de_orgaos_diferentes_com_mesmo_nome_de_arquivo_nao_colidem(db_session):
