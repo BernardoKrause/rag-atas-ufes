@@ -71,7 +71,8 @@ RE_SECAO_NUMERADA = re.compile(
     r"|PAUTA"
     r"|INFORMES?"
     r"|PALAVRA[\s-]LIVRE"
-    r")\s*[:.]"
+    r")\s*[:.]",
+    re.IGNORECASE,
 )
 
 _ALIAS_SECAO = {
@@ -104,7 +105,7 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
 
     for i, secao_match in enumerate(secoes):
         numero_secao = secao_match.group(1)
-        secao = _ALIAS_SECAO[secao_match.group(2)]
+        secao = _ALIAS_SECAO[secao_match.group(2).upper()]
         inicio_corpo = secao_match.end()
         fim_corpo = secoes[i + 1].start() if i + 1 < len(secoes) else len(texto_normalizado)
         corpo = texto_normalizado[inicio_corpo:fim_corpo]
@@ -114,7 +115,7 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             if m.group(1).split(".")[0].lstrip("0") == numero_secao.lstrip("0")
         ]
         for j, item_match in enumerate(matches_item):
-            inicio_item = inicio_corpo + item_match.start()
+            inicio_item = inicio_corpo if j == 0 else inicio_corpo + item_match.start()
             fim_item = (
                 inicio_corpo + matches_item[j + 1].start()
                 if j + 1 < len(matches_item)
