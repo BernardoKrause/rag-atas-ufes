@@ -286,3 +286,21 @@ def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> list[Item
     texto_normalizado, _mapa = _normalizar_com_mapa(texto_bruto)
     itens = detector(texto_normalizado)
     return _reclassificar_exclusao_de_pauta(itens)
+
+
+def dividir_fragmentos(texto: str) -> list[str]:
+    """Heuristica por caracteres, nao pelo tokenizer real do modelo de
+    embedding (Parte 5 ainda nao escolheu o modelo). Mesmo estilo de janela
+    com sobreposicao ja usado em _janelas_para_ner (cleaner.py)."""
+    if len(texto) <= TAMANHO_MAX_FRAGMENTO:
+        return [texto]
+
+    fragmentos = []
+    inicio = 0
+    while True:
+        fim = min(inicio + TAMANHO_MAX_FRAGMENTO, len(texto))
+        fragmentos.append(texto[inicio:fim])
+        if fim == len(texto):
+            break
+        inicio = fim - SOBREPOSICAO_FRAGMENTO
+    return fragmentos

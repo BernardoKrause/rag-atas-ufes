@@ -11,6 +11,8 @@ from app.ingestion.segmentador import (
     SECAO_PALAVRA_LIVRE,
     SECAO_PROCESSOS_PROJETOS,
     ItemDetectado,
+    SOBREPOSICAO_FRAGMENTO,
+    TAMANHO_MAX_FRAGMENTO,
     _neutralizar_numeracao_de_margem,
     _normalizar_com_mapa,
     _reclassificar_exclusao_de_pauta,
@@ -18,6 +20,7 @@ from app.ingestion.segmentador import (
     detectar_itens_car,
     detectar_itens_ct,
     detectar_itens_cefd,
+    dividir_fragmentos,
     segmentar_texto,
 )
 
@@ -214,3 +217,26 @@ def test_segmentar_texto_tipo_d_neutraliza_margem_antes_de_segmentar():
     texto = "1. ORDEM DO DIA:\n8\n1.1 ITEM COM NUMERO DE MARGEM NO MEIO."
     itens = segmentar_texto("D", "CE", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_ORDEM_DO_DIA, "1.1")]
+
+
+def test_dividir_fragmentos_texto_curto_retorna_fragmento_unico():
+    texto = "texto curto"
+    assert dividir_fragmentos(texto) == [texto]
+
+
+def test_dividir_fragmentos_texto_longo_divide_com_sobreposicao():
+    texto = "x" * 7000
+    fragmentos = dividir_fragmentos(texto)
+
+    assert len(fragmentos) > 1
+    assert all(len(f) <= TAMANHO_MAX_FRAGMENTO for f in fragmentos)
+    # reconstroi o texto original removendo a sobreposicao, confirma que nada foi perdido
+    reconstruido = fragmentos[0]
+    for f in fragmentos[1:]:
+        reconstruido += f[SOBREPOSICAO_FRAGMENTO:]
+    assert reconstruido == texto
+
+
+def test_dividir_fragmentos_texto_no_limite_exato_retorna_fragmento_unico():
+    texto = "x" * TAMANHO_MAX_FRAGMENTO
+    assert dividir_fragmentos(texto) == [texto]
