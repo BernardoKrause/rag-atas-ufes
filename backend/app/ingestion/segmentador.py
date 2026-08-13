@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import re
-import unicodedata
-from bisect import bisect_right
 from dataclasses import dataclass
 
 TAMANHO_MAX_FRAGMENTO = 3000
