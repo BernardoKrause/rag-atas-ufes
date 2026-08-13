@@ -121,3 +121,30 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             )
 
     return itens
+
+
+# Tipo D tem numeracao de linha na margem esquerda (rastreabilidade de
+# correcoes) — o PyMuPDF extrai cada numero de margem como sua propria
+# "linha" de texto, intercalado com o conteudo real (ex.: "1. APRECIAÇÃO DE\n8\nATA:").
+# Substituir por espacos do mesmo tamanho (nao remover) preserva os offsets
+# originais — necessario pro mapeamento de pagina continuar correto.
+RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
+
+
+def _neutralizar_numeracao_de_margem(texto: str) -> str:
+    return RE_NUMERACAO_MARGEM.sub(lambda m: " " * len(m.group(0)), texto)
+
+
+def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDetectado]:
+    """EXCLUSÃO DE PAUTA aparece como subtitulo textual dentro do EXPEDIENTE
+    (nao tem numeracao propria de secao) — vira sua propria secao quando o
+    texto do item comeca literalmente com esse subtitulo."""
+    resultado = []
+    for item in itens:
+        if item.secao == SECAO_EXPEDIENTE and item.texto.upper().startswith("EXCLUSÃO DE PAUTA"):
+            resultado.append(
+                ItemDetectado(SECAO_EXCLUSAO_DE_PAUTA, item.numero_item, item.inicio, item.fim, item.texto)
+            )
+        else:
+            resultado.append(item)
+    return resultado

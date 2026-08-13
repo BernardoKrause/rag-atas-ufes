@@ -1,10 +1,14 @@
 from app.ingestion.segmentador import (
     SECAO_APROVACAO_ATA,
     SECAO_COMUNICACOES,
+    SECAO_EXCLUSAO_DE_PAUTA,
     SECAO_EXPEDIENTE,
     SECAO_ORDEM_DO_DIA,
     SECAO_PAUTA,
+    ItemDetectado,
+    _neutralizar_numeracao_de_margem,
     _normalizar_com_mapa,
+    _reclassificar_exclusao_de_pauta,
     detectar_itens_familia_pontilhada,
 )
 
@@ -90,3 +94,28 @@ def test_familia_pontilhada_ignora_numero_citado_entre_aspas():
         (SECAO_APROVACAO_ATA, "1.1"),
         (SECAO_EXPEDIENTE, "2.1"),
     ]
+
+
+def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
+    texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert len(resultado) == len(texto)
+    assert "8" not in resultado
+    assert "9" not in resultado
+    assert "PRIMEIRA LINHA" in resultado
+
+
+def test_neutralizar_numeracao_de_margem_preserva_numero_dentro_da_linha():
+    texto = "1. ORDEM DO DIA: 1.1 ITEM.\n8\nCONTINUAÇÃO."
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert "1. ORDEM DO DIA: 1.1 ITEM." in resultado
+
+
+def test_reclassificar_exclusao_de_pauta():
+    itens = [
+        ItemDetectado(SECAO_EXPEDIENTE, "2.1", 0, 10, "EXCLUSÃO DE PAUTA: 2.1 ITEM RETIRADO."),
+        ItemDetectado(SECAO_EXPEDIENTE, "2.2", 10, 20, "2.2 OUTRO ITEM, SEM RELAÇÃO COM EXCLUSÃO."),
+    ]
+    resultado = _reclassificar_exclusao_de_pauta(itens)
+    assert resultado[0].secao == SECAO_EXCLUSAO_DE_PAUTA
+    assert resultado[1].secao == SECAO_EXPEDIENTE
