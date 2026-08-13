@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -61,6 +61,11 @@ class Documento(Base):
     departamentos_representados: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     texto_limpo: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # nulo ate o documento ser reprocessado pelo pipeline (Parte 2) depois da
+    # Parte 3 — os 357 documentos ja ingeridos precisam de um rerun idempotente
+    # pra essa coluna deixar de ser nula
+    paginas_offsets: Mapped[list[int] | None] = mapped_column(JSON, nullable=True)
 
 
 class EntidadeAnonimizada(Base):

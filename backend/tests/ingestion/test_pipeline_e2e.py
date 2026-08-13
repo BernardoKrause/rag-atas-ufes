@@ -41,6 +41,15 @@ def test_pipeline_preenche_campos_organizacionais_e_estruturais(db_session):
     assert ccae.modalidade == "Presencial"
 
 
+def test_pipeline_preenche_paginas_offsets(db_session):
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
+    ccae = next(d for d in documentos if d.nome_arquivo == "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf")
+
+    assert ccae.paginas_offsets is not None
+    assert ccae.paginas_offsets[0] == 0
+    assert len(ccae.paginas_offsets) >= 1
+
+
 def test_pipeline_aceita_orgaos_sem_numero_ou_carater_de_reuniao(db_session):
     # CAR nao numera atas na fonte e nao declara carater (ordinaria/extraordinaria)
     documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)

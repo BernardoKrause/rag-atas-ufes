@@ -55,6 +55,7 @@ def processar_ata(ata: AtaParaProcessar, secret_key: bytes, sessao: Session) -> 
     documento.local = campos["local"]
     documento.quorum_declarado = campos["quorum_declarado"]
     documento.texto_limpo = texto_limpo
+    documento.paginas_offsets = campos["paginas_offsets"]
 
     sessao.flush()
     return documento
