@@ -6,6 +6,13 @@ from bisect import bisect_right
 from dataclasses import dataclass
 from typing import Callable
 
+from sqlalchemy import create_engine, delete, select
+from sqlalchemy.orm import Session, sessionmaker
+
+from app.core.config import settings
+from app.models.documento import Documento
+from app.models.item_pauta import ItemPauta
+
 TAMANHO_MAX_FRAGMENTO = 3000
 SOBREPOSICAO_FRAGMENTO = 300
 
@@ -327,3 +334,62 @@ def gerar_item_id_canonico(documento_id: int, secao: str, numero_item: str, frag
     if fragmento_indice > 0:
         return f"{base}_F{fragmento_indice}"
     return base
+
+
+def segmentar_e_persistir(documento: Documento, sessao: Session) -> list[ItemPauta]:
+    """Idempotente por documento_id: substitui (delete + insert) os itens
+    daquele documento a cada rerun, em vez de tentar um upsert campo a
+    campo — mais simples e evita deixar itens obsoletos quando um rerun
+    produz menos itens que o anterior (ex.: ajuste de regex)."""
+    itens_detectados = segmentar_texto(documento.tipo_orgao, documento.centro, documento.texto_limpo)
+    _, mapa = _normalizar_com_mapa(
+        _neutralizar_numeracao_de_margem(documento.texto_limpo)
+        if documento.tipo_orgao == "D"
+        else documento.texto_limpo
+    )
+
+    sessao.execute(delete(ItemPauta).where(ItemPauta.documento_id == documento.id_documento))
+
+    novos_itens = []
+    for item in itens_detectados:
+        fragmentos = dividir_fragmentos(item.texto)
+        offset_original_inicio = mapa[item.inicio] if item.inicio < len(mapa) else mapa[-1]
+        offset_original_fim = mapa[item.fim - 1] if 0 <= item.fim - 1 < len(mapa) else mapa[-1]
+
+        for indice_fragmento, texto_fragmento in enumerate(fragmentos):
+            novos_itens.append(
+                ItemPauta(
+                    documento_id=documento.id_documento,
+                    item_id_canonico=gerar_item_id_canonico(
+                        documento.id_documento, item.secao, item.numero_item, indice_fragmento
+                    ),
+                    secao=item.secao,
+                    numero_item=item.numero_item,
+                    fragmento_indice=indice_fragmento,
+                    texto=texto_fragmento,
+                    pagina_inicio=mapear_pagina(offset_original_inicio, documento.paginas_offsets),
+                    pagina_fim=mapear_pagina(offset_original_fim, documento.paginas_offsets),
+                )
+            )
+
+    sessao.add_all(novos_itens)
+    sessao.flush()
+    return novos_itens
+
+
+def main() -> None:
+    engine = create_engine(settings.database_url)
+    Sessao = sessionmaker(bind=engine)
+
+    with Sessao() as sessao:
+        documentos = sessao.execute(select(Documento)).scalars().all()
+        total_itens = 0
+        for documento in documentos:
+            itens = segmentar_e_persistir(documento, sessao)
+            sessao.commit()
+            total_itens += len(itens)
+        print(f"{len(documentos)} documentos processados, {total_itens} itens de pauta gerados.")
+
+
+if __name__ == "__main__":
+    main()

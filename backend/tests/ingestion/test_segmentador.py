@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from app.ingestion.segmentador import (
@@ -24,7 +26,10 @@ from app.ingestion.segmentador import (
     gerar_item_id_canonico,
     mapear_pagina,
     segmentar_texto,
+    segmentar_e_persistir,
 )
+from app.models.documento import Documento
+from app.models.item_pauta import ItemPauta
 
 
 def test_normalizar_com_mapa_colapsa_espacos_multiplos():
@@ -272,3 +277,50 @@ def test_gerar_item_id_canonico_com_fragmento():
 def test_gerar_item_id_canonico_remove_acento_e_barra_da_secao():
     assert gerar_item_id_canonico(1, "PROCESSOS/PROJETOS", "1", 0) == "1_PROCESSOS_PROJETOS_1"
     assert gerar_item_id_canonico(1, "EXCLUSÃO DE PAUTA", "2.1", 0) == "1_EXCLUSAO_DE_PAUTA_2.1"
+
+
+def _criar_documento(sessao, **overrides) -> Documento:
+    base = dict(
+        nome_arquivo="teste.pdf", url_origem="http://exemplo", centro="CCENS",
+        campus="Alegre", tipo_orgao="A", orgao="CCENS_DB", data_reuniao=date(2025, 1, 1),
+        texto_limpo="1. ORDEM DO DIA. 1.1 PRIMEIRO ITEM. 1.2 SEGUNDO ITEM.",
+        paginas_offsets=[0],
+    )
+    base.update(overrides)
+    documento = Documento(**base)
+    sessao.add(documento)
+    sessao.flush()
+    return documento
+
+
+def test_segmentar_e_persistir_cria_itens(db_session):
+    documento = _criar_documento(db_session)
+    itens = segmentar_e_persistir(documento, db_session)
+
+    assert len(itens) == 2
+    assert {i.numero_item for i in itens} == {"1.1", "1.2"}
+    assert all(i.documento_id == documento.id_documento for i in itens)
+    assert all(i.pagina_inicio == 1 for i in itens)
+    assert db_session.query(ItemPauta).filter_by(documento_id=documento.id_documento).count() == 2
+
+
+def test_segmentar_e_persistir_e_idempotente(db_session):
+    documento = _criar_documento(db_session)
+    segmentar_e_persistir(documento, db_session)
+    itens_segunda_vez = segmentar_e_persistir(documento, db_session)
+
+    assert len(itens_segunda_vez) == 2
+    assert db_session.query(ItemPauta).filter_by(documento_id=documento.id_documento).count() == 2
+
+
+def test_segmentar_e_persistir_aplica_overflow_split(db_session):
+    texto_longo = "1. ORDEM DO DIA. 1.1 " + ("x" * 7000)
+    documento = _criar_documento(db_session, texto_limpo=texto_longo, nome_arquivo="longo.pdf")
+    itens = segmentar_e_persistir(documento, db_session)
+
+    assert len(itens) > 1
+    assert {i.fragmento_indice for i in itens} == set(range(len(itens)))
+    assert {i.item_id_canonico for i in itens} == {
+        gerar_item_id_canonico(documento.id_documento, "ORDEM DO DIA", "1.1", i.fragmento_indice)
+        for i in itens
+    }
