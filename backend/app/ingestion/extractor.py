@@ -43,12 +43,23 @@ def _normalizar_espacos(texto: str) -> str:
     return re.sub(r"\s+", " ", texto)
 
 
-def extrair_texto_bruto(caminho_pdf: Path) -> str:
+def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
+    """Retorna o texto completo e, junto, o offset (indice no texto) onde
+    cada pagina comeca — necessario pro segmentador (Parte 3) saber em que
+    pagina do PDF cada item de pauta cai."""
     doc = fitz.open(caminho_pdf)
     try:
-        return "\n".join(pagina.get_text() for pagina in doc)
+        paginas_texto = [pagina.get_text() for pagina in doc]
     finally:
         doc.close()
+
+    offsets = []
+    offset_atual = 0
+    for texto_pagina in paginas_texto:
+        offsets.append(offset_atual)
+        offset_atual += len(texto_pagina) + 1  # +1 pelo separador "\n" do join
+
+    return "\n".join(paginas_texto), offsets
 
 
 def extrair_metadados_organizacionais(tipo: str, orgao: str) -> dict[str, str | None]:
@@ -201,12 +212,13 @@ def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
     forma confiavel, o que e trabalho do NER do cleaner.py (proximo
     fragmento) — nao faz sentido duplicar essa logica aqui com regex fragil.
     """
-    texto_bruto = extrair_texto_bruto(caminho_pdf)
+    texto_bruto, paginas_offsets = extrair_texto_bruto(caminho_pdf)
     metadados = extrair_metadados_organizacionais(tipo, orgao)
 
     return {
         **metadados,
         "texto_bruto": texto_bruto,
+        "paginas_offsets": paginas_offsets,
         "horario_inicio": extrair_horario_inicio(texto_bruto),
         "modalidade": extrair_modalidade(texto_bruto),
         "local": extrair_local(texto_bruto),
