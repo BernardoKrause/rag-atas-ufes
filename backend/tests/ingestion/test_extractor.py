@@ -67,8 +67,19 @@ def test_metadados_tipo_d_curso_com_multiplos_segmentos_nao_trunca():
 
 def test_extrair_texto_bruto_retorna_conteudo_nao_vazio():
     caminho = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CAR" / "ata_05_02_2025.pdf"
-    texto = extrair_texto_bruto(caminho)
+    texto, _offsets = extrair_texto_bruto(caminho)
     assert "CENTRO DE ARTES" in texto.upper()
+
+
+def test_extrair_texto_bruto_retorna_offsets_de_pagina():
+    caminho = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CT" / "10-2025.pdf"
+    texto, offsets = extrair_texto_bruto(caminho)
+
+    assert offsets[0] == 0
+    assert len(offsets) >= 2
+    assert all(offsets[i] < offsets[i + 1] for i in range(len(offsets) - 1))
+    for offset in offsets:
+        assert 0 <= offset <= len(texto)
 
 
 def test_horario_formato_digito_compacto():
