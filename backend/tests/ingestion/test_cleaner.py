@@ -6,6 +6,7 @@ from app.ingestion.cleaner import (
     _recortar_sobreposicao_com_processos,
     _subtrair_intervalo,
     anonimizar_texto,
+    remapear_offsets,
 )
 from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
@@ -20,7 +21,7 @@ TEXTO_ABERTURA = (
 
 
 def test_pessoas_e_processo_sao_substituidos_por_token(db_session):
-    resultado = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
+    resultado, _ = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
 
     assert "João da Silva Souza" not in resultado
     assert "Maria Oliveira" not in resultado
@@ -33,8 +34,8 @@ def test_mesma_pessoa_gera_sempre_o_mesmo_token_em_atas_diferentes(db_session):
     ata_1 = "O professor João da Silva Souza apresentou o relatório."
     ata_2 = "Segundo o professor João da Silva Souza, o prazo está mantido."
 
-    resultado_1 = anonimizar_texto(ata_1, SECRET_KEY, db_session)
-    resultado_2 = anonimizar_texto(ata_2, SECRET_KEY, db_session)
+    resultado_1, _ = anonimizar_texto(ata_1, SECRET_KEY, db_session)
+    resultado_2, _ = anonimizar_texto(ata_2, SECRET_KEY, db_session)
 
     token_1 = resultado_1.split("O professor ")[1].split(" apresentou")[0]
     token_2 = resultado_2.split("Segundo o professor ")[1].split(", o prazo")[0]
@@ -42,8 +43,8 @@ def test_mesma_pessoa_gera_sempre_o_mesmo_token_em_atas_diferentes(db_session):
 
 
 def test_reprocessar_o_mesmo_texto_e_idempotente(db_session):
-    primeira_vez = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
-    segunda_vez = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
+    primeira_vez, _ = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
+    segunda_vez, _ = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
 
     assert primeira_vez == segunda_vez
 
@@ -52,7 +53,7 @@ def test_pessoas_diferentes_geram_tokens_diferentes(db_session):
     # filtra pelos tokens que aparecem no proprio resultado, nao pela tabela
     # inteira — contra um Postgres de dev com o corpus real ja ingerido, um
     # count() sem filtro contaria tambem entidades de outras execucoes
-    resultado = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
+    resultado, _ = anonimizar_texto(TEXTO_ABERTURA, SECRET_KEY, db_session)
     tokens_no_resultado = set(re.findall(r"PESSOA_\d+", resultado))
 
     entidades = (
@@ -94,8 +95,8 @@ def test_numeracao_do_token_incrementa_via_sequence_por_tipo(db_session):
 def test_chave_secreta_diferente_gera_token_diferente_para_mesma_pessoa(db_session):
     texto = "O professor João da Silva Souza apresentou o relatório."
 
-    resultado_a = anonimizar_texto(texto, SECRET_KEY, db_session)
-    resultado_b = anonimizar_texto(texto, OUTRA_SECRET_KEY, db_session)
+    resultado_a, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    resultado_b, _ = anonimizar_texto(texto, OUTRA_SECRET_KEY, db_session)
 
     token_a = resultado_a.split("O professor ")[1].split(" apresentou")[0]
     token_b = resultado_b.split("O professor ")[1].split(" apresentou")[0]
@@ -105,8 +106,8 @@ def test_chave_secreta_diferente_gera_token_diferente_para_mesma_pessoa(db_sessi
 def test_mesmo_numero_de_processo_gera_sempre_o_mesmo_token(db_session):
     texto = "O processo 23068.001234/2025-11 foi distribuído para relatoria."
 
-    resultado_1 = anonimizar_texto(texto, SECRET_KEY, db_session)
-    resultado_2 = anonimizar_texto(texto, SECRET_KEY, db_session)
+    resultado_1, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    resultado_2, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
 
     assert resultado_1 == resultado_2
     # filtra pelo token especifico gerado, nao pela tabela inteira — mesmo
@@ -118,7 +119,9 @@ def test_mesmo_numero_de_processo_gera_sempre_o_mesmo_token(db_session):
 
 def test_texto_sem_pessoas_ou_processos_fica_inalterado(db_session):
     texto = "Ata da reunião ordinária, sem menção a quórum."
-    assert anonimizar_texto(texto, SECRET_KEY, db_session) == texto
+    resultado, substituicoes = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert resultado == texto
+    assert substituicoes == []
 
 
 def test_subtrair_intervalo_sem_sobreposicao_mantem_o_alvo():
@@ -172,7 +175,7 @@ def test_anonimizar_texto_nao_corrompe_saida_quando_ner_se_sobrepoe_ao_processo(
         lambda _texto: [(inicio_pessoa, fim_pessoa_com_erro_de_limite)],
     )
 
-    resultado = anonimizar_texto(texto, SECRET_KEY, db_session)
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
 
     assert "23068.001234/2025-11" not in resultado
     assert "Silva" not in resultado
@@ -187,7 +190,33 @@ def test_texto_maior_que_uma_janela_de_ner_ainda_anonimiza_o_final(db_session):
     enchimento = "Este parágrafo é apenas texto de preenchimento sem entidades. " * 40
     texto = enchimento + "Ao final, falou o professor João da Silva Souza."
 
-    resultado = anonimizar_texto(texto, SECRET_KEY, db_session)
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
 
     assert "João da Silva Souza" not in resultado
     assert "PESSOA_" in resultado
+
+
+def test_anonimizar_texto_retorna_substituicoes_com_delta_de_tamanho(db_session):
+    # regressao achado #1: quem precisa reprojetar um offset calculado sobre
+    # o texto original (ex.: paginas_offsets, calculado pre-anonimizacao)
+    # precisa saber onde cada substituicao ocorreu e quanto ela deslocou o
+    # texto — o token tem tamanho fixo, diferente do nome/processo real que
+    # substitui.
+    texto = "O professor João da Silva Souza apresentou o relatório."
+    resultado, substituicoes = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    nome = "João da Silva Souza"
+    inicio_nome = texto.index(nome)
+    assert substituicoes == [(inicio_nome, len(resultado) - len(texto))]
+
+
+def test_remapear_offsets_soma_delta_das_substituicoes_anteriores():
+    # substituicao em 5 encolhe 3 chars; substituicao em 12 cresce 2 chars.
+    # offset exatamente no inicio de uma substituicao ainda nao foi
+    # deslocado por ela (ela desloca o que vem DEPOIS de si mesma)
+    substituicoes = [(5, -3), (12, 2)]
+    assert remapear_offsets([0, 3, 5, 10, 20], substituicoes) == [0, 3, 5, 7, 19]
+
+
+def test_remapear_offsets_sem_substituicoes_retorna_offsets_inalterados():
+    assert remapear_offsets([0, 10, 20], []) == [0, 10, 20]

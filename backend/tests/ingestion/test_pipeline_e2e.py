@@ -129,3 +129,53 @@ def test_falha_no_meio_do_lote_preserva_atas_ja_processadas(db_session, monkeypa
 
     assert db_session.query(Documento).filter_by(nome_arquivo="boa.pdf").count() == 1
     assert db_session.query(Documento).filter_by(nome_arquivo="ruim.pdf").count() == 0
+
+
+def test_processar_ata_remapeia_paginas_offsets_para_o_espaco_do_texto_limpo(db_session, monkeypatch):
+    # regressao achado #1 da Parte 3: paginas_offsets vem do extrator sobre
+    # texto_bruto (pre-anonimizacao), mas o documento persiste texto_limpo
+    # (pos-anonimizacao) — a substituicao de um nome por um token de tamanho
+    # fixo desloca tudo que vem depois dele. Sem remapear, pagina_inicio dos
+    # itens de pauta (calculados sobre texto_limpo em segmentador.py) fica
+    # errado sempre que ha uma anonimizacao antes da quebra de pagina.
+    texto_bruto = "Presidida por FULANO DE TAL DA SILVA PEREIRA JUNIOR. PAUTA: item."
+    offset_pagina_2 = texto_bruto.index("PAUTA:")  # "pagina 2" comeca aqui, pre-anonimizacao
+
+    monkeypatch.setattr(
+        pipeline_module,
+        "extrair_campos",
+        lambda tipo, orgao, caminho: {
+            "texto_bruto": texto_bruto,
+            "paginas_offsets": [0, offset_pagina_2],
+            "tipo_orgao": "A",
+            "centro": "X",
+            "campus": "Goiabeiras",
+            "departamento": None,
+            "curso": None,
+            "area_tematica": None,
+            "horario_inicio": None,
+            "modalidade": None,
+            "local": None,
+            "quorum_declarado": None,
+        },
+    )
+    monkeypatch.setattr(
+        pipeline_module,
+        "anonimizar_texto",
+        lambda texto, secret_key, sessao: (
+            texto.replace("FULANO DE TAL DA SILVA PEREIRA JUNIOR", "PESSOA_0001"),
+            [(
+                texto.index("FULANO DE TAL DA SILVA PEREIRA JUNIOR"),
+                len("PESSOA_0001") - len("FULANO DE TAL DA SILVA PEREIRA JUNIOR"),
+            )],
+        ),
+    )
+
+    ata = AtaParaProcessar(
+        tipo="TIPO_A", orgao="X", numero_reuniao=1, caratere="Ordinaria",
+        data_reuniao=date(2025, 1, 1), arquivo="fake.pdf", caminho_pdf=Path("fake.pdf"),
+    )
+    documento = processar_ata(ata, SECRET_KEY, db_session)
+
+    offset_pauta_no_texto_limpo = documento.texto_limpo.index("PAUTA:")
+    assert documento.paginas_offsets == [0, offset_pauta_no_texto_limpo]

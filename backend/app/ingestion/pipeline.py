@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
-from app.ingestion.cleaner import anonimizar_texto
+from app.ingestion.cleaner import anonimizar_texto, remapear_offsets
 from app.ingestion.collector import PREFIXO_PATH_ESTENDIDO, AtaParaProcessar, coletar_atas
 from app.ingestion.extractor import extrair_campos
 from app.models.documento import Documento
@@ -29,7 +29,7 @@ def processar_ata(ata: AtaParaProcessar, secret_key: bytes, sessao: Session) -> 
     nomear atas com o mesmo padrao generico (ex.: "10-2025.pdf").
     """
     campos = extrair_campos(ata.tipo, ata.orgao, ata.caminho_pdf)
-    texto_limpo = anonimizar_texto(campos["texto_bruto"], secret_key, sessao)
+    texto_limpo, substituicoes = anonimizar_texto(campos["texto_bruto"], secret_key, sessao)
 
     documento = sessao.execute(
         select(Documento).filter_by(
@@ -55,7 +55,10 @@ def processar_ata(ata: AtaParaProcessar, secret_key: bytes, sessao: Session) -> 
     documento.local = campos["local"]
     documento.quorum_declarado = campos["quorum_declarado"]
     documento.texto_limpo = texto_limpo
-    documento.paginas_offsets = campos["paginas_offsets"]
+    # paginas_offsets vem do extrator sobre texto_bruto (pre-anonimizacao);
+    # remapeado aqui pro espaco de texto_limpo, que e o que fica persistido
+    # e o que segmentador.py usa pra calcular pagina_inicio/pagina_fim
+    documento.paginas_offsets = remapear_offsets(campos["paginas_offsets"], substituicoes)
 
     sessao.flush()
     return documento

@@ -61,37 +61,39 @@ def _normalizar_com_mapa(texto: str) -> tuple[str, list[int]]:
     return "".join(partes), mapa
 
 
+# grupos nomeados em vez de um dict alias->secao casado pelo texto literal
+# capturado: o alias por texto exigia enumerar toda combinacao de
+# prefixo/acento/singular-plural que o regex reconhece (ex.: "APRECIAÇÃO DA
+# ATA" bate no regex mas nao tinha entrada no dict antigo -> KeyError). Cada
+# alternativa abaixo ja mapeia 1:1 pra uma secao, entao o grupo nomeado que
+# casou entrega a secao diretamente, sem depender do texto exato casado.
 RE_SECAO_NUMERADA = re.compile(
-    r"(?<!\d)(\d{1,2})\.\s*("
-    r"APR(?:OVA|ECIA)[CÇ][AÃ]O D[AE] ATAS?(?:/RELAT[OÓ]RIOS)?"
-    r"|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)"
-    r"|COMUNICADOS?"
-    r"|EXPEDIENTE"
-    r"|ORDEM DO DIA"
-    r"|PAUTA"
-    r"|INFORMES?"
-    r"|PALAVRA[\s-]LIVRE"
+    r"(?<!\d)(\d{1,2})\.\s*(?:"
+    r"(?P<aprovacao_ata>APR(?:OVA|ECIA)[CÇ][AÃ]O D[AE] ATAS?(?:/RELAT[OÓ]RIOS)?)"
+    r"|(?P<comunicacoes>COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|COMUNICADOS?)"
+    r"|(?P<expediente>EXPEDIENTE)"
+    r"|(?P<ordem_do_dia>ORDEM DO DIA)"
+    r"|(?P<pauta>PAUTA)"
+    r"|(?P<informes>INFORMES?)"
+    r"|(?P<palavra_livre>PALAVRA[\s-]LIVRE)"
     r")\s*[:.]",
     re.IGNORECASE,
 )
 
-_ALIAS_SECAO = {
-    "APROVAÇÃO DA ATA": SECAO_APROVACAO_ATA,
-    "APRECIAÇÃO DE ATA": SECAO_APROVACAO_ATA,
-    "APRECIAÇÃO DE ATAS/RELATÓRIOS": SECAO_APROVACAO_ATA,
-    "APROVAÇÃO DE ATA": SECAO_APROVACAO_ATA,
-    "COMUNICAÇÃO": SECAO_COMUNICACOES,
-    "COMUNICAÇÕES": SECAO_COMUNICACOES,
-    "COMUNICADO": SECAO_COMUNICACOES,
-    "COMUNICADOS": SECAO_COMUNICACOES,
-    "EXPEDIENTE": SECAO_EXPEDIENTE,
-    "ORDEM DO DIA": SECAO_ORDEM_DO_DIA,
-    "PAUTA": SECAO_PAUTA,
-    "INFORME": SECAO_INFORMES,
-    "INFORMES": SECAO_INFORMES,
-    "PALAVRA LIVRE": SECAO_PALAVRA_LIVRE,
-    "PALAVRA-LIVRE": SECAO_PALAVRA_LIVRE,
+_SECAO_POR_GRUPO = {
+    "aprovacao_ata": SECAO_APROVACAO_ATA,
+    "comunicacoes": SECAO_COMUNICACOES,
+    "expediente": SECAO_EXPEDIENTE,
+    "ordem_do_dia": SECAO_ORDEM_DO_DIA,
+    "pauta": SECAO_PAUTA,
+    "informes": SECAO_INFORMES,
+    "palavra_livre": SECAO_PALAVRA_LIVRE,
 }
+
+
+def _secao_do_match(secao_match: re.Match) -> str:
+    nome_grupo = secao_match.lastgroup
+    return _SECAO_POR_GRUPO[nome_grupo]
 
 # nao pode ser precedido/seguido de outro digito (evita casar o final de um
 # token de anonimizacao tipo "PESSOA_12752") nem estar entre aspas (evita
@@ -105,7 +107,7 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
 
     for i, secao_match in enumerate(secoes):
         numero_secao = secao_match.group(1)
-        secao = _ALIAS_SECAO[secao_match.group(2).upper()]
+        secao = _secao_do_match(secao_match)
         inicio_corpo = secao_match.end()
         fim_corpo = secoes[i + 1].start() if i + 1 < len(secoes) else len(texto_normalizado)
         corpo = texto_normalizado[inicio_corpo:fim_corpo]
@@ -163,8 +165,10 @@ def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDet
 
 # CT (B1) nao tem uma secao "PAUTA" com subitens dentro — cada item ja e
 # "PAUTA N:" ou "INFORME N:" diretamente, entao a deteccao de secao e de
-# item sao a mesma passada, ao contrario da familia pontilhada
-RE_ITEM_CT = re.compile(r"(?<!\d)(INFORME|PAUTA)\s+(\d{1,2}):(?!\d)")
+# item sao a mesma passada, ao contrario da familia pontilhada.
+# Guarda contra aspas nas duas pontas (mesmo motivo do RE_ITEM_PONTILHADO):
+# evita casar a citacao do numero de OUTRO item como referencia no texto.
+RE_ITEM_CT = re.compile(r'(?<!\d)(?<!["“])(INFORME|PAUTA)\s+(\d{1,2}):(?!\d)(?!["”])')
 
 _SECAO_CT = {"INFORME": SECAO_INFORMES, "PAUTA": SECAO_PAUTA}
 
@@ -187,7 +191,8 @@ def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-RE_ITEM_CAR = re.compile(r"(?<!\d)(\d{1,2})\)(?!\d)")
+# mesma guarda de aspas do RE_ITEM_PONTILHADO/RE_ITEM_CT
+RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])')
 
 
 def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
@@ -222,7 +227,8 @@ def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
 RE_SECAO_CEFD = re.compile(
     r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE):"
 )
-RE_ITEM_CEFD = re.compile(r"(?<!\d)\[(\d{1,2})\](?!\d)")
+# mesma guarda de aspas do RE_ITEM_PONTILHADO/RE_ITEM_CT
+RE_ITEM_CEFD = re.compile(r'(?<![\d"“])\[(\d{1,2})\](?!\d)(?!["”])')
 
 _SECAO_CEFD = {
     "EM PAUTA": SECAO_PAUTA,
@@ -286,16 +292,20 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
     raise ValueError(f"variante sem detector mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
 
 
-def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> list[ItemDetectado]:
+def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
+    """Retorna os itens detectados junto com o mapa de offsets (indice no
+    texto normalizado -> indice no texto_limpo original), pra quem precisar
+    localizar a posicao original de um item (ex.: mapeamento de pagina) nao
+    ter que reimplementar a mesma normalizacao."""
     detector = _obter_detector(tipo_orgao, centro)
 
     texto_bruto = texto_limpo
     if tipo_orgao == "D":
         texto_bruto = _neutralizar_numeracao_de_margem(texto_bruto)
 
-    texto_normalizado, _mapa = _normalizar_com_mapa(texto_bruto)
+    texto_normalizado, mapa = _normalizar_com_mapa(texto_bruto)
     itens = detector(texto_normalizado)
-    return _reclassificar_exclusao_de_pauta(itens)
+    return _reclassificar_exclusao_de_pauta(itens), mapa
 
 
 def dividir_fragmentos(texto: str) -> list[str]:
@@ -342,12 +352,7 @@ def segmentar_e_persistir(documento: Documento, sessao: Session) -> list[ItemPau
     daquele documento a cada rerun, em vez de tentar um upsert campo a
     campo — mais simples e evita deixar itens obsoletos quando um rerun
     produz menos itens que o anterior (ex.: ajuste de regex)."""
-    itens_detectados = segmentar_texto(documento.tipo_orgao, documento.centro, documento.texto_limpo)
-    _, mapa = _normalizar_com_mapa(
-        _neutralizar_numeracao_de_margem(documento.texto_limpo)
-        if documento.tipo_orgao == "D"
-        else documento.texto_limpo
-    )
+    itens_detectados, mapa = segmentar_texto(documento.tipo_orgao, documento.centro, documento.texto_limpo)
 
     sessao.execute(delete(ItemPauta).where(ItemPauta.documento_id == documento.id_documento))
 

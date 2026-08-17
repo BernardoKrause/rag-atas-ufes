@@ -4,6 +4,8 @@ import hashlib
 import hmac
 import re
 import unicodedata
+from bisect import bisect_left
+from itertools import accumulate
 
 from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
@@ -159,11 +161,19 @@ def _obter_ou_criar_token(
     return token
 
 
-def anonimizar_texto(texto: str, secret_key: bytes, sessao: Session) -> str:
+def anonimizar_texto(
+    texto: str, secret_key: bytes, sessao: Session
+) -> tuple[str, list[tuple[int, int]]]:
     """Substitui pessoas (NER) e numeros de processo SIPAC (regex) por tokens
     deterministicos, consultando/gravando EntidadeAnonimizada — a mesma pessoa
     ou processo real sempre gera o mesmo token, inclusive entre atas e execucoes
-    diferentes."""
+    diferentes.
+
+    Alem do texto anonimizado, retorna a lista de substituicoes (offset
+    original, delta de tamanho) em ordem crescente de offset — o token tem
+    tamanho fixo, diferente do nome/processo real que substitui, entao quem
+    tiver offsets calculados sobre o texto original (ex.: paginas_offsets)
+    precisa dessa lista pra reprojeta-los via remapear_offsets()."""
     intervalos_processo = [(m.start(), m.end()) for m in RE_PROCESSO_SIPAC.finditer(texto)]
     intervalos_pessoa = _recortar_sobreposicao_com_processos(
         _achar_entidades_pessoa(texto), intervalos_processo
@@ -181,8 +191,31 @@ def anonimizar_texto(texto: str, secret_key: bytes, sessao: Session) -> str:
     ocorrencias.sort(key=lambda o: o[0], reverse=True)
 
     resultado = texto
+    substituicoes: list[tuple[int, int]] = []
     for inicio, fim, tipo in ocorrencias:
         token = _obter_ou_criar_token(sessao, secret_key, tipo, texto[inicio:fim])
         resultado = resultado[:inicio] + token + resultado[fim:]
+        substituicoes.append((inicio, len(token) - (fim - inicio)))
 
+    substituicoes.sort(key=lambda s: s[0])
+    return resultado, substituicoes
+
+
+def remapear_offsets(offsets: list[int], substituicoes: list[tuple[int, int]]) -> list[int]:
+    """Reprojeta offsets calculados sobre o texto pre-anonimizacao pro
+    espaco do texto pos-anonimizacao (o retornado por anonimizar_texto),
+    somando o delta acumulado de toda substituicao que ocorreu antes de cada
+    offset. Uma substituicao que comeca exatamente NO offset ainda nao o
+    deslocou — ela desloca o que vem depois de si mesma."""
+    if not substituicoes:
+        return list(offsets)
+
+    inicios = [inicio for inicio, _delta in substituicoes]
+    deltas_acumulados = list(accumulate(delta for _inicio, delta in substituicoes))
+
+    resultado = []
+    for offset in offsets:
+        indice = bisect_left(inicios, offset)
+        delta = deltas_acumulados[indice - 1] if indice > 0 else 0
+        resultado.append(offset + delta)
     return resultado

@@ -120,6 +120,23 @@ def test_familia_pontilhada_ignora_numero_citado_entre_aspas():
     ]
 
 
+def test_familia_pontilhada_cabecalho_de_secao_sem_acento():
+    # regressao: RE_SECAO_NUMERADA casa variantes sem acento (classes [CÇ]/
+    # [AÃ]/[OÕ]) e variantes DA/DE + singular/plural que _ALIAS_SECAO nao
+    # cobria, levantando KeyError em vez de reclassificar como APROVACAO_ATA
+    texto = "1. APROVACAO DA ATA: 1.1 ATA ANTERIOR APROVADA."
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
+
+
+def test_familia_pontilhada_cabecalho_de_secao_combinacao_nao_prevista_no_alias():
+    # regressao: "APRECIAÇÃO DA ATA" (prefixo APRECIA + "DA" em vez de "DE")
+    # bate no regex mas nao tinha entrada em _ALIAS_SECAO
+    texto = "1. APRECIAÇÃO DA ATA: 1.1 ATA ANTERIOR APROVADA."
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
+
+
 def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
     texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
     resultado = _neutralizar_numeracao_de_margem(texto)
@@ -175,6 +192,35 @@ def test_detectar_itens_car_sem_pauta_retorna_vazio():
     assert detectar_itens_car("TEXTO SEM A PALAVRA PAUTA.") == []
 
 
+def test_detectar_itens_car_ignora_numero_citado_entre_aspas():
+    # regressao: um item pode citar o numero de OUTRO item entre aspas como
+    # referencia — isso nao pode ser confundido com o inicio de um item novo
+    texto = 'PAUTA: 1) PRIMEIRO ITEM QUE MENCIONA O ITEM "3)" DA PAUTA ANTERIOR. 2) SEGUNDO ITEM.'
+    itens = detectar_itens_car(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_detectar_itens_ct_ignora_numero_citado_entre_aspas():
+    texto = 'PAUTA 1: PRIMEIRO ITEM QUE MENCIONA "PAUTA 3:" DE OUTRA ATA. PAUTA 2: SEGUNDO ITEM.'
+    itens = detectar_itens_ct(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_detectar_itens_cefd_ignora_numero_citado_entre_aspas():
+    texto = 'EM PAUTA: [1] PRIMEIRO ITEM QUE MENCIONA O ITEM "[3]" DE OUTRA ATA. [2] SEGUNDO ITEM.'
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
 def test_detectar_itens_cefd():
     texto = (
         "EM PAUTA: LEITURA DA ATA APROVADA POR UNANIMIDADE. "
@@ -198,25 +244,25 @@ def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
 
 def test_segmentar_texto_tipo_a():
     texto = "1. ORDEM DO DIA. 1.1 ITEM ÚNICO."
-    itens = segmentar_texto("A", "CCENS", texto)
+    itens, _ = segmentar_texto("A", "CCENS", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_ORDEM_DO_DIA, "1.1")]
 
 
 def test_segmentar_texto_ct_via_config():
     texto = "PAUTA 1: PRIMEIRO ITEM."
-    itens = segmentar_texto("B", "CT", texto)
+    itens, _ = segmentar_texto("B", "CT", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
 
 
 def test_segmentar_texto_car_via_config():
     texto = "INFORMES: PAUTA: 1) PRIMEIRO ITEM."
-    itens = segmentar_texto("B", "CAR", texto)
+    itens, _ = segmentar_texto("B", "CAR", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
 
 
 def test_segmentar_texto_cefd_via_config():
     texto = "PROCESSOS/PROJETOS: [1] PRIMEIRO PROCESSO."
-    itens = segmentar_texto("B", "CEFD", texto)
+    itens, _ = segmentar_texto("B", "CEFD", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PROCESSOS_PROJETOS, "1")]
 
 
@@ -227,7 +273,7 @@ def test_segmentar_texto_variant_desconhecido_levanta_erro():
 
 def test_segmentar_texto_tipo_d_neutraliza_margem_antes_de_segmentar():
     texto = "1. ORDEM DO DIA:\n8\n1.1 ITEM COM NUMERO DE MARGEM NO MEIO."
-    itens = segmentar_texto("D", "CE", texto)
+    itens, _ = segmentar_texto("D", "CE", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_ORDEM_DO_DIA, "1.1")]
 
 
