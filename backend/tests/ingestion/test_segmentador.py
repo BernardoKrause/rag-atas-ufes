@@ -12,7 +12,6 @@ from app.ingestion.segmentador import (
     SECAO_INFORMES,
     SECAO_ORDEM_DO_DIA,
     SECAO_PAUTA,
-    SECAO_PALAVRA_LIVRE,
     SECAO_PROCESSOS_PROJETOS,
     ItemDetectado,
     SOBREPOSICAO_FRAGMENTO,
