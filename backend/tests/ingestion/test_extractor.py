@@ -1,5 +1,7 @@
+import logging
 from pathlib import Path
 
+import fitz
 import pytest
 
 from app.ingestion.extractor import (
@@ -210,3 +212,15 @@ def test_extrair_campos_fixture_ct_layout_espacado():
     assert campos["horario_inicio"] == "14:00"
     assert campos["modalidade"] == "Videoconferência"
     assert campos["quorum_declarado"] is True
+
+
+def test_extrair_texto_bruto_loga_aviso_do_mupdf_em_vez_de_vazar_pro_stderr(caplog, monkeypatch):
+    caminho_qualquer = next(FIXTURES.glob("**/*.pdf"))
+    monkeypatch.setattr(
+        fitz.TOOLS, "mupdf_warnings", lambda: "syntax error: unknown keyword: '0,5020'"
+    )
+
+    with caplog.at_level(logging.WARNING, logger="app.ingestion.extractor"):
+        extrair_texto_bruto(caminho_qualquer)
+
+    assert any("MuPDF" in registro.message for registro in caplog.records)
