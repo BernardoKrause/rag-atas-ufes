@@ -268,6 +268,42 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
+# CCE nao usa cabecalho de secao (PAUTA:/INFORME:) nem numeracao pontilhada
+# — cada assunto e um "Ponto N" (ou, em atas mais antigas, a ordem invertida
+# "Nº. Ponto") direto apos o texto de abertura/quorum, sem distincao de
+# secao. Reuniao de assunto unico usa "Ponto único" em vez de numero.
+# Maiusculas/minusculas variam entre atas de anos diferentes — daí IGNORECASE
+# em vez da guarda de aspas usada nos outros detectores (aqui a citacao
+# narrativa de um ponto ja votado nao usa aspas, ver achado (c) CCE — tratado
+# via ocorrencia_indice em segmentar_e_persistir, nao aqui).
+RE_ITEM_CCE = re.compile(
+    r"(?<!\d)(?:"
+    r"PONTO\s+(?:(\d{1,2})|(ÚNICO))\.?"
+    r"|(\d{1,2})[ºo°]\.?\s*PONTO"
+    r")(?!\d)",
+    re.IGNORECASE,
+)
+
+
+def detectar_itens_cce(texto_normalizado: str) -> list[ItemDetectado]:
+    matches = list(RE_ITEM_CCE.finditer(texto_normalizado))
+    itens = []
+    for i, m in enumerate(matches):
+        numero_item = "1" if m.group(2) else (m.group(1) or m.group(3))
+        inicio = m.start()
+        fim = matches[i + 1].start() if i + 1 < len(matches) else len(texto_normalizado)
+        itens.append(
+            ItemDetectado(
+                secao=SECAO_PAUTA,
+                numero_item=numero_item,
+                inicio=inicio,
+                fim=fim,
+                texto=texto_normalizado[inicio:fim].strip(),
+            )
+        )
+    return itens
+
+
 # (tipo_orgao, centro) -> funcao detectora de itens sobre o texto normalizado.
 # Mesmo estilo dict-driven de CENTRO_CAMPUS em extractor.py — variant sem
 # entrada aqui levanta ValueError explicito, nunca falha silenciosamente.
@@ -279,6 +315,8 @@ CONFIG_VARIANTES: dict[tuple[str, str], Callable[[str], list[ItemDetectado]]] = 
     ("B", "CCAE"): detectar_itens_familia_pontilhada,
     ("B", "CE"): detectar_itens_familia_pontilhada,
     ("B", "CCHN"): detectar_itens_familia_pontilhada,
+    ("B", "CEUNES"): detectar_itens_ct,
+    ("B", "CCE"): detectar_itens_cce,
     ("C", "*"): detectar_itens_familia_pontilhada,
     ("D", "*"): detectar_itens_familia_pontilhada,
 }
@@ -340,8 +378,12 @@ def _slug_secao(secao: str) -> str:
     return re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
 
 
-def gerar_item_id_canonico(documento_id: int, secao: str, numero_item: str, fragmento_indice: int) -> str:
+def gerar_item_id_canonico(
+    documento_id: int, secao: str, numero_item: str, ocorrencia_indice: int, fragmento_indice: int
+) -> str:
     base = f"{documento_id}_{_slug_secao(secao)}_{numero_item}"
+    if ocorrencia_indice > 0:
+        base = f"{base}_D{ocorrencia_indice}"
     if fragmento_indice > 0:
         return f"{base}_F{fragmento_indice}"
     return base
@@ -351,13 +393,24 @@ def segmentar_e_persistir(documento: Documento, sessao: Session) -> list[ItemPau
     """Idempotente por documento_id: substitui (delete + insert) os itens
     daquele documento a cada rerun, em vez de tentar um upsert campo a
     campo — mais simples e evita deixar itens obsoletos quando um rerun
-    produz menos itens que o anterior (ex.: ajuste de regex)."""
+    produz menos itens que o anterior (ex.: ajuste de regex).
+
+    ocorrencia_indice desambigua itens que compartilham (secao, numero_item)
+    dentro do mesmo documento — numeracao duplicada na fonte ou falso
+    positivo de deteccao (numero citado dentro do corpo de outro item) nao
+    quebram mais a constraint unica; ficam persistidos lado a lado, com
+    sufixo "_D{n}" no item_id_canonico, pra revisao manual amostral."""
     itens_detectados, mapa = segmentar_texto(documento.tipo_orgao, documento.centro, documento.texto_limpo)
 
     sessao.execute(delete(ItemPauta).where(ItemPauta.documento_id == documento.id_documento))
 
+    contador_ocorrencias: dict[tuple[str, str], int] = {}
     novos_itens = []
     for item in itens_detectados:
+        chave = (item.secao, item.numero_item)
+        ocorrencia_indice = contador_ocorrencias.get(chave, 0)
+        contador_ocorrencias[chave] = ocorrencia_indice + 1
+
         fragmentos = dividir_fragmentos(item.texto)
         offset_original_inicio = mapa[item.inicio] if item.inicio < len(mapa) else mapa[-1]
         offset_original_fim = mapa[item.fim - 1] if 0 <= item.fim - 1 < len(mapa) else mapa[-1]
@@ -367,10 +420,12 @@ def segmentar_e_persistir(documento: Documento, sessao: Session) -> list[ItemPau
                 ItemPauta(
                     documento_id=documento.id_documento,
                     item_id_canonico=gerar_item_id_canonico(
-                        documento.id_documento, item.secao, item.numero_item, indice_fragmento
+                        documento.id_documento, item.secao, item.numero_item,
+                        ocorrencia_indice, indice_fragmento,
                     ),
                     secao=item.secao,
                     numero_item=item.numero_item,
+                    ocorrencia_indice=ocorrencia_indice,
                     fragmento_indice=indice_fragmento,
                     texto=texto_fragmento,
                     pagina_inicio=mapear_pagina(offset_original_inicio, documento.paginas_offsets),
