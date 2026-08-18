@@ -38,6 +38,14 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # o schema antigo (sem ocorrencia_indice) nao consegue representar itens
+    # que so se diferenciam por ocorrencia_indice > 0 (numeracao duplicada
+    # desambiguada pelo segmentador — ver Task 5) — nao ha como "mesclar"
+    # essas linhas sem perder dado, entao o downgrade e destrutivo por
+    # necessidade: descarta as ocorrencias extras antes de recriar a
+    # constraint antiga
+    op.execute("DELETE FROM itens_pauta WHERE ocorrencia_indice > 0")
+
     op.drop_constraint(
         'uq_itens_pauta_documento_secao_numero_ocorrencia_fragmento', 'itens_pauta', type_='unique'
     )
