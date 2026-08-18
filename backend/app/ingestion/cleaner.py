@@ -214,7 +214,11 @@ def anonimizar_texto(
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
 
     intervalos_pessoa = _recortar_sobreposicao(
-        _achar_entidades_pessoa(texto), intervalos_processo, intervalos_email
+        _achar_entidades_pessoa(texto),
+        intervalos_processo,
+        intervalos_email,
+        intervalos_cpf,
+        intervalos_rg,
     )
 
     ocorrencias: list[tuple[int, int, TipoEntidade]] = [

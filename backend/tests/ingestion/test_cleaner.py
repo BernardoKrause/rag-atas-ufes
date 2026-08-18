@@ -271,6 +271,32 @@ def test_pessoa_colada_em_email_nao_corrompe_a_saida(db_session, monkeypatch):
     assert resultado.endswith(" em anexo.")
 
 
+def test_pessoa_colada_em_cpf_nao_corrompe_a_saida(db_session, monkeypatch):
+    # regressao do finding da revisao final: _recortar_sobreposicao so
+    # protegia processo/email, nao cpf/rg — um span de PESSOA que invade um
+    # CPF colado sem espaco corrompia o CPF em vez de anonimiza-lo inteiro.
+    # mesmo formato de test_anonimizar_texto_nao_corrompe_saida_quando_ner_se_
+    # sobrepoe_ao_processo: apos o recorte, "Fulano" continua um nome valido
+    # (vira seu proprio token PESSOA_) e o CPF sobrevive intacto como CPF_.
+    texto = "Assinado por Fulano150.233.587-55 em anexo."
+    inicio_cpf = texto.index("150.233.587-55")
+    inicio_pessoa = texto.index("Fulano")
+    fim_pessoa_com_erro_de_limite = inicio_cpf + 5  # invade o CPF
+    monkeypatch.setattr(
+        cleaner,
+        "_achar_entidades_pessoa",
+        lambda _texto: [(inicio_pessoa, fim_pessoa_com_erro_de_limite)],
+    )
+
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    assert "150.233.587-55" not in resultado
+    assert "Fulano" not in resultado
+    assert resultado.startswith("Assinado por PESSOA_")
+    assert resultado.endswith(" em anexo.")
+    assert "CPF_" in resultado
+
+
 def test_processo_fora_do_prefixo_sipac_padrao_e_substituido(db_session):
     # achado (f): RE_PROCESSO_SIPAC so pegava o prefixo 23068. (SIPAC-UFES);
     # doc 462 do corpus real tem um protocolo Fala.BR/CGU (23546.) no mesmo
