@@ -3,7 +3,7 @@ import re
 from app.ingestion import cleaner
 from app.ingestion.cleaner import (
     _obter_ou_criar_token,
-    _recortar_sobreposicao_com_processos,
+    _recortar_sobreposicao,
     _subtrair_intervalo,
     anonimizar_texto,
     remapear_offsets,
@@ -145,18 +145,18 @@ def test_subtrair_intervalo_alvo_contem_intervalo_removido_gera_dois_pedacos():
     assert _subtrair_intervalo((0, 10), (4, 6)) == [(0, 4), (6, 10)]
 
 
-def test_recortar_sobreposicao_com_processos_preserva_pessoa_sem_conflito():
+def test_recortar_sobreposicao_preserva_pessoa_sem_conflito():
     pessoas = [(0, 10)]
     processos = [(20, 30)]
-    assert _recortar_sobreposicao_com_processos(pessoas, processos) == pessoas
+    assert _recortar_sobreposicao(pessoas, processos) == pessoas
 
 
-def test_recortar_sobreposicao_com_processos_recorta_pessoa_grudada_no_numero():
+def test_recortar_sobreposicao_recorta_pessoa_grudada_no_numero():
     # simula "Silva23068.001234/2025-11": o NER errou o limite e incluiu
     # os primeiros digitos do numero de processo dentro do span de PESSOA
     pessoas = [(0, 20)]
     processos = [(15, 40)]
-    assert _recortar_sobreposicao_com_processos(pessoas, processos) == [(0, 15)]
+    assert _recortar_sobreposicao(pessoas, processos) == [(0, 15)]
 
 
 def test_anonimizar_texto_nao_corrompe_saida_quando_ner_se_sobrepoe_ao_processo(
@@ -220,3 +220,62 @@ def test_remapear_offsets_soma_delta_das_substituicoes_anteriores():
 
 def test_remapear_offsets_sem_substituicoes_retorna_offsets_inalterados():
     assert remapear_offsets([0, 10, 20], []) == [0, 10, 20]
+
+
+def test_cpf_e_substituido_por_token(db_session):
+    texto = "CPF 150.233.587-55 cadastrado no processo seletivo."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "150.233.587-55" not in resultado
+    assert "CPF_" in resultado
+
+
+def test_rg_e_substituido_por_token(db_session):
+    texto = "Portador do RG 28631510-6, compareceu à sessão."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "28631510-6" not in resultado
+    assert "RG_" in resultado
+
+
+def test_email_pessoal_e_substituido_por_token(db_session):
+    texto = "Contato: marcus.v.almeida@ufes.br para mais informações."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "marcus.v.almeida@ufes.br" not in resultado
+    assert "EMAIL_" in resultado
+
+
+def test_email_institucional_permanece_intacto(db_session):
+    texto = "Encaminhar dúvidas para secretaria.ct@ufes.br."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "secretaria.ct@ufes.br" in resultado
+    assert "EMAIL_" not in resultado
+
+
+def test_pessoa_colada_em_email_nao_corrompe_a_saida(db_session, monkeypatch):
+    # regressao do achado (d): o NER as vezes reconhece so um fragmento de
+    # nome dentro do local-part de um e-mail sem espaco (ex.: "v.almeida"
+    # dentro de "marcus.v.almeida@ufes.br"), produzindo token de PESSOA
+    # colado com o resto do e-mail cru em vez do e-mail inteiro anonimizado
+    texto = "Assinado eletronicamente por marcus.v.almeida@ufes.br em anexo."
+    inicio_email = texto.index("marcus.v.almeida@ufes.br")
+    monkeypatch.setattr(
+        cleaner,
+        "_achar_entidades_pessoa",
+        lambda _texto: [(inicio_email + len("marcus."), inicio_email + len("marcus.v.almeida"))],
+    )
+
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    assert "marcus.v.almeida@ufes.br" not in resultado
+    assert "PESSOA_" not in resultado
+    assert resultado.startswith("Assinado eletronicamente por EMAIL_")
+    assert resultado.endswith(" em anexo.")
+
+
+def test_processo_fora_do_prefixo_sipac_padrao_e_substituido(db_session):
+    # achado (f): RE_PROCESSO_SIPAC so pegava o prefixo 23068. (SIPAC-UFES);
+    # doc 462 do corpus real tem um protocolo Fala.BR/CGU (23546.) no mesmo
+    # formato NNNNN.NNNNNN/NNNN-NN que tambem precisa ser anonimizado
+    texto = "Protocolo 23546.071495/2021-22 registrado na ouvidoria."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "23546.071495/2021-22" not in resultado
+    assert "PROCESSO_" in resultado
