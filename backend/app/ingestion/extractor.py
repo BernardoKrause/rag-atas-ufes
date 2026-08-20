@@ -1,9 +1,12 @@
+import logging
 import re
 from pathlib import Path
 
 import fitz
 
 from app.ingestion._extenso import NUM_10_19, NUM_DEZENA, NUM_UNIDADE, ZERO, parse_cardinal, tokenizar
+
+logger = logging.getLogger(__name__)
 
 RE_HORA_COMPACTA = re.compile(r"(\d{1,2})[Hh](\d{2})")
 RE_HORA_HHMM = re.compile(r"(\d{1,2}):(\d{2})")
@@ -47,11 +50,19 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
     """Retorna o texto completo e, junto, o offset (indice no texto) onde
     cada pagina comeca — necessario pro segmentador (Parte 3) saber em que
     pagina do PDF cada item de pauta cai."""
-    doc = fitz.open(caminho_pdf)
+    fitz.TOOLS.mupdf_display_errors(False)
     try:
-        paginas_texto = [pagina.get_text() for pagina in doc]
+        doc = fitz.open(caminho_pdf)
+        try:
+            paginas_texto = [pagina.get_text() for pagina in doc]
+        finally:
+            doc.close()
     finally:
-        doc.close()
+        aviso = fitz.TOOLS.mupdf_warnings()
+        fitz.TOOLS.mupdf_display_errors(True)
+
+    if aviso:
+        logger.warning("MuPDF emitiu aviso ao extrair %s: %s", caminho_pdf, aviso)
 
     offsets = []
     offset_atual = 0

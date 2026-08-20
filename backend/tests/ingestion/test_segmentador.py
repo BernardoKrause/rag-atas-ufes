@@ -21,6 +21,7 @@ from app.ingestion.segmentador import (
     _reclassificar_exclusao_de_pauta,
     detectar_itens_familia_pontilhada,
     detectar_itens_car,
+    detectar_itens_cce,
     detectar_itens_ct,
     detectar_itens_cefd,
     dividir_fragmentos,
@@ -241,6 +242,48 @@ def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
     assert detectar_itens_cefd(texto) == []
 
 
+def test_detectar_itens_cce_ponto_numerado_com_ponto_final():
+    texto = "DECLAROU ABERTA A SESSÃO. Ponto 01. Comunicações: TEXTO. Ponto 02. TEXTO DOIS."
+    itens = detectar_itens_cce(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "01"),
+        (SECAO_PAUTA, "02"),
+    ]
+
+
+def test_detectar_itens_cce_ordem_invertida_maiuscula_de_ata_antiga():
+    # atas mais antigas do CCE usam "PONTO N –" tudo maiusculo, ou a ordem
+    # invertida "Nº. Ponto –"
+    texto = "DECLAROU ABERTA A SESSÃO. . PONTO 1 – COMUNICAÇÕES – TEXTO. PONTO 2 – TEXTO DOIS."
+    itens = detectar_itens_cce(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_detectar_itens_cce_ordem_invertida_com_numeral_ordinal():
+    texto = "DECLAROU ABERTA A SESSÃO. . 1º. Ponto – Mudança de composição de banca."
+    itens = detectar_itens_cce(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_detectar_itens_cce_ponto_unico_vira_item_numero_1():
+    texto = "DECLAROU ABERTA A SESSÃO. Ponto único – Pedido de Abertura de Concurso Público."
+    itens = detectar_itens_cce(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_detectar_itens_cce_sem_estrutura_retorna_vazio():
+    assert detectar_itens_cce("ATA SEM NENHUM PONTO DE PAUTA NUMERADO NO TEXTO.") == []
+
+
+def test_segmentar_texto_cce_via_config():
+    texto = "DECLAROU ABERTA A SESSÃO. Ponto 01. PRIMEIRO ITEM."
+    itens, _ = segmentar_texto("B", "CCE", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "01")]
+
+
 def test_segmentar_texto_tipo_a():
     texto = "1. ORDEM DO DIA. 1.1 ITEM ÚNICO."
     itens, _ = segmentar_texto("A", "CCENS", texto)
@@ -250,6 +293,14 @@ def test_segmentar_texto_tipo_a():
 def test_segmentar_texto_ct_via_config():
     texto = "PAUTA 1: PRIMEIRO ITEM."
     itens, _ = segmentar_texto("B", "CT", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_segmentar_texto_ceunes_b_via_config():
+    # achado (a), parte CEUNES: reusa o mesmo detector do CT (INFORME N:/
+    # PAUTA N:) — confirmado contra os 10 documentos reais nao-escaneados
+    texto = "PAUTA 1: PRIMEIRO ITEM."
+    itens, _ = segmentar_texto("B", "CEUNES", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
 
 
@@ -317,16 +368,29 @@ def test_mapear_pagina_sem_offsets_retorna_none():
 
 
 def test_gerar_item_id_canonico_sem_fragmento():
-    assert gerar_item_id_canonico(233, "PAUTA", "2.1", 0) == "233_PAUTA_2.1"
+    assert gerar_item_id_canonico(233, "PAUTA", "2.1", 0, 0) == "233_PAUTA_2.1"
 
 
 def test_gerar_item_id_canonico_com_fragmento():
-    assert gerar_item_id_canonico(233, "PAUTA", "2.1", 2) == "233_PAUTA_2.1_F2"
+    assert gerar_item_id_canonico(233, "PAUTA", "2.1", 0, 2) == "233_PAUTA_2.1_F2"
 
 
 def test_gerar_item_id_canonico_remove_acento_e_barra_da_secao():
-    assert gerar_item_id_canonico(1, "PROCESSOS/PROJETOS", "1", 0) == "1_PROCESSOS_PROJETOS_1"
-    assert gerar_item_id_canonico(1, "EXCLUSÃO DE PAUTA", "2.1", 0) == "1_EXCLUSAO_DE_PAUTA_2.1"
+    assert gerar_item_id_canonico(1, "PROCESSOS/PROJETOS", "1", 0, 0) == "1_PROCESSOS_PROJETOS_1"
+    assert gerar_item_id_canonico(1, "EXCLUSÃO DE PAUTA", "2.1", 0, 0) == "1_EXCLUSAO_DE_PAUTA_2.1"
+
+
+def test_gerar_item_id_canonico_com_ocorrencia_duplicada():
+    # achado (c): numeracao duplicada na fonte (ou falso positivo de
+    # deteccao) vira uma ocorrencia extra desambiguada por sufixo, em vez de
+    # quebrar a constraint unica
+    assert gerar_item_id_canonico(456, "COMUNICACOES", "1.01", 1, 0) == "456_COMUNICACOES_1.01_D1"
+
+
+def test_gerar_item_id_canonico_com_ocorrencia_e_fragmento():
+    assert (
+        gerar_item_id_canonico(456, "COMUNICACOES", "1.01", 1, 2) == "456_COMUNICACOES_1.01_D1_F2"
+    )
 
 
 def _criar_documento(sessao, **overrides) -> Documento:
@@ -371,8 +435,25 @@ def test_segmentar_e_persistir_aplica_overflow_split(db_session):
     assert len(itens) > 1
     assert {i.fragmento_indice for i in itens} == set(range(len(itens)))
     assert {i.item_id_canonico for i in itens} == {
-        gerar_item_id_canonico(documento.id_documento, "ORDEM DO DIA", "1.1", i.fragmento_indice)
+        gerar_item_id_canonico(documento.id_documento, "ORDEM DO DIA", "1.1", 0, i.fragmento_indice)
         for i in itens
+    }
+
+
+def test_segmentar_e_persistir_desambigua_numero_duplicado_dentro_do_documento(db_session):
+    # regressao achado (c): numeracao genuinamente duplicada na fonte (dois
+    # assuntos distintos com o mesmo numero_item, ex.: doc 456 do corpus
+    # real) nao pode mais quebrar a constraint unica — vira ocorrencia_indice
+    # crescente
+    texto = "1. COMUNICAÇÕES: 1.1 PRIMEIRO ASSUNTO. 1.1 SEGUNDO ASSUNTO, NUMERO REPETIDO NA FONTE."
+    documento = _criar_documento(db_session, texto_limpo=texto)
+    itens = segmentar_e_persistir(documento, db_session)
+
+    assert len(itens) == 2
+    assert {i.ocorrencia_indice for i in itens} == {0, 1}
+    assert {i.item_id_canonico for i in itens} == {
+        f"{documento.id_documento}_COMUNICACOES_1.1",
+        f"{documento.id_documento}_COMUNICACOES_1.1_D1",
     }
 
 

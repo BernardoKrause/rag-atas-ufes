@@ -18,6 +18,9 @@ class StatusAprovacao(str, enum.Enum):
 class TipoEntidade(str, enum.Enum):
     PESSOA = "pessoa"
     PROCESSO = "processo"
+    CPF = "cpf"
+    RG = "rg"
+    EMAIL = "email"
 
 
 class Documento(Base):

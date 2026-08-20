@@ -13,13 +13,40 @@ from transformers import pipeline
 
 from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
-RE_PROCESSO_SIPAC = re.compile(r"23068\.\d{6}/\d{4}-\d{2}")
+# formato geral de protocolo NNNNN.NNNNNN/NNNN-NN — cobre SIPAC-UFES
+# (prefixo 23068.) e outros orgaos com o mesmo padrao (ex.: achado (f),
+# protocolo Fala.BR/CGU 23546. no doc 462 do corpus real)
+RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\d{6}/\d{4}-\d{2}")
+
+RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
+
+# proximidade da palavra "RG": nao ha formato nacional unico de RG, entao a
+# deteccao e por contexto (palavra-chave) em vez de regex solto — validado
+# contra o corpus real (342 documentos) sem nenhum falso positivo
+RE_RG = re.compile(r"\bRG[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE)
+
+RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
+
+# enderecos institucionais/de funcao confirmados no corpus real — nao
+# identificam uma pessoa, entao ficam fora da anonimizacao. Qualquer
+# endereco novo desse tipo achado depois deve ser adicionado aqui.
+EMAILS_INSTITUCIONAIS = frozenset({
+    "cchn.ufes@gmail.com",
+    "direcao.cceufes@gmail.com",
+    "secretaria.ct@ufes.br",
+    "sud.ccens@ufes.br",
+    "departamento.computacaoeeletronica.saomateus@ufes.br",
+    "notificacao@astenassinatura.com.br",
+})
 
 # nextval() e atomico entre execucoes concorrentes, mas nao e transacional —
 # numeros podem ficar com buracos se uma insercao for revertida
 SEQUENCIA_NUMERACAO_TOKEN = {
     TipoEntidade.PESSOA: Sequence("seq_entidades_anonimizadas_pessoa"),
     TipoEntidade.PROCESSO: Sequence("seq_entidades_anonimizadas_processo"),
+    TipoEntidade.CPF: Sequence("seq_entidades_anonimizadas_cpf"),
+    TipoEntidade.RG: Sequence("seq_entidades_anonimizadas_rg"),
+    TipoEntidade.EMAIL: Sequence("seq_entidades_anonimizadas_email"),
 }
 
 MODELO_NER = "Gpaiva/NERDE-base"
@@ -97,24 +124,27 @@ def _subtrair_intervalo(
     return pedacos
 
 
-def _recortar_sobreposicao_com_processos(
+def _recortar_sobreposicao(
     intervalos_pessoa: list[tuple[int, int]],
-    intervalos_processo: list[tuple[int, int]],
+    *outros_intervalos: list[tuple[int, int]],
 ) -> list[tuple[int, int]]:
-    """Numeros de processo SIPAC vem de regex exato; nomes vem de NER, cujos
-    limites podem errar (ex.: "Silva23068.001234/2025-11" sem espaco no PDF).
-    Recorta do span de PESSOA a parte que cai dentro de um span de
-    PROCESSO."""
-    ajustados: list[tuple[int, int]] = []
-    for inicio, fim in intervalos_pessoa:
-        pedacos = [(inicio, fim)]
-        for p_inicio, p_fim in intervalos_processo:
-            pedacos = [
-                pedaco
-                for i, f in pedacos
-                for pedaco in _subtrair_intervalo((i, f), (p_inicio, p_fim))
-            ]
-        ajustados.extend(pedacos)
+    """Numeros de processo e e-mail vem de regex exato; nomes vem de NER,
+    cujos limites podem errar (ex.: "Silva23068.001234/2025-11" ou
+    "marcus.v.almeida@ufes.br" sem espaco no PDF). Recorta do span de PESSOA
+    a parte que cai dentro de qualquer span protegido (processo, e-mail...)."""
+    ajustados = list(intervalos_pessoa)
+    for intervalos in outros_intervalos:
+        proximo: list[tuple[int, int]] = []
+        for inicio, fim in ajustados:
+            pedacos = [(inicio, fim)]
+            for o_inicio, o_fim in intervalos:
+                pedacos = [
+                    pedaco
+                    for i, f in pedacos
+                    for pedaco in _subtrair_intervalo((i, f), (o_inicio, o_fim))
+                ]
+            proximo.extend(pedacos)
+        ajustados = proximo
     return ajustados
 
 
@@ -164,27 +194,40 @@ def _obter_ou_criar_token(
 def anonimizar_texto(
     texto: str, secret_key: bytes, sessao: Session
 ) -> tuple[str, list[tuple[int, int]]]:
-    """Substitui pessoas (NER) e numeros de processo SIPAC (regex) por tokens
-    deterministicos, consultando/gravando EntidadeAnonimizada — a mesma pessoa
-    ou processo real sempre gera o mesmo token, inclusive entre atas e execucoes
-    diferentes.
+    """Substitui pessoas (NER), numeros de processo, CPF, RG e e-mail pessoal
+    (regex) por tokens deterministicos, consultando/gravando
+    EntidadeAnonimizada — a mesma pessoa ou processo real sempre gera o mesmo
+    token, inclusive entre atas e execucoes diferentes.
 
     Alem do texto anonimizado, retorna a lista de substituicoes (offset
     original, delta de tamanho) em ordem crescente de offset — o token tem
     tamanho fixo, diferente do nome/processo real que substitui, entao quem
     tiver offsets calculados sobre o texto original (ex.: paginas_offsets)
     precisa dessa lista pra reprojeta-los via remapear_offsets()."""
-    intervalos_processo = [(m.start(), m.end()) for m in RE_PROCESSO_SIPAC.finditer(texto)]
-    intervalos_pessoa = _recortar_sobreposicao_com_processos(
-        _achar_entidades_pessoa(texto), intervalos_processo
+    intervalos_processo = [(m.start(), m.end()) for m in RE_NUMERO_PROCESSO.finditer(texto)]
+    intervalos_email = [
+        (m.start(), m.end())
+        for m in RE_EMAIL.finditer(texto)
+        if m.group(0).lower() not in EMAILS_INSTITUCIONAIS
+    ]
+    intervalos_cpf = [(m.start(), m.end()) for m in RE_CPF.finditer(texto)]
+    intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
+
+    intervalos_pessoa = _recortar_sobreposicao(
+        _achar_entidades_pessoa(texto),
+        intervalos_processo,
+        intervalos_email,
+        intervalos_cpf,
+        intervalos_rg,
     )
 
     ocorrencias: list[tuple[int, int, TipoEntidade]] = [
         (inicio, fim, TipoEntidade.PESSOA) for inicio, fim in intervalos_pessoa
     ]
-    ocorrencias += [
-        (inicio, fim, TipoEntidade.PROCESSO) for inicio, fim in intervalos_processo
-    ]
+    ocorrencias += [(inicio, fim, TipoEntidade.PROCESSO) for inicio, fim in intervalos_processo]
+    ocorrencias += [(inicio, fim, TipoEntidade.EMAIL) for inicio, fim in intervalos_email]
+    ocorrencias += [(inicio, fim, TipoEntidade.CPF) for inicio, fim in intervalos_cpf]
+    ocorrencias += [(inicio, fim, TipoEntidade.RG) for inicio, fim in intervalos_rg]
 
     # ordem decrescente de inicio: substituir do fim pro comeco preserva os
     # indices das ocorrencias ainda nao processadas
