@@ -314,21 +314,56 @@ def detectar_itens_cce(texto_normalizado: str) -> list[ItemDetectado]:
 # escolha entre os dois formatos precisa acontecer dentro da funcao, pelo
 # conteudo do texto (mesmo estilo do RE_ITEM_CCE, que ja lida com variacao
 # de formato entre atas antigas/novas dentro de uma unica funcao).
-RE_SECAO_CE_D = re.compile(r"(INFORMES?|PAUTA)[:.]", re.IGNORECASE)
+# Sem re.IGNORECASE e com \b: cabecalho real e sempre "INFORMES:"/"PAUTA."
+# em CAIXA ALTA nos dois docs reais (463/469) — texto narrativo comum tipo
+# "Retirado de pauta." / "Retirado de Pauta." (ambos confirmados nos dois
+# docs reais) bate em minuscula/capitalizado mas nao em caixa alta, entao
+# case-sensitive sozinho ja filtra; \b e so uma guarda extra de fronteira.
+RE_SECAO_CE_D = re.compile(r"\b(INFORMES?|PAUTA)[:.]")
 # mesma guarda de aspas dos outros detectores por regex de item, mais guarda
 # de barra: sem ela, notacao de data/semestre "DD/MM." ou "AAAA/N." (ex.
 # "2021/2. A professora...", "02/11. Ferias...") bate igualzinho no padrao
 # digito-ponto-espaco-maiuscula e vira item fantasma — confirmado nos dois
-# docs reais (463/469) durante a validacao empirica deste detector.
+# docs reais (463/469) durante a validacao empirica deste detector. A guarda
+# de aspas so cobre o caractere imediatamente antes do digito, nao o span
+# inteiro entre aspas — uma lista numerada citada dentro de uma unica frase
+# entre aspas (ex. doc 463, item 3 da PAUTA: “1. Responder... 2. Registrar
+# no campo de sugestões...”) ainda pode gerar um item fantasma a partir do
+# segundo numero em diante, ja que so o primeiro vem colado na aspa de
+# abertura. Achado real, aceito como limitacao conhecida (ocorrencia unica
+# nos dois docs, blast radius contido, nao gera colisao de PK gracas ao
+# ocorrencia_indice em segmentar_e_persistir).
 # O lookahead aceita maiuscula direto (item comum) OU numero ordinal seguido
 # de "o"/"a" (ex. "5a Conferencia...") — tambem confirmado em doc 463, onde
-# um item real comeca com ordinal em vez de maiuscula.
-RE_ITEM_CE_D = re.compile(r'(?<![\d."“/])(\d{1,2})\.\s+(?=[A-ZÀ-Ú]|\d{1,2}[ºª])')
+# um item real comeca com ordinal em vez de maiuscula. \s* (nao \s+): doc
+# 463 item 4 e "4.Metodologia..." sem espaco (artefato de extracao de PDF,
+# confirmado via scan de \d{1,2}\.[A-ZÀ-Ú] nos dois docs reais) — a guarda
+# contra numeracao de dois niveis ("4.1") continua vindo do lookbehind (nao
+# pode ser precedido de digito/ponto/aspas/barra) e do proprio requisito de
+# maiuscula/ordinal logo em seguida, nao do espaco em si.
+RE_ITEM_CE_D = re.compile(r'(?<![\d."“/])(\d{1,2})\.\s*(?=[A-ZÀ-Ú]|\d{1,2}[ºª])')
 
 _SECAO_CE_D = {"INFORME": SECAO_INFORMES, "INFORMES": SECAO_INFORMES, "PAUTA": SECAO_PAUTA}
 
 
 def detectar_itens_ce_d(texto_normalizado: str) -> list[ItemDetectado]:
+    # tenta primeiro o formato pontilhado padrao (mesmo usado pelo resto da
+    # familia B/C/D): e a fixture real da 3a reuniao (mesmo colegiado, ata
+    # mais antiga) que define a ordem seguranca aqui — o resultado NAO-VAZIO
+    # de detectar_itens_familia_pontilhada e o sinal confiavel de "formato
+    # antigo"; um resultado vazio do detector novo (RE_SECAO_CE_D/RE_ITEM_CE_D)
+    # NAO e confiavel como sinal equivalente pro formato novo, porque
+    # cabecalhos de secao pontilhados ("2. EXPEDIENTE:", "3. INFORMES:", "4.
+    # PAUTA:") tambem casam parcialmente no RE_ITEM_CE_D e podem produzir
+    # itens espurios em vez de lista vazia dependendo de onde caem os
+    # limites de secao — confirmado por review: bastou um "5. PALAVRA
+    # LIVRE:" extra na mesma fixture pra fazer o detector novo devolver 1
+    # item espurio em vez de lista vazia, o que quebraria esse discriminador
+    # se a ordem fosse invertida.
+    itens_pontilhados = detectar_itens_familia_pontilhada(texto_normalizado)
+    if itens_pontilhados:
+        return itens_pontilhados
+
     secoes = list(RE_SECAO_CE_D.finditer(texto_normalizado))
     itens = []
     for i, secao_match in enumerate(secoes):
@@ -354,13 +389,7 @@ def detectar_itens_ce_d(texto_normalizado: str) -> list[ItemDetectado]:
                     texto=texto_normalizado[inicio_item:fim_item].strip(),
                 )
             )
-    if itens:
-        return itens
-    # nenhuma secao/item do formato novo bateu — ata do formato pontilhado
-    # antigo do mesmo colegiado (fixture real confirmou: familia_pontilhada
-    # devolve 0 pros docs do formato novo e nao-zero pro formato antigo,
-    # entao usar "vazio" como sinal de formato errado e seguro aqui)
-    return detectar_itens_familia_pontilhada(texto_normalizado)
+    return itens
 
 
 # (tipo_orgao, centro) -> funcao detectora de itens sobre o texto normalizado.

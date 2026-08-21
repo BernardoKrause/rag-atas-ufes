@@ -11,6 +11,7 @@ from app.ingestion.segmentador import (
     SECAO_EXPEDIENTE,
     SECAO_INFORMES,
     SECAO_ORDEM_DO_DIA,
+    SECAO_PALAVRA_LIVRE,
     SECAO_PAUTA,
     SECAO_PROCESSOS_PROJETOS,
     ItemDetectado,
@@ -393,15 +394,88 @@ def test_ce_d_item_pode_comecar_com_numero_ordinal():
     ]
 
 
-def test_ce_d_cai_para_familia_pontilhada_quando_formato_novo_nao_bate():
+def test_ce_d_tenta_familia_pontilhada_primeiro_e_e_robusto_a_secao_extra():
     # achado real: ata_da_3a_reuniao_ordinaria_colped.pdf (fixture real, mesmo
     # colegiado dos docs 463/469) usa o formato pontilhado antigo ("1. APRE-
     # CIACAO DE ATA: 1.1 ..."), sem "INFORMES:"/"PAUTA." sem numero — se
     # ("D","CE") virasse so detectar_itens_ce_d sem fallback, essa fixture
-    # real ia quebrar de 12 itens pra 0 (regressao pega pela suite completa)
-    texto = "1. APRECIAÇÃO DE ATA: 1.1. TEXTO DO ITEM PONTILHADO SOBRE A ATA."
+    # real ia quebrar de 12 itens pra 0.
+    #
+    # A ordem em que os dois formatos sao tentados importa: tentar o formato
+    # novo primeiro e cair pro pontilhado so quando o novo devolve vazio
+    # parece seguro isoladamente, mas nao e — cabecalhos pontilhados como
+    # "2. EXPEDIENTE:", "3. INFORMES:", "4. PAUTA:" batem parcialmente em
+    # RE_ITEM_CE_D (o "N." no comeco) e podem produzir itens espurios em vez
+    # de lista vazia dependendo de onde os limites de RE_SECAO_CE_D caem,
+    # entao "resultado vazio do formato novo" nao e um sinal confiavel de
+    # "formato antigo". Por isso a ordem certa e a inversa: tenta o
+    # pontilhado primeiro (resultado NAO-vazio dele e que e o sinal
+    # confiavel), so cai pro formato novo se o pontilhado vier vazio.
+    #
+    # Este teste replica a forma real da fixture (3 secoes pontilhadas) mais
+    # uma 4a secao pontilhada extra no final ("5. PALAVRA LIVRE:") pra
+    # provar que a ordem certa nao quebra nesse cenario.
+    texto = (
+        "1. APRECIAÇÃO DE ATA: 1.1. Ata da Segunda Reunião Ordinária. "
+        "2. EXPEDIENTE: 2.1. Exclusão de ponto de pauta. "
+        "3. INFORMES: 3.1. Situação referente ao atendimento. "
+        "4. PAUTA: 4.1. Apreciação de solicitação. "
+        "5. PALAVRA LIVRE: 5.1. Primeiro ponto de palavra livre. "
+        "5.2. Segundo ponto de palavra livre."
+    )
     itens = detectar_itens_ce_d(texto)
-    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_APROVACAO_ATA, "1.1"),
+        (SECAO_EXPEDIENTE, "2.1"),
+        (SECAO_INFORMES, "3.1"),
+        (SECAO_PAUTA, "4.1"),
+        (SECAO_PALAVRA_LIVRE, "5.1"),
+        (SECAO_PALAVRA_LIVRE, "5.2"),
+    ]
+
+
+def test_ce_d_secao_ignora_narrativa_com_a_palavra_pauta_em_minuscula():
+    # achado real nos dois docs (463 e 469): a frase comum "Retirado de
+    # pauta." / "Retirado de Pauta." aparece varias vezes como texto
+    # narrativo comum (nao cabecalho de secao) e batia em RE_SECAO_CE_D
+    # quando o regex era case-insensitive, cortando o item real ali no meio
+    # e criando uma "secao" fantasma. Cabecalho real e sempre em CAIXA ALTA
+    # ("INFORMES:", "PAUTA.") nos dois docs — o fix (case-sensitive) so deixa
+    # passar exatamente essa forma.
+    texto = (
+        "PAUTA. 1. Primeiro item da pauta, retirado de pauta. "
+        "2. Segundo item, com sucesso. Retirado de Pauta. Nada mais a tratar."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+    # o item 2 deve conter a frase de encerramento inteira, sem cortar em
+    # "Retirado de Pauta." como uma nova secao fantasma
+    assert "Nada mais a tratar" in itens[1].texto
+
+
+def test_ce_d_item_sem_espaco_apos_o_ponto():
+    # achado real doc 463: item 4 da PAUTA e "4.Metodologia de trabalho..."
+    # sem espaco (artefato de extracao de PDF) — confirmado via scan
+    # completo dos dois docs reais por \d{1,2}\.[A-ZÀ-Ú] (unica ocorrencia)
+    texto = "PAUTA. 1. PRIMEIRO ITEM. 2.Segundo item sem espaço após o ponto."
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_ce_d_item_sem_espaco_nao_confunde_numeracao_de_dois_niveis():
+    # a guarda contra "4.1" (nivel-dois da familia pontilhada) nao vem do
+    # \s+ (agora \s*), vem do lookbehind (nao pode ser precedido de digito)
+    # + do requisito de maiuscula/ordinal logo em seguida — "4.1 Aprovacao"
+    # e "4.1. Aprovacao" nao devem virar item nenhum aqui
+    texto = "PAUTA. 4.1 Aprovação de item de nível dois. 4.1. Aprovação de item de nível dois de novo."
+    itens = detectar_itens_ce_d(texto)
+    assert itens == []
 
 
 def test_segmentar_texto_cce_via_config():
