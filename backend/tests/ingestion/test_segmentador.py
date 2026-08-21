@@ -304,6 +304,24 @@ def test_segmentar_texto_ceunes_b_via_config():
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
 
 
+def test_ceunes_tipo_a_usa_mesmo_formato_informe_pauta_do_tipo_b():
+    # achado do gap de 77 docs: CEUNES tipo A usa o mesmo formato "INFORME N:"
+    # / "PAUTA N:" do tipo B, mas nao tinha entrada de dispatch propria —
+    # caia no fallback ("A","*") -> familia_pontilhada, que nao bate nesse
+    # formato (confirmado rodando RE_ITEM_CT contra os 53 docs reais nao
+    # escaneados do grupo)
+    texto = (
+        "HAVENDO NÚMERO LEGAL DE MEMBROS, DECLAROU ABERTA A SESSÃO. "
+        "INFORME 1: O chefe do departamento informou sobre o edital de concurso. "
+        "INFORME 2: Foi comunicada a data da próxima reunião."
+    )
+    itens, _ = segmentar_texto("A", "CEUNES", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
 def test_segmentar_texto_car_via_config():
     texto = "INFORMES: PAUTA: 1) PRIMEIRO ITEM."
     itens, _ = segmentar_texto("B", "CAR", texto)

@@ -309,6 +309,7 @@ def detectar_itens_cce(texto_normalizado: str) -> list[ItemDetectado]:
 # entrada aqui levanta ValueError explicito, nunca falha silenciosamente.
 CONFIG_VARIANTES: dict[tuple[str, str], Callable[[str], list[ItemDetectado]]] = {
     ("A", "*"): detectar_itens_familia_pontilhada,
+    ("A", "CEUNES"): detectar_itens_ct,
     ("B", "CT"): detectar_itens_ct,
     ("B", "CAR"): detectar_itens_car,
     ("B", "CEFD"): detectar_itens_cefd,
