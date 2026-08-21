@@ -288,6 +288,16 @@ def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
     assert detectar_itens_cefd(texto) == []
 
 
+def test_cefd_aceita_ponto_final_em_vez_de_dois_pontos_no_cabecalho():
+    # doc 438 do corpus real (CEFD): "PROCESSOS/PROJETOS. [1] Solicitação..."
+    # em vez de "PROCESSOS/PROJETOS: [1] ..." — RE_SECAO_CEFD so aceitava ":"
+    texto = "PROCESSOS/PROJETOS. [1] SOLICITAÇÃO DE AFASTAMENTO PARA DOUTORADO."
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PROCESSOS_PROJETOS, "1"),
+    ]
+
+
 def test_detectar_itens_cce_ponto_numerado_com_ponto_final():
     texto = "DECLAROU ABERTA A SESSÃO. Ponto 01. Comunicações: TEXTO. Ponto 02. TEXTO DOIS."
     itens = detectar_itens_cce(texto)

@@ -225,7 +225,7 @@ def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
 # (EM PAUTA em vez de PAUTA; PROCESSOS/PROJETOS nao tem equivalente em
 # nenhum outro variant) — descoberto na investigacao empirica da pendencia 3
 RE_SECAO_CEFD = re.compile(
-    r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE):"
+    r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE)[:.]"
 )
 # mesma guarda de aspas do RE_ITEM_PONTILHADO/RE_ITEM_CT
 RE_ITEM_CEFD = re.compile(r'(?<![\d"“])\[(\d{1,2})\](?!\d)(?!["”])')
