@@ -336,6 +336,46 @@ def test_detectar_itens_cce_sem_estrutura_retorna_vazio():
     assert detectar_itens_cce("ATA SEM NENHUM PONTO DE PAUTA NUMERADO NO TEXTO.") == []
 
 
+def test_cce_aceita_subitem_decimal_ponto_n_m():
+    # doc 683 do corpus real: "Ponto 8" e seguido por subitens soltos "8.1"/
+    # "8.2" (sem a palavra "Ponto" repetida antes — nao viram item aqui, e
+    # isso ja era assim antes desta correcao) e, mais adiante, por cabecalhos
+    # reais e distintos "Ponto 8.3"/"Ponto 8.4", com a palavra "Ponto"
+    # repetida e o numero decimal colado ao "8". RE_ITEM_CCE descartava a
+    # parte decimal (backtracking do "\.?" opcional contra a lookahead
+    # (?!\d) — ver nota acima de RE_ITEM_CCE), colidindo "8", "8.3" e "8.4"
+    # sob numero_item="8".
+    texto = (
+        "Ponto 8 – Homologações: 8.1 – Proc. Nº PROCESSO_3479 – Homologação "
+        "da Eleição de Chefe e Subchefe do Departamento de Física. . 8.2 – "
+        "Concurso Público para Professor Adjunto para a área de Química – "
+        "Retirado de pauta. . Ponto 8.3 – Prot. Nº PROCESSO_3478 - Alteração "
+        "da Composição da Banca para Concurso de professor Visitante "
+        "Estrangeiro. . Ponto 8.4 – Homologação do Termo de Cooperação "
+        "Petrobrás x UFES."
+    )
+    itens = detectar_itens_cce(texto)
+    assert [i.numero_item for i in itens] == ["8", "8.3", "8.4"]
+
+
+def test_cce_ponto_repetido_sem_decimal_nao_captura_subitem_solto():
+    # docs 643/668/682 do corpus real: "Ponto N" e repetido literalmente,
+    # cada ocorrencia seguida (com palavras entre elas) por um subitem solto
+    # "N.M" sem a palavra "Ponto" antes dele (ex. "Ponto 3 – Afastamentos:
+    # 3.1 ... Ponto 3 – Afastamento: 3.6 ..."). Isso NAO e o bug de
+    # truncamento decimal — RE_ITEM_CCE exige "PONTO" literal imediatamente
+    # antes do numero — entao o regex mais permissivo nao pode comecar a
+    # colar esses subitens soltos ao numero capturado; cada ocorrencia de
+    # "Ponto 3" deve continuar gerando so "3".
+    texto = (
+        "Ponto 3 – Afastamentos: 3.1 – Processo Nº PROCESSO_3385 – texto "
+        "um. 3.2 – Processo Nº PROCESSO_3384 – texto dois. . Ponto 3 – "
+        "Afastamento: 3.6 – Processo Nº PROCESSO_3380 – texto seis."
+    )
+    itens = detectar_itens_cce(texto)
+    assert [i.numero_item for i in itens] == ["3", "3"]
+
+
 def test_ce_d_informes_com_numeracao_de_nivel_unico():
     texto = (
         "HAVENDO QUÓRUM LEGAL A COORDENADORA INICIOU A REUNIÃO. "

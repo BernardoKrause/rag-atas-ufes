@@ -276,9 +276,21 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
 # em vez da guarda de aspas usada nos outros detectores (aqui a citacao
 # narrativa de um ponto ja votado nao usa aspas, ver achado (c) CCE — tratado
 # via ocorrencia_indice em segmentar_e_persistir, nao aqui).
+# O grupo numerico aceita uma parte decimal opcional "(?:\.\d{1,2})?" porque
+# atas reais (doc 683 do corpus) tem cabecalhos proprios "Ponto 8.3"/"Ponto
+# 8.4" com a palavra "Ponto" repetida antes de cada subitem — sem o grupo
+# decimal, o "\.?" sozinho nunca consome o ponto (faria a lookahead (?!\d)
+# falhar contra o digito seguinte), entao o match parava em "8" e colidia
+# "Ponto 8"/"Ponto 8.3"/"Ponto 8.4" sob numero_item="8". O grupo decimal so
+# ativa quando ha digito colado logo apos o ponto — nao afeta "Ponto 4."
+# de sentenca comum nem os casos, tambem reais (docs 643/668/682), em que
+# "Ponto N" e repetido e o subitem "N.M" aparece solto mais adiante SEM a
+# palavra "Ponto" antes (ali o "PONTO" literal nunca fica colado ao ".M",
+# entao o regex so casa o "N" de cada vez — colisao genuina de repeticao,
+# nao truncamento decimal, ja tratada via ocorrencia_indice).
 RE_ITEM_CCE = re.compile(
     r"(?<!\d)(?:"
-    r"PONTO\s+(?:(\d{1,2})|(ÚNICO))\.?"
+    r"PONTO\s+(?:(\d{1,2}(?:\.\d{1,2})?)|(ÚNICO))\.?"
     r"|(\d{1,2})[ºo°]\.?\s*PONTO"
     r")(?!\d)",
     re.IGNORECASE,
