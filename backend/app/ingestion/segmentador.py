@@ -304,6 +304,65 @@ def detectar_itens_cce(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
+# CE tipo D (Colegiado de Pedagogia) nao numera a secao (ao contrario da
+# familia pontilhada) e usa item de nivel unico ("1. Texto", nao "1.1") sem
+# vinculo com nenhum numero de secao — descoberto na investigacao empirica
+# do gap de 77 docs. Mas o MESMO colegiado tambem tem atas mais antigas (ex.
+# fixture da 3a reuniao, formato pontilhado "1. APRECIACAO DE ATA: 1.1 ...")
+# que usam o formato pontilhado padrao — ("D","CE") nao e um variant unico,
+# e o dict de dispatch so tem uma chave por (tipo_orgao, centro), entao a
+# escolha entre os dois formatos precisa acontecer dentro da funcao, pelo
+# conteudo do texto (mesmo estilo do RE_ITEM_CCE, que ja lida com variacao
+# de formato entre atas antigas/novas dentro de uma unica funcao).
+RE_SECAO_CE_D = re.compile(r"(INFORMES?|PAUTA)[:.]", re.IGNORECASE)
+# mesma guarda de aspas dos outros detectores por regex de item, mais guarda
+# de barra: sem ela, notacao de data/semestre "DD/MM." ou "AAAA/N." (ex.
+# "2021/2. A professora...", "02/11. Ferias...") bate igualzinho no padrao
+# digito-ponto-espaco-maiuscula e vira item fantasma — confirmado nos dois
+# docs reais (463/469) durante a validacao empirica deste detector.
+# O lookahead aceita maiuscula direto (item comum) OU numero ordinal seguido
+# de "o"/"a" (ex. "5a Conferencia...") — tambem confirmado em doc 463, onde
+# um item real comeca com ordinal em vez de maiuscula.
+RE_ITEM_CE_D = re.compile(r'(?<![\d."“/])(\d{1,2})\.\s+(?=[A-ZÀ-Ú]|\d{1,2}[ºª])')
+
+_SECAO_CE_D = {"INFORME": SECAO_INFORMES, "INFORMES": SECAO_INFORMES, "PAUTA": SECAO_PAUTA}
+
+
+def detectar_itens_ce_d(texto_normalizado: str) -> list[ItemDetectado]:
+    secoes = list(RE_SECAO_CE_D.finditer(texto_normalizado))
+    itens = []
+    for i, secao_match in enumerate(secoes):
+        secao = _SECAO_CE_D[secao_match.group(1).upper()]
+        inicio_corpo = secao_match.end()
+        fim_corpo = secoes[i + 1].start() if i + 1 < len(secoes) else len(texto_normalizado)
+        corpo = texto_normalizado[inicio_corpo:fim_corpo]
+
+        matches_item = list(RE_ITEM_CE_D.finditer(corpo))
+        for j, item_match in enumerate(matches_item):
+            inicio_item = inicio_corpo + item_match.start()
+            fim_item = (
+                inicio_corpo + matches_item[j + 1].start()
+                if j + 1 < len(matches_item)
+                else fim_corpo
+            )
+            itens.append(
+                ItemDetectado(
+                    secao=secao,
+                    numero_item=item_match.group(1),
+                    inicio=inicio_item,
+                    fim=fim_item,
+                    texto=texto_normalizado[inicio_item:fim_item].strip(),
+                )
+            )
+    if itens:
+        return itens
+    # nenhuma secao/item do formato novo bateu — ata do formato pontilhado
+    # antigo do mesmo colegiado (fixture real confirmou: familia_pontilhada
+    # devolve 0 pros docs do formato novo e nao-zero pro formato antigo,
+    # entao usar "vazio" como sinal de formato errado e seguro aqui)
+    return detectar_itens_familia_pontilhada(texto_normalizado)
+
+
 # (tipo_orgao, centro) -> funcao detectora de itens sobre o texto normalizado.
 # Mesmo estilo dict-driven de CENTRO_CAMPUS em extractor.py — variant sem
 # entrada aqui levanta ValueError explicito, nunca falha silenciosamente.
@@ -319,6 +378,7 @@ CONFIG_VARIANTES: dict[tuple[str, str], Callable[[str], list[ItemDetectado]]] = 
     ("B", "CEUNES"): detectar_itens_ct,
     ("B", "CCE"): detectar_itens_cce,
     ("C", "*"): detectar_itens_familia_pontilhada,
+    ("D", "CE"): detectar_itens_ce_d,
     ("D", "*"): detectar_itens_familia_pontilhada,
 }
 

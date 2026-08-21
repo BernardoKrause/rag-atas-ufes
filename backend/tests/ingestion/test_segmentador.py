@@ -22,6 +22,7 @@ from app.ingestion.segmentador import (
     detectar_itens_familia_pontilhada,
     detectar_itens_car,
     detectar_itens_cce,
+    detectar_itens_ce_d,
     detectar_itens_ct,
     detectar_itens_cefd,
     dividir_fragmentos,
@@ -332,6 +333,75 @@ def test_detectar_itens_cce_ponto_unico_vira_item_numero_1():
 
 def test_detectar_itens_cce_sem_estrutura_retorna_vazio():
     assert detectar_itens_cce("ATA SEM NENHUM PONTO DE PAUTA NUMERADO NO TEXTO.") == []
+
+
+def test_ce_d_informes_com_numeracao_de_nivel_unico():
+    texto = (
+        "HAVENDO QUÓRUM LEGAL A COORDENADORA INICIOU A REUNIÃO. "
+        "INFORMES: 1. OFÍCIO CIRCULAR Nº 6/2021 SOBRE ENSINO HÍBRIDO. "
+        "2. FÉRIAS DA COORDENADORA."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
+def test_ce_d_pauta_com_numeracao_de_nivel_unico():
+    texto = (
+        "PAUTA. 1. APRECIAÇÃO DA ATA DA DÉCIMA REUNIÃO ORDINÁRIA. "
+        "2. HOMOLOGAÇÃO DO AD REFERENDUM."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_ce_d_dispatch_via_segmentar_texto():
+    texto = "INFORMES: 1. TEXTO DO INFORME UM."
+    itens, _ = segmentar_texto("D", "CE", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_INFORMES, "1")]
+
+
+def test_ce_d_nao_confunde_notacao_de_semestre_com_numero_de_item():
+    # achado real doc 469: "2021/2." bate no padrao digito-ponto-espaco-
+    # maiuscula do RE_ITEM_CE_D e criava um item fantasma duplicado "2"
+    # antes do item real seguinte, cortando o texto do item anterior no meio
+    texto = (
+        "INFORMES: 1. OFÍCIO CIRCULAR Nº 6/2021 SOBRE OFERTA NO SEMESTRE "
+        "LETIVO 2021/2. A PROFESSORA INFORMOU QUE NÃO OFERTARÁ DISCIPLINAS. "
+        "2. FÉRIAS DA COORDENADORA."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
+def test_ce_d_item_pode_comecar_com_numero_ordinal():
+    # achado real doc 463: item 4 comeca com "5ª Conferência..." — o
+    # lookahead so aceitava maiuscula direto apos "N. ", perdendo esse item
+    texto = "INFORMES: 1. PRIMEIRO INFORME SOBRE O EVENTO. 2. 5ª CONFERÊNCIA MUNICIPAL DE EDUCAÇÃO."
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
+def test_ce_d_cai_para_familia_pontilhada_quando_formato_novo_nao_bate():
+    # achado real: ata_da_3a_reuniao_ordinaria_colped.pdf (fixture real, mesmo
+    # colegiado dos docs 463/469) usa o formato pontilhado antigo ("1. APRE-
+    # CIACAO DE ATA: 1.1 ..."), sem "INFORMES:"/"PAUTA." sem numero — se
+    # ("D","CE") virasse so detectar_itens_ce_d sem fallback, essa fixture
+    # real ia quebrar de 12 itens pra 0 (regressao pega pela suite completa)
+    texto = "1. APRECIAÇÃO DE ATA: 1.1. TEXTO DO ITEM PONTILHADO SOBRE A ATA."
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
 
 
 def test_segmentar_texto_cce_via_config():
