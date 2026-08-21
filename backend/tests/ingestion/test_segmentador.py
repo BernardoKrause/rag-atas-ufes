@@ -97,6 +97,13 @@ def test_familia_pontilhada_secao_sem_itens_e_pulada():
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1.1")]
 
 
+def test_familia_pontilhada_aceita_pauta_no_plural():
+    # doc 588 do corpus real (CCAE): "3. PAUTAS: 3.1 - Documento avulso..."
+    texto = "1. EXPEDIENTE: NÃO HOUVE. 3. PAUTAS: 3.1 – DOCUMENTO AVULSO Nº 123."
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert (SECAO_PAUTA, "3.1") in [(i.secao, i.numero_item) for i in itens]
+
+
 def test_familia_pontilhada_ignora_numero_de_token_de_anonimizacao():
     # regressao: "PESSOA_12752." tem "52." no final, que sozinho parece um
     # inicio de secao numerada — nao pode disparar falso positivo

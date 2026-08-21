@@ -73,7 +73,7 @@ RE_SECAO_NUMERADA = re.compile(
     r"|(?P<comunicacoes>COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|COMUNICADOS?)"
     r"|(?P<expediente>EXPEDIENTE)"
     r"|(?P<ordem_do_dia>ORDEM DO DIA)"
-    r"|(?P<pauta>PAUTA)"
+    r"|(?P<pauta>PAUTAS?)"
     r"|(?P<informes>INFORMES?)"
     r"|(?P<palavra_livre>PALAVRA[\s-]LIVRE)"
     r")\s*[:.]",
