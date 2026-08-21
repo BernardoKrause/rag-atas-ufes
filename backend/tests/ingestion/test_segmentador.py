@@ -167,6 +167,22 @@ def test_familia_pontilhada_secao_sem_pontuacao_e_sem_subitem_fica_vazia():
     assert detectar_itens_familia_pontilhada(texto) == []
 
 
+def test_familia_pontilhada_nao_trunca_secao_em_numero_coincidente_no_meio_da_frase():
+    # regressao: com o terminador opcional, "43. COMUNICADOS" no meio de
+    # uma frase (numero de resolucao seguido por uma palavra de secao)
+    # nao pode ser lido como cabecalho de nova secao — so vale como
+    # cabecalho se um subitem "N.M" vier logo em seguida (lookahead)
+    texto = (
+        "1. EXPEDIENTE: 1.1 LEITURA DA RESOLUCAO 43. COMUNICADOS FORAM FEITOS "
+        "PELA DIRECAO. 1.2 OUTRO ITEM."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_EXPEDIENTE, "1.1"),
+        (SECAO_EXPEDIENTE, "1.2"),
+    ]
+
+
 def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
     texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
     resultado = _neutralizar_numeracao_de_margem(texto)
