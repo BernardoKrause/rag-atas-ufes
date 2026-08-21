@@ -144,6 +144,29 @@ def test_familia_pontilhada_cabecalho_de_secao_combinacao_nao_prevista_no_alias(
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
 
 
+def test_familia_pontilhada_aceita_secao_sem_pontuacao_antes_do_subitem():
+    # docs 609/611/612/613/600/603/607 do corpus real (CCAE): cabecalho de
+    # secao vai direto pro subitem, sem ":" nem "." depois da palavra da
+    # secao — ex. doc 613: "1. EXPEDIENTE Não houve. 2. ORDEM DO DIA 2.1
+    # Aprovação do Calendário..."
+    texto = (
+        "1. EXPEDIENTE NÃO HOUVE. "
+        "2. ORDEM DO DIA 2.1 APROVAÇÃO DO CALENDÁRIO DE REUNIÕES."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_ORDEM_DO_DIA, "2.1"),
+    ]
+
+
+def test_familia_pontilhada_secao_sem_pontuacao_e_sem_subitem_fica_vazia():
+    # secao sem numeracao propria (ex.: "EXPEDIENTE" sem nada a tratar) nao
+    # deve gerar item nenhum — mesmo edge case ja documentado em
+    # detectar_itens_car
+    texto = "1. EXPEDIENTE NÃO HOUVE."
+    assert detectar_itens_familia_pontilhada(texto) == []
+
+
 def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
     texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
     resultado = _neutralizar_numeracao_de_margem(texto)

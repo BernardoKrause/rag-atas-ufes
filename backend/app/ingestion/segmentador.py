@@ -76,7 +76,7 @@ RE_SECAO_NUMERADA = re.compile(
     r"|(?P<pauta>PAUTAS?)"
     r"|(?P<informes>INFORMES?)"
     r"|(?P<palavra_livre>PALAVRA[\s-]LIVRE)"
-    r")\s*[:.]",
+    r")\s*[:.]?",
     re.IGNORECASE,
 )
 
