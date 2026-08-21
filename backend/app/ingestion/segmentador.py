@@ -67,6 +67,15 @@ def _normalizar_com_mapa(texto: str) -> tuple[str, list[int]]:
 # ATA" bate no regex mas nao tinha entrada no dict antigo -> KeyError). Cada
 # alternativa abaixo ja mapeia 1:1 pra uma secao, entao o grupo nomeado que
 # casou entrega a secao diretamente, sem depender do texto exato casado.
+# o lookahead do terminador (abaixo) e protecao parcial: defende contra um
+# match coincidental "N. PALAVRA-DE-SECAO" que NAO tem subitem "N.M" logo em
+# seguida (ver test_familia_pontilhada_nao_trunca_secao_em_numero_coincidente_no_meio_da_frase),
+# mas nao contra um match coincidental que POR ACASO e seguido de algum texto
+# "N.M"-shaped nao relacionado (ex. "43. COMUNICADOS 12.5 do plano" faria
+# "43. COMUNICADOS" passar pelo lookahead como se fosse cabecalho valido).
+# Confirmado ausente do corpus real dos 357 docs (validacao da Tarefa 7), mas
+# nao e estruturalmente impossivel — o teste citado acima cobre so o caso sem
+# subitem seguinte, nao este.
 RE_SECAO_NUMERADA = re.compile(
     r"(?<!\d)(\d{1,2})\.\s*(?:"
     r"(?P<aprovacao_ata>APR(?:OVA|ECIA)[CÇ][AÃ]O D[AE] ATAS?(?:/RELAT[OÓ]RIOS)?)"
@@ -324,16 +333,24 @@ def detectar_itens_cce(texto_normalizado: str) -> list[ItemDetectado]:
 # que usam o formato pontilhado padrao — ("D","CE") nao e um variant unico,
 # e o dict de dispatch so tem uma chave por (tipo_orgao, centro), entao a
 # escolha entre os dois formatos precisa acontecer dentro da funcao, pelo
-# conteudo do texto (mesmo estilo do RE_ITEM_CCE, que ja lida com variacao
-# de formato entre atas antigas/novas dentro de uma unica funcao).
+# conteudo do texto — ao contrario do RE_ITEM_CCE, que resolve sua propria
+# variacao de formato antiga/nova dentro do proprio regex via alternancia
+# (sem precisar de discriminador externo), aqui os dois formatos (pontilhado
+# vs. nivel unico) nao compartilham vocabulario de cabecalho suficiente pra
+# unificar num regex so — o discriminador de formato precisa ser o resultado
+# de outro detector (detectar_itens_familia_pontilhada), chamado como
+# fallback dentro de detectar_itens_ce_d.
 # Sem re.IGNORECASE e com \b: cabecalho real e sempre "INFORMES:"/"PAUTA."
 # em CAIXA ALTA nos dois docs reais (463/469) — texto narrativo comum tipo
 # "Retirado de pauta." / "Retirado de Pauta." (ambos confirmados nos dois
 # docs reais) bate em minuscula/capitalizado mas nao em caixa alta, entao
 # case-sensitive sozinho ja filtra; \b e so uma guarda extra de fronteira.
 RE_SECAO_CE_D = re.compile(r"\b(INFORMES?|PAUTA)[:.]")
-# mesma guarda de aspas dos outros detectores por regex de item, mais guarda
-# de barra: sem ela, notacao de data/semestre "DD/MM." ou "AAAA/N." (ex.
+# mesma guarda de aspas de entrada dos outros detectores (lookbehind); a
+# guarda de saida e dispensavel aqui porque o lookahead de maiuscula/ordinal
+# logo em seguida ja a subsome (uma aspa de fechamento nao e maiuscula nem
+# ordinal, entao ja fica fora do match sem precisar de guarda separada).
+# Mais guarda de barra: sem ela, notacao de data/semestre "DD/MM." ou "AAAA/N." (ex.
 # "2021/2. A professora...", "02/11. Ferias...") bate igualzinho no padrao
 # digito-ponto-espaco-maiuscula e vira item fantasma — confirmado nos dois
 # docs reais (463/469) durante a validacao empirica deste detector. A guarda

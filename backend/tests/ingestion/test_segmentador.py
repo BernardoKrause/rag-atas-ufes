@@ -300,6 +300,30 @@ def test_cefd_aceita_ponto_final_em_vez_de_dois_pontos_no_cabecalho():
     ]
 
 
+def test_cefd_secao_ignora_narrativa_com_termos_de_secao_em_minuscula():
+    # mesmo risco de RE_SECAO_CE_D (ver
+    # test_ce_d_secao_ignora_narrativa_com_a_palavra_pauta_em_minuscula):
+    # RE_SECAO_CEFD tambem depende de ficar case-sensitive (sem
+    # re.IGNORECASE) pra nao confundir prosa narrativa comum ("...colocado
+    # em pauta.", "...apos fazer comunicações.", "...tratado em palavra
+    # livre.") com cabecalho real de secao — cabecalho real e sempre em
+    # CAIXA ALTA nos docs reais (ex. "PROCESSOS/PROJETOS:").
+    texto = (
+        "PROCESSOS/PROJETOS: [1] PRIMEIRO PROCESSO. O relator informou que o "
+        "assunto foi colocado em pauta. O relator apresentou o parecer final "
+        "apos fazer comunicações. Ficou definido que sera tratado em palavra "
+        "livre. [2] SEGUNDO PROCESSO."
+    )
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PROCESSOS_PROJETOS, "1"),
+        (SECAO_PROCESSOS_PROJETOS, "2"),
+    ]
+    # o item 1 deve conter a frase narrativa inteira, sem cortar em "em
+    # pauta."/"comunicações."/"palavra livre." como uma secao fantasma
+    assert "parecer final" in itens[0].texto
+
+
 def test_detectar_itens_cce_ponto_numerado_com_ponto_final():
     texto = "DECLAROU ABERTA A SESSÃO. Ponto 01. Comunicações: TEXTO. Ponto 02. TEXTO DOIS."
     itens = detectar_itens_cce(texto)
