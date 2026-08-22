@@ -31,19 +31,12 @@ SECAO_PROCESSOS_PROJETOS = "PROCESSOS/PROJETOS"
 class ItemDetectado:
     secao: str
     numero_item: str
-    inicio: int  # offset no texto normalizado
-    fim: int  # offset no texto normalizado
+    inicio: int
+    fim: int
     texto: str
 
 
 def _normalizar_com_mapa(texto: str) -> tuple[str, list[int]]:
-    """Colapsa qualquer sequencia de espaco em branco (incluindo quebras de
-    linha — alguns modelos de ata, ex. CT, tem uma palavra por linha) num
-    unico espaco, preservando um mapa de cada indice do texto normalizado
-    pro indice correspondente no texto original. Necessario pro segmentador
-    continuar sabendo em que pagina do PDF cada item cai depois de
-    normalizar — normalizar sem preservar o mapa perderia essa
-    correspondencia."""
     partes: list[str] = []
     mapa: list[int] = []
     em_espaco = False
@@ -61,21 +54,6 @@ def _normalizar_com_mapa(texto: str) -> tuple[str, list[int]]:
     return "".join(partes), mapa
 
 
-# grupos nomeados em vez de um dict alias->secao casado pelo texto literal
-# capturado: o alias por texto exigia enumerar toda combinacao de
-# prefixo/acento/singular-plural que o regex reconhece (ex.: "APRECIAÇÃO DA
-# ATA" bate no regex mas nao tinha entrada no dict antigo -> KeyError). Cada
-# alternativa abaixo ja mapeia 1:1 pra uma secao, entao o grupo nomeado que
-# casou entrega a secao diretamente, sem depender do texto exato casado.
-# o lookahead do terminador (abaixo) e protecao parcial: defende contra um
-# match coincidental "N. PALAVRA-DE-SECAO" que NAO tem subitem "N.M" logo em
-# seguida (ver test_familia_pontilhada_nao_trunca_secao_em_numero_coincidente_no_meio_da_frase),
-# mas nao contra um match coincidental que POR ACASO e seguido de algum texto
-# "N.M"-shaped nao relacionado (ex. "43. COMUNICADOS 12.5 do plano" faria
-# "43. COMUNICADOS" passar pelo lookahead como se fosse cabecalho valido).
-# Confirmado ausente do corpus real dos 357 docs (validacao da Tarefa 7), mas
-# nao e estruturalmente impossivel — o teste citado acima cobre so o caso sem
-# subitem seguinte, nao este.
 RE_SECAO_NUMERADA = re.compile(
     r"(?<!\d)(\d{1,2})\.\s*(?:"
     r"(?P<aprovacao_ata>APR(?:OVA|ECIA)[CÇ][AÃ]O D[AE] ATAS?(?:/RELAT[OÓ]RIOS)?)"
@@ -104,9 +82,7 @@ def _secao_do_match(secao_match: re.Match) -> str:
     nome_grupo = secao_match.lastgroup
     return _SECAO_POR_GRUPO[nome_grupo]
 
-# nao pode ser precedido/seguido de outro digito (evita casar o final de um
-# token de anonimizacao tipo "PESSOA_12752") nem estar entre aspas (evita
-# casar a citacao do numero de OUTRO item como referencia dentro do texto)
+
 RE_ITEM_PONTILHADO = re.compile(r'(?<![\d"“])(\d{1,2}\.\d{1,2})(?!\d)\.?(?!["”])')
 
 
@@ -145,11 +121,6 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
     return itens
 
 
-# Tipo D tem numeracao de linha na margem esquerda (rastreabilidade de
-# correcoes) — o PyMuPDF extrai cada numero de margem como sua propria
-# "linha" de texto, intercalado com o conteudo real (ex.: "1. APRECIAÇÃO DE\n8\nATA:").
-# Substituir por espacos do mesmo tamanho (nao remover) preserva os offsets
-# originais — necessario pro mapeamento de pagina continuar correto.
 RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
 
 
@@ -158,9 +129,6 @@ def _neutralizar_numeracao_de_margem(texto: str) -> str:
 
 
 def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDetectado]:
-    """EXCLUSÃO DE PAUTA aparece como subtitulo textual dentro do EXPEDIENTE
-    (nao tem numeracao propria de secao) — vira sua propria secao quando o
-    texto do item comeca literalmente com esse subtitulo."""
     resultado = []
     for item in itens:
         if item.secao == SECAO_EXPEDIENTE and item.texto.upper().startswith("EXCLUSÃO DE PAUTA"):
@@ -172,11 +140,6 @@ def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDet
     return resultado
 
 
-# CT (B1) nao tem uma secao "PAUTA" com subitens dentro — cada item ja e
-# "PAUTA N:" ou "INFORME N:" diretamente, entao a deteccao de secao e de
-# item sao a mesma passada, ao contrario da familia pontilhada.
-# Guarda contra aspas nas duas pontas (mesmo motivo do RE_ITEM_PONTILHADO):
-# evita casar a citacao do numero de OUTRO item como referencia no texto.
 RE_ITEM_CT = re.compile(r'(?<!\d)(?<!["“])(INFORME|PAUTA)\s+(\d{1,2}):(?!\d)(?!["”])')
 
 _SECAO_CT = {"INFORME": SECAO_INFORMES, "PAUTA": SECAO_PAUTA}
@@ -200,14 +163,10 @@ def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-# mesma guarda de aspas do RE_ITEM_PONTILHADO/RE_ITEM_CT
 RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])')
 
 
 def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
-    """CAR (B2) nao numera a secao de informes (fica vazia/implicita — ver
-    edge case de secao sem itens detectaveis); todos os itens caem direto
-    em PAUTA, numerados sem padding fixo ("1)", "04)", "6)"...)."""
     indice_pauta = texto_normalizado.find("PAUTA:")
     if indice_pauta == -1:
         return []
@@ -230,13 +189,9 @@ def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-# CEFD tem vocabulario de secao proprio, fora do documentado no §7 original
-# (EM PAUTA em vez de PAUTA; PROCESSOS/PROJETOS nao tem equivalente em
-# nenhum outro variant) — descoberto na investigacao empirica da pendencia 3
 RE_SECAO_CEFD = re.compile(
     r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE)[:.]"
 )
-# mesma guarda de aspas do RE_ITEM_PONTILHADO/RE_ITEM_CT
 RE_ITEM_CEFD = re.compile(r'(?<![\d"“])\[(\d{1,2})\](?!\d)(?!["”])')
 
 _SECAO_CEFD = {
@@ -277,26 +232,6 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-# CCE nao usa cabecalho de secao (PAUTA:/INFORME:) nem numeracao pontilhada
-# — cada assunto e um "Ponto N" (ou, em atas mais antigas, a ordem invertida
-# "Nº. Ponto") direto apos o texto de abertura/quorum, sem distincao de
-# secao. Reuniao de assunto unico usa "Ponto único" em vez de numero.
-# Maiusculas/minusculas variam entre atas de anos diferentes — daí IGNORECASE
-# em vez da guarda de aspas usada nos outros detectores (aqui a citacao
-# narrativa de um ponto ja votado nao usa aspas, ver achado (c) CCE — tratado
-# via ocorrencia_indice em segmentar_e_persistir, nao aqui).
-# O grupo numerico aceita uma parte decimal opcional "(?:\.\d{1,2})?" porque
-# atas reais (doc 683 do corpus) tem cabecalhos proprios "Ponto 8.3"/"Ponto
-# 8.4" com a palavra "Ponto" repetida antes de cada subitem — sem o grupo
-# decimal, o "\.?" sozinho nunca consome o ponto (faria a lookahead (?!\d)
-# falhar contra o digito seguinte), entao o match parava em "8" e colidia
-# "Ponto 8"/"Ponto 8.3"/"Ponto 8.4" sob numero_item="8". O grupo decimal so
-# ativa quando ha digito colado logo apos o ponto — nao afeta "Ponto 4."
-# de sentenca comum nem os casos, tambem reais (docs 643/668/682), em que
-# "Ponto N" e repetido e o subitem "N.M" aparece solto mais adiante SEM a
-# palavra "Ponto" antes (ali o "PONTO" literal nunca fica colado ao ".M",
-# entao o regex so casa o "N" de cada vez — colisao genuina de repeticao,
-# nao truncamento decimal, ja tratada via ocorrencia_indice).
 RE_ITEM_CCE = re.compile(
     r"(?<!\d)(?:"
     r"PONTO\s+(?:(\d{1,2}(?:\.\d{1,2})?)|(ÚNICO))\.?"
@@ -325,70 +260,13 @@ def detectar_itens_cce(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-# CE tipo D (Colegiado de Pedagogia) nao numera a secao (ao contrario da
-# familia pontilhada) e usa item de nivel unico ("1. Texto", nao "1.1") sem
-# vinculo com nenhum numero de secao — descoberto na investigacao empirica
-# do gap de 77 docs. Mas o MESMO colegiado tambem tem atas mais antigas (ex.
-# fixture da 3a reuniao, formato pontilhado "1. APRECIACAO DE ATA: 1.1 ...")
-# que usam o formato pontilhado padrao — ("D","CE") nao e um variant unico,
-# e o dict de dispatch so tem uma chave por (tipo_orgao, centro), entao a
-# escolha entre os dois formatos precisa acontecer dentro da funcao, pelo
-# conteudo do texto — ao contrario do RE_ITEM_CCE, que resolve sua propria
-# variacao de formato antiga/nova dentro do proprio regex via alternancia
-# (sem precisar de discriminador externo), aqui os dois formatos (pontilhado
-# vs. nivel unico) nao compartilham vocabulario de cabecalho suficiente pra
-# unificar num regex so — o discriminador de formato precisa ser o resultado
-# de outro detector (detectar_itens_familia_pontilhada), chamado como
-# fallback dentro de detectar_itens_ce_d.
-# Sem re.IGNORECASE e com \b: cabecalho real e sempre "INFORMES:"/"PAUTA."
-# em CAIXA ALTA nos dois docs reais (463/469) — texto narrativo comum tipo
-# "Retirado de pauta." / "Retirado de Pauta." (ambos confirmados nos dois
-# docs reais) bate em minuscula/capitalizado mas nao em caixa alta, entao
-# case-sensitive sozinho ja filtra; \b e so uma guarda extra de fronteira.
 RE_SECAO_CE_D = re.compile(r"\b(INFORMES?|PAUTA)[:.]")
-# mesma guarda de aspas de entrada dos outros detectores (lookbehind); a
-# guarda de saida e dispensavel aqui porque o lookahead de maiuscula/ordinal
-# logo em seguida ja a subsome (uma aspa de fechamento nao e maiuscula nem
-# ordinal, entao ja fica fora do match sem precisar de guarda separada).
-# Mais guarda de barra: sem ela, notacao de data/semestre "DD/MM." ou "AAAA/N." (ex.
-# "2021/2. A professora...", "02/11. Ferias...") bate igualzinho no padrao
-# digito-ponto-espaco-maiuscula e vira item fantasma — confirmado nos dois
-# docs reais (463/469) durante a validacao empirica deste detector. A guarda
-# de aspas so cobre o caractere imediatamente antes do digito, nao o span
-# inteiro entre aspas — uma lista numerada citada dentro de uma unica frase
-# entre aspas (ex. doc 463, item 3 da PAUTA: “1. Responder... 2. Registrar
-# no campo de sugestões...”) ainda pode gerar um item fantasma a partir do
-# segundo numero em diante, ja que so o primeiro vem colado na aspa de
-# abertura. Achado real, aceito como limitacao conhecida (ocorrencia unica
-# nos dois docs, blast radius contido, nao gera colisao de PK gracas ao
-# ocorrencia_indice em segmentar_e_persistir).
-# O lookahead aceita maiuscula direto (item comum) OU numero ordinal seguido
-# de "o"/"a" (ex. "5a Conferencia...") — tambem confirmado em doc 463, onde
-# um item real comeca com ordinal em vez de maiuscula. \s* (nao \s+): doc
-# 463 item 4 e "4.Metodologia..." sem espaco (artefato de extracao de PDF,
-# confirmado via scan de \d{1,2}\.[A-ZÀ-Ú] nos dois docs reais) — a guarda
-# contra numeracao de dois niveis ("4.1") continua vindo do lookbehind (nao
-# pode ser precedido de digito/ponto/aspas/barra) e do proprio requisito de
-# maiuscula/ordinal logo em seguida, nao do espaco em si.
 RE_ITEM_CE_D = re.compile(r'(?<![\d."“/])(\d{1,2})\.\s*(?=[A-ZÀ-Ú]|\d{1,2}[ºª])')
 
 _SECAO_CE_D = {"INFORME": SECAO_INFORMES, "INFORMES": SECAO_INFORMES, "PAUTA": SECAO_PAUTA}
 
 
 def detectar_itens_ce_d(texto_normalizado: str) -> list[ItemDetectado]:
-    # tenta primeiro o formato pontilhado padrao (mesmo usado pelo resto da
-    # familia B/C/D): e a fixture real da 3a reuniao (mesmo colegiado, ata
-    # mais antiga) que define a ordem seguranca aqui — o resultado NAO-VAZIO
-    # de detectar_itens_familia_pontilhada e o sinal confiavel de "formato
-    # antigo"; um resultado vazio do detector novo (RE_SECAO_CE_D/RE_ITEM_CE_D)
-    # NAO e confiavel como sinal equivalente pro formato novo, porque
-    # cabecalhos de secao pontilhados ("2. EXPEDIENTE:", "3. INFORMES:", "4.
-    # PAUTA:") tambem casam parcialmente no RE_ITEM_CE_D e podem produzir
-    # itens espurios em vez de lista vazia dependendo de onde caem os
-    # limites de secao — confirmado por review: bastou um "5. PALAVRA
-    # LIVRE:" extra na mesma fixture pra fazer o detector novo devolver 1
-    # item espurio em vez de lista vazia, o que quebraria esse discriminador
-    # se a ordem fosse invertida.
     itens_pontilhados = detectar_itens_familia_pontilhada(texto_normalizado)
     if itens_pontilhados:
         return itens_pontilhados
@@ -421,9 +299,6 @@ def detectar_itens_ce_d(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-# (tipo_orgao, centro) -> funcao detectora de itens sobre o texto normalizado.
-# Mesmo estilo dict-driven de CENTRO_CAMPUS em extractor.py — variant sem
-# entrada aqui levanta ValueError explicito, nunca falha silenciosamente.
 CONFIG_VARIANTES: dict[tuple[str, str], Callable[[str], list[ItemDetectado]]] = {
     ("A", "*"): detectar_itens_familia_pontilhada,
     ("A", "CEUNES"): detectar_itens_ct,
@@ -450,10 +325,6 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
 
 
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
-    """Retorna os itens detectados junto com o mapa de offsets (indice no
-    texto normalizado -> indice no texto_limpo original), pra quem precisar
-    localizar a posicao original de um item (ex.: mapeamento de pagina) nao
-    ter que reimplementar a mesma normalizacao."""
     detector = _obter_detector(tipo_orgao, centro)
 
     texto_bruto = texto_limpo
@@ -466,9 +337,6 @@ def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[lis
 
 
 def dividir_fragmentos(texto: str) -> list[str]:
-    """Heuristica por caracteres, nao pelo tokenizer real do modelo de
-    embedding (Parte 5 ainda nao escolheu o modelo). Mesmo estilo de janela
-    com sobreposicao ja usado em _janelas_para_ner (cleaner.py)."""
     if len(texto) <= TAMANHO_MAX_FRAGMENTO:
         return [texto]
 
@@ -484,9 +352,6 @@ def dividir_fragmentos(texto: str) -> list[str]:
 
 
 def mapear_pagina(offset: int, paginas_offsets: list[int] | None) -> int | None:
-    """paginas_offsets[i] e o offset de inicio da pagina i (0-based) no
-    texto — bisect_right conta quantos inicios de pagina sao <= offset, que
-    e diretamente o numero de pagina 1-based."""
     if not paginas_offsets:
         return None
     return bisect_right(paginas_offsets, offset)
@@ -509,16 +374,6 @@ def gerar_item_id_canonico(
 
 
 def segmentar_e_persistir(documento: Documento, sessao: Session) -> list[ItemPauta]:
-    """Idempotente por documento_id: substitui (delete + insert) os itens
-    daquele documento a cada rerun, em vez de tentar um upsert campo a
-    campo — mais simples e evita deixar itens obsoletos quando um rerun
-    produz menos itens que o anterior (ex.: ajuste de regex).
-
-    ocorrencia_indice desambigua itens que compartilham (secao, numero_item)
-    dentro do mesmo documento — numeracao duplicada na fonte ou falso
-    positivo de deteccao (numero citado dentro do corpo de outro item) nao
-    quebram mais a constraint unica; ficam persistidos lado a lado, com
-    sufixo "_D{n}" no item_id_canonico, pra revisao manual amostral."""
     itens_detectados, mapa = segmentar_texto(documento.tipo_orgao, documento.centro, documento.texto_limpo)
 
     sessao.execute(delete(ItemPauta).where(ItemPauta.documento_id == documento.id_documento))
