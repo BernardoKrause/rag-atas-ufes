@@ -11,6 +11,7 @@ from app.ingestion.segmentador import (
     SECAO_EXPEDIENTE,
     SECAO_INFORMES,
     SECAO_ORDEM_DO_DIA,
+    SECAO_PALAVRA_LIVRE,
     SECAO_PAUTA,
     SECAO_PROCESSOS_PROJETOS,
     ItemDetectado,
@@ -22,6 +23,7 @@ from app.ingestion.segmentador import (
     detectar_itens_familia_pontilhada,
     detectar_itens_car,
     detectar_itens_cce,
+    detectar_itens_ce_d,
     detectar_itens_ct,
     detectar_itens_cefd,
     dividir_fragmentos,
@@ -52,7 +54,6 @@ def test_normalizar_com_mapa_preserva_offset_correto():
     original = "AB  CD"
     normalizado, mapa = _normalizar_com_mapa(original)
     assert normalizado == "AB CD"
-    # o "C" normalizado (indice 3) deve apontar pro "C" original (indice 4)
     indice_c = normalizado.index("C")
     assert original[mapa[indice_c]] == "C"
 
@@ -97,18 +98,19 @@ def test_familia_pontilhada_secao_sem_itens_e_pulada():
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1.1")]
 
 
+def test_familia_pontilhada_aceita_pauta_no_plural():
+    texto = "1. EXPEDIENTE: NÃO HOUVE. 3. PAUTAS: 3.1 – DOCUMENTO AVULSO Nº 123."
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert (SECAO_PAUTA, "3.1") in [(i.secao, i.numero_item) for i in itens]
+
+
 def test_familia_pontilhada_ignora_numero_de_token_de_anonimizacao():
-    # regressao: "PESSOA_12752." tem "52." no final, que sozinho parece um
-    # inicio de secao numerada — nao pode disparar falso positivo
     texto = "REUNIÃO SOB A PRESIDÊNCIA DA PROFESSORA PESSOA_12752. INFORMES: PAUTA: 1) ITEM."
     itens = detectar_itens_familia_pontilhada(texto)
     assert itens == []
 
 
 def test_familia_pontilhada_ignora_numero_citado_entre_aspas():
-    # regressao: um item pode citar o numero de OUTRO item entre aspas
-    # como referencia (ex.: revisar o topico "1.4" de uma ata anterior) —
-    # isso nao e um novo item comecando
     texto = (
         '1. APRECIAÇÃO DE ATA: 1.1. A PROFESSORA SUGERIU A REVISÃO DO TÓPICO '
         '“1.4” DA ATA ANTERIOR. 2. EXPEDIENTE: 2.1 ITEM SEGUINTE.'
@@ -121,20 +123,43 @@ def test_familia_pontilhada_ignora_numero_citado_entre_aspas():
 
 
 def test_familia_pontilhada_cabecalho_de_secao_sem_acento():
-    # regressao: RE_SECAO_NUMERADA casa variantes sem acento (classes [CÇ]/
-    # [AÃ]/[OÕ]) e variantes DA/DE + singular/plural que _ALIAS_SECAO nao
-    # cobria, levantando KeyError em vez de reclassificar como APROVACAO_ATA
     texto = "1. APROVACAO DA ATA: 1.1 ATA ANTERIOR APROVADA."
     itens = detectar_itens_familia_pontilhada(texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
 
 
 def test_familia_pontilhada_cabecalho_de_secao_combinacao_nao_prevista_no_alias():
-    # regressao: "APRECIAÇÃO DA ATA" (prefixo APRECIA + "DA" em vez de "DE")
-    # bate no regex mas nao tinha entrada em _ALIAS_SECAO
     texto = "1. APRECIAÇÃO DA ATA: 1.1 ATA ANTERIOR APROVADA."
     itens = detectar_itens_familia_pontilhada(texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_APROVACAO_ATA, "1.1")]
+
+
+def test_familia_pontilhada_aceita_secao_sem_pontuacao_antes_do_subitem():
+    texto = (
+        "1. EXPEDIENTE NÃO HOUVE. "
+        "2. ORDEM DO DIA 2.1 APROVAÇÃO DO CALENDÁRIO DE REUNIÕES."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_ORDEM_DO_DIA, "2.1"),
+    ]
+
+
+def test_familia_pontilhada_secao_sem_pontuacao_e_sem_subitem_fica_vazia():
+    texto = "1. EXPEDIENTE NÃO HOUVE."
+    assert detectar_itens_familia_pontilhada(texto) == []
+
+
+def test_familia_pontilhada_nao_trunca_secao_em_numero_coincidente_no_meio_da_frase():
+    texto = (
+        "1. EXPEDIENTE: 1.1 LEITURA DA RESOLUCAO 43. COMUNICADOS FORAM FEITOS "
+        "PELA DIRECAO. 1.2 OUTRO ITEM."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_EXPEDIENTE, "1.1"),
+        (SECAO_EXPEDIENTE, "1.2"),
+    ]
 
 
 def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
@@ -178,7 +203,6 @@ def test_detectar_itens_ct():
 
 
 def test_detectar_itens_car():
-    # padding inconsistente no corpus real: "1)", "2)", "04)", "05)", "6)"...
     texto = "INFORMES: PAUTA: 1) PRIMEIRO ITEM. 2) SEGUNDO ITEM. 04) TERCEIRO ITEM COM PADDING."
     itens = detectar_itens_car(texto)
     assert [(i.secao, i.numero_item) for i in itens] == [
@@ -193,8 +217,6 @@ def test_detectar_itens_car_sem_pauta_retorna_vazio():
 
 
 def test_detectar_itens_car_ignora_numero_citado_entre_aspas():
-    # regressao: um item pode citar o numero de OUTRO item entre aspas como
-    # referencia — isso nao pode ser confundido com o inicio de um item novo
     texto = 'PAUTA: 1) PRIMEIRO ITEM QUE MENCIONA O ITEM "3)" DA PAUTA ANTERIOR. 2) SEGUNDO ITEM.'
     itens = detectar_itens_car(texto)
     assert [(i.secao, i.numero_item) for i in itens] == [
@@ -242,6 +264,29 @@ def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
     assert detectar_itens_cefd(texto) == []
 
 
+def test_cefd_aceita_ponto_final_em_vez_de_dois_pontos_no_cabecalho():
+    texto = "PROCESSOS/PROJETOS. [1] SOLICITAÇÃO DE AFASTAMENTO PARA DOUTORADO."
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PROCESSOS_PROJETOS, "1"),
+    ]
+
+
+def test_cefd_secao_ignora_narrativa_com_termos_de_secao_em_minuscula():
+    texto = (
+        "PROCESSOS/PROJETOS: [1] PRIMEIRO PROCESSO. O relator informou que o "
+        "assunto foi colocado em pauta. O relator apresentou o parecer final "
+        "apos fazer comunicações. Ficou definido que sera tratado em palavra "
+        "livre. [2] SEGUNDO PROCESSO."
+    )
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PROCESSOS_PROJETOS, "1"),
+        (SECAO_PROCESSOS_PROJETOS, "2"),
+    ]
+    assert "parecer final" in itens[0].texto
+
+
 def test_detectar_itens_cce_ponto_numerado_com_ponto_final():
     texto = "DECLAROU ABERTA A SESSÃO. Ponto 01. Comunicações: TEXTO. Ponto 02. TEXTO DOIS."
     itens = detectar_itens_cce(texto)
@@ -252,8 +297,6 @@ def test_detectar_itens_cce_ponto_numerado_com_ponto_final():
 
 
 def test_detectar_itens_cce_ordem_invertida_maiuscula_de_ata_antiga():
-    # atas mais antigas do CCE usam "PONTO N –" tudo maiusculo, ou a ordem
-    # invertida "Nº. Ponto –"
     texto = "DECLAROU ABERTA A SESSÃO. . PONTO 1 – COMUNICAÇÕES – TEXTO. PONTO 2 – TEXTO DOIS."
     itens = detectar_itens_cce(texto)
     assert [(i.secao, i.numero_item) for i in itens] == [
@@ -278,6 +321,131 @@ def test_detectar_itens_cce_sem_estrutura_retorna_vazio():
     assert detectar_itens_cce("ATA SEM NENHUM PONTO DE PAUTA NUMERADO NO TEXTO.") == []
 
 
+def test_cce_aceita_subitem_decimal_ponto_n_m():
+    texto = (
+        "Ponto 8 – Homologações: 8.1 – Proc. Nº PROCESSO_3479 – Homologação "
+        "da Eleição de Chefe e Subchefe do Departamento de Física. . 8.2 – "
+        "Concurso Público para Professor Adjunto para a área de Química – "
+        "Retirado de pauta. . Ponto 8.3 – Prot. Nº PROCESSO_3478 - Alteração "
+        "da Composição da Banca para Concurso de professor Visitante "
+        "Estrangeiro. . Ponto 8.4 – Homologação do Termo de Cooperação "
+        "Petrobrás x UFES."
+    )
+    itens = detectar_itens_cce(texto)
+    assert [i.numero_item for i in itens] == ["8", "8.3", "8.4"]
+
+
+def test_cce_ponto_repetido_sem_decimal_nao_captura_subitem_solto():
+    texto = (
+        "Ponto 3 – Afastamentos: 3.1 – Processo Nº PROCESSO_3385 – texto "
+        "um. 3.2 – Processo Nº PROCESSO_3384 – texto dois. . Ponto 3 – "
+        "Afastamento: 3.6 – Processo Nº PROCESSO_3380 – texto seis."
+    )
+    itens = detectar_itens_cce(texto)
+    assert [i.numero_item for i in itens] == ["3", "3"]
+
+
+def test_ce_d_informes_com_numeracao_de_nivel_unico():
+    texto = (
+        "HAVENDO QUÓRUM LEGAL A COORDENADORA INICIOU A REUNIÃO. "
+        "INFORMES: 1. OFÍCIO CIRCULAR Nº 6/2021 SOBRE ENSINO HÍBRIDO. "
+        "2. FÉRIAS DA COORDENADORA."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
+def test_ce_d_pauta_com_numeracao_de_nivel_unico():
+    texto = (
+        "PAUTA. 1. APRECIAÇÃO DA ATA DA DÉCIMA REUNIÃO ORDINÁRIA. "
+        "2. HOMOLOGAÇÃO DO AD REFERENDUM."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_ce_d_dispatch_via_segmentar_texto():
+    texto = "INFORMES: 1. TEXTO DO INFORME UM."
+    itens, _ = segmentar_texto("D", "CE", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_INFORMES, "1")]
+
+
+def test_ce_d_nao_confunde_notacao_de_semestre_com_numero_de_item():
+    texto = (
+        "INFORMES: 1. OFÍCIO CIRCULAR Nº 6/2021 SOBRE OFERTA NO SEMESTRE "
+        "LETIVO 2021/2. A PROFESSORA INFORMOU QUE NÃO OFERTARÁ DISCIPLINAS. "
+        "2. FÉRIAS DA COORDENADORA."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
+def test_ce_d_item_pode_comecar_com_numero_ordinal():
+    texto = "INFORMES: 1. PRIMEIRO INFORME SOBRE O EVENTO. 2. 5ª CONFERÊNCIA MUNICIPAL DE EDUCAÇÃO."
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
+
+
+def test_ce_d_tenta_familia_pontilhada_primeiro_e_e_robusto_a_secao_extra():
+    texto = (
+        "1. APRECIAÇÃO DE ATA: 1.1. Ata da Segunda Reunião Ordinária. "
+        "2. EXPEDIENTE: 2.1. Exclusão de ponto de pauta. "
+        "3. INFORMES: 3.1. Situação referente ao atendimento. "
+        "4. PAUTA: 4.1. Apreciação de solicitação. "
+        "5. PALAVRA LIVRE: 5.1. Primeiro ponto de palavra livre. "
+        "5.2. Segundo ponto de palavra livre."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_APROVACAO_ATA, "1.1"),
+        (SECAO_EXPEDIENTE, "2.1"),
+        (SECAO_INFORMES, "3.1"),
+        (SECAO_PAUTA, "4.1"),
+        (SECAO_PALAVRA_LIVRE, "5.1"),
+        (SECAO_PALAVRA_LIVRE, "5.2"),
+    ]
+
+
+def test_ce_d_secao_ignora_narrativa_com_a_palavra_pauta_em_minuscula():
+    texto = (
+        "PAUTA. 1. Primeiro item da pauta, retirado de pauta. "
+        "2. Segundo item, com sucesso. Retirado de Pauta. Nada mais a tratar."
+    )
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+    assert "Nada mais a tratar" in itens[1].texto
+
+
+def test_ce_d_item_sem_espaco_apos_o_ponto():
+    texto = "PAUTA. 1. PRIMEIRO ITEM. 2.Segundo item sem espaço após o ponto."
+    itens = detectar_itens_ce_d(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_PAUTA, "2"),
+    ]
+
+
+def test_ce_d_item_sem_espaco_nao_confunde_numeracao_de_dois_niveis():
+    texto = "PAUTA. 4.1 Aprovação de item de nível dois. 4.1. Aprovação de item de nível dois de novo."
+    itens = detectar_itens_ce_d(texto)
+    assert itens == []
+
+
 def test_segmentar_texto_cce_via_config():
     texto = "DECLAROU ABERTA A SESSÃO. Ponto 01. PRIMEIRO ITEM."
     itens, _ = segmentar_texto("B", "CCE", texto)
@@ -297,11 +465,22 @@ def test_segmentar_texto_ct_via_config():
 
 
 def test_segmentar_texto_ceunes_b_via_config():
-    # achado (a), parte CEUNES: reusa o mesmo detector do CT (INFORME N:/
-    # PAUTA N:) — confirmado contra os 10 documentos reais nao-escaneados
     texto = "PAUTA 1: PRIMEIRO ITEM."
     itens, _ = segmentar_texto("B", "CEUNES", texto)
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_ceunes_tipo_a_usa_mesmo_formato_informe_pauta_do_tipo_b():
+    texto = (
+        "HAVENDO NÚMERO LEGAL DE MEMBROS, DECLAROU ABERTA A SESSÃO. "
+        "INFORME 1: O chefe do departamento informou sobre o edital de concurso. "
+        "INFORME 2: Foi comunicada a data da próxima reunião."
+    )
+    itens, _ = segmentar_texto("A", "CEUNES", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_INFORMES, "1"),
+        (SECAO_INFORMES, "2"),
+    ]
 
 
 def test_segmentar_texto_car_via_config():
@@ -338,7 +517,6 @@ def test_dividir_fragmentos_texto_longo_divide_com_sobreposicao():
 
     assert len(fragmentos) > 1
     assert all(len(f) <= TAMANHO_MAX_FRAGMENTO for f in fragmentos)
-    # reconstroi o texto original removendo a sobreposicao, confirma que nada foi perdido
     reconstruido = fragmentos[0]
     for f in fragmentos[1:]:
         reconstruido += f[SOBREPOSICAO_FRAGMENTO:]
@@ -381,9 +559,6 @@ def test_gerar_item_id_canonico_remove_acento_e_barra_da_secao():
 
 
 def test_gerar_item_id_canonico_com_ocorrencia_duplicada():
-    # achado (c): numeracao duplicada na fonte (ou falso positivo de
-    # deteccao) vira uma ocorrencia extra desambiguada por sufixo, em vez de
-    # quebrar a constraint unica
     assert gerar_item_id_canonico(456, "COMUNICACOES", "1.01", 1, 0) == "456_COMUNICACOES_1.01_D1"
 
 
@@ -441,10 +616,6 @@ def test_segmentar_e_persistir_aplica_overflow_split(db_session):
 
 
 def test_segmentar_e_persistir_desambigua_numero_duplicado_dentro_do_documento(db_session):
-    # regressao achado (c): numeracao genuinamente duplicada na fonte (dois
-    # assuntos distintos com o mesmo numero_item, ex.: doc 456 do corpus
-    # real) nao pode mais quebrar a constraint unica — vira ocorrencia_indice
-    # crescente
     texto = "1. COMUNICAÇÕES: 1.1 PRIMEIRO ASSUNTO. 1.1 SEGUNDO ASSUNTO, NUMERO REPETIDO NA FONTE."
     documento = _criar_documento(db_session, texto_limpo=texto)
     itens = segmentar_e_persistir(documento, db_session)
@@ -460,14 +631,12 @@ def test_segmentar_e_persistir_desambigua_numero_duplicado_dentro_do_documento(d
 def test_segmentar_as_6_fixtures_reais_bate_com_contagem_manual(db_session):
     documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
     contagem_esperada = {
-        "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf": 4,   # Tipo A
-        # B1/CT: 27 itens estruturais, mas PAUTA 7 e 8 (votos em separado
-        # extensos) sofrem overflow-split em 2 fragmentos cada -> 29
+        "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf": 4,
         "10-2025.pdf": 29,
-        "ata_05_02_2025.pdf": 14,                                           # B2/CAR
-        "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf": 8,          # B3/CCAE
-        "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf": 7,                # Tipo C
-        "ata_da_3a_reuniao_ordinaria_colped.pdf": 12,                       # Tipo D
+        "ata_05_02_2025.pdf": 14,
+        "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf": 8,
+        "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf": 7,
+        "ata_da_3a_reuniao_ordinaria_colped.pdf": 12,
     }
 
     for documento in documentos:
@@ -502,15 +671,13 @@ def test_segmentar_fixture_camara_local_reclassifica_exclusao_de_pauta(db_sessio
 
 
 def test_segmentar_fixture_ct_paginas_preenchidas(db_session):
-    # CT/10-2025.pdf tem 8 paginas — confirma que o mapeamento de pagina
-    # funciona de ponta a ponta (extrair_texto_bruto -> pipeline -> segmentador)
     documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
     ct = next(d for d in documentos if d.nome_arquivo == "10-2025.pdf")
     itens = segmentar_e_persistir(ct, db_session)
 
     assert all(i.pagina_inicio is not None for i in itens)
     paginas = {i.pagina_inicio for i in itens}
-    assert len(paginas) > 1  # itens espalhados por mais de uma pagina
+    assert len(paginas) > 1
     assert min(paginas) == 1
 
 
