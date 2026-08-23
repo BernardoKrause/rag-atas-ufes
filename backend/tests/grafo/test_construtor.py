@@ -83,3 +83,86 @@ def test_criar_no_item_cria_item_e_menciona_processo():
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_agrupar_assuntos_por_processo_compartilhado():
+    from app.grafo.construtor import agrupar_assuntos
+
+    item1 = ItemPauta(
+        item_id_canonico="1_A", documento_id=1, secao="PAUTA", numero_item="1",
+        texto="PROCESSO_0001 assunto x", assunto="Reforma do prédio",
+    )
+    item2 = ItemPauta(
+        item_id_canonico="2_A", documento_id=2, secao="PAUTA", numero_item="1",
+        texto="PROCESSO_0001 mesmo processo", assunto="Texto completamente diferente",
+    )
+    item3 = ItemPauta(
+        item_id_canonico="3_A", documento_id=3, secao="PAUTA", numero_item="1",
+        texto="sem processo", assunto="Assunto isolado",
+    )
+
+    agrupamento = agrupar_assuntos([item1, item2, item3])
+
+    grupos = list(agrupamento.values())
+    assert sorted(len(g) for g in grupos) == [1, 2]
+    grupo_com_dois = next(g for g in grupos if len(g) == 2)
+    assert {i.item_id_canonico for i in grupo_com_dois} == {"1_A", "2_A"}
+
+
+def test_agrupar_assuntos_por_texto_normalizado_identico():
+    from app.grafo.construtor import agrupar_assuntos
+
+    item1 = ItemPauta(
+        item_id_canonico="1_B", documento_id=1, secao="PAUTA", numero_item="1",
+        texto="sem processo", assunto="Aprovação do Calendário Acadêmico",
+    )
+    item2 = ItemPauta(
+        item_id_canonico="2_B", documento_id=2, secao="PAUTA", numero_item="1",
+        texto="sem processo", assunto="aprovação do calendário acadêmico",
+    )
+
+    agrupamento = agrupar_assuntos([item1, item2])
+
+    assert len(agrupamento) == 1
+
+
+def test_criar_nos_assunto_cria_relacoes_trata_de(db_session):
+    from app.grafo.construtor import agrupar_assuntos, criar_no_item, criar_nos_assunto
+
+    documento1 = Documento(
+        id_documento=999001, nome_arquivo="x.pdf", url_origem="x.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 6, 6), texto_limpo="texto",
+    )
+    documento2 = Documento(
+        id_documento=999002, nome_arquivo="y.pdf", url_origem="y.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 6, 13), texto_limpo="texto",
+    )
+    item1 = ItemPauta(
+        item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: PROCESSO_0099 assunto", assunto="Reforma do laboratório",
+        pagina_inicio=1, pagina_fim=1,
+    )
+    item2 = ItemPauta(
+        item_id_canonico="999002_PAUTA_1", documento_id=999002, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: PROCESSO_0099 mesmo processo", assunto="Texto diferente",
+        pagina_inicio=1, pagina_fim=1,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, documento1)
+        criar_no_ata(driver, documento2)
+        criar_no_item(driver, 999001, item1)
+        criar_no_item(driver, 999002, item2)
+
+        agrupamento = agrupar_assuntos([item1, item2])
+        criar_nos_assunto(driver, agrupamento)
+
+        resultado = executar_leitura(
+            driver, "MATCH (:Assunto)<-[:TRATA_DE]-(i:ItemPauta) RETURN count(i) AS total"
+        )
+        assert resultado == [{"total": 2}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
