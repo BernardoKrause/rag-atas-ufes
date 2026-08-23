@@ -8,6 +8,9 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
+from app.ingestion.segmentador import (
+    RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT, RE_ITEM_PONTILHADO,
+)
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -20,6 +23,22 @@ class CamposEnriquecidos:
     encaminhamento: str | None
     ato_emitido: str | None
     departamento_origem: str | None
+
+
+_MARCADORES_ITEM = [RE_ITEM_CT, RE_ITEM_CAR, RE_ITEM_CEFD, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_PONTILHADO]
+
+
+def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
+    """O marcador de abertura do item (ex. "PAUTA 2:", "4.3", "[3]") sempre
+    casa no offset 0 de item.texto — mesmo regex usado pelo segmentador.py
+    pra achar o inicio do item. Tenta cada marcador conhecido nessa posicao;
+    se nenhum casar (nao deveria acontecer pra um item ja segmentado), retorna
+    o texto integral."""
+    for marcador in _MARCADORES_ITEM:
+        match = marcador.match(texto)
+        if match:
+            return texto[match.end():].strip()
+    return texto
 
 
 CONFIG_ENRIQUECEDOR: dict[tuple[str, str], Callable[[str, date], CamposEnriquecidos]] = {}

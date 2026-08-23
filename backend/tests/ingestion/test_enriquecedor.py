@@ -61,3 +61,17 @@ def test_enriquecer_e_persistir_e_idempotente(db_session, monkeypatch):
 
     assert len(chamadas) == 2
     assert item.tipo_desfecho == "Aprovado"
+
+
+def test_extrair_corpo_sem_marcador_ct():
+    from app.ingestion.enriquecedor import extrair_corpo_sem_marcador
+    texto = 'PAUTA 2: Processo digital nº 23068.007249/2025-23 - homologação - Departamento de Informática - Interrupção. Decisão: Homologado(a).'
+    corpo = extrair_corpo_sem_marcador("PAUTA", texto)
+    assert corpo.startswith("Processo digital")
+
+
+def test_extrair_corpo_sem_marcador_pontilhado():
+    from app.ingestion.enriquecedor import extrair_corpo_sem_marcador
+    texto = '4.3. Apreciação com sugestões para aprimoramento da proposta. Decisão: Aprovado.'
+    corpo = extrair_corpo_sem_marcador("INFORMES", texto)
+    assert corpo.startswith("Apreciação")
