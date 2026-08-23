@@ -110,6 +110,7 @@ def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
 
 CONFIG_ENRIQUECEDOR[("B", "CT")] = extrair_ct
 CONFIG_ENRIQUECEDOR[("A", "CEUNES")] = extrair_ct
+CONFIG_ENRIQUECEDOR[("B", "CEUNES")] = extrair_ct
 
 
 RE_PALAVRA_CHAVE_DESFECHO = re.compile(
@@ -154,7 +155,7 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
     )
 
 
-for _chave in [("B", "CAR"), ("B", "CCAE"), ("B", "CE"), ("B", "CCHN"), ("B", "CCE"),
+for _chave in [("B", "CAR"), ("B", "CEFD"), ("B", "CCAE"), ("B", "CE"), ("B", "CCHN"), ("B", "CCE"),
                ("A", "*"), ("C", "*"), ("D", "*")]:
     CONFIG_ENRIQUECEDOR[_chave] = extrair_generico
 

@@ -205,3 +205,11 @@ def test_extrair_generico_contra_fixtures_reais(db_session):
         itens = segmentar_e_persistir(documento, db_session)
         enriquecer_e_persistir(documento, itens, db_session)
         assert any(i.tipo_desfecho is not None for i in itens), nome
+
+
+def test_todas_as_variantes_do_segmentador_tem_extrator_no_enriquecedor():
+    from app.ingestion.enriquecedor import _obter_extrator
+    from app.ingestion.segmentador import CONFIG_VARIANTES
+
+    for tipo_orgao, centro in CONFIG_VARIANTES:
+        _obter_extrator(tipo_orgao, centro)  # nao deve levantar ValueError
