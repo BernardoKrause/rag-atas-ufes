@@ -73,7 +73,7 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
 
 
 RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
-RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-.]+?)\s*[-.]")
+RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-.:]+?)\s*[-.:]")
 
 LIMITE_DEPARTAMENTO_ORIGEM = 60
 

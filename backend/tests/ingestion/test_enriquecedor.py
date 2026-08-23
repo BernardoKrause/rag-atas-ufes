@@ -144,6 +144,26 @@ def test_extrair_ct_departamento_incidental_excede_limite_retorna_none():
     assert campos.departamento_origem is None
 
 
+def test_extrair_ct_departamento_terminado_por_dois_pontos():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    # excerto real do item id=14846 (doc_id=331): lista orcamentaria com
+    # departamentos separados por "-" e valores em R$ apos ":". Sem ":" no
+    # terminador, a captura avanca ate o valor monetario ("ENGENHARIA_
+    # AMBIENTAL_R_58", 26 chars) — passa pela guarda de tamanho em silencio
+    # e persiste lixo em vez do nome correto do departamento.
+    texto = (
+        'PAUTA 24: O senhor Diretor apresentou a proposta de orçamento do Centro '
+        'Tecnológico para o ano de 2025. Segue o detalhamento por departamento: '
+        '- Departamento de Engenharia Ambiental: R$ 58.751,12; - Departamento de '
+        'Engenharia Civil: R$ 61.925,95; - Departamento de Engenharia de Produção: '
+        'R$ 75.750,61. Decisão: Aprovado(a) por unanimidade a proposta apresentada '
+        'pela Direção do CT.'
+    )
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.departamento_origem == "ENGENHARIA_AMBIENTAL"
+
+
 def test_extrair_ct_contra_fixture_real(db_session):
     from pathlib import Path
     from app.ingestion.pipeline import executar_pipeline
