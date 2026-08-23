@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
+from app.ingestion._extenso import parse_cardinal, tokenizar
 from app.ingestion.segmentador import (
     RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT, RE_ITEM_PONTILHADO,
 )
@@ -156,6 +157,43 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
 for _chave in [("B", "CAR"), ("B", "CCAE"), ("B", "CE"), ("B", "CCHN"), ("B", "CCE"),
                ("A", "*"), ("C", "*"), ("D", "*")]:
     CONFIG_ENRIQUECEDOR[_chave] = extrair_generico
+
+
+RE_ATO_EMITIDO = re.compile(
+    r"Baixada a (DECIS[ÃA]O|RESOLU[ÇC][ÃA]O)\s+N[ÚU]MERO\s+([A-ZÀ-Ú ]+?)(?:,\s*DE|\s+BARRA)",
+    re.IGNORECASE,
+)
+
+_TIPO_ATO = {"DECISAO": "DECISAO", "DECISÃO": "DECISAO", "RESOLUCAO": "RESOLUCAO", "RESOLUÇÃO": "RESOLUCAO"}
+
+
+def _extrair_numero_extenso(bruto: str) -> int | None:
+    tokens = tokenizar(bruto)
+    valor, proximo = parse_cardinal(tokens, 0)
+    if valor is None or proximo != len(tokens):
+        return None
+    return valor
+
+
+def extrair_ccae(texto: str, data_reuniao: date) -> CamposEnriquecidos:
+    campos_base = extrair_generico(texto, data_reuniao)
+
+    match = RE_ATO_EMITIDO.search(texto)
+    if not match:
+        return campos_base
+
+    tipo = _TIPO_ATO[unicodedata.normalize("NFKD", match.group(1)).encode("ascii", "ignore").decode("ascii").upper()]
+    numero = _extrair_numero_extenso(match.group(2).strip())
+    ato_emitido = f"{tipo}_{numero}_{data_reuniao.year}" if numero is not None else None
+
+    return CamposEnriquecidos(
+        assunto=campos_base.assunto, tipo_desfecho=campos_base.tipo_desfecho,
+        resultado_votacao=campos_base.resultado_votacao, encaminhamento=campos_base.encaminhamento,
+        ato_emitido=ato_emitido, departamento_origem=None,
+    )
+
+
+CONFIG_ENRIQUECEDOR[("B", "CCAE")] = extrair_ccae
 
 
 def main() -> None:

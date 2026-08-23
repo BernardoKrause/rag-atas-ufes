@@ -143,6 +143,53 @@ def test_extrair_generico_sem_palavra_chave_retorna_none():
     assert campos.assunto == texto.strip()
 
 
+def test_extrair_ccae_resolucao_setenta_e_nove():
+    from app.ingestion.enriquecedor import extrair_ccae
+
+    texto = (
+        '3.2 Ajustes de formação. Aprovado por unanimidade. Baixada a RESOLUÇÃO NÚMERO SETENTA '
+        'E NOVE, DE VINTE E OITO DE JANEIRO DE DOIS MIL E VINTE E CINCO. Revoga-se a Resolução '
+        'CCAE/Ufes nº 62, de 21 de fevereiro de 2024, deste Conselho.'
+    )
+    campos = extrair_ccae(texto, date(2025, 1, 28))
+    assert campos.ato_emitido == "RESOLUCAO_79_2025"
+    assert campos.tipo_desfecho == "Aprovado"
+
+
+def test_extrair_ccae_decisao_tres_barra():
+    from app.ingestion.enriquecedor import extrair_ccae
+
+    texto = 'Aprovado por unanimidade. Baixada a DECISÃO NÚMERO TRÊS BARRA DOIS MIL E VINTE E CINCO.'
+    campos = extrair_ccae(texto, date(2025, 1, 28))
+    assert campos.ato_emitido == "DECISAO_3_2025"
+
+
+def test_extrair_ccae_sem_ato_emitido():
+    from app.ingestion.enriquecedor import extrair_ccae
+
+    texto = '3.3 Processo digital nº 23068.001468/2025-07 – Encaminha, para conhecimento.'
+    campos = extrair_ccae(texto, date(2025, 1, 28))
+    assert campos.ato_emitido is None
+
+
+def test_extrair_ccae_contra_fixture_real(db_session):
+    from pathlib import Path
+    from app.ingestion.pipeline import executar_pipeline
+    from app.ingestion.segmentador import segmentar_e_persistir
+    from app.ingestion.enriquecedor import enriquecer_e_persistir
+
+    fixtures = Path(__file__).parent.parent / "fixtures" / "atas_sample"
+    documentos = executar_pipeline(fixtures, b"chave-de-teste-nao-usar-em-producao", db_session)
+    ccae = next(d for d in documentos if d.nome_arquivo == "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf")
+    itens = segmentar_e_persistir(ccae, db_session)
+
+    enriquecer_e_persistir(ccae, itens, db_session)
+
+    atos = [i.ato_emitido for i in itens if i.ato_emitido]
+    assert "RESOLUCAO_79_2025" in atos
+    assert any(a.startswith("DECISAO_") for a in atos)
+
+
 def test_extrair_generico_contra_fixtures_reais(db_session):
     from pathlib import Path
     from app.ingestion.pipeline import executar_pipeline
