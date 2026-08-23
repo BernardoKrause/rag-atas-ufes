@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable
@@ -67,6 +69,46 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
         item.ato_emitido = campos.ato_emitido
         item.departamento_origem = campos.departamento_origem
     sessao.flush()
+
+
+RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
+RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-]+?)\s*-")
+
+_DESFECHO_CT = {
+    "APROVADO": "Aprovado", "HOMOLOGADO": "Aprovado", "REPROVADO": "Reprovado",
+    "RETIRADO": "Retirado", "ADIADO": "Adiado", "ENCAMINHADO": "Encaminhado",
+}
+
+
+def _normalizar_departamento(bruto: str) -> str:
+    sem_acento = unicodedata.normalize("NFKD", bruto).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
+
+
+def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
+    corpo = extrair_corpo_sem_marcador("PAUTA", texto)
+
+    match_dep = RE_DEPARTAMENTO_CT.search(corpo)
+    departamento_origem = _normalizar_departamento(match_dep.group(1)) if match_dep else None
+
+    match_decisao = RE_DECISAO_CT.search(corpo)
+    if match_decisao:
+        chave = match_decisao.group(1).upper()
+        tipo_desfecho = _DESFECHO_CT.get(chave)
+        resultado_votacao = match_decisao.group(2).strip() or None
+        assunto = corpo[:match_decisao.start()].strip(" .")
+    else:
+        tipo_desfecho, resultado_votacao = None, None
+        assunto = corpo.strip(" .")
+
+    return CamposEnriquecidos(
+        assunto=assunto or None, tipo_desfecho=tipo_desfecho, resultado_votacao=resultado_votacao,
+        encaminhamento=None, ato_emitido=None, departamento_origem=departamento_origem,
+    )
+
+
+CONFIG_ENRIQUECEDOR[("B", "CT")] = extrair_ct
+CONFIG_ENRIQUECEDOR[("A", "CEUNES")] = extrair_ct
 
 
 def main() -> None:

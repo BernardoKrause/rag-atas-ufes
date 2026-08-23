@@ -75,3 +75,43 @@ def test_extrair_corpo_sem_marcador_pontilhado():
     texto = '4.3. Apreciação com sugestões para aprimoramento da proposta. Decisão: Aprovado.'
     corpo = extrair_corpo_sem_marcador("INFORMES", texto)
     assert corpo.startswith("Apreciação")
+
+
+def test_extrair_ct_aprovado_com_departamento():
+    from app.ingestion.enriquecedor import extrair_ct
+    texto = (
+        'PAUTA 2: Processo digital nº 23068.007249/2025-23 - homologação de "ad referendum" '
+        '- Departamento de Informática - Interrupção, a partir do dia 17/05/2025, da licença '
+        'para capacitação do Prof. PESSOA_0001. Decisão: Homologado(a).'
+    )
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.departamento_origem == "INFORMATICA"
+    assert "Interrupção" in campos.assunto
+    assert "Decisão" not in campos.assunto
+
+
+def test_extrair_ct_retirado_sem_departamento():
+    from app.ingestion.enriquecedor import extrair_ct
+    texto = 'PAUTA 5: Processo digital nº 23068.000001/2025-00 - Análise de recurso. Decisão: Retirado(a).'
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.tipo_desfecho == "Retirado"
+    assert campos.departamento_origem is None
+
+
+def test_extrair_ct_contra_fixture_real(db_session):
+    from pathlib import Path
+    from app.ingestion.pipeline import executar_pipeline
+    from app.ingestion.segmentador import segmentar_e_persistir
+    from app.ingestion.enriquecedor import enriquecer_e_persistir
+
+    fixtures = Path(__file__).parent.parent / "fixtures" / "atas_sample"
+    documentos = executar_pipeline(fixtures, b"chave-de-teste-nao-usar-em-producao", db_session)
+    ct = next(d for d in documentos if d.nome_arquivo == "10-2025.pdf")
+    itens = segmentar_e_persistir(ct, db_session)
+
+    enriquecer_e_persistir(ct, itens, db_session)
+
+    desfechos = {i.tipo_desfecho for i in itens if i.tipo_desfecho}
+    assert desfechos <= {"Aprovado", "Reprovado", "Encaminhado", "Adiado", "Retirado"}
+    assert any(i.departamento_origem == "INFORMATICA" for i in itens)
