@@ -221,3 +221,29 @@ def test_criar_nos_assunto_pula_grupo_sem_assunto():
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_criar_no_item_com_pagina_inicio_none_nao_levanta_excecao():
+    from app.grafo.construtor import criar_no_item
+
+    item = ItemPauta(
+        documento_id=999006, item_id_canonico="999006_PAUTA_1", secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: Processo digital nº PROCESSO_0055 - Interrupção de licença.",
+        pagina_inicio=None, pagina_fim=None,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        criar_no_item(driver, 999001, item)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (i:ItemPauta {item_id_canonico: $id})-[:MENCIONA]->(p:Processo) RETURN p.token AS token",
+            id="999006_PAUTA_1",
+        )
+        assert resultado == [{"token": "PROCESSO_0055"}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()

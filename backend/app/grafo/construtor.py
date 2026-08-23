@@ -63,7 +63,8 @@ def criar_no_item(driver: Driver, documento_id: int, item: ItemPauta) -> None:
             driver,
             "MATCH (i:ItemPauta {item_id_canonico: $item_id}) "
             "MERGE (p:Processo {token: $token}) "
-            "MERGE (i)-[:MENCIONA {pagina: $pagina, trecho: $trecho}]->(p)",
+            "MERGE (i)-[r:MENCIONA]->(p) "
+            "SET r.pagina = $pagina, r.trecho = $trecho",
             item_id=item.item_id_canonico, token=token,
             pagina=item.pagina_inicio, trecho=item.texto[:500],
         )
