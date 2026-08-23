@@ -364,3 +364,170 @@ def test_criar_no_deliberacao_pula_encaminhamento_quando_falsy(db_session):
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_resolver_citacoes_deliberacao_cria_relacao_revoga(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item, resolver_citacoes_deliberacao
+
+    item_antigo = ItemPauta(
+        item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: texto antigo", tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_62_2024",
+    )
+    item_novo = ItemPauta(
+        item_id_canonico="999001_PAUTA_5", documento_id=999001, secao="PAUTA", numero_item="5",
+        texto="PAUTA 5: Baixada a RESOLUÇÃO NÚMERO SETENTA E NOVE. Revoga-se a Resolução nº 62, de 21 de fevereiro de 2024.",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_79_2025",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        for item in (item_antigo, item_novo):
+            criar_no_item(driver, 999001, item)
+            criar_no_deliberacao(driver, item)
+
+        resolver_citacoes_deliberacao(driver, [item_antigo, item_novo])
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (nova:Deliberação {item_id_canonico: '999001_PAUTA_5'})-[:revoga]->(antiga:Deliberação) "
+            "RETURN antiga.item_id_canonico AS id",
+        )
+        assert resultado == [{"id": "999001_PAUTA_1"}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_resolver_citacoes_deliberacao_cria_relacao_altera_com_ano_barra(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item, resolver_citacoes_deliberacao
+
+    item_antigo = ItemPauta(
+        item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: texto antigo", tipo_desfecho="Aprovado", ato_emitido="DECISAO_50_2024",
+    )
+    item_novo = ItemPauta(
+        item_id_canonico="999001_PAUTA_5", documento_id=999001, secao="PAUTA", numero_item="5",
+        texto="PAUTA 5: Altera-se a Decisão Nº 50/2024 conforme deliberado.",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_79_2025",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        for item in (item_antigo, item_novo):
+            criar_no_item(driver, 999001, item)
+            criar_no_deliberacao(driver, item)
+
+        resolver_citacoes_deliberacao(driver, [item_antigo, item_novo])
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (nova:Deliberação {item_id_canonico: '999001_PAUTA_5'})-[:altera]->(antiga:Deliberação) "
+            "RETURN antiga.item_id_canonico AS id",
+        )
+        assert resultado == [{"id": "999001_PAUTA_1"}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_resolver_citacoes_deliberacao_nao_cria_relacao_quando_ato_citado_nao_existe(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item, resolver_citacoes_deliberacao
+
+    item_novo = ItemPauta(
+        item_id_canonico="999001_PAUTA_5", documento_id=999001, secao="PAUTA", numero_item="5",
+        texto="PAUTA 5: Revoga-se a Resolução nº 999, de 1 de janeiro de 2020.",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_79_2025",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        criar_no_item(driver, 999001, item_novo)
+        criar_no_deliberacao(driver, item_novo)
+
+        resolver_citacoes_deliberacao(driver, [item_novo])
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:Deliberação {item_id_canonico: '999001_PAUTA_5'})-[r:revoga]->() RETURN count(r) AS total",
+        )
+        assert resultado == [{"total": 0}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_criar_relacao_mesmo_assunto_liga_deliberacoes_do_mesmo_grupo(db_session):
+    from app.grafo.construtor import agrupar_assuntos, criar_no_deliberacao, criar_no_item, criar_relacao_mesmo_assunto
+
+    item_a = ItemPauta(
+        item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: menciona PROCESSO_2024001", assunto="Bolsas de pesquisa",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_1_2024",
+    )
+    item_b = ItemPauta(
+        item_id_canonico="999001_PAUTA_2", documento_id=999001, secao="PAUTA", numero_item="2",
+        texto="PAUTA 2: retoma PROCESSO_2024001", assunto="Bolsas de pesquisa",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_2_2024",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        for item in (item_a, item_b):
+            criar_no_item(driver, 999001, item)
+            criar_no_deliberacao(driver, item)
+
+        agrupamento = agrupar_assuntos([item_a, item_b])
+        criar_relacao_mesmo_assunto(driver, agrupamento)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:Deliberação {item_id_canonico: '999001_PAUTA_1'})"
+            "-[:trata_do_mesmo_assunto]->(:Deliberação {item_id_canonico: '999001_PAUTA_2'}) "
+            "RETURN count(*) AS total",
+        )
+        assert resultado == [{"total": 1}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_criar_relacao_mesmo_assunto_nao_liga_quando_so_um_item_tem_deliberacao(db_session):
+    from app.grafo.construtor import agrupar_assuntos, criar_no_deliberacao, criar_no_item, criar_relacao_mesmo_assunto
+
+    item_a = ItemPauta(
+        item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: menciona PROCESSO_2024001", assunto="Bolsas de pesquisa",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_1_2024",
+    )
+    item_b = ItemPauta(
+        item_id_canonico="999001_PAUTA_2", documento_id=999001, secao="PAUTA", numero_item="2",
+        texto="PAUTA 2: retoma PROCESSO_2024001", assunto="Bolsas de pesquisa",
+        tipo_desfecho=None,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        for item in (item_a, item_b):
+            criar_no_item(driver, 999001, item)
+            criar_no_deliberacao(driver, item)
+
+        agrupamento = agrupar_assuntos([item_a, item_b])
+        criar_relacao_mesmo_assunto(driver, agrupamento)
+
+        resultado = executar_leitura(
+            driver, "MATCH ()-[r:trata_do_mesmo_assunto]->() RETURN count(r) AS total",
+        )
+        assert resultado == [{"total": 0}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()

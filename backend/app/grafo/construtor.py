@@ -169,3 +169,48 @@ def criar_no_deliberacao(driver: Driver, item: ItemPauta) -> None:
             "MERGE (del)-[:GERA]->(enc)",
             item_id=item.item_id_canonico, texto=item.encaminhamento,
         )
+
+
+RE_CITACAO_DELIBERACAO = re.compile(
+    r"(Revoga-se|Altera-se|Substitui-se)\s+a\s+(Resolu[çc][ãa]o|Decis[ãa]o)"
+    r"(?:\s+[A-Z/]+)?\s+n?[º°.o]*\s*(\d+)(?:/(\d{4})|,\s*de\s+\d{1,2}\s+de\s+\w+\s+de\s+(\d{4}))",
+    re.IGNORECASE,
+)
+
+_RELACAO_POR_VERBO = {"REVOGA-SE": "revoga", "ALTERA-SE": "altera", "SUBSTITUI-SE": "substitui"}
+
+
+def resolver_citacoes_deliberacao(driver: Driver, itens: list[ItemPauta]) -> None:
+    for item in itens:
+        for match in RE_CITACAO_DELIBERACAO.finditer(item.texto):
+            verbo = match.group(1).upper()
+            tipo = "RESOLUCAO" if match.group(2).upper().startswith("RESOLU") else "DECISAO"
+            numero = match.group(3)
+            ano = match.group(4) or match.group(5)
+            if ano is None:
+                continue
+            ato_citado = f"{tipo}_{int(numero)}_{ano}"
+            relacao = _RELACAO_POR_VERBO[verbo]
+            executar_escrita(
+                driver,
+                f"""
+                MATCH (nova:Deliberação {{item_id_canonico: $item_id}})
+                MATCH (antiga:Deliberação {{ato_emitido: $ato_citado}})
+                MERGE (nova)-[:{relacao}]->(antiga)
+                """,
+                item_id=item.item_id_canonico, ato_citado=ato_citado,
+            )
+
+
+def criar_relacao_mesmo_assunto(driver: Driver, agrupamento: dict[str, list[ItemPauta]]) -> None:
+    for membros in agrupamento.values():
+        ids_com_deliberacao = [i.item_id_canonico for i in membros if i.tipo_desfecho is not None]
+        for i, id_a in enumerate(ids_com_deliberacao):
+            for id_b in ids_com_deliberacao[i + 1:]:
+                executar_escrita(
+                    driver,
+                    "MATCH (a:Deliberação {item_id_canonico: $id_a}) "
+                    "MATCH (b:Deliberação {item_id_canonico: $id_b}) "
+                    "MERGE (a)-[:trata_do_mesmo_assunto]->(b)",
+                    id_a=id_a, id_b=id_b,
+                )
