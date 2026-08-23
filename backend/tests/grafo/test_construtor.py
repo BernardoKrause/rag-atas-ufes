@@ -275,3 +275,92 @@ def test_criar_no_deliberacao_cria_deliberacao_e_encaminhamento(db_session):
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_criar_no_deliberacao_com_resultado_votacao_e_ato_emitido_none(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item
+
+    item = ItemPauta(
+        item_id_canonico="999001_PAUTA_4", documento_id=999001, secao="PAUTA", numero_item="4",
+        texto="PAUTA 4: texto", tipo_desfecho="Aprovado", resultado_votacao=None,
+        encaminhamento=None, ato_emitido=None, pagina_inicio=3,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        criar_no_item(driver, 999001, item)
+        criar_no_deliberacao(driver, item)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: $id})-[:GERA]->(del:Deliberação) "
+            "RETURN del.tipo_desfecho AS desfecho, del.resultado_votacao AS resultado, del.ato_emitido AS ato",
+            id="999001_PAUTA_4",
+        )
+        assert resultado == [{"desfecho": "Aprovado", "resultado": None, "ato": None}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_criar_no_deliberacao_pula_quando_tipo_desfecho_none(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item
+
+    item = ItemPauta(
+        item_id_canonico="999001_PAUTA_5", documento_id=999001, secao="PAUTA", numero_item="5",
+        texto="PAUTA 5: texto", tipo_desfecho=None, resultado_votacao=None,
+        encaminhamento=None, ato_emitido=None, pagina_inicio=4,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        criar_no_item(driver, 999001, item)
+        criar_no_deliberacao(driver, item)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: $id})-[:GERA]->(del:Deliberação) RETURN count(del) AS total",
+            id="999001_PAUTA_5",
+        )
+        assert resultado == [{"total": 0}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_criar_no_deliberacao_pula_encaminhamento_quando_falsy(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item
+
+    item = ItemPauta(
+        item_id_canonico="999001_PAUTA_6", documento_id=999001, secao="PAUTA", numero_item="6",
+        texto="PAUTA 6: texto", tipo_desfecho="Aprovado", resultado_votacao="unanimidade",
+        encaminhamento=None, ato_emitido="RESOLUCAO_80_2025", pagina_inicio=5,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        criar_no_item(driver, 999001, item)
+        criar_no_deliberacao(driver, item)
+
+        resultado_deliberacao = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: $id})-[:GERA]->(del:Deliberação) RETURN count(del) AS total",
+            id="999001_PAUTA_6",
+        )
+        assert resultado_deliberacao == [{"total": 1}]
+
+        resultado_encaminhamento = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: $id})-[:GERA]->(del:Deliberação)-[:GERA]->(enc:Encaminhamento) RETURN count(enc) AS total",
+            id="999001_PAUTA_6",
+        )
+        assert resultado_encaminhamento == [{"total": 0}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
