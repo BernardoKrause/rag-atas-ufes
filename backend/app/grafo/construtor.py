@@ -142,3 +142,30 @@ def criar_nos_assunto(driver: Driver, agrupamento: dict[str, list[ItemPauta]]) -
                 item_id=item.item_id_canonico, assunto_id=assunto_id,
                 pagina=item.pagina_inicio, trecho=(item.assunto or "")[:500],
             )
+
+
+def criar_no_deliberacao(driver: Driver, item: ItemPauta) -> None:
+    if item.tipo_desfecho is None:
+        return
+    executar_escrita(
+        driver,
+        """
+        MATCH (i:ItemPauta {item_id_canonico: $item_id})
+        MERGE (del:Deliberação {item_id_canonico: $item_id})
+        SET del.tipo_desfecho = $tipo_desfecho, del.resultado_votacao = $resultado_votacao,
+            del.ato_emitido = $ato_emitido, del.pagina = $pagina
+        MERGE (i)-[:GERA]->(del)
+        """,
+        item_id=item.item_id_canonico, tipo_desfecho=item.tipo_desfecho,
+        resultado_votacao=item.resultado_votacao, ato_emitido=item.ato_emitido,
+        pagina=item.pagina_inicio,
+    )
+    if item.encaminhamento:
+        executar_escrita(
+            driver,
+            "MATCH (del:Deliberação {item_id_canonico: $item_id}) "
+            "MERGE (enc:Encaminhamento {item_id_canonico: $item_id}) "
+            "SET enc.texto = $texto "
+            "MERGE (del)-[:GERA]->(enc)",
+            item_id=item.item_id_canonico, texto=item.encaminhamento,
+        )

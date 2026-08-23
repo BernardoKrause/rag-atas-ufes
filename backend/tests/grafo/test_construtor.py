@@ -247,3 +247,31 @@ def test_criar_no_item_com_pagina_inicio_none_nao_levanta_excecao():
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_criar_no_deliberacao_cria_deliberacao_e_encaminhamento(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item
+
+    item = ItemPauta(
+        item_id_canonico="999001_PAUTA_3", documento_id=999001, secao="PAUTA", numero_item="3",
+        texto="PAUTA 3: texto", tipo_desfecho="Aprovado", resultado_votacao="unanimidade",
+        encaminhamento="publicar no boletim", ato_emitido="RESOLUCAO_79_2025", pagina_inicio=2,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        criar_no_item(driver, 999001, item)
+        criar_no_deliberacao(driver, item)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: $id})-[:GERA]->(del:Deliberação)-[:GERA]->(enc:Encaminhamento) "
+            "RETURN del.tipo_desfecho AS desfecho, del.ato_emitido AS ato, enc.texto AS encaminhamento",
+            id="999001_PAUTA_3",
+        )
+        assert resultado == [{"desfecho": "Aprovado", "ato": "RESOLUCAO_79_2025", "encaminhamento": "publicar no boletim"}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
