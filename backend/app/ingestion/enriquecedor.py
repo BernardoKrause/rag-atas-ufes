@@ -130,14 +130,14 @@ _DESFECHO_GENERICO = {
 def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
     corpo = texto.strip()
 
-    matches = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))
-    if not matches:
+    ocorrencias = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))
+    if not ocorrencias:
         return CamposEnriquecidos(
             assunto=corpo or None, tipo_desfecho=None, resultado_votacao=None,
             encaminhamento=None, ato_emitido=None, departamento_origem=None,
         )
 
-    ultimo = matches[-1]
+    ultimo = ocorrencias[-1]
     chave = re.sub(r"S$", "", ultimo.group(1).upper())
     if chave not in _DESFECHO_GENERICO and ultimo.group(1).upper() in _DESFECHO_GENERICO:
         chave = ultimo.group(1).upper()
