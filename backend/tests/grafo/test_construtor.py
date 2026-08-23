@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.grafo.cliente import executar_leitura, obter_driver
+from app.grafo.cliente import executar_escrita, executar_leitura, obter_driver
 from app.grafo.construtor import criar_no_ata, limpar_grafo
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
@@ -163,6 +163,61 @@ def test_criar_nos_assunto_cria_relacoes_trata_de(db_session):
             driver, "MATCH (:Assunto)<-[:TRATA_DE]-(i:ItemPauta) RETURN count(i) AS total"
         )
         assert resultado == [{"total": 2}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_criar_nos_assunto_com_pagina_inicio_none_nao_levanta_excecao():
+    from app.grafo.construtor import agrupar_assuntos, criar_nos_assunto
+
+    item1 = ItemPauta(
+        item_id_canonico="999003_PAUTA_1", documento_id=999003, secao="PAUTA", numero_item="1",
+        texto="PROCESSO_0077 assunto", assunto="Assunto sem pagina registrada",
+        pagina_inicio=None, pagina_fim=None,
+    )
+    item2 = ItemPauta(
+        item_id_canonico="999004_PAUTA_1", documento_id=999004, secao="PAUTA", numero_item="1",
+        texto="PROCESSO_0077 mesmo processo", assunto="Texto diferente",
+        pagina_inicio=3, pagina_fim=3,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        for item in (item1, item2):
+            executar_escrita(driver, "MERGE (:ItemPauta {item_id_canonico: $id})", id=item.item_id_canonico)
+
+        agrupamento = agrupar_assuntos([item1, item2])
+        criar_nos_assunto(driver, agrupamento)
+
+        resultado = executar_leitura(
+            driver, "MATCH (:Assunto)<-[:TRATA_DE]-(i:ItemPauta) RETURN count(i) AS total"
+        )
+        assert resultado == [{"total": 2}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_criar_nos_assunto_pula_grupo_sem_assunto():
+    from app.grafo.construtor import agrupar_assuntos, criar_nos_assunto
+
+    item = ItemPauta(
+        item_id_canonico="999005_PAUTA_1", documento_id=999005, secao="PAUTA", numero_item="1",
+        texto="sem processo e sem assunto", assunto=None, pagina_inicio=1, pagina_fim=1,
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        executar_escrita(driver, "MERGE (:ItemPauta {item_id_canonico: $id})", id=item.item_id_canonico)
+
+        agrupamento = agrupar_assuntos([item])
+        criar_nos_assunto(driver, agrupamento)
+
+        resultado = executar_leitura(driver, "MATCH (s:Assunto) RETURN count(s) AS total")
+        assert resultado == [{"total": 0}]
     finally:
         limpar_grafo(driver)
         driver.close()

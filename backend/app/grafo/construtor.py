@@ -136,7 +136,8 @@ def criar_nos_assunto(driver: Driver, agrupamento: dict[str, list[ItemPauta]]) -
                 driver,
                 "MATCH (i:ItemPauta {item_id_canonico: $item_id}) "
                 "MATCH (s:Assunto {assunto_id: $assunto_id}) "
-                "MERGE (i)-[:TRATA_DE {pagina: $pagina, trecho: $trecho}]->(s)",
+                "MERGE (i)-[r:TRATA_DE]->(s) "
+                "SET r.pagina = $pagina, r.trecho = $trecho",
                 item_id=item.item_id_canonico, assunto_id=assunto_id,
                 pagina=item.pagina_inicio, trecho=(item.assunto or "")[:500],
             )
