@@ -115,3 +115,46 @@ def test_extrair_ct_contra_fixture_real(db_session):
     desfechos = {i.tipo_desfecho for i in itens if i.tipo_desfecho}
     assert desfechos <= {"Aprovado", "Reprovado", "Encaminhado", "Adiado", "Retirado"}
     assert any(i.departamento_origem == "INFORMATICA" for i in itens)
+
+
+def test_extrair_generico_aprovado_unanimidade():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = '1) Proc. 23068.001234/2025-11 Eleição de coordenador. Aprovado a unanimidade.'
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho == "Aprovado"
+    assert "unanimidade" in campos.resultado_votacao
+
+
+def test_extrair_generico_retirado():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = '4.3. Apreciação de estudante em situação de desligamento. Ponto de pauta retirado.'
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho == "Retirado"
+
+
+def test_extrair_generico_sem_palavra_chave_retorna_none():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = '2.1 Nova Resolução sobre EART, discussão em andamento.'
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho is None
+    assert campos.assunto == texto.strip()
+
+
+def test_extrair_generico_contra_fixtures_reais(db_session):
+    from pathlib import Path
+    from app.ingestion.pipeline import executar_pipeline
+    from app.ingestion.segmentador import segmentar_e_persistir
+    from app.ingestion.enriquecedor import enriquecer_e_persistir
+
+    fixtures = Path(__file__).parent.parent / "fixtures" / "atas_sample"
+    documentos = executar_pipeline(fixtures, b"chave-de-teste-nao-usar-em-producao", db_session)
+
+    for nome in ["ata_05_02_2025.pdf", "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf",
+                 "ata_da_3a_reuniao_ordinaria_colped.pdf", "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf"]:
+        documento = next(d for d in documentos if d.nome_arquivo == nome)
+        itens = segmentar_e_persistir(documento, db_session)
+        enriquecer_e_persistir(documento, itens, db_session)
+        assert any(i.tipo_desfecho is not None for i in itens), nome

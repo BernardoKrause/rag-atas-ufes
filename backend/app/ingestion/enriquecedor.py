@@ -111,6 +111,53 @@ CONFIG_ENRIQUECEDOR[("B", "CT")] = extrair_ct
 CONFIG_ENRIQUECEDOR[("A", "CEUNES")] = extrair_ct
 
 
+RE_PALAVRA_CHAVE_DESFECHO = re.compile(
+    r"\b(APROVAD[OA]S?|REPROVAD[OA]S?|RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?|ADIAD[OA]S?|"
+    r"ENCAMINHAD[OA]S?|HOMOLOGAD[OA]S?)\b",
+    re.IGNORECASE,
+)
+
+_DESFECHO_GENERICO = {
+    "APROVADO": "Aprovado", "APROVADA": "Aprovado", "APROVADOS": "Aprovado", "APROVADAS": "Aprovado",
+    "REPROVADO": "Reprovado", "REPROVADA": "Reprovado",
+    "RETIRADO": "Retirado", "RETIRADA": "Retirado",
+    "ADIADO": "Adiado", "ADIADA": "Adiado",
+    "ENCAMINHADO": "Encaminhado", "ENCAMINHADA": "Encaminhado",
+    "HOMOLOGADO": "Aprovado", "HOMOLOGADA": "Aprovado",
+}
+
+
+def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
+    corpo = texto.strip()
+
+    matches = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))
+    if not matches:
+        return CamposEnriquecidos(
+            assunto=corpo or None, tipo_desfecho=None, resultado_votacao=None,
+            encaminhamento=None, ato_emitido=None, departamento_origem=None,
+        )
+
+    ultimo = matches[-1]
+    chave = re.sub(r"S$", "", ultimo.group(1).upper())
+    if chave not in _DESFECHO_GENERICO and ultimo.group(1).upper() in _DESFECHO_GENERICO:
+        chave = ultimo.group(1).upper()
+    tipo_desfecho = _DESFECHO_GENERICO.get(ultimo.group(1).upper()) or _DESFECHO_GENERICO.get(chave)
+
+    inicio_frase = corpo.rfind(".", 0, ultimo.start()) + 1
+    resultado_votacao = corpo[inicio_frase:].strip(" .") or None
+    assunto = corpo[:inicio_frase].strip(" .") or corpo[:ultimo.start()].strip(" .")
+
+    return CamposEnriquecidos(
+        assunto=assunto or None, tipo_desfecho=tipo_desfecho, resultado_votacao=resultado_votacao,
+        encaminhamento=None, ato_emitido=None, departamento_origem=None,
+    )
+
+
+for _chave in [("B", "CAR"), ("B", "CCAE"), ("B", "CE"), ("B", "CCHN"), ("B", "CCE"),
+               ("A", "*"), ("C", "*"), ("D", "*")]:
+    CONFIG_ENRIQUECEDOR[_chave] = extrair_generico
+
+
 def main() -> None:
     engine = create_engine(settings.database_url)
     Sessao = sessionmaker(bind=engine)
