@@ -531,3 +531,31 @@ def test_criar_relacao_mesmo_assunto_nao_liga_quando_so_um_item_tem_deliberacao(
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_construir_grafo_ponta_a_ponta(db_session):
+    from app.models.item_pauta import ItemPauta
+    from app.grafo.construtor import construir_grafo
+
+    documento = _documento_teste()
+    itens = [
+        ItemPauta(
+            item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+            texto="PAUTA 1: PROCESSO_0001 texto. Decisão: Aprovado(a).",
+            assunto="Reforma", tipo_desfecho="Aprovado",
+        ),
+    ]
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        construir_grafo([(documento, itens)], driver)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:Ata)-[:CONTEM]->(i:ItemPauta)-[:GERA]->(:Deliberação) RETURN count(i) AS total",
+        )
+        assert resultado == [{"total": 1}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()

@@ -6,7 +6,7 @@ import unicodedata
 
 from neo4j import Driver
 
-from app.grafo.cliente import executar_escrita
+from app.grafo.cliente import executar_escrita, obter_driver
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -214,3 +214,52 @@ def criar_relacao_mesmo_assunto(driver: Driver, agrupamento: dict[str, list[Item
                     "MERGE (a)-[:trata_do_mesmo_assunto]->(b)",
                     id_a=id_a, id_b=id_b,
                 )
+
+
+def construir_grafo(documentos_com_itens: list[tuple[Documento, list[ItemPauta]]], driver: Driver) -> None:
+    limpar_grafo(driver)
+
+    todos_itens = []
+    for documento, itens in documentos_com_itens:
+        criar_no_ata(driver, documento)
+        for item in itens:
+            criar_no_item(driver, documento.id_documento, item)
+            criar_no_deliberacao(driver, item)
+            todos_itens.append(item)
+
+    agrupamento = agrupar_assuntos(todos_itens)
+    criar_nos_assunto(driver, agrupamento)
+    resolver_citacoes_deliberacao(driver, todos_itens)
+    criar_relacao_mesmo_assunto(driver, agrupamento)
+
+
+def main() -> None:
+    from sqlalchemy import create_engine, select
+    from sqlalchemy.orm import sessionmaker
+
+    from app.core.config import settings
+
+    engine = create_engine(settings.database_url)
+    Sessao = sessionmaker(bind=engine)
+    driver = obter_driver()
+
+    try:
+        with Sessao() as sessao:
+            documentos = sessao.execute(select(Documento)).scalars().all()
+            documentos_com_itens = [
+                (
+                    documento,
+                    sessao.execute(
+                        select(ItemPauta).where(ItemPauta.documento_id == documento.id_documento)
+                    ).scalars().all(),
+                )
+                for documento in documentos
+            ]
+            construir_grafo(documentos_com_itens, driver)
+            print(f"grafo reconstruido a partir de {len(documentos)} atas.")
+    finally:
+        driver.close()
+
+
+if __name__ == "__main__":
+    main()
