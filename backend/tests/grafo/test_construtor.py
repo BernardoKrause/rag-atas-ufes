@@ -559,3 +559,51 @@ def test_construir_grafo_ponta_a_ponta(db_session):
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def test_construir_grafo_cria_relacoes_cross_documento(db_session):
+    from app.models.item_pauta import ItemPauta
+    from app.grafo.construtor import construir_grafo
+
+    documento1 = Documento(
+        id_documento=999007, nome_arquivo="a.pdf", url_origem="a.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 8, 1), texto_limpo="texto",
+    )
+    documento2 = Documento(
+        id_documento=999008, nome_arquivo="b.pdf", url_origem="b.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 8, 8), texto_limpo="texto",
+    )
+    item1 = ItemPauta(
+        item_id_canonico="999007_PAUTA_1", documento_id=999007, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: menciona PROCESSO_2024001 texto.", assunto="Bolsas de pesquisa",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_1_2025",
+    )
+    item2 = ItemPauta(
+        item_id_canonico="999008_PAUTA_1", documento_id=999008, secao="PAUTA", numero_item="1",
+        texto="PAUTA 1: retoma PROCESSO_2024001 texto.", assunto="Bolsas de pesquisa",
+        tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_2_2025",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        construir_grafo([(documento1, [item1]), (documento2, [item2])], driver)
+
+        resultado_assunto = executar_leitura(
+            driver,
+            "MATCH (i1:ItemPauta {item_id_canonico: $id1})-[:TRATA_DE]->(s:Assunto)"
+            "<-[:TRATA_DE]-(i2:ItemPauta {item_id_canonico: $id2}) RETURN count(s) AS total",
+            id1="999007_PAUTA_1", id2="999008_PAUTA_1",
+        )
+        assert resultado_assunto == [{"total": 1}]
+
+        resultado_mesmo_assunto = executar_leitura(
+            driver,
+            "MATCH (:Deliberação {item_id_canonico: $id1})-[:trata_do_mesmo_assunto]->"
+            "(:Deliberação {item_id_canonico: $id2}) RETURN count(*) AS total",
+            id1="999007_PAUTA_1", id2="999008_PAUTA_1",
+        )
+        assert resultado_mesmo_assunto == [{"total": 1}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
