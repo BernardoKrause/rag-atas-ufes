@@ -99,6 +99,51 @@ def test_extrair_ct_retirado_sem_departamento():
     assert campos.departamento_origem is None
 
 
+def test_extrair_ct_departamento_terminado_por_ponto():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    # excerto real do item id=15079 (doc_id=492): nome do departamento e
+    # terminado por ponto final, nao por hifen, ao contrario do exemplo de
+    # calibracao original.
+    texto = (
+        'PAUTA 2: Documento avulso nº PROCESSO_2822 - Solicitação de ações para o '
+        'Monitoramento do Estudante Iniciante (MEI) - 2024/1 - Departamento de '
+        'Computação e Eletrônica (DCE). Apreciação da solicitação da CCCC/Ceunes e '
+        'Documento avulso nº PROCESSO_2821 DCE-Solicitação de ações para o '
+        'Monitoramento do Estudante Iniciante (MEI) - 2024/1. Decisão: Aprovado(a) '
+        'por unanimidade.'
+    )
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.departamento_origem == "COMPUTACAO_E_ELETRONICA_DCE"
+    assert len(campos.departamento_origem) <= 60
+
+
+def test_extrair_ct_departamento_incidental_excede_limite_retorna_none():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    # excerto real do item id=16349 (doc_id=540): "Departamento de" aparece de
+    # forma incidental numa afiliacao de membro externo de comissao, sem
+    # hifen nem ponto proximos para delimitar o nome - mesmo com o terminador
+    # ampliado (hifen OU ponto), o trecho capturado ainda estoura os 60
+    # caracteres da coluna (o primeiro ponto so aparece bem mais adiante, em
+    # "Profa."). Guarda defensiva deve descartar em vez de persistir uma
+    # string truncada/garbage.
+    texto = (
+        'PAUTA 4: Processo PROCESSO_3010 - Solicita apreciação de nomes para compor '
+        'Comissão Especial para avaliar a promoção do Professor PESSOA_0001, da '
+        'Classe D para a Classe E, conforme sugestão a seguir: Membro Interno: Prof. '
+        'PESSOA_0002 - Departamento de Ciências Agrárias e Biológicas, Centro '
+        'Universitário Norte do Espírito Santo, Universidade Federal do Espírito '
+        'Santo (UFES); Membro Externo: Profa. PESSOA_0003 Emissão: 25/07/2024 '
+        '09:23:44 Página 2/6 Documento assinado digitalmente conforme descrito '
+        'no(s) Protocolo(s) de Assinatura constante(s) neste arquivo, de onde é '
+        'possível verificar a autenticidade do mesmo. PESSOA_0004 - Decisão: '
+        'Aprovado(a) por unanimidade.'
+    )
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.departamento_origem is None
+
+
 def test_extrair_ct_contra_fixture_real(db_session):
     from pathlib import Path
     from app.ingestion.pipeline import executar_pipeline

@@ -73,7 +73,9 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
 
 
 RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
-RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-]+?)\s*-")
+RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-.]+?)\s*[-.]")
+
+LIMITE_DEPARTAMENTO_ORIGEM = 60
 
 _DESFECHO_CT = {
     "APROVADO": "Aprovado", "HOMOLOGADO": "Aprovado", "REPROVADO": "Reprovado",
@@ -81,9 +83,12 @@ _DESFECHO_CT = {
 }
 
 
-def _normalizar_departamento(bruto: str) -> str:
+def _normalizar_departamento(bruto: str) -> str | None:
     sem_acento = unicodedata.normalize("NFKD", bruto).encode("ascii", "ignore").decode("ascii")
-    return re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
+    normalizado = re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
+    if len(normalizado) > LIMITE_DEPARTAMENTO_ORIGEM:
+        return None
+    return normalizado
 
 
 def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
