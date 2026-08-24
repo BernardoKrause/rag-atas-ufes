@@ -36,6 +36,9 @@ docker/volumes/
 # --- Alembic ---
 # (versions/ tracked; nada a ignorar aqui além do padrão Python acima)
 
+# --- Saidas operacionais (geradas por scripts, não versionadas) ---
+backend/validacao_manual_grafo.csv
+
 # --- Superpowers (artefatos locais, não versionados) ---
 docs/superpowers/
 
