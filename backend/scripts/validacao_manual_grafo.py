@@ -13,17 +13,48 @@ from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
 SEMENTE_AMOSTRAGEM = 42
+LIMITE_ESTRATO_SUPLEMENTAR = 8
+DESFECHOS_RAROS = ("Reprovado", "Adiado")
+
+
+def _sortear(
+    candidatos: list[tuple[Documento, ItemPauta]],
+    limite: int | None,
+    ja_escolhidos: set[str],
+    aleatorio: random.Random,
+) -> list[tuple[Documento, ItemPauta]]:
+    disponiveis = [p for p in candidatos if p[1].item_id_canonico not in ja_escolhidos]
+    if limite is None:
+        escolhidos = disponiveis
+    else:
+        escolhidos = aleatorio.sample(disponiveis, min(limite, len(disponiveis)))
+    ja_escolhidos.update(p[1].item_id_canonico for p in escolhidos)
+    return escolhidos
 
 
 def amostrar_itens(pares: list[tuple[Documento, ItemPauta]], n_por_variante: int) -> list[tuple[Documento, ItemPauta]]:
+    """Estratificacao por variante mais estratos suplementares para os campos
+    raros: no corpus real ato_emitido aparece em 72/3552 itens e
+    departamento_origem em 113/3552, entao uma amostra puramente estratificada
+    por variante quase nunca cobre justamente os campos com menos calibracao."""
     por_variante: dict[tuple[str, str], list[tuple[Documento, ItemPauta]]] = {}
     for documento, item in pares:
         por_variante.setdefault((documento.tipo_orgao, documento.centro), []).append((documento, item))
 
     aleatorio = random.Random(SEMENTE_AMOSTRAGEM)
+    ja_escolhidos: set[str] = set()
     amostra = []
     for grupo in por_variante.values():
-        amostra.extend(aleatorio.sample(grupo, min(n_por_variante, len(grupo))))
+        amostra.extend(_sortear(grupo, n_por_variante, ja_escolhidos, aleatorio))
+
+    suplementares: list[tuple[list[tuple[Documento, ItemPauta]], int | None]] = [
+        ([p for p in pares if p[1].ato_emitido], LIMITE_ESTRATO_SUPLEMENTAR),
+        ([p for p in pares if p[1].departamento_origem], LIMITE_ESTRATO_SUPLEMENTAR),
+        ([p for p in pares if p[1].tipo_desfecho in DESFECHOS_RAROS], None),
+    ]
+    for candidatos, limite in suplementares:
+        amostra.extend(_sortear(candidatos, limite, ja_escolhidos, aleatorio))
+
     return amostra
 
 
@@ -63,9 +94,13 @@ def main() -> None:
         with Sessao() as sessao:
             pares = [
                 (documento, item)
-                for documento in sessao.execute(select(Documento)).scalars().all()
+                for documento in sessao.execute(
+                    select(Documento).order_by(Documento.id_documento)
+                ).scalars().all()
                 for item in sessao.execute(
-                    select(ItemPauta).where(ItemPauta.documento_id == documento.id_documento)
+                    select(ItemPauta)
+                    .where(ItemPauta.documento_id == documento.id_documento)
+                    .order_by(ItemPauta.id)
                 ).scalars().all()
             ]
             amostra = amostrar_itens(pares, n_por_variante=5)
