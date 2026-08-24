@@ -126,6 +126,48 @@ def test_agrupar_assuntos_por_texto_normalizado_identico():
     assert len(agrupamento) == 1
 
 
+def test_agrupar_assuntos_ignora_assunto_degenerado_como_sinal_fraco():
+    from app.grafo.construtor import agrupar_assuntos
+
+    # valores como "4" ou "Foi apreciada e" sao residuo de segmentacao, nao
+    # assunto: no corpus real o valor "4" sozinho juntava 12 itens de atas
+    # diferentes num unico componente.
+    itens = [
+        ItemPauta(
+            item_id_canonico=f"{i}_C", documento_id=i, secao="COMUNICACOES", numero_item="4",
+            texto="sem processo", assunto="4",
+        )
+        for i in range(1, 4)
+    ] + [
+        ItemPauta(
+            item_id_canonico=f"{i}_D", documento_id=i, secao="PAUTA", numero_item="1",
+            texto="sem processo", assunto="Foi apreciada e",
+        )
+        for i in range(4, 6)
+    ]
+
+    agrupamento = agrupar_assuntos(itens)
+
+    assert len(agrupamento) == len(itens)
+
+
+def test_agrupar_assuntos_ignora_degenerado_mas_mantem_sinal_forte_de_processo():
+    from app.grafo.construtor import agrupar_assuntos
+
+    item1 = ItemPauta(
+        item_id_canonico="1_E", documento_id=1, secao="PAUTA", numero_item="4",
+        texto="PROCESSO_0009 x", assunto="4",
+    )
+    item2 = ItemPauta(
+        item_id_canonico="2_E", documento_id=2, secao="PAUTA", numero_item="4",
+        texto="PROCESSO_0009 y", assunto="4",
+    )
+
+    agrupamento = agrupar_assuntos([item1, item2])
+
+    assert len(agrupamento) == 1
+
+
 def test_criar_nos_assunto_cria_relacoes_trata_de(db_session):
     from app.grafo.construtor import agrupar_assuntos, criar_no_item, criar_nos_assunto
 
@@ -457,6 +499,45 @@ def test_resolver_citacoes_deliberacao_nao_cria_relacao_quando_ato_citado_nao_ex
             "MATCH (:Deliberação {item_id_canonico: '999001_PAUTA_5'})-[r:revoga]->() RETURN count(r) AS total",
         )
         assert resultado == [{"total": 0}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_resolver_citacoes_deliberacao_com_ato_duplicado_cria_uma_unica_relacao(db_session):
+    from app.grafo.construtor import criar_no_deliberacao, criar_no_item, resolver_citacoes_deliberacao
+
+    # no corpus real DECISAO_32_2025 e DECISAO_34_2025 aparecem em dois itens
+    # cada (extracao imprecisa a montante): o MATCH casaria os dois nos e o
+    # MERGE criaria duas arestas, uma delas necessariamente errada.
+    itens_antigos = [
+        ItemPauta(
+            item_id_canonico=f"999001_PAUTA_{n}", documento_id=999001, secao="PAUTA", numero_item=str(n),
+            texto=f"PAUTA {n}: texto antigo", tipo_desfecho="Aprovado", ato_emitido="DECISAO_32_2025",
+        )
+        for n in (1, 2)
+    ]
+    item_novo = ItemPauta(
+        item_id_canonico="999001_PAUTA_5", documento_id=999001, secao="PAUTA", numero_item="5",
+        texto="PAUTA 5: Revoga-se a Decisão nº 32/2025 deste Conselho.",
+        tipo_desfecho="Aprovado", ato_emitido="DECISAO_90_2025",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, _documento_teste())
+        for item in [*itens_antigos, item_novo]:
+            criar_no_item(driver, 999001, item)
+            criar_no_deliberacao(driver, item)
+
+        resolver_citacoes_deliberacao(driver, [*itens_antigos, item_novo])
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:Deliberação {item_id_canonico: '999001_PAUTA_5'})-[r:revoga]->() RETURN count(r) AS total",
+        )
+        assert resultado == [{"total": 1}]
     finally:
         limpar_grafo(driver)
         driver.close()

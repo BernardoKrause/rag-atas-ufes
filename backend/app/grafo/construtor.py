@@ -91,11 +91,23 @@ def _normalizar_assunto(texto: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", sem_acento.upper())).strip()
 
 
+MIN_PALAVRAS_ASSUNTO = 3
+MIN_CARACTERES_ASSUNTO = 20
+
+
+def _assunto_e_sinal_util(chave: str) -> bool:
+    """Assunto curto demais e residuo de segmentacao ("4", "PROC", "FOI
+    APRECIADA E"), nao tema: usar como sinal fraco juntaria itens sem
+    relacao nenhuma. Calibrado no corpus real — este corte descarta os 8
+    grupos degenerados e preserva os 31 legitimos."""
+    return len(chave) >= MIN_CARACTERES_ASSUNTO and len(chave.split()) >= MIN_PALAVRAS_ASSUNTO
+
+
 def agrupar_assuntos(itens: list[ItemPauta]) -> dict[str, list[ItemPauta]]:
     """Componentes conectados: dois itens caem no mesmo Assunto se
     compartilham um token de Processo (sinal forte) ou tem assunto
-    normalizado identico (sinal fraco, risco de falso-positivo medido na
-    validacao manual — ver Task 15)."""
+    normalizado identico e suficientemente especifico (sinal fraco, risco de
+    falso-positivo medido na validacao manual — ver Task 15)."""
     uniao = UnionFind()
     for item in itens:
         uniao.find(item.item_id_canonico)
@@ -107,7 +119,7 @@ def agrupar_assuntos(itens: list[ItemPauta]) -> dict[str, list[ItemPauta]]:
             por_processo.setdefault(token, []).append(item)
         if item.assunto:
             chave = _normalizar_assunto(item.assunto)
-            if chave:
+            if _assunto_e_sinal_util(chave):
                 por_assunto.setdefault(chave, []).append(item)
 
     for grupo in list(por_processo.values()) + list(por_assunto.values()):
@@ -193,9 +205,13 @@ def resolver_citacoes_deliberacao(driver: Driver, itens: list[ItemPauta]) -> Non
             relacao = _RELACAO_POR_VERBO[verbo]
             executar_escrita(
                 driver,
+                # ato_emitido nao e unico no corpus real; sem o LIMIT o MERGE
+                # criaria uma aresta por no casado, e no maximo uma delas
+                # apontaria pra deliberacao de fato citada.
                 f"""
                 MATCH (nova:Deliberação {{item_id_canonico: $item_id}})
                 MATCH (antiga:Deliberação {{ato_emitido: $ato_citado}})
+                WITH nova, antiga ORDER BY antiga.item_id_canonico LIMIT 1
                 MERGE (nova)-[:{relacao}]->(antiga)
                 """,
                 item_id=item.item_id_canonico, ato_citado=ato_citado,
