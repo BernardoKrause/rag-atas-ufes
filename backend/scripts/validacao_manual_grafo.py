@@ -109,13 +109,14 @@ def main() -> None:
             for documento, item in amostra:
                 processos = executar_leitura(
                     driver,
-                    "MATCH (:ItemPauta {item_id_canonico: $id})-[:MENCIONA]->(p:Processo) RETURN p.token AS token",
+                    "MATCH (:ItemPauta {item_id_canonico: $id})-[:MENCIONA]->(p:Processo) "
+                    "RETURN p.token AS token ORDER BY token",
                     id=item.item_id_canonico,
                 )
                 relacoes_assunto = executar_leitura(
                     driver,
                     "MATCH (:ItemPauta {item_id_canonico: $id})-[:TRATA_DE]->(:Assunto)<-[:TRATA_DE]-(outro:ItemPauta) "
-                    "RETURN outro.item_id_canonico AS id",
+                    "RETURN outro.item_id_canonico AS id ORDER BY id",
                     id=item.item_id_canonico,
                 )
                 linhas.append(gerar_linha_csv(
