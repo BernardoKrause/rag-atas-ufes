@@ -41,7 +41,7 @@ def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
         match = marcador.match(texto)
         if match:
             return texto[match.end():].strip()
-    return texto
+    return texto.strip()
 
 
 CONFIG_ENRIQUECEDOR: dict[tuple[str, str], Callable[[str, date], CamposEnriquecidos]] = {}
@@ -88,7 +88,7 @@ def _normalizar_departamento(bruto: str) -> str | None:
     normalizado = re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
     if len(normalizado) > LIMITE_DEPARTAMENTO_ORIGEM:
         return None
-    return normalizado
+    return normalizado or None
 
 
 def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
@@ -135,7 +135,7 @@ _DESFECHO_GENERICO = {
 
 
 def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
-    corpo = texto.strip()
+    corpo = extrair_corpo_sem_marcador("", texto)
 
     ocorrencias = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))
     if not ocorrencias:

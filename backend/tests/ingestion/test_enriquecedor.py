@@ -205,7 +205,33 @@ def test_extrair_generico_sem_palavra_chave_retorna_none():
     texto = '2.1 Nova Resolução sobre EART, discussão em andamento.'
     campos = extrair_generico(texto, None)
     assert campos.tipo_desfecho is None
-    assert campos.assunto == texto.strip()
+    assert campos.assunto == 'Nova Resolução sobre EART, discussão em andamento.'
+
+
+def test_extrair_generico_remove_marcador_de_abertura_do_assunto():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    # o marcador do proprio item ("1.1", "3)") vazava pro assunto e quebrava a
+    # chave de merge cross-documento do Assunto no grafo.
+    campos = extrair_generico('1.1 Aprovação do calendário acadêmico. Aprovado por unanimidade.', None)
+    assert campos.assunto == 'Aprovação do calendário acadêmico'
+
+    campos_outro = extrair_generico('4.2 Aprovação do calendário acadêmico. Aprovado por unanimidade.', None)
+    assert campos_outro.assunto == campos.assunto
+
+
+def test_extrair_generico_nao_remove_numero_que_nao_e_marcador():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico('25 de fevereiro de 2025: leitura da ata. Aprovada.', None)
+    assert campos.assunto == '25 de fevereiro de 2025: leitura da ata'
+
+
+def test_normalizar_departamento_sem_alfanumerico_retorna_none():
+    from app.ingestion.enriquecedor import _normalizar_departamento
+
+    assert _normalizar_departamento(" -- ") is None
+    assert _normalizar_departamento("Informática") == "INFORMATICA"
 
 
 def test_extrair_ccae_resolucao_setenta_e_nove():
@@ -264,12 +290,17 @@ def test_extrair_generico_contra_fixtures_reais(db_session):
     fixtures = Path(__file__).parent.parent / "fixtures" / "atas_sample"
     documentos = executar_pipeline(fixtures, b"chave-de-teste-nao-usar-em-producao", db_session)
 
+    from app.ingestion.enriquecedor import extrair_corpo_sem_marcador
+
     for nome in ["ata_05_02_2025.pdf", "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf",
                  "ata_da_3a_reuniao_ordinaria_colped.pdf", "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf"]:
         documento = next(d for d in documentos if d.nome_arquivo == nome)
         itens = segmentar_e_persistir(documento, db_session)
         enriquecer_e_persistir(documento, itens, db_session)
         assert any(i.tipo_desfecho is not None for i in itens), nome
+        for item in itens:
+            if item.assunto:
+                assert extrair_corpo_sem_marcador("", item.assunto) == item.assunto, (nome, item.assunto)
 
 
 def test_todas_as_variantes_do_segmentador_tem_extrator_no_enriquecedor():
