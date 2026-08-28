@@ -22,8 +22,12 @@ RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 
 # proximidade da palavra "RG": nao ha formato nacional unico de RG, entao a
 # deteccao e por contexto (palavra-chave) em vez de regex solto — validado
-# contra o corpus real (342 documentos) sem nenhum falso positivo
-RE_RG = re.compile(r"\bRG[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE)
+# contra o corpus real (342 documentos) sem nenhum falso positivo. O "n[ºo°]"
+# opcional cobre a abreviatura "RG nº"/"RG n°"/"RG no", tao comum quanto "RG"
+# sozinho em documento institucional.
+RE_RG = re.compile(
+    r"\bRG\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE
+)
 
 RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
 
@@ -124,6 +128,35 @@ def _subtrair_intervalo(
     return pedacos
 
 
+def _remover_sobreposicoes(
+    *listas_intervalos: list[tuple[int, int]],
+) -> list[list[tuple[int, int]]]:
+    """As deteccoes de processo/e-mail/CPF/RG sao por regex exato e deveriam
+    ser mutuamente exclusivas, mas um sub-padrao pode coincidir por acidente
+    (ex.: um e-mail cujo local-part tem o formato de CPF). A substituicao
+    final assume spans disjuntos, entao mantem so o span mais longo entre os
+    que se sobrepoem — os demais sao descartados, nao recortados, porque sao
+    identificadores atomicos."""
+    todas = [
+        (inicio, fim, indice)
+        for indice, intervalos in enumerate(listas_intervalos)
+        for inicio, fim in intervalos
+    ]
+    todas.sort(key=lambda o: (-(o[1] - o[0]), o[0]))
+
+    aceitas: list[tuple[int, int, int]] = []
+    for inicio, fim, indice in todas:
+        if not any(inicio < f and i < fim for i, f, _ in aceitas):
+            aceitas.append((inicio, fim, indice))
+
+    resultado: list[list[tuple[int, int]]] = [[] for _ in listas_intervalos]
+    for inicio, fim, indice in aceitas:
+        resultado[indice].append((inicio, fim))
+    for intervalos in resultado:
+        intervalos.sort()
+    return resultado
+
+
 def _recortar_sobreposicao(
     intervalos_pessoa: list[tuple[int, int]],
     *outros_intervalos: list[tuple[int, int]],
@@ -212,6 +245,10 @@ def anonimizar_texto(
     ]
     intervalos_cpf = [(m.start(), m.end()) for m in RE_CPF.finditer(texto)]
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
+
+    intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg = _remover_sobreposicoes(
+        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg
+    )
 
     intervalos_pessoa = _recortar_sobreposicao(
         _achar_entidades_pessoa(texto),

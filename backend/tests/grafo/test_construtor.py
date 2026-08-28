@@ -1,9 +1,17 @@
 from datetime import date
 
 from app.grafo.cliente import executar_escrita, executar_leitura, obter_driver
-from app.grafo.construtor import criar_no_ata, limpar_grafo
+from app.grafo.construtor import UnionFind, criar_no_ata, limpar_grafo
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
+
+
+def test_union_find_suporta_cadeia_longa_sem_estourar_recursao():
+    uniao = UnionFind()
+    for i in range(5000):
+        uniao.union(str(i), str(i + 1))
+
+    assert uniao.find("0") == uniao.find("5000")
 
 
 def _documento_teste():

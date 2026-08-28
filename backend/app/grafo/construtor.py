@@ -76,9 +76,12 @@ class UnionFind:
 
     def find(self, x: str) -> str:
         self._pai.setdefault(x, x)
-        if self._pai[x] != x:
-            self._pai[x] = self.find(self._pai[x])
-        return self._pai[x]
+        raiz = x
+        while self._pai[raiz] != raiz:
+            raiz = self._pai[raiz]
+        while self._pai[x] != raiz:
+            self._pai[x], x = raiz, self._pai[x]
+        return raiz
 
     def union(self, x: str, y: str) -> None:
         raiz_x, raiz_y = self.find(x), self.find(y)

@@ -199,6 +199,14 @@ def test_extrair_generico_retirado():
     assert campos.tipo_desfecho == "Retirado"
 
 
+def test_extrair_generico_retirado_de_pauta():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = '1.1 Solicitação de bolsa. O item foi retirado de pauta.'
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho == "Retirado"
+
+
 def test_extrair_generico_sem_palavra_chave_retorna_none():
     from app.ingestion.enriquecedor import extrair_generico
 

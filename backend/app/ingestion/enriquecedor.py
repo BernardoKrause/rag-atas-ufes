@@ -145,10 +145,11 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
         )
 
     ultimo = ocorrencias[-1]
-    chave = re.sub(r"S$", "", ultimo.group(1).upper())
-    if chave not in _DESFECHO_GENERICO and ultimo.group(1).upper() in _DESFECHO_GENERICO:
-        chave = ultimo.group(1).upper()
-    tipo_desfecho = _DESFECHO_GENERICO.get(ultimo.group(1).upper()) or _DESFECHO_GENERICO.get(chave)
+    palavra = re.sub(r"\s+DE\s+PAUTA$", "", ultimo.group(1).upper())
+    chave = re.sub(r"S$", "", palavra)
+    if chave not in _DESFECHO_GENERICO and palavra in _DESFECHO_GENERICO:
+        chave = palavra
+    tipo_desfecho = _DESFECHO_GENERICO.get(palavra) or _DESFECHO_GENERICO.get(chave)
 
     inicio_frase = corpo.rfind(".", 0, ultimo.start()) + 1
     resultado_votacao = corpo[inicio_frase:].strip(" .") or None
