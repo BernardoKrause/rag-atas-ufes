@@ -11,7 +11,10 @@ NUM_10_19 = {
     "DEZ": 10, "ONZE": 11, "DOZE": 12, "TREZE": 13, "QUATORZE": 14, "CATORZE": 14,
     "QUINZE": 15, "DEZESSEIS": 16, "DEZESSETE": 17, "DEZOITO": 18, "DEZENOVE": 19,
 }
-NUM_DEZENA = {"VINTE": 20, "TRINTA": 30}
+NUM_DEZENA = {
+    "VINTE": 20, "TRINTA": 30, "QUARENTA": 40, "CINQUENTA": 50,
+    "SESSENTA": 60, "SETENTA": 70, "OITENTA": 80, "NOVENTA": 90,
+}
 ZERO = {"ZERO": 0}
 
 _RE_TOKEN = re.compile("[A-Z" + chr(0xC0) + "-" + chr(0xDE) + chr(0xFFFD) + "]+|\\d+")

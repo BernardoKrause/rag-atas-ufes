@@ -236,11 +236,25 @@ def test_rg_e_substituido_por_token(db_session):
     assert "RG_" in resultado
 
 
+def test_rg_com_abreviatura_no_e_substituido_por_token(db_session):
+    texto = "Portador do RG nº 28.631.510-6, compareceu à sessão."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "28.631.510-6" not in resultado
+    assert "RG_" in resultado
+
+
 def test_email_pessoal_e_substituido_por_token(db_session):
     texto = "Contato: marcus.v.almeida@ufes.br para mais informações."
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
     assert "marcus.v.almeida@ufes.br" not in resultado
     assert "EMAIL_" in resultado
+
+
+def test_email_com_local_part_no_formato_de_cpf_nao_corrompe_texto(db_session):
+    texto = "Contato: 123.456.789-00@ufes.br para mais informações."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "123.456.789-00@ufes.br" not in resultado
+    assert "para mais informações." in resultado
 
 
 def test_email_institucional_permanece_intacto(db_session):

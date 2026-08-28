@@ -40,4 +40,10 @@ class ItemPauta(Base):
     # Documento.paginas_offsets preenchido
     pagina_inicio: Mapped[int | None] = mapped_column(Integer, nullable=True)
     pagina_fim: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    assunto: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tipo_desfecho: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    resultado_votacao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    encaminhamento: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ato_emitido: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    departamento_origem: Mapped[str | None] = mapped_column(String(60), nullable=True)
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
