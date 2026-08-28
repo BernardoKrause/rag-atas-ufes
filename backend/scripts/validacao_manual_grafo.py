@@ -4,11 +4,12 @@ import csv
 import random
 from pathlib import Path
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 from app.grafo.cliente import executar_leitura, obter_driver
+from app.models.consultas import carregar_documentos_com_itens
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -94,14 +95,8 @@ def main() -> None:
         with Sessao() as sessao:
             pares = [
                 (documento, item)
-                for documento in sessao.execute(
-                    select(Documento).order_by(Documento.id_documento)
-                ).scalars().all()
-                for item in sessao.execute(
-                    select(ItemPauta)
-                    .where(ItemPauta.documento_id == documento.id_documento)
-                    .order_by(ItemPauta.id)
-                ).scalars().all()
+                for documento, itens in carregar_documentos_com_itens(sessao)
+                for item in itens
             ]
             amostra = amostrar_itens(pares, n_por_variante=5)
 

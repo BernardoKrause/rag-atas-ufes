@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 import re
-import unicodedata
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
+from app.core.texto import remover_acentos_maiusculo, slugificar
 from app.ingestion._extenso import parse_cardinal, tokenizar
 from app.ingestion.segmentador import (
     RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT, RE_ITEM_PONTILHADO,
 )
+from app.models.consultas import carregar_documentos_com_itens
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -84,8 +85,7 @@ _DESFECHO_CT = {
 
 
 def _normalizar_departamento(bruto: str) -> str | None:
-    sem_acento = unicodedata.normalize("NFKD", bruto).encode("ascii", "ignore").decode("ascii")
-    normalizado = re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
+    normalizado = slugificar(bruto)
     if len(normalizado) > LIMITE_DEPARTAMENTO_ORIGEM:
         return None
     return normalizado or None
@@ -189,7 +189,7 @@ def extrair_ccae(texto: str, data_reuniao: date) -> CamposEnriquecidos:
     if not match:
         return campos_base
 
-    tipo = _TIPO_ATO[unicodedata.normalize("NFKD", match.group(1)).encode("ascii", "ignore").decode("ascii").upper()]
+    tipo = _TIPO_ATO[remover_acentos_maiusculo(match.group(1))]
     numero = _extrair_numero_extenso(match.group(2).strip())
     ato_emitido = f"{tipo}_{numero}_{data_reuniao.year}" if numero is not None else None
 
@@ -208,16 +208,13 @@ def main() -> None:
     Sessao = sessionmaker(bind=engine)
 
     with Sessao() as sessao:
-        documentos = sessao.execute(select(Documento)).scalars().all()
+        documentos_com_itens = carregar_documentos_com_itens(sessao)
         total_itens = 0
-        for documento in documentos:
-            itens = sessao.execute(
-                select(ItemPauta).where(ItemPauta.documento_id == documento.id_documento)
-            ).scalars().all()
+        for documento, itens in documentos_com_itens:
             enriquecer_e_persistir(documento, itens, sessao)
             sessao.commit()
             total_itens += len(itens)
-        print(f"{len(documentos)} documentos processados, {total_itens} itens enriquecidos.")
+        print(f"{len(documentos_com_itens)} documentos processados, {total_itens} itens enriquecidos.")
 
 
 if __name__ == "__main__":

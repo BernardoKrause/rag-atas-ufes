@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import re
-import unicodedata
 
 from neo4j import Driver
 
+from app.core.texto import remover_acentos_maiusculo
 from app.grafo.cliente import executar_escrita, obter_driver
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
@@ -90,8 +90,8 @@ class UnionFind:
 
 
 def _normalizar_assunto(texto: str) -> str:
-    sem_acento = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
-    return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", sem_acento.upper())).strip()
+    sem_acento = remover_acentos_maiusculo(texto)
+    return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", sem_acento)).strip()
 
 
 MIN_PALAVRAS_ASSUNTO = 3
@@ -224,15 +224,23 @@ def resolver_citacoes_deliberacao(driver: Driver, itens: list[ItemPauta]) -> Non
 def criar_relacao_mesmo_assunto(driver: Driver, agrupamento: dict[str, list[ItemPauta]]) -> None:
     for membros in agrupamento.values():
         ids_com_deliberacao = [i.item_id_canonico for i in membros if i.tipo_desfecho is not None]
-        for i, id_a in enumerate(ids_com_deliberacao):
-            for id_b in ids_com_deliberacao[i + 1:]:
-                executar_escrita(
-                    driver,
-                    "MATCH (a:Deliberação {item_id_canonico: $id_a}) "
-                    "MATCH (b:Deliberação {item_id_canonico: $id_b}) "
-                    "MERGE (a)-[:trata_do_mesmo_assunto]->(b)",
-                    id_a=id_a, id_b=id_b,
-                )
+        pares = [
+            {"id_a": id_a, "id_b": id_b}
+            for i, id_a in enumerate(ids_com_deliberacao)
+            for id_b in ids_com_deliberacao[i + 1:]
+        ]
+        if not pares:
+            continue
+        executar_escrita(
+            driver,
+            """
+            UNWIND $pares AS par
+            MATCH (a:Deliberação {item_id_canonico: par.id_a})
+            MATCH (b:Deliberação {item_id_canonico: par.id_b})
+            MERGE (a)-[:trata_do_mesmo_assunto]->(b)
+            """,
+            pares=pares,
+        )
 
 
 def construir_grafo(documentos_com_itens: list[tuple[Documento, list[ItemPauta]]], driver: Driver) -> None:
@@ -253,10 +261,11 @@ def construir_grafo(documentos_com_itens: list[tuple[Documento, list[ItemPauta]]
 
 
 def main() -> None:
-    from sqlalchemy import create_engine, select
+    from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
     from app.core.config import settings
+    from app.models.consultas import carregar_documentos_com_itens
 
     engine = create_engine(settings.database_url)
     Sessao = sessionmaker(bind=engine)
@@ -264,18 +273,9 @@ def main() -> None:
 
     try:
         with Sessao() as sessao:
-            documentos = sessao.execute(select(Documento)).scalars().all()
-            documentos_com_itens = [
-                (
-                    documento,
-                    sessao.execute(
-                        select(ItemPauta).where(ItemPauta.documento_id == documento.id_documento)
-                    ).scalars().all(),
-                )
-                for documento in documentos
-            ]
+            documentos_com_itens = carregar_documentos_com_itens(sessao)
             construir_grafo(documentos_com_itens, driver)
-            print(f"grafo reconstruido a partir de {len(documentos)} atas.")
+            print(f"grafo reconstruido a partir de {len(documentos_com_itens)} atas.")
     finally:
         driver.close()
 

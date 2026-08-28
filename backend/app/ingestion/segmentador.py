@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-import unicodedata
 from bisect import bisect_right
 from dataclasses import dataclass
 from typing import Callable
@@ -10,6 +9,7 @@ from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
+from app.core.texto import slugificar
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -357,15 +357,10 @@ def mapear_pagina(offset: int, paginas_offsets: list[int] | None) -> int | None:
     return bisect_right(paginas_offsets, offset)
 
 
-def _slug_secao(secao: str) -> str:
-    sem_acento = unicodedata.normalize("NFKD", secao).encode("ascii", "ignore").decode("ascii")
-    return re.sub(r"[^A-Z0-9]+", "_", sem_acento.upper()).strip("_")
-
-
 def gerar_item_id_canonico(
     documento_id: int, secao: str, numero_item: str, ocorrencia_indice: int, fragmento_indice: int
 ) -> str:
-    base = f"{documento_id}_{_slug_secao(secao)}_{numero_item}"
+    base = f"{documento_id}_{slugificar(secao)}_{numero_item}"
     if ocorrencia_indice > 0:
         base = f"{base}_D{ocorrencia_indice}"
     if fragmento_indice > 0:
