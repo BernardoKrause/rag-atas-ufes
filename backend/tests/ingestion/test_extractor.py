@@ -6,6 +6,7 @@ import pytest
 
 from app.ingestion.extractor import (
     CENTRO_CAMPUS,
+    _remover_cabecalho_e_rodape_repetidos,
     extrair_campos,
     extrair_horario_inicio,
     extrair_local,
@@ -224,3 +225,95 @@ def test_extrair_texto_bruto_loga_aviso_do_mupdf_em_vez_de_vazar_pro_stderr(capl
         extrair_texto_bruto(caminho_qualquer)
 
     assert any("MuPDF" in registro.message for registro in caplog.records)
+
+
+CCENS_DB = FIXTURES / "TIPO_A__Camara_Departamental" / "CCENS_DB" / "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf"
+CAR = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CAR" / "ata_05_02_2025.pdf"
+CT = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CT" / "10-2025.pdf"
+CCHN_CAMARA_LOCAL = FIXTURES / "TIPO_C__Camara_Local_Tematica" / "CCHN_CamaraLocal_Graduacao" / "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf"
+CCENS_DC = FIXTURES / "TIPO_A__Camara_Departamental" / "CCENS_DC" / "ata_da_01a_reuniao_de_carater_ordinario_dc_29_01_2025.docx.pdf"
+CCENS_DC_2_PAGINAS = FIXTURES / "TIPO_A__Camara_Departamental" / "CCENS_DC" / "ata_da_08a_reuniao_de_carater_ordinario_dc_27_06_2025.docx.pdf"
+
+
+def test_extrair_texto_bruto_remove_cabecalho_institucional_repetido_da_pagina_seguinte():
+    texto, offsets = extrair_texto_bruto(CCENS_DB)
+    pagina2 = texto[offsets[1]:]
+
+    assert "Universidade Federal do Espírito Santo" not in pagina2
+    assert pagina2.lstrip().startswith("Pós-Graduação em Agroquímica")
+
+
+def test_extrair_texto_bruto_preserva_cabecalho_da_primeira_pagina():
+    texto, offsets = extrair_texto_bruto(CCENS_DB)
+    pagina1 = texto[offsets[0]:offsets[1]]
+
+    assert "Universidade Federal do Espírito Santo" in pagina1
+
+
+def test_extrair_texto_bruto_remove_cabecalho_repetido_em_multiplas_paginas():
+    texto, offsets = extrair_texto_bruto(CCHN_CAMARA_LOCAL)
+    pagina2 = texto[offsets[1]:]
+
+    assert "CONSELHO DEPARTAMENTAL" not in pagina2
+    assert pagina2.lstrip().startswith("encerrada a sessão")
+
+
+def test_extrair_texto_bruto_preserva_numero_isolado_de_pagina_sem_linha_fixa_de_rodape():
+    # a pagina termina so com o numero da pagina solto (ex.: "...de \n1 \n\n"), sem
+    # nenhuma linha fixa antes dele repetida entre paginas -- nao ha como distinguir
+    # com confianca de um numero que faca parte do proprio conteudo do item (ver
+    # caso real do fixture colped/CE-D), entao esse caso fica de fora de proposito
+    texto, offsets = extrair_texto_bruto(CCENS_DB)
+    pagina1 = texto[offsets[0]:offsets[1]]
+
+    assert pagina1.rstrip().endswith("1")
+
+
+def test_extrair_texto_bruto_remove_rodape_com_timestamp_fixo_e_contador_de_pagina_variavel():
+    texto, _offsets = extrair_texto_bruto(CT)
+
+    assert "Emissão: 11/03/2026 12:00:13" not in texto
+    assert "Página 1/8" not in texto
+    assert "Página 8/8" not in texto
+
+
+def test_extrair_texto_bruto_nao_remove_nada_quando_paginas_nao_repetem_conteudo():
+    texto, offsets = extrair_texto_bruto(CAR)
+    pagina2 = texto[offsets[1]:]
+
+    assert pagina2.lstrip().startswith("concessão da solicitação")
+
+
+def test_extrair_texto_bruto_remove_cabecalho_mesmo_com_linha_em_branco_extra_na_primeira_pagina():
+    # a 1a pagina desse documento real tem uma linha em branco a mais no topo do
+    # que as paginas seguintes (" \n \nUniversidade..." vs " \nUniversidade...")
+    # -- exigir que a 1a pagina bata linha a linha com as demais pra descobrir o
+    # cabecalho falharia aqui; o padrao precisa ser descoberto so entre as
+    # paginas 2+ quando ha pelo menos duas delas pra concordar entre si
+    texto, offsets = extrair_texto_bruto(CCENS_DC)
+    pagina2 = texto[offsets[1]:]
+
+    assert "Universidade Federal do Espírito Santo" not in pagina2
+    assert pagina2.lstrip().startswith("Campus e também sobre os cursos")
+
+
+def test_extrair_texto_bruto_remove_cabecalho_com_linha_em_branco_extra_em_documento_de_2_paginas():
+    # mesmo problema do teste anterior, mas no caso de fallback (documento com
+    # so 2 paginas, onde a 1a obrigatoriamente entra na comparacao porque nao ha
+    # nenhuma outra pagina pra descobrir o padrao sem ela)
+    texto, offsets = extrair_texto_bruto(CCENS_DC_2_PAGINAS)
+    pagina2 = texto[offsets[1]:]
+
+    assert "Universidade Federal do Espírito Santo" not in pagina2
+    assert pagina2.lstrip().startswith("exoneração oficialmente")
+
+
+def test_remove_cabecalho_nao_quebra_quando_primeira_pagina_e_mais_curta_que_as_outras():
+    # a pagina[0] entra na comparacao pra descobrir o cabecalho (mesmo nunca
+    # sendo alvo do corte) -- se ela for mais curta que as demais, o indice
+    # pode ultrapassar seu numero de linhas antes das outras paginas divergirem
+    paginas = _remover_cabecalho_e_rodape_repetidos(
+        ["CABECALHO\nFIXO", "CABECALHO\nFIXO\nCORPO1", "CABECALHO\nFIXO\nCORPO2"]
+    )
+
+    assert paginas == ["CABECALHO\nFIXO", "CORPO1", "CORPO2"]

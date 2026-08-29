@@ -46,6 +46,102 @@ def _normalizar_espacos(texto: str) -> str:
     return re.sub(r"\s+", " ", texto)
 
 
+# contador de pagina, tolerando um rotulo antes (ex.: "Página 3/8", ".2.", "56") --
+# a seguranca real contra falso positivo vem da confirmacao por linha fixa seguinte
+# em _contagem_de_linhas_repetidas, nao dessa regex sozinha
+RE_CONTADOR_PAGINA = re.compile(r"^.*\d{1,4}(?:\s*/\s*\d{1,4})?\s*\.?\s*$")
+
+# uma unica linha em branco batendo entre paginas nao e evidencia real de timbre
+# repetido (e comum por acaso); exige um minimo de conteudo nao-branco
+LIMIAR_CABECALHO_CHARS = 8
+
+
+def _linha(pagina: str, indice: int) -> str | None:
+    linhas = pagina.split("\n")
+    fora_do_range = indice >= len(linhas) if indice >= 0 else -indice > len(linhas)
+    return None if fora_do_range else linhas[indice]
+
+
+def _contagem_de_linhas_repetidas(paginas: list[str], inicio: int, passo: int) -> int:
+    """Anda linha a linha (do inicio de cada pagina em diante, ou do fim de cada
+    pagina pra tras, conforme `passo`) contando quantas sao identicas em TODAS as
+    paginas. Permite UMA linha com formato de contador de pagina (ex.: "Página 3/8",
+    ".2.") ficar de fora dessa igualdade, desde que a linha seguinte volte a bater
+    exatamente -- assim distingue timbre/rodape mecanico (que tem essas linhas fixas
+    ao redor do contador) de um numero solto que faz parte do proprio conteudo do
+    item (sem nenhuma linha fixa pra confirmar)."""
+    indice = inicio
+    confirmadas = 0
+    pendente_contador = False
+    while True:
+        linhas = [_linha(p, indice) for p in paginas]
+        if any(linha is None for linha in linhas):
+            break
+        if all(linha == linhas[0] for linha in linhas):
+            confirmadas = abs(indice - inicio) + 1
+            indice += passo
+            pendente_contador = False
+            continue
+        if not pendente_contador and all(RE_CONTADOR_PAGINA.match(linha) for linha in linhas):
+            pendente_contador = True
+            indice += passo
+            continue
+        break
+    return confirmadas
+
+
+def _sem_linhas_em_branco_no_topo(pagina: str) -> str:
+    linhas = pagina.split("\n")
+    indice = 0
+    while indice < len(linhas) and not linhas[indice].strip():
+        indice += 1
+    return "\n".join(linhas[indice:])
+
+
+def _remover_cabecalho_e_rodape_repetidos(paginas_texto: list[str]) -> list[str]:
+    """PDFs cujo modelo repete timbre institucional no topo e/ou rodape mecanico
+    (timestamp de emissao, contador de pagina) de cada pagina fazem esse conteudo
+    vazar pro meio da frase de qualquer item que atravesse uma quebra de pagina --
+    page.get_text() nao distingue corpo de cabecalho/rodape. Detecta comparando o
+    inicio/fim de todas as paginas do documento: o que se repete identico e removido.
+    O cabecalho da 1a pagina fica intacto (e o lugar legitimo do timbre); rodape e
+    removido de todas, inclusive a 1a (nunca e conteudo)."""
+    if len(paginas_texto) < 2:
+        return paginas_texto
+
+    n_rodape = _contagem_de_linhas_repetidas(paginas_texto, -1, -1)
+    sem_rodape = [
+        "\n".join(pagina.split("\n")[: len(pagina.split("\n")) - n_rodape])
+        for pagina in paginas_texto
+    ] if n_rodape else paginas_texto
+
+    # a pagina seguinte ao cabecalho as vezes tem uma linha em branco a
+    # mais/menos no topo que as demais (variacao real observada no corpus, ex.:
+    # 1a pagina com layout de capa ligeiramente diferente) -- sem normalizar
+    # isso fora, a igualdade linha a linha do cabecalho quebraria por causa de
+    # uma diferenca que nao carrega nenhum conteudo
+    sem_linha_em_branco_no_topo = [_sem_linhas_em_branco_no_topo(p) for p in sem_rodape]
+
+    # a 1a pagina entra na comparacao quando so ha 2 paginas (nao ha outro jeito
+    # de descobrir o padrao); com 3+, o padrao e descoberto so entre as paginas
+    # seguintes, ja que a 1a nunca e alvo do corte mesmo
+    grupo_cabecalho = (
+        sem_linha_em_branco_no_topo[1:] if len(sem_linha_em_branco_no_topo) >= 3
+        else sem_linha_em_branco_no_topo
+    )
+    n_cabecalho = _contagem_de_linhas_repetidas(grupo_cabecalho, 0, 1)
+    primeiras_linhas = grupo_cabecalho[0].split("\n")[:n_cabecalho]
+    conteudo_nao_branco = "".join(linha.strip() for linha in primeiras_linhas)
+    if not n_cabecalho or len(conteudo_nao_branco) < LIMIAR_CABECALHO_CHARS:
+        return sem_rodape
+
+    novas_paginas = [sem_rodape[0]]
+    for pagina in sem_linha_em_branco_no_topo[1:]:
+        linhas = pagina.split("\n")
+        novas_paginas.append("\n".join(linhas[n_cabecalho:]))
+    return novas_paginas
+
+
 def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
     """Retorna o texto completo e, junto, o offset (indice no texto) onde
     cada pagina comeca — necessario pro segmentador (Parte 3) saber em que
@@ -63,6 +159,8 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
 
     if aviso:
         logger.warning("MuPDF emitiu aviso ao extrair %s: %s", caminho_pdf, aviso)
+
+    paginas_texto = _remover_cabecalho_e_rodape_repetidos(paginas_texto)
 
     offsets = []
     offset_atual = 0
