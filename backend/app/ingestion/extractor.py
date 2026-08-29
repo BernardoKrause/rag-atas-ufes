@@ -46,6 +46,75 @@ def _normalizar_espacos(texto: str) -> str:
     return re.sub(r"\s+", " ", texto)
 
 
+RE_CONTADOR_PAGINA = re.compile(r"^.*\d{1,4}(?:\s*/\s*\d{1,4})?\s*\.?\s*$")
+
+LIMIAR_CABECALHO_CHARS = 8
+
+
+def _linha(pagina: str, indice: int) -> str | None:
+    linhas = pagina.split("\n")
+    fora_do_range = indice >= len(linhas) if indice >= 0 else -indice > len(linhas)
+    return None if fora_do_range else linhas[indice]
+
+
+def _contagem_de_linhas_repetidas(paginas: list[str], inicio: int, passo: int) -> int:
+    indice = inicio
+    confirmadas = 0
+    pendente_contador = False
+    while True:
+        linhas = [_linha(p, indice) for p in paginas]
+        if any(linha is None for linha in linhas):
+            break
+        if all(linha == linhas[0] for linha in linhas):
+            confirmadas = abs(indice - inicio) + 1
+            indice += passo
+            pendente_contador = False
+            continue
+        if not pendente_contador and all(RE_CONTADOR_PAGINA.match(linha) for linha in linhas):
+            pendente_contador = True
+            indice += passo
+            continue
+        break
+    return confirmadas
+
+
+def _sem_linhas_em_branco_no_topo(pagina: str) -> str:
+    linhas = pagina.split("\n")
+    indice = 0
+    while indice < len(linhas) and not linhas[indice].strip():
+        indice += 1
+    return "\n".join(linhas[indice:])
+
+
+def _remover_cabecalho_e_rodape_repetidos(paginas_texto: list[str]) -> list[str]:
+    if len(paginas_texto) < 2:
+        return paginas_texto
+
+    n_rodape = _contagem_de_linhas_repetidas(paginas_texto, -1, -1)
+    sem_rodape = [
+        "\n".join(pagina.split("\n")[: len(pagina.split("\n")) - n_rodape])
+        for pagina in paginas_texto
+    ] if n_rodape else paginas_texto
+
+    sem_linha_em_branco_no_topo = [_sem_linhas_em_branco_no_topo(p) for p in sem_rodape]
+
+    grupo_cabecalho = (
+        sem_linha_em_branco_no_topo[1:] if len(sem_linha_em_branco_no_topo) >= 3
+        else sem_linha_em_branco_no_topo
+    )
+    n_cabecalho = _contagem_de_linhas_repetidas(grupo_cabecalho, 0, 1)
+    primeiras_linhas = grupo_cabecalho[0].split("\n")[:n_cabecalho]
+    conteudo_nao_branco = "".join(linha.strip() for linha in primeiras_linhas)
+    if not n_cabecalho or len(conteudo_nao_branco) < LIMIAR_CABECALHO_CHARS:
+        return sem_rodape
+
+    novas_paginas = [sem_rodape[0]]
+    for pagina in sem_linha_em_branco_no_topo[1:]:
+        linhas = pagina.split("\n")
+        novas_paginas.append("\n".join(linhas[n_cabecalho:]))
+    return novas_paginas
+
+
 def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
     """Retorna o texto completo e, junto, o offset (indice no texto) onde
     cada pagina comeca — necessario pro segmentador (Parte 3) saber em que
@@ -63,6 +132,8 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
 
     if aviso:
         logger.warning("MuPDF emitiu aviso ao extrair %s: %s", caminho_pdf, aviso)
+
+    paginas_texto = _remover_cabecalho_e_rodape_repetidos(paginas_texto)
 
     offsets = []
     offset_atual = 0
