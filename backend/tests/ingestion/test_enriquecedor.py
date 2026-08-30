@@ -182,6 +182,25 @@ def test_extrair_ct_contra_fixture_real(db_session):
     assert any(i.departamento_origem == "INFORMATICA" for i in itens)
 
 
+def test_extrair_generico_ignora_encerramento_da_ata_no_ultimo_item():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    # ultimo item de uma ata carrega, sem marcador de proximo item pra
+    # cortar, o boilerplate de encerramento inteiro no mesmo item.texto — e
+    # esse boilerplate ("...sera aprovada e assinada por todos os membros...")
+    # tem sua propria ocorrencia de "aprovada" que nao e o resultado da
+    # votacao do item. Achado real: item 300_ORDEM_DO_DIA_1.4 do corpus.
+    texto = (
+        "1.4 Documento avulso: Atuação no Programa de Pós-Graduação. "
+        "Em votação. Aprovado por unanimidade. Nada mais havendo a tratar, "
+        "encerrou-se a presente reunião e eu lavrei a presente Ata, que, "
+        "após lida e achada conforme, será aprovada e assinada por todos "
+        "os membros desta Câmara Departamental."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == "Aprovado por unanimidade"
+
+
 def test_extrair_generico_aprovado_unanimidade():
     from app.ingestion.enriquecedor import extrair_generico
 

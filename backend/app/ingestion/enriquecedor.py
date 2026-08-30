@@ -31,6 +31,14 @@ class CamposEnriquecidos:
 
 _MARCADORES_ITEM = [RE_ITEM_CT, RE_ITEM_CAR, RE_ITEM_CEFD, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_PONTILHADO]
 
+# fórmula padrão de encerramento de ata ("Nada mais havendo a tratar, ...
+# sera aprovada e assinada por todos os membros"). Sem marcador de proximo
+# item pra cortar, o ultimo item de cada ata carrega esse boilerplate junto
+# no seu texto — e ele proprio contem palavras-chave de desfecho ("aprovada")
+# que nao tem nada a ver com a votacao do item. Achado em 194/357 documentos
+# do corpus real.
+RE_ENCERRAMENTO_ATA = re.compile(r"Nada\s+mais\s+havendo\s+a\s+tratar", re.IGNORECASE)
+
 
 def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     """O marcador de abertura do item (ex. "PAUTA 2:", "4.3", "[3]") sempre
@@ -41,7 +49,13 @@ def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     for marcador in _MARCADORES_ITEM:
         match = marcador.match(texto)
         if match:
-            return texto[match.end():].strip()
+            texto = texto[match.end():]
+            break
+
+    match_encerramento = RE_ENCERRAMENTO_ATA.search(texto)
+    if match_encerramento:
+        texto = texto[:match_encerramento.start()]
+
     return texto.strip()
 
 
