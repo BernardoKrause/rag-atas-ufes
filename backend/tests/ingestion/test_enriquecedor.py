@@ -201,6 +201,24 @@ def test_extrair_generico_ignora_encerramento_da_ata_no_ultimo_item():
     assert campos.resultado_votacao == "Aprovado por unanimidade"
 
 
+def test_extrair_generico_aprovacao_de_ata_com_decisao_antes_do_marcador():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    # a secao "Aprovacao de Ata" as vezes descreve a decisao ANTES do proprio
+    # marcador do item, em vez de depois (ordem invertida da maioria dos
+    # itens) — achado em 6/70 documentos do corpus real com "secao de
+    # aprovacao de ata", sempre com essa mesma redacao (mesmo template CCAE)
+    texto = (
+        "Foi apreciada e aprovada, por unanimidade: 1.1 Ata da Sessão "
+        "Ordinária do Conselho Departamental, realizada em 17 de dezembro "
+        "de 2024."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.assunto == "Ata da Sessão Ordinária do Conselho Departamental, realizada em 17 de dezembro de 2024"
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.resultado_votacao == "Foi apreciada e aprovada, por unanimidade"
+
+
 def test_extrair_generico_aprovado_unanimidade():
     from app.ingestion.enriquecedor import extrair_generico
 

@@ -148,7 +148,26 @@ _DESFECHO_GENERICO = {
 }
 
 
+RE_APROVACAO_ATA_INVERTIDA = re.compile(
+    r"^Foi\s+apreciad[oa]\s+e\s+aprovad[oa],?\s+por\s+unanimidade\s*:\s*", re.IGNORECASE
+)
+
+
 def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
+    # a secao "Aprovacao de Ata" as vezes descreve a decisao antes do proprio
+    # marcador do item ("Foi apreciada e aprovada, por unanimidade: 1.1 Ata
+    # da Sessao..."), ordem invertida da maioria dos itens — achado sempre
+    # com essa mesma redacao (mesmo template) em 6/70 documentos do corpus
+    # real com secao de aprovacao de ata
+    match_invertido = RE_APROVACAO_ATA_INVERTIDA.match(texto)
+    if match_invertido:
+        resultado_votacao = match_invertido.group(0).strip(" :")
+        assunto = extrair_corpo_sem_marcador("", texto[match_invertido.end():]).strip(" .")
+        return CamposEnriquecidos(
+            assunto=assunto or None, tipo_desfecho="Aprovado", resultado_votacao=resultado_votacao,
+            encaminhamento=None, ato_emitido=None, departamento_origem=None,
+        )
+
     corpo = extrair_corpo_sem_marcador("", texto)
 
     ocorrencias = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))
