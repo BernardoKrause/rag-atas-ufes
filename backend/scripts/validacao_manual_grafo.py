@@ -63,6 +63,9 @@ def gerar_linha_csv(documento: Documento, item: ItemPauta, relacoes_assunto: lis
     return {
         "item_id_canonico": item.item_id_canonico,
         "ata": documento.nome_arquivo,
+        "tipo_orgao": documento.tipo_orgao,
+        "centro": documento.centro,
+        "orgao": documento.orgao,
         "pagina": item.pagina_inicio,
         "trecho": item.texto[:300],
         "assunto": item.assunto,
