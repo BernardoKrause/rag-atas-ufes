@@ -39,6 +39,13 @@ def mapear_campus(centro: str) -> str:
         raise ValueError(f"centro sem campus mapeado: {centro}") from None
 
 
+def _corrigir_ligadura_ti_quebrada(texto: str) -> str:
+    # alguns PDFs (fonte com CMap ToUnicode quebrado pro glifo de ligadura
+    # "ti") decodificam esse glifo como U+019F em vez de "ti" — letra
+    # inexistente em portugues, entao a troca literal e segura
+    return texto.replace("Ɵ", "ti")
+
+
 def _normalizar_espacos(texto: str) -> str:
     # alguns modelos de ata (ex.: CT/CEUNES) tem cada palavra separada por
     # "\n" + varios espacos — colapsa tudo pra um espaco simples antes de
@@ -123,7 +130,7 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
     try:
         doc = fitz.open(caminho_pdf)
         try:
-            paginas_texto = [pagina.get_text() for pagina in doc]
+            paginas_texto = [_corrigir_ligadura_ti_quebrada(pagina.get_text()) for pagina in doc]
         finally:
             doc.close()
     finally:

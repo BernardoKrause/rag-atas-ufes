@@ -85,6 +85,16 @@ def test_extrair_texto_bruto_retorna_offsets_de_pagina():
         assert 0 <= offset <= len(texto)
 
 
+def test_extrair_texto_bruto_corrige_ligadura_ti_quebrada():
+    caminho = (
+        FIXTURES / "TIPO_C__Camara_Local_Tematica" / "CCHN_CamaraLocal_Graduacao"
+        / "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf"
+    )
+    texto, _offsets = extrair_texto_bruto(caminho)
+    assert "Ɵ" not in texto
+    assert "participar" in texto
+
+
 def test_horario_formato_digito_compacto():
     assert extrair_horario_inicio("às 13h30, realizou-se a reunião") == "13:30"
 
