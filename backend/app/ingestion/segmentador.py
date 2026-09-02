@@ -121,13 +121,6 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
     return itens
 
 
-RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
-
-
-def _neutralizar_numeracao_de_margem(texto: str) -> str:
-    return RE_NUMERACAO_MARGEM.sub(lambda m: " " * len(m.group(0)), texto)
-
-
 def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDetectado]:
     resultado = []
     for item in itens:
@@ -325,13 +318,11 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
 
 
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
+    # numeracao de margem ja vem neutralizada desde extractor.extrair_texto_bruto
+    # (universal, roda antes da anonimizacao) — nada a fazer aqui
     detector = _obter_detector(tipo_orgao, centro)
 
-    texto_bruto = texto_limpo
-    if tipo_orgao == "D":
-        texto_bruto = _neutralizar_numeracao_de_margem(texto_bruto)
-
-    texto_normalizado, mapa = _normalizar_com_mapa(texto_bruto)
+    texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
     itens = detector(texto_normalizado)
     return _reclassificar_exclusao_de_pauta(itens), mapa
 

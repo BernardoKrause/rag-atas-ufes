@@ -17,7 +17,6 @@ from app.ingestion.segmentador import (
     ItemDetectado,
     SOBREPOSICAO_FRAGMENTO,
     TAMANHO_MAX_FRAGMENTO,
-    _neutralizar_numeracao_de_margem,
     _normalizar_com_mapa,
     _reclassificar_exclusao_de_pauta,
     detectar_itens_familia_pontilhada,
@@ -160,21 +159,6 @@ def test_familia_pontilhada_nao_trunca_secao_em_numero_coincidente_no_meio_da_fr
         (SECAO_EXPEDIENTE, "1.1"),
         (SECAO_EXPEDIENTE, "1.2"),
     ]
-
-
-def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
-    texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
-    resultado = _neutralizar_numeracao_de_margem(texto)
-    assert len(resultado) == len(texto)
-    assert "8" not in resultado
-    assert "9" not in resultado
-    assert "PRIMEIRA LINHA" in resultado
-
-
-def test_neutralizar_numeracao_de_margem_preserva_numero_dentro_da_linha():
-    texto = "1. ORDEM DO DIA: 1.1 ITEM.\n8\nCONTINUAÇÃO."
-    resultado = _neutralizar_numeracao_de_margem(texto)
-    assert "1. ORDEM DO DIA: 1.1 ITEM." in resultado
 
 
 def test_reclassificar_exclusao_de_pauta():

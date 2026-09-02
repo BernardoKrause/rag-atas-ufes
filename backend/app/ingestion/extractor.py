@@ -53,6 +53,24 @@ def _normalizar_espacos(texto: str) -> str:
     return re.sub(r"\s+", " ", texto)
 
 
+# (?=[\s\S]*\S) exige que sobre conteudo nao-branco depois do match, dentro
+# do mesmo texto passado (por isso aplicado por pagina, nao no documento
+# jа juntado): sem essa exigencia, um numero de pagina isolado no fim da
+# pagina (ex.: "...de \n1 \n\n", sem mais nada depois) tambem seria apagado
+# — caso que _remover_cabecalho_e_rodape_repetidos preserva de proposito,
+# por nao conseguir distinguir com confianca de um numero real de conteudo
+RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?(?=[\s\S]*\S)")
+
+
+def _neutralizar_numeracao_de_margem(texto: str) -> str:
+    # alguns modelos de ata (ex.: CCAE/DEAL) imprimem numeracao de linha na
+    # margem, que o PyMuPDF intercala solta no meio do texto extraido —
+    # troca por espacos do mesmo tamanho (preserva offsets) pra nao ser
+    # confundida com digitos de entidades reais (ex.: RE_NUMERO_PROCESSO em
+    # cleaner.py) nem com marcadores de item (segmentador.py)
+    return RE_NUMERACAO_MARGEM.sub(lambda m: " " * len(m.group(0)), texto)
+
+
 RE_CONTADOR_PAGINA = re.compile(r"^.*\d{1,4}(?:\s*/\s*\d{1,4})?\s*\.?\s*$")
 
 LIMIAR_CABECALHO_CHARS = 8
@@ -141,6 +159,11 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
         logger.warning("MuPDF emitiu aviso ao extrair %s: %s", caminho_pdf, aviso)
 
     paginas_texto = _remover_cabecalho_e_rodape_repetidos(paginas_texto)
+    # por pagina, nao no documento inteiro ja junto: o lookahead de
+    # RE_NUMERACAO_MARGEM precisa que "sobra conteudo depois" seja avaliado
+    # dentro da propria pagina, senao um numero de pagina isolado no fim da
+    # ultima linha "pega emprestado" conteudo da pagina seguinte e e apagado
+    paginas_texto = [_neutralizar_numeracao_de_margem(p) for p in paginas_texto]
 
     offsets = []
     offset_atual = 0

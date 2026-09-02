@@ -15,11 +15,15 @@ from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
 # formato geral de protocolo NNNNN.NNNNNN/NNNN-NN — cobre SIPAC-UFES
 # (prefixo 23068.) e outros orgaos com o mesmo padrao (ex.: achado (f),
-# protocolo Fala.BR/CGU 23546. no doc 462 do corpus real). O \s{0,3} apos o
+# protocolo Fala.BR/CGU 23546. no doc 462 do corpus real). O \s{0,6} apos o
 # primeiro grupo e antes dos 2 digitos finais tolera espaco/quebra de linha
 # que o PyMuPDF as vezes insere ali (artefato de layout do PDF de origem,
-# achado em 50/1926 ocorrencias do corpus completo)
-RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\s{0,3}\d{6}/\d{4}-\s{0,3}\d{2}")
+# achado em 50/1926 ocorrencias do corpus completo). O texto ja chega aqui
+# com numeracao de margem neutralizada (extractor.py), entao esse vao pode
+# incluir os espacos que sobraram no lugar de uma numeracao apagada — sem
+# a neutralizacao, o \s tolerante engolia os digitos da margem como se
+# fossem o digito verificador do processo (2 casos reais no corpus, CCAE/DEAL)
+RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\s{0,6}\d{6}/\d{4}-\s{0,6}\d{2}")
 
 RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 

@@ -6,6 +6,7 @@ import pytest
 
 from app.ingestion.extractor import (
     CENTRO_CAMPUS,
+    _neutralizar_numeracao_de_margem,
     _remover_cabecalho_e_rodape_repetidos,
     extrair_campos,
     extrair_horario_inicio,
@@ -316,6 +317,54 @@ def test_extrair_texto_bruto_remove_cabecalho_com_linha_em_branco_extra_em_docum
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
     assert pagina2.lstrip().startswith("exoneração oficialmente")
+
+
+def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos_seguida_de_mais_conteudo():
+    texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert len(resultado) == len(texto)
+    assert "8" not in resultado
+    assert "9" not in resultado
+    assert "PRIMEIRA LINHA" in resultado
+
+
+def test_neutralizar_numeracao_de_margem_preserva_numero_dentro_da_linha():
+    texto = "1. ORDEM DO DIA: 1.1 ITEM.\n8\nCONTINUAÇÃO."
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert "1. ORDEM DO DIA: 1.1 ITEM." in resultado
+
+
+def test_neutralizar_numeracao_de_margem_preserva_numero_isolado_no_fim_do_texto():
+    # sem conteudo real depois, e ambiguo demais com um numero de pagina —
+    # mesma cautela documentada em
+    # test_extrair_texto_bruto_preserva_numero_isolado_de_pagina_sem_linha_fixa_de_rodape
+    texto = "Atuação no Programa de \n1 \n\n"
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert resultado.rstrip().endswith("1")
+
+
+def test_extrair_texto_bruto_corrige_numero_de_processo_partido_por_numeracao_de_margem(tmp_path):
+    # caso real do corpus (CCAE/DEAL): a numeracao de linha impressa na
+    # margem ("26") intercalada entre o traco e o digito verificador real
+    # ("91") do processo confundia RE_NUMERO_PROCESSO (cleaner.py), que
+    # capturava os 2 digitos errados como se fossem o verificador
+    doc = fitz.open()
+    pagina = doc.new_page()
+    pagina.insert_text(
+        (72, 72),
+        "3.3 - Processo digital nº 23068.031941/2024-\n26 \n91 – Interessado: Fulano.",
+    )
+    caminho = tmp_path / "margem.pdf"
+    doc.save(caminho)
+    doc.close()
+
+    from app.ingestion.cleaner import RE_NUMERO_PROCESSO
+
+    texto, _offsets = extrair_texto_bruto(caminho)
+    match = RE_NUMERO_PROCESSO.search(texto)
+
+    assert match is not None
+    assert "".join(match.group(0).split()) == "23068.031941/2024-91"
 
 
 def test_remove_cabecalho_nao_quebra_quando_primeira_pagina_e_mais_curta_que_as_outras():
