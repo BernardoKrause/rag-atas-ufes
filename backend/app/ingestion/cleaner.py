@@ -199,13 +199,19 @@ def _achar_entidades_pessoa(texto: str) -> list[tuple[int, int]]:
     return _mesclar_intervalos(intervalos)
 
 
-def _normalizar_entidade(texto: str) -> str:
-    texto = unicodedata.normalize("NFKC", texto)
-    return " ".join(texto.upper().split())
+def _normalizar_entidade(tipo: TipoEntidade, texto: str) -> str:
+    texto = unicodedata.normalize("NFKC", texto).upper()
+    if tipo is TipoEntidade.PROCESSO:
+        # numero de processo nunca tem espaco interno de verdade — remove
+        # tudo, nao so colapsa, senao o mesmo processo real gera hashes
+        # diferentes conforme o PyMuPDF tenha inserido ou nao espaco/quebra
+        # de linha ali (RE_NUMERO_PROCESSO tolera esse glitch no match)
+        return "".join(texto.split())
+    return " ".join(texto.split())
 
 
 def _gerar_hash_entidade(secret_key: bytes, tipo: TipoEntidade, texto_bruto: str) -> str:
-    mensagem = f"{tipo.value}:{_normalizar_entidade(texto_bruto)}".encode()
+    mensagem = f"{tipo.value}:{_normalizar_entidade(tipo, texto_bruto)}".encode()
     return hmac.new(secret_key, mensagem, hashlib.sha256).hexdigest()
 
 

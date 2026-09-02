@@ -44,6 +44,20 @@ def test_numero_de_processo_com_espaco_ou_quebra_de_linha_e_reconhecido(db_sessi
     assert resultado.count("PROCESSO_") == 2
 
 
+def test_mesmo_processo_com_e_sem_glitch_de_espaco_gera_o_mesmo_token(db_session):
+    # a mesma extracao real pode ou nao ter o artefato de espaco/quebra de
+    # linha do PyMuPDF (ver teste acima) — sem normalizacao ciente do tipo,
+    # isso gerava hashes diferentes pro mesmo processo real
+    token_limpo = _obter_ou_criar_token(
+        db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068.001234/2025-11"
+    )
+    token_com_glitch = _obter_ou_criar_token(
+        db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068. 001234/2025-\n11"
+    )
+
+    assert token_limpo == token_com_glitch
+
+
 def test_mesma_pessoa_gera_sempre_o_mesmo_token_em_atas_diferentes(db_session):
     ata_1 = "O professor João da Silva Souza apresentou o relatório."
     ata_2 = "Segundo o professor João da Silva Souza, o prazo está mantido."
