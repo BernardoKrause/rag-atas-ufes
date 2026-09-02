@@ -101,8 +101,32 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             m for m in RE_ITEM_PONTILHADO.finditer(corpo)
             if m.group(1).split(".")[0].lstrip("0") == numero_secao.lstrip("0")
         ]
+
+        # o preambulo entre o cabecalho da secao e o marcador do 1o item (ex.:
+        # "EXPEDIENTE: EXCLUSÃO DE PAUTA: 2.1 ...") nao pertence a nenhum item
+        # especifico -- fica de fora de item.texto pra todos os itens, mas
+        # ainda e checado aqui pra reclassificar a secao quando ele contem o
+        # subtitulo "EXCLUSÃO DE PAUTA" (so o 1o item da secao herda essa
+        # reclassificacao, igual ao comportamento anterior)
+        preambulo = corpo[:matches_item[0].start()] if matches_item else corpo
+        secao_primeiro_item = (
+            SECAO_EXCLUSAO_DE_PAUTA
+            if secao == SECAO_EXPEDIENTE and preambulo.strip().upper().startswith("EXCLUSÃO DE PAUTA")
+            else secao
+        )
+
         for j, item_match in enumerate(matches_item):
-            inicio_item = inicio_corpo if j == 0 else inicio_corpo + item_match.start()
+            # excecao: em "APROVAÇÃO DE ATA" o preambulo do 1o item costuma
+            # ser a propria decisao, so que redigida antes do marcador ("Foi
+            # apreciada e aprovada, por unanimidade: 1.1 Ata da Sessão...",
+            # ver RE_APROVACAO_ATA_INVERTIDA em enriquecedor.py) -- e o
+            # conteudo real do item, nao uma introducao generica da secao
+            # inteira (confirmado nos 357 PDFs do corpus: toda ocorrencia
+            # dessa secao tem exatamente essa estrutura de item unico)
+            inicio_item = (
+                inicio_corpo if j == 0 and secao == SECAO_APROVACAO_ATA
+                else inicio_corpo + item_match.start()
+            )
             fim_item = (
                 inicio_corpo + matches_item[j + 1].start()
                 if j + 1 < len(matches_item)
@@ -110,7 +134,7 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             )
             itens.append(
                 ItemDetectado(
-                    secao=secao,
+                    secao=secao_primeiro_item if j == 0 else secao,
                     numero_item=item_match.group(1),
                     inicio=inicio_item,
                     fim=fim_item,
@@ -119,18 +143,6 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             )
 
     return itens
-
-
-def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDetectado]:
-    resultado = []
-    for item in itens:
-        if item.secao == SECAO_EXPEDIENTE and item.texto.upper().startswith("EXCLUSÃO DE PAUTA"):
-            resultado.append(
-                ItemDetectado(SECAO_EXCLUSAO_DE_PAUTA, item.numero_item, item.inicio, item.fim, item.texto)
-            )
-        else:
-            resultado.append(item)
-    return resultado
 
 
 RE_ITEM_CT = re.compile(r'(?<!\d)(?<!["“])(INFORME|PAUTA)\s+(\d{1,2}):(?!\d)(?!["”])')
@@ -324,7 +336,7 @@ def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[lis
 
     texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
     itens = detector(texto_normalizado)
-    return _reclassificar_exclusao_de_pauta(itens), mapa
+    return itens, mapa
 
 
 def dividir_fragmentos(texto: str) -> list[str]:
