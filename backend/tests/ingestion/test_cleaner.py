@@ -31,9 +31,6 @@ def test_pessoas_e_processo_sao_substituidos_por_token(db_session):
 
 
 def test_numero_de_processo_com_espaco_ou_quebra_de_linha_e_reconhecido(db_session):
-    # PyMuPDF as vezes extrai um espaco ou quebra de linha dentro do numero
-    # de processo (artefato de layout do PDF de origem) — achado em 50
-    # ocorrencias reais no corpus completo (357 PDFs)
     texto = (
         "Proc. 23068. 069033/2024-71 e proc. 23068.053531/2025-\n82 "
         "foram aprovados."
@@ -45,9 +42,6 @@ def test_numero_de_processo_com_espaco_ou_quebra_de_linha_e_reconhecido(db_sessi
 
 
 def test_mesmo_processo_com_e_sem_glitch_de_espaco_gera_o_mesmo_token(db_session):
-    # a mesma extracao real pode ou nao ter o artefato de espaco/quebra de
-    # linha do PyMuPDF (ver teste acima) — sem normalizacao ciente do tipo,
-    # isso gerava hashes diferentes pro mesmo processo real
     token_limpo = _obter_ou_criar_token(
         db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068.001234/2025-11"
     )

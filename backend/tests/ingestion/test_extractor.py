@@ -335,19 +335,12 @@ def test_neutralizar_numeracao_de_margem_preserva_numero_dentro_da_linha():
 
 
 def test_neutralizar_numeracao_de_margem_preserva_numero_isolado_no_fim_do_texto():
-    # sem conteudo real depois, e ambiguo demais com um numero de pagina —
-    # mesma cautela documentada em
-    # test_extrair_texto_bruto_preserva_numero_isolado_de_pagina_sem_linha_fixa_de_rodape
     texto = "Atuação no Programa de \n1 \n\n"
     resultado = _neutralizar_numeracao_de_margem(texto)
     assert resultado.rstrip().endswith("1")
 
 
 def test_extrair_texto_bruto_corrige_numero_de_processo_partido_por_numeracao_de_margem(tmp_path):
-    # caso real do corpus (CCAE/DEAL): a numeracao de linha impressa na
-    # margem ("26") intercalada entre o traco e o digito verificador real
-    # ("91") do processo confundia RE_NUMERO_PROCESSO (cleaner.py), que
-    # capturava os 2 digitos errados como se fossem o verificador
     doc = fitz.open()
     pagina = doc.new_page()
     pagina.insert_text(

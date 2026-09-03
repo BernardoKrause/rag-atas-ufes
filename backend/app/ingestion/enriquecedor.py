@@ -31,12 +31,6 @@ class CamposEnriquecidos:
 
 _MARCADORES_ITEM = [RE_ITEM_CT, RE_ITEM_CAR, RE_ITEM_CEFD, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_PONTILHADO]
 
-# fórmula padrão de encerramento de ata ("Nada mais havendo a tratar, ...
-# sera aprovada e assinada por todos os membros"). Sem marcador de proximo
-# item pra cortar, o ultimo item de cada ata carrega esse boilerplate junto
-# no seu texto — e ele proprio contem palavras-chave de desfecho ("aprovada")
-# que nao tem nada a ver com a votacao do item. Achado em 194/357 documentos
-# do corpus real.
 RE_ENCERRAMENTO_ATA = re.compile(r"Nada\s+mais\s+havendo\s+a\s+tratar", re.IGNORECASE)
 
 
@@ -154,11 +148,6 @@ RE_APROVACAO_ATA_INVERTIDA = re.compile(
 
 
 def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
-    # a secao "Aprovacao de Ata" as vezes descreve a decisao antes do proprio
-    # marcador do item ("Foi apreciada e aprovada, por unanimidade: 1.1 Ata
-    # da Sessao..."), ordem invertida da maioria dos itens — achado sempre
-    # com essa mesma redacao (mesmo template) em 6/70 documentos do corpus
-    # real com secao de aprovacao de ata
     match_invertido = RE_APROVACAO_ATA_INVERTIDA.match(texto)
     if match_invertido:
         resultado_votacao = match_invertido.group(0).strip(" :")

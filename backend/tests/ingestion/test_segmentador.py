@@ -170,10 +170,6 @@ def test_familia_pontilhada_reclassifica_exclusao_de_pauta_do_primeiro_item():
 
 
 def test_familia_pontilhada_primeiro_item_nao_carrega_preambulo_da_secao():
-    # achado 4: o marcador do 1o item de uma secao ("2.1") sempre delimita o
-    # inicio de item.texto, igual aos demais itens -- antes, item.texto do
-    # 1o item comecava no cabecalho da secao, arrastando junto qualquer frase
-    # introdutoria (que fala de todos os itens da secao, nao so do primeiro)
     texto = (
         "2. EXPEDIENTE: A Presidente solicitou a inclusão de pontos extras na "
         "pauta, a saber: 2.1 Processo digital tal. 2.2 Outro item qualquer."
@@ -184,11 +180,6 @@ def test_familia_pontilhada_primeiro_item_nao_carrega_preambulo_da_secao():
 
 
 def test_familia_pontilhada_aprovacao_de_ata_preserva_decisao_antes_do_marcador():
-    # excecao ao achado 4: em "APROVAÇÃO DE ATA" o preambulo do 1o item e a
-    # propria decisao, so que redigida antes do marcador (achado real do
-    # corpus, ver RE_APROVACAO_ATA_INVERTIDA em enriquecedor.py) -- tem que
-    # continuar em item.texto, ao contrario do preambulo generico de outras
-    # secoes
     texto = (
         "1. APROVAÇÃO DE ATA: Foi apreciada e aprovada, por unanimidade: "
         "1.1 Ata da Sessão Ordinária, realizada em 17 de dezembro de 2024."

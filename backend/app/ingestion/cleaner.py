@@ -15,14 +15,7 @@ from app.models.documento import EntidadeAnonimizada, TipoEntidade
 
 # formato geral de protocolo NNNNN.NNNNNN/NNNN-NN — cobre SIPAC-UFES
 # (prefixo 23068.) e outros orgaos com o mesmo padrao (ex.: achado (f),
-# protocolo Fala.BR/CGU 23546. no doc 462 do corpus real). O \s{0,6} apos o
-# primeiro grupo e antes dos 2 digitos finais tolera espaco/quebra de linha
-# que o PyMuPDF as vezes insere ali (artefato de layout do PDF de origem,
-# achado em 50/1926 ocorrencias do corpus completo). O texto ja chega aqui
-# com numeracao de margem neutralizada (extractor.py), entao esse vao pode
-# incluir os espacos que sobraram no lugar de uma numeracao apagada — sem
-# a neutralizacao, o \s tolerante engolia os digitos da margem como se
-# fossem o digito verificador do processo (2 casos reais no corpus, CCAE/DEAL)
+# protocolo Fala.BR/CGU 23546. no doc 462 do corpus real)
 RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\s{0,6}\d{6}/\d{4}-\s{0,6}\d{2}")
 
 RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
@@ -202,10 +195,6 @@ def _achar_entidades_pessoa(texto: str) -> list[tuple[int, int]]:
 def _normalizar_entidade(tipo: TipoEntidade, texto: str) -> str:
     texto = unicodedata.normalize("NFKC", texto).upper()
     if tipo is TipoEntidade.PROCESSO:
-        # numero de processo nunca tem espaco interno de verdade — remove
-        # tudo, nao so colapsa, senao o mesmo processo real gera hashes
-        # diferentes conforme o PyMuPDF tenha inserido ou nao espaco/quebra
-        # de linha ali (RE_NUMERO_PROCESSO tolera esse glitch no match)
         return "".join(texto.split())
     return " ".join(texto.split())
 

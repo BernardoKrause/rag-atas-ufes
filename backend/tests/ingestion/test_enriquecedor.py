@@ -185,11 +185,6 @@ def test_extrair_ct_contra_fixture_real(db_session):
 def test_extrair_generico_ignora_encerramento_da_ata_no_ultimo_item():
     from app.ingestion.enriquecedor import extrair_generico
 
-    # ultimo item de uma ata carrega, sem marcador de proximo item pra
-    # cortar, o boilerplate de encerramento inteiro no mesmo item.texto — e
-    # esse boilerplate ("...sera aprovada e assinada por todos os membros...")
-    # tem sua propria ocorrencia de "aprovada" que nao e o resultado da
-    # votacao do item. Achado real: item 300_ORDEM_DO_DIA_1.4 do corpus.
     texto = (
         "1.4 Documento avulso: Atuação no Programa de Pós-Graduação. "
         "Em votação. Aprovado por unanimidade. Nada mais havendo a tratar, "
@@ -204,10 +199,6 @@ def test_extrair_generico_ignora_encerramento_da_ata_no_ultimo_item():
 def test_extrair_generico_aprovacao_de_ata_com_decisao_antes_do_marcador():
     from app.ingestion.enriquecedor import extrair_generico
 
-    # a secao "Aprovacao de Ata" as vezes descreve a decisao ANTES do proprio
-    # marcador do item, em vez de depois (ordem invertida da maioria dos
-    # itens) — achado em 6/70 documentos do corpus real com "secao de
-    # aprovacao de ata", sempre com essa mesma redacao (mesmo template CCAE)
     texto = (
         "Foi apreciada e aprovada, por unanimidade: 1.1 Ata da Sessão "
         "Ordinária do Conselho Departamental, realizada em 17 de dezembro "

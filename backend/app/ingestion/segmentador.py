@@ -102,12 +102,6 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             if m.group(1).split(".")[0].lstrip("0") == numero_secao.lstrip("0")
         ]
 
-        # o preambulo entre o cabecalho da secao e o marcador do 1o item (ex.:
-        # "EXPEDIENTE: EXCLUSÃO DE PAUTA: 2.1 ...") nao pertence a nenhum item
-        # especifico -- fica de fora de item.texto pra todos os itens, mas
-        # ainda e checado aqui pra reclassificar a secao quando ele contem o
-        # subtitulo "EXCLUSÃO DE PAUTA" (so o 1o item da secao herda essa
-        # reclassificacao, igual ao comportamento anterior)
         preambulo = corpo[:matches_item[0].start()] if matches_item else corpo
         secao_primeiro_item = (
             SECAO_EXCLUSAO_DE_PAUTA
@@ -116,13 +110,6 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
         )
 
         for j, item_match in enumerate(matches_item):
-            # excecao: em "APROVAÇÃO DE ATA" o preambulo do 1o item costuma
-            # ser a propria decisao, so que redigida antes do marcador ("Foi
-            # apreciada e aprovada, por unanimidade: 1.1 Ata da Sessão...",
-            # ver RE_APROVACAO_ATA_INVERTIDA em enriquecedor.py) -- e o
-            # conteudo real do item, nao uma introducao generica da secao
-            # inteira (confirmado nos 357 PDFs do corpus: toda ocorrencia
-            # dessa secao tem exatamente essa estrutura de item unico)
             inicio_item = (
                 inicio_corpo if j == 0 and secao == SECAO_APROVACAO_ATA
                 else inicio_corpo + item_match.start()
@@ -330,8 +317,6 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
 
 
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
-    # numeracao de margem ja vem neutralizada desde extractor.extrair_texto_bruto
-    # (universal, roda antes da anonimizacao) — nada a fazer aqui
     detector = _obter_detector(tipo_orgao, centro)
 
     texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
