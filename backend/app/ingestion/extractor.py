@@ -50,11 +50,16 @@ def _normalizar_espacos(texto: str) -> str:
     return re.sub(r"\s+", " ", texto)
 
 
-RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?(?=[\s\S]*\S)")
+RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
 
 
 def _neutralizar_numeracao_de_margem(texto: str) -> str:
-    return RE_NUMERACAO_MARGEM.sub(lambda m: " " * len(m.group(0)), texto)
+    candidatos = list(RE_NUMERACAO_MARGEM.finditer(texto))
+    if len(candidatos) < 2:
+        return texto
+    for match in reversed(candidatos):
+        texto = texto[:match.start()] + " " * len(match.group(0)) + texto[match.end():]
+    return texto
 
 
 RE_CONTADOR_PAGINA = re.compile(r"^.*\d{1,4}(?:\s*/\s*\d{1,4})?\s*\.?\s*$")
