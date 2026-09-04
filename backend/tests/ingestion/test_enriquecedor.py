@@ -182,6 +182,34 @@ def test_extrair_ct_contra_fixture_real(db_session):
     assert any(i.departamento_origem == "INFORMATICA" for i in itens)
 
 
+def test_extrair_generico_ignora_encerramento_da_ata_no_ultimo_item():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "1.4 Documento avulso: Atuação no Programa de Pós-Graduação. "
+        "Em votação. Aprovado por unanimidade. Nada mais havendo a tratar, "
+        "encerrou-se a presente reunião e eu lavrei a presente Ata, que, "
+        "após lida e achada conforme, será aprovada e assinada por todos "
+        "os membros desta Câmara Departamental."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == "Aprovado por unanimidade"
+
+
+def test_extrair_generico_aprovacao_de_ata_com_decisao_antes_do_marcador():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "Foi apreciada e aprovada, por unanimidade: 1.1 Ata da Sessão "
+        "Ordinária do Conselho Departamental, realizada em 17 de dezembro "
+        "de 2024."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.assunto == "Ata da Sessão Ordinária do Conselho Departamental, realizada em 17 de dezembro de 2024"
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.resultado_votacao == "Foi apreciada e aprovada, por unanimidade"
+
+
 def test_extrair_generico_aprovado_unanimidade():
     from app.ingestion.enriquecedor import extrair_generico
 

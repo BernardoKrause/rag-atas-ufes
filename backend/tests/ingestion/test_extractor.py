@@ -6,6 +6,7 @@ import pytest
 
 from app.ingestion.extractor import (
     CENTRO_CAMPUS,
+    _neutralizar_numeracao_de_margem,
     _remover_cabecalho_e_rodape_repetidos,
     extrair_campos,
     extrair_horario_inicio,
@@ -83,6 +84,16 @@ def test_extrair_texto_bruto_retorna_offsets_de_pagina():
     assert all(offsets[i] < offsets[i + 1] for i in range(len(offsets) - 1))
     for offset in offsets:
         assert 0 <= offset <= len(texto)
+
+
+def test_extrair_texto_bruto_corrige_ligadura_ti_quebrada():
+    caminho = (
+        FIXTURES / "TIPO_C__Camara_Local_Tematica" / "CCHN_CamaraLocal_Graduacao"
+        / "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf"
+    )
+    texto, _offsets = extrair_texto_bruto(caminho)
+    assert "Ɵ" not in texto
+    assert "participar" in texto
 
 
 def test_horario_formato_digito_compacto():
@@ -306,6 +317,64 @@ def test_extrair_texto_bruto_remove_cabecalho_com_linha_em_branco_extra_em_docum
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
     assert pagina2.lstrip().startswith("exoneração oficialmente")
+
+
+def test_neutralizar_numeracao_de_margem_remove_linhas_que_se_repetem_na_pagina():
+    texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert len(resultado) == len(texto)
+    assert "8" not in resultado
+    assert "9" not in resultado
+    assert "PRIMEIRA LINHA" in resultado
+
+
+def test_neutralizar_numeracao_de_margem_preserva_numero_dentro_da_linha():
+    texto = "1. ORDEM DO DIA: 1.1 ITEM.\n8\nCONTINUAÇÃO.\n9\nMAIS TEXTO."
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert "1. ORDEM DO DIA: 1.1 ITEM." in resultado
+
+
+def test_neutralizar_numeracao_de_margem_preserva_numero_isolado_sem_repeticao_na_pagina():
+    texto = "Atuação no Programa de \n1 \n\n"
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert resultado.rstrip().endswith("1")
+
+
+def test_neutralizar_numeracao_de_margem_remove_numero_que_e_ultima_linha_do_texto_se_repetir_antes():
+    texto = "8\nCONTEUDO DA PAGINA\n9"
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert "8" not in resultado
+    assert "9" not in resultado
+
+
+def test_neutralizar_numeracao_de_margem_preserva_data_com_dia_isolado_na_propria_linha():
+    # layout "uma palavra por linha" real de atas CEUNES: o dia da data fica
+    # sozinho na linha, sem nenhuma outra numeracao de margem na pagina pra
+    # confirmar que e um contador repetido -- nao pode ser apagado
+    texto = "São Mateus/ES, \n15 \nde fevereiro de 2023."
+    resultado = _neutralizar_numeracao_de_margem(texto)
+    assert "15" in resultado
+
+
+def test_extrair_texto_bruto_corrige_numero_de_processo_partido_por_numeracao_de_margem(tmp_path):
+    doc = fitz.open()
+    pagina = doc.new_page()
+    pagina.insert_text(
+        (72, 72),
+        "25 \nOutro trecho qualquer da ata antes do processo.\n"
+        "3.3 - Processo digital nº 23068.031941/2024-\n26 \n91 – Interessado: Fulano.",
+    )
+    caminho = tmp_path / "margem.pdf"
+    doc.save(caminho)
+    doc.close()
+
+    from app.ingestion.cleaner import RE_NUMERO_PROCESSO
+
+    texto, _offsets = extrair_texto_bruto(caminho)
+    match = RE_NUMERO_PROCESSO.search(texto)
+
+    assert match is not None
+    assert "".join(match.group(0).split()) == "23068.031941/2024-91"
 
 
 def test_remove_cabecalho_nao_quebra_quando_primeira_pagina_e_mais_curta_que_as_outras():

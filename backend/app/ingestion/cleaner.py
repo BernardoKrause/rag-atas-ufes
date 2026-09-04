@@ -16,7 +16,7 @@ from app.models.documento import EntidadeAnonimizada, TipoEntidade
 # formato geral de protocolo NNNNN.NNNNNN/NNNN-NN — cobre SIPAC-UFES
 # (prefixo 23068.) e outros orgaos com o mesmo padrao (ex.: achado (f),
 # protocolo Fala.BR/CGU 23546. no doc 462 do corpus real)
-RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\d{6}/\d{4}-\d{2}")
+RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\s{0,6}\d{6}/\d{4}-\s{0,6}\d{2}")
 
 RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 
@@ -192,13 +192,15 @@ def _achar_entidades_pessoa(texto: str) -> list[tuple[int, int]]:
     return _mesclar_intervalos(intervalos)
 
 
-def _normalizar_entidade(texto: str) -> str:
-    texto = unicodedata.normalize("NFKC", texto)
-    return " ".join(texto.upper().split())
+def _normalizar_entidade(tipo: TipoEntidade, texto: str) -> str:
+    texto = unicodedata.normalize("NFKC", texto).upper()
+    if tipo is TipoEntidade.PROCESSO:
+        return "".join(texto.split())
+    return " ".join(texto.split())
 
 
 def _gerar_hash_entidade(secret_key: bytes, tipo: TipoEntidade, texto_bruto: str) -> str:
-    mensagem = f"{tipo.value}:{_normalizar_entidade(texto_bruto)}".encode()
+    mensagem = f"{tipo.value}:{_normalizar_entidade(tipo, texto_bruto)}".encode()
     return hmac.new(secret_key, mensagem, hashlib.sha256).hexdigest()
 
 

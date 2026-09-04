@@ -101,8 +101,19 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             m for m in RE_ITEM_PONTILHADO.finditer(corpo)
             if m.group(1).split(".")[0].lstrip("0") == numero_secao.lstrip("0")
         ]
+
+        preambulo = corpo[:matches_item[0].start()] if matches_item else corpo
+        secao_primeiro_item = (
+            SECAO_EXCLUSAO_DE_PAUTA
+            if secao == SECAO_EXPEDIENTE and preambulo.strip().upper().startswith("EXCLUSÃO DE PAUTA")
+            else secao
+        )
+
         for j, item_match in enumerate(matches_item):
-            inicio_item = inicio_corpo if j == 0 else inicio_corpo + item_match.start()
+            inicio_item = (
+                inicio_corpo if j == 0 and secao == SECAO_APROVACAO_ATA
+                else inicio_corpo + item_match.start()
+            )
             fim_item = (
                 inicio_corpo + matches_item[j + 1].start()
                 if j + 1 < len(matches_item)
@@ -110,7 +121,7 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             )
             itens.append(
                 ItemDetectado(
-                    secao=secao,
+                    secao=secao_primeiro_item if j == 0 else secao,
                     numero_item=item_match.group(1),
                     inicio=inicio_item,
                     fim=fim_item,
@@ -119,25 +130,6 @@ def detectar_itens_familia_pontilhada(texto_normalizado: str) -> list[ItemDetect
             )
 
     return itens
-
-
-RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
-
-
-def _neutralizar_numeracao_de_margem(texto: str) -> str:
-    return RE_NUMERACAO_MARGEM.sub(lambda m: " " * len(m.group(0)), texto)
-
-
-def _reclassificar_exclusao_de_pauta(itens: list[ItemDetectado]) -> list[ItemDetectado]:
-    resultado = []
-    for item in itens:
-        if item.secao == SECAO_EXPEDIENTE and item.texto.upper().startswith("EXCLUSÃO DE PAUTA"):
-            resultado.append(
-                ItemDetectado(SECAO_EXCLUSAO_DE_PAUTA, item.numero_item, item.inicio, item.fim, item.texto)
-            )
-        else:
-            resultado.append(item)
-    return resultado
 
 
 RE_ITEM_CT = re.compile(r'(?<!\d)(?<!["“])(INFORME|PAUTA)\s+(\d{1,2}):(?!\d)(?!["”])')
@@ -327,13 +319,9 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
     detector = _obter_detector(tipo_orgao, centro)
 
-    texto_bruto = texto_limpo
-    if tipo_orgao == "D":
-        texto_bruto = _neutralizar_numeracao_de_margem(texto_bruto)
-
-    texto_normalizado, mapa = _normalizar_com_mapa(texto_bruto)
+    texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
     itens = detector(texto_normalizado)
-    return _reclassificar_exclusao_de_pauta(itens), mapa
+    return itens, mapa
 
 
 def dividir_fragmentos(texto: str) -> list[str]:

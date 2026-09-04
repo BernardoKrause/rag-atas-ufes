@@ -31,6 +31,8 @@ class CamposEnriquecidos:
 
 _MARCADORES_ITEM = [RE_ITEM_CT, RE_ITEM_CAR, RE_ITEM_CEFD, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_PONTILHADO]
 
+RE_ENCERRAMENTO_ATA = re.compile(r"Nada\s+mais\s+havendo\s+a\s+tratar", re.IGNORECASE)
+
 
 def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     """O marcador de abertura do item (ex. "PAUTA 2:", "4.3", "[3]") sempre
@@ -41,7 +43,13 @@ def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     for marcador in _MARCADORES_ITEM:
         match = marcador.match(texto)
         if match:
-            return texto[match.end():].strip()
+            texto = texto[match.end():]
+            break
+
+    match_encerramento = RE_ENCERRAMENTO_ATA.search(texto)
+    if match_encerramento:
+        texto = texto[:match_encerramento.start()]
+
     return texto.strip()
 
 
@@ -134,7 +142,21 @@ _DESFECHO_GENERICO = {
 }
 
 
+RE_APROVACAO_ATA_INVERTIDA = re.compile(
+    r"^Foi\s+apreciad[oa]\s+e\s+aprovad[oa],?\s+por\s+unanimidade\s*:\s*", re.IGNORECASE
+)
+
+
 def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
+    match_invertido = RE_APROVACAO_ATA_INVERTIDA.match(texto)
+    if match_invertido:
+        resultado_votacao = match_invertido.group(0).strip(" :")
+        assunto = extrair_corpo_sem_marcador("", texto[match_invertido.end():]).strip(" .")
+        return CamposEnriquecidos(
+            assunto=assunto or None, tipo_desfecho="Aprovado", resultado_votacao=resultado_votacao,
+            encaminhamento=None, ato_emitido=None, departamento_origem=None,
+        )
+
     corpo = extrair_corpo_sem_marcador("", texto)
 
     ocorrencias = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))

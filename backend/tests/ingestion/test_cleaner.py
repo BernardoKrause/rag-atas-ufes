@@ -30,6 +30,28 @@ def test_pessoas_e_processo_sao_substituidos_por_token(db_session):
     assert "PROCESSO_" in resultado
 
 
+def test_numero_de_processo_com_espaco_ou_quebra_de_linha_e_reconhecido(db_session):
+    texto = (
+        "Proc. 23068. 069033/2024-71 e proc. 23068.053531/2025-\n82 "
+        "foram aprovados."
+    )
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    assert "23068" not in resultado
+    assert resultado.count("PROCESSO_") == 2
+
+
+def test_mesmo_processo_com_e_sem_glitch_de_espaco_gera_o_mesmo_token(db_session):
+    token_limpo = _obter_ou_criar_token(
+        db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068.001234/2025-11"
+    )
+    token_com_glitch = _obter_ou_criar_token(
+        db_session, SECRET_KEY, TipoEntidade.PROCESSO, "23068. 001234/2025-\n11"
+    )
+
+    assert token_limpo == token_com_glitch
+
+
 def test_mesma_pessoa_gera_sempre_o_mesmo_token_em_atas_diferentes(db_session):
     ata_1 = "O professor João da Silva Souza apresentou o relatório."
     ata_2 = "Segundo o professor João da Silva Souza, o prazo está mantido."

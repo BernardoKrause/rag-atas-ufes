@@ -39,11 +39,27 @@ def mapear_campus(centro: str) -> str:
         raise ValueError(f"centro sem campus mapeado: {centro}") from None
 
 
+def _corrigir_ligadura_ti_quebrada(texto: str) -> str:
+    return texto.replace("Ɵ", "ti")
+
+
 def _normalizar_espacos(texto: str) -> str:
     # alguns modelos de ata (ex.: CT/CEUNES) tem cada palavra separada por
     # "\n" + varios espacos — colapsa tudo pra um espaco simples antes de
     # qualquer checagem de substring literal com mais de uma palavra
     return re.sub(r"\s+", " ", texto)
+
+
+RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
+
+
+def _neutralizar_numeracao_de_margem(texto: str) -> str:
+    candidatos = list(RE_NUMERACAO_MARGEM.finditer(texto))
+    if len(candidatos) < 2:
+        return texto
+    for match in reversed(candidatos):
+        texto = texto[:match.start()] + " " * len(match.group(0)) + texto[match.end():]
+    return texto
 
 
 RE_CONTADOR_PAGINA = re.compile(r"^.*\d{1,4}(?:\s*/\s*\d{1,4})?\s*\.?\s*$")
@@ -123,7 +139,7 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
     try:
         doc = fitz.open(caminho_pdf)
         try:
-            paginas_texto = [pagina.get_text() for pagina in doc]
+            paginas_texto = [_corrigir_ligadura_ti_quebrada(pagina.get_text()) for pagina in doc]
         finally:
             doc.close()
     finally:
@@ -134,6 +150,7 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
         logger.warning("MuPDF emitiu aviso ao extrair %s: %s", caminho_pdf, aviso)
 
     paginas_texto = _remover_cabecalho_e_rodape_repetidos(paginas_texto)
+    paginas_texto = [_neutralizar_numeracao_de_margem(p) for p in paginas_texto]
 
     offsets = []
     offset_atual = 0

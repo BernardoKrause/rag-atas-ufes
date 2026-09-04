@@ -14,12 +14,9 @@ from app.ingestion.segmentador import (
     SECAO_PALAVRA_LIVRE,
     SECAO_PAUTA,
     SECAO_PROCESSOS_PROJETOS,
-    ItemDetectado,
     SOBREPOSICAO_FRAGMENTO,
     TAMANHO_MAX_FRAGMENTO,
-    _neutralizar_numeracao_de_margem,
     _normalizar_com_mapa,
-    _reclassificar_exclusao_de_pauta,
     detectar_itens_familia_pontilhada,
     detectar_itens_car,
     detectar_itens_cce,
@@ -162,29 +159,39 @@ def test_familia_pontilhada_nao_trunca_secao_em_numero_coincidente_no_meio_da_fr
     ]
 
 
-def test_neutralizar_numeracao_de_margem_remove_linha_so_com_digitos():
-    texto = "PRIMEIRA LINHA\n8\nSEGUNDA LINHA\n9\nTERCEIRA LINHA"
-    resultado = _neutralizar_numeracao_de_margem(texto)
-    assert len(resultado) == len(texto)
-    assert "8" not in resultado
-    assert "9" not in resultado
-    assert "PRIMEIRA LINHA" in resultado
+def test_familia_pontilhada_reclassifica_exclusao_de_pauta_do_primeiro_item():
+    texto = (
+        "2. EXPEDIENTE: EXCLUSÃO DE PAUTA: 2.1 ITEM RETIRADO. "
+        "2.2 OUTRO ITEM, SEM RELAÇÃO COM EXCLUSÃO."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert itens[0].secao == SECAO_EXCLUSAO_DE_PAUTA
+    assert itens[1].secao == SECAO_EXPEDIENTE
 
 
-def test_neutralizar_numeracao_de_margem_preserva_numero_dentro_da_linha():
-    texto = "1. ORDEM DO DIA: 1.1 ITEM.\n8\nCONTINUAÇÃO."
-    resultado = _neutralizar_numeracao_de_margem(texto)
-    assert "1. ORDEM DO DIA: 1.1 ITEM." in resultado
+def test_familia_pontilhada_primeiro_item_nao_carrega_preambulo_da_secao():
+    texto = (
+        "2. EXPEDIENTE: A Presidente solicitou a inclusão de pontos extras na "
+        "pauta, a saber: 2.1 Processo digital tal. 2.2 Outro item qualquer."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert itens[0].texto.startswith("2.1")
+    assert "Presidente solicitou" not in itens[0].texto
 
 
-def test_reclassificar_exclusao_de_pauta():
-    itens = [
-        ItemDetectado(SECAO_EXPEDIENTE, "2.1", 0, 10, "EXCLUSÃO DE PAUTA: 2.1 ITEM RETIRADO."),
-        ItemDetectado(SECAO_EXPEDIENTE, "2.2", 10, 20, "2.2 OUTRO ITEM, SEM RELAÇÃO COM EXCLUSÃO."),
-    ]
-    resultado = _reclassificar_exclusao_de_pauta(itens)
-    assert resultado[0].secao == SECAO_EXCLUSAO_DE_PAUTA
-    assert resultado[1].secao == SECAO_EXPEDIENTE
+def test_familia_pontilhada_aprovacao_de_ata_preserva_decisao_antes_do_marcador():
+    texto = (
+        "1. APROVAÇÃO DE ATA: Foi apreciada e aprovada, por unanimidade: "
+        "1.1 Ata da Sessão Ordinária, realizada em 17 de dezembro de 2024."
+    )
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert itens[0].texto.startswith("Foi apreciada e aprovada, por unanimidade")
+
+
+def test_familia_pontilhada_reclassificacao_nao_se_aplica_a_secao_sem_subtitulo():
+    texto = "2. EXPEDIENTE: 2.1 ITEM NORMAL, SEM SUBTÍTULO DE EXCLUSÃO."
+    itens = detectar_itens_familia_pontilhada(texto)
+    assert itens[0].secao == SECAO_EXPEDIENTE
 
 
 def test_detectar_itens_ct():
