@@ -136,6 +136,29 @@ def test_gerar_embedding_e_deterministico():
     assert e1 == e2
 
 
+def test_gerar_embedding_captura_similaridade_semantica():
+    tokenizer, modelo = carregar_modelo()
+
+    a = gerar_embedding(tokenizer, modelo, tokenizar_texto(tokenizer, "O conselho aprovou a pauta por unanimidade."))
+    a_parafrase = gerar_embedding(
+        tokenizer, modelo, tokenizar_texto(tokenizer, "A pauta foi aprovada pelo conselho de forma unanime.")
+    )
+    b_nao_relacionado = gerar_embedding(
+        tokenizer, modelo, tokenizar_texto(tokenizer, "O gato dormiu no sofa durante a tarde inteira.")
+    )
+
+    def cosseno(x, y):
+        produto = sum(xi * yi for xi, yi in zip(x, y))
+        norma_x = sum(xi * xi for xi in x) ** 0.5
+        norma_y = sum(yi * yi for yi in y) ** 0.5
+        return produto / (norma_x * norma_y)
+
+    similaridade_parafrase = cosseno(a, a_parafrase)
+    similaridade_nao_relacionado = cosseno(a, b_nao_relacionado)
+
+    assert similaridade_parafrase > similaridade_nao_relacionado
+
+
 def test_tokenizar_texto_nao_inclui_tokens_especiais():
     tokenizer, _ = carregar_modelo()
 
@@ -180,6 +203,42 @@ def test_indexar_e_persistir_upsert_sobrescreve_quando_texto_muda(db_session, qd
             scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_upsert"))]),
         )
         assert len(resultado) == 1  # nao duplicou
+    finally:
+        _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+
+
+def test_indexar_e_persistir_gera_um_ponto_por_janela_em_texto_longo(db_session, qdrant_cliente):
+    frase = (
+        "O conselho universitario discutiu a pauta e aprovou por unanimidade "
+        "a proposta apresentada pelo relator. "
+    )
+    texto_longo = frase * 15
+    documento = _criar_documento(db_session, nome_arquivo="janelas_multiplas.pdf")
+    item = _criar_item(
+        db_session, documento, numero_item="1", item_id_canonico="idx_teste_multi_janela", texto=texto_longo
+    )
+
+    try:
+        total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+
+        tokenizer, _ = carregar_modelo()
+        janelas_esperadas = gerar_janelas(tokenizar_texto(tokenizer, texto_longo))
+        assert total == len(janelas_esperadas)
+        assert total > 1  # confirma que o texto de fato exercita o caminho multi-janela
+
+        resultado, _ = qdrant_cliente.scroll(
+            collection_name=COLLECTION,
+            scroll_filter=Filter(
+                must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_multi_janela"))]
+            ),
+            limit=len(janelas_esperadas),
+        )
+        indices_presentes = sorted(ponto.payload["janela_indice"] for ponto in resultado)
+        assert indices_presentes == list(range(len(janelas_esperadas)))
+        assert len({ponto.id for ponto in resultado}) == len(resultado)
+
+        ponto_janela_1 = next(p for p in resultado if p.payload["janela_indice"] == 1)
+        assert (ponto_janela_1.payload["offset_inicio"], ponto_janela_1.payload["offset_fim"]) == (100, 220)
     finally:
         _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
 
