@@ -1,6 +1,8 @@
 import uuid
 
-from app.ingestion.indexador import gerar_janelas, gerar_point_id
+from qdrant_client.models import Distance
+
+from app.ingestion.indexador import COLLECTION, DIMENSAO_EMBEDDING, gerar_janelas, gerar_point_id, garantir_collection
 
 
 def test_gerar_janelas_texto_menor_que_janela_gera_uma_unica_janela():
@@ -45,3 +47,23 @@ def test_gerar_point_id_muda_com_janela_indice_diferente():
 
 def test_gerar_point_id_muda_com_item_id_canonico_diferente():
     assert gerar_point_id("42_pauta_3.2", 0) != gerar_point_id("42_pauta_3.3", 0)
+
+
+def test_garantir_collection_cria_collection_com_config_correta(qdrant_cliente):
+    qdrant_cliente.delete_collection(COLLECTION)
+    assert not qdrant_cliente.collection_exists(COLLECTION)
+
+    garantir_collection(qdrant_cliente)
+
+    assert qdrant_cliente.collection_exists(COLLECTION)
+    info = qdrant_cliente.get_collection(COLLECTION)
+    assert info.config.params.vectors.size == DIMENSAO_EMBEDDING
+    assert info.config.params.vectors.distance == Distance.COSINE
+
+
+def test_garantir_collection_e_idempotente_quando_ja_existe(qdrant_cliente):
+    garantir_collection(qdrant_cliente)
+
+    garantir_collection(qdrant_cliente)  # nao deve levantar erro
+
+    assert qdrant_cliente.collection_exists(COLLECTION)

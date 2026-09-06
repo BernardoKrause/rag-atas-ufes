@@ -3,8 +3,16 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass
 
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+
+from app.core.config import settings
+
 TAMANHO_JANELA = 120
 SOBREPOSICAO_JANELA = 20
+
+COLLECTION = "itens_pauta"
+DIMENSAO_EMBEDDING = 768
 
 # fixo e arbitrario — so precisa ser estavel entre execucoes, nao tem
 # significado alem de namespacear os UUID5 gerados por este modulo
@@ -41,3 +49,16 @@ def gerar_janelas(
 
 def gerar_point_id(item_id_canonico: str, janela_indice: int) -> str:
     return str(uuid.uuid5(NAMESPACE_INDEXADOR, f"{item_id_canonico}_{janela_indice}"))
+
+
+def obter_cliente_qdrant() -> QdrantClient:
+    return QdrantClient(url=settings.qdrant_url)
+
+
+def garantir_collection(cliente: QdrantClient) -> None:
+    if cliente.collection_exists(COLLECTION):
+        return
+    cliente.create_collection(
+        collection_name=COLLECTION,
+        vectors_config=VectorParams(size=DIMENSAO_EMBEDDING, distance=Distance.COSINE),
+    )
