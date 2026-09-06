@@ -6,10 +6,11 @@ from functools import lru_cache
 
 import torch
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
 from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
 from app.core.config import settings
+from app.models.item_pauta import ItemPauta
 
 TAMANHO_JANELA = 120
 SOBREPOSICAO_JANELA = 20
@@ -94,3 +95,34 @@ def gerar_embedding(tokenizer: PreTrainedTokenizerBase, modelo: PreTrainedModel,
     media = (embeddings_token * mascara).sum(dim=0) / mascara.sum()
     normalizado = media / media.norm()
     return normalizado.tolist()
+
+
+def indexar_e_persistir(documento_id: int, itens: list[ItemPauta], cliente: QdrantClient) -> int:
+    tokenizer, modelo = carregar_modelo()
+
+    pontos = []
+    for item in itens:
+        token_ids = tokenizar_texto(tokenizer, item.texto)
+        for janela in gerar_janelas(token_ids):
+            embedding = gerar_embedding(tokenizer, modelo, janela.token_ids)
+            pontos.append(
+                PointStruct(
+                    id=gerar_point_id(item.item_id_canonico, janela.indice),
+                    vector=embedding,
+                    payload={
+                        "item_id_canonico": item.item_id_canonico,
+                        "janela_indice": janela.indice,
+                        "offset_inicio": janela.offset_inicio,
+                        "offset_fim": janela.offset_fim,
+                        "documento_id": documento_id,
+                    },
+                )
+            )
+
+    cliente.delete(
+        collection_name=COLLECTION,
+        points_selector=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento_id))]),
+    )
+    if pontos:
+        cliente.upsert(collection_name=COLLECTION, points=pontos)
+    return len(pontos)

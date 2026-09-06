@@ -1,6 +1,7 @@
 import uuid
+from datetime import date
 
-from qdrant_client.models import Distance
+from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue
 
 from app.ingestion.indexador import (
     COLLECTION,
@@ -10,8 +11,44 @@ from app.ingestion.indexador import (
     gerar_janelas,
     gerar_point_id,
     garantir_collection,
+    indexar_e_persistir,
     tokenizar_texto,
 )
+from app.models.documento import Documento
+from app.models.item_pauta import ItemPauta
+
+
+def _criar_documento(sessao, **overrides):
+    base = dict(
+        nome_arquivo="teste_indexador.pdf", url_origem="http://exemplo", centro="CCENS",
+        campus="Alegre", tipo_orgao="A", orgao="CCENS_DB", data_reuniao=date(2025, 1, 1),
+        texto_limpo="texto", paginas_offsets=[0],
+    )
+    base.update(overrides)
+    documento = Documento(**base)
+    sessao.add(documento)
+    sessao.flush()
+    return documento
+
+
+def _criar_item(sessao, documento, **overrides):
+    base = dict(
+        documento_id=documento.id_documento, secao="PAUTA", numero_item="1",
+        ocorrencia_indice=0, fragmento_indice=0, texto="texto do item de teste sobre a pauta discutida.",
+    )
+    base.update(overrides)
+    base.setdefault("item_id_canonico", f"{documento.id_documento}_pauta_{base['numero_item']}")
+    item = ItemPauta(**base)
+    sessao.add(item)
+    sessao.flush()
+    return item
+
+
+def _limpar_pontos_do_documento(cliente, documento_id):
+    cliente.delete(
+        collection_name=COLLECTION,
+        points_selector=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento_id))]),
+    )
 
 
 def test_gerar_janelas_texto_menor_que_janela_gera_uma_unica_janela():
@@ -106,3 +143,57 @@ def test_tokenizar_texto_nao_inclui_tokens_especiais():
 
     assert tokenizer.cls_token_id not in token_ids
     assert tokenizer.sep_token_id not in token_ids
+
+
+def test_indexar_e_persistir_cria_um_ponto_por_janela(db_session, qdrant_cliente):
+    documento = _criar_documento(db_session)
+    item = _criar_item(db_session, documento, numero_item="1", item_id_canonico="idx_teste_1")
+
+    total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+
+    assert total == 1
+    resultado, _ = qdrant_cliente.scroll(
+        collection_name=COLLECTION,
+        scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_1"))]),
+    )
+    assert len(resultado) == 1
+    assert resultado[0].payload["janela_indice"] == 0
+    assert resultado[0].payload["documento_id"] == documento.id_documento
+    _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+
+
+def test_indexar_e_persistir_upsert_sobrescreve_quando_texto_muda(db_session, qdrant_cliente):
+    documento = _criar_documento(db_session, nome_arquivo="upsert.pdf")
+    item = _criar_item(db_session, documento, numero_item="1", item_id_canonico="idx_teste_upsert")
+
+    indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+    item.texto = "texto atualizado do mesmo item, ainda cabe em uma unica janela de tokens."
+    db_session.flush()
+    total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+
+    assert total == 1
+    resultado, _ = qdrant_cliente.scroll(
+        collection_name=COLLECTION,
+        scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_upsert"))]),
+    )
+    assert len(resultado) == 1  # nao duplicou
+    _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+
+
+def test_indexar_e_persistir_remove_pontos_orfaos_na_reindexacao(db_session, qdrant_cliente):
+    documento = _criar_documento(db_session, nome_arquivo="reindex.pdf")
+    item_a = _criar_item(db_session, documento, numero_item="1", item_id_canonico="idx_orfao_a")
+    item_b = _criar_item(db_session, documento, numero_item="2", item_id_canonico="idx_orfao_b")
+    indexar_e_persistir(documento.id_documento, [item_a, item_b], qdrant_cliente)
+
+    # simula re-segmentacao: item_b sumiu, item_c e novo
+    item_c = _criar_item(db_session, documento, numero_item="3", item_id_canonico="idx_orfao_c")
+    indexar_e_persistir(documento.id_documento, [item_a, item_c], qdrant_cliente)
+
+    resultado, _ = qdrant_cliente.scroll(
+        collection_name=COLLECTION,
+        scroll_filter=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento.id_documento))]),
+    )
+    ids_presentes = {ponto.payload["item_id_canonico"] for ponto in resultado}
+    assert ids_presentes == {"idx_orfao_a", "idx_orfao_c"}
+    _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
