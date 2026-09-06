@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 
 TAMANHO_JANELA = 120
 SOBREPOSICAO_JANELA = 20
+
+# fixo e arbitrario — so precisa ser estavel entre execucoes, nao tem
+# significado alem de namespacear os UUID5 gerados por este modulo
+NAMESPACE_INDEXADOR = uuid.UUID("cb1ba723-9f07-43ee-b6fa-107dd354bb04")
 
 
 @dataclass(frozen=True)
@@ -32,3 +37,7 @@ def gerar_janelas(
         inicio += passo
         indice += 1
     return janelas
+
+
+def gerar_point_id(item_id_canonico: str, janela_indice: int) -> str:
+    return str(uuid.uuid5(NAMESPACE_INDEXADOR, f"{item_id_canonico}_{janela_indice}"))

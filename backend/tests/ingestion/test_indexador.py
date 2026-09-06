@@ -1,4 +1,6 @@
-from app.ingestion.indexador import gerar_janelas
+import uuid
+
+from app.ingestion.indexador import gerar_janelas, gerar_point_id
 
 
 def test_gerar_janelas_texto_menor_que_janela_gera_uma_unica_janela():
@@ -27,3 +29,19 @@ def test_gerar_janelas_aplica_sobreposicao_entre_janelas_consecutivas():
 
 def test_gerar_janelas_lista_vazia_nao_gera_janelas():
     assert gerar_janelas([]) == []
+
+
+def test_gerar_point_id_e_deterministico_e_valido():
+    id1 = gerar_point_id("42_pauta_3.2", 0)
+    id2 = gerar_point_id("42_pauta_3.2", 0)
+
+    assert id1 == id2
+    uuid.UUID(id1)  # nao levanta ValueError
+
+
+def test_gerar_point_id_muda_com_janela_indice_diferente():
+    assert gerar_point_id("42_pauta_3.2", 0) != gerar_point_id("42_pauta_3.2", 1)
+
+
+def test_gerar_point_id_muda_com_item_id_canonico_diferente():
+    assert gerar_point_id("42_pauta_3.2", 0) != gerar_point_id("42_pauta_3.3", 0)
