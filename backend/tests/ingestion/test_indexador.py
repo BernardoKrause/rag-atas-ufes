@@ -2,7 +2,16 @@ import uuid
 
 from qdrant_client.models import Distance
 
-from app.ingestion.indexador import COLLECTION, DIMENSAO_EMBEDDING, gerar_janelas, gerar_point_id, garantir_collection
+from app.ingestion.indexador import (
+    COLLECTION,
+    DIMENSAO_EMBEDDING,
+    carregar_modelo,
+    gerar_embedding,
+    gerar_janelas,
+    gerar_point_id,
+    garantir_collection,
+    tokenizar_texto,
+)
 
 
 def test_gerar_janelas_texto_menor_que_janela_gera_uma_unica_janela():
@@ -67,3 +76,33 @@ def test_garantir_collection_e_idempotente_quando_ja_existe(qdrant_cliente):
     garantir_collection(qdrant_cliente)  # nao deve levantar erro
 
     assert qdrant_cliente.collection_exists(COLLECTION)
+
+
+def test_gerar_embedding_retorna_vetor_normalizado_de_768_dimensoes():
+    tokenizer, modelo = carregar_modelo()
+    token_ids = tokenizar_texto(tokenizer, "O conselho aprovou a pauta por unanimidade.")
+
+    embedding = gerar_embedding(tokenizer, modelo, token_ids)
+
+    assert len(embedding) == 768
+    norma = sum(v * v for v in embedding) ** 0.5
+    assert abs(norma - 1.0) < 1e-4
+
+
+def test_gerar_embedding_e_deterministico():
+    tokenizer, modelo = carregar_modelo()
+    token_ids = tokenizar_texto(tokenizer, "Texto de teste.")
+
+    e1 = gerar_embedding(tokenizer, modelo, token_ids)
+    e2 = gerar_embedding(tokenizer, modelo, token_ids)
+
+    assert e1 == e2
+
+
+def test_tokenizar_texto_nao_inclui_tokens_especiais():
+    tokenizer, _ = carregar_modelo()
+
+    token_ids = tokenizar_texto(tokenizer, "teste")
+
+    assert tokenizer.cls_token_id not in token_ids
+    assert tokenizer.sep_token_id not in token_ids

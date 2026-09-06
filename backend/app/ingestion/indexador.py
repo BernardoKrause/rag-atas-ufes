@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
+from functools import lru_cache
 
+import torch
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
 from app.core.config import settings
 
@@ -13,6 +16,8 @@ SOBREPOSICAO_JANELA = 20
 
 COLLECTION = "itens_pauta"
 DIMENSAO_EMBEDDING = 768
+
+NOME_MODELO = "PORTULAN/serafim-100m-portuguese-pt-sentence-encoder-ir"
 
 # fixo e arbitrario — so precisa ser estavel entre execucoes, nao tem
 # significado alem de namespacear os UUID5 gerados por este modulo
@@ -62,3 +67,30 @@ def garantir_collection(cliente: QdrantClient) -> None:
         collection_name=COLLECTION,
         vectors_config=VectorParams(size=DIMENSAO_EMBEDDING, distance=Distance.COSINE),
     )
+
+
+@lru_cache(maxsize=1)
+def carregar_modelo() -> tuple[PreTrainedTokenizerBase, PreTrainedModel]:
+    tokenizer = AutoTokenizer.from_pretrained(NOME_MODELO)
+    modelo = AutoModel.from_pretrained(NOME_MODELO)
+    modelo.eval()
+    return tokenizer, modelo
+
+
+def tokenizar_texto(tokenizer: PreTrainedTokenizerBase, texto: str) -> list[int]:
+    return tokenizer(texto, add_special_tokens=False)["input_ids"]
+
+
+def gerar_embedding(tokenizer: PreTrainedTokenizerBase, modelo: PreTrainedModel, token_ids: list[int]) -> list[float]:
+    entrada = [tokenizer.cls_token_id] + token_ids + [tokenizer.sep_token_id]
+    tensor_ids = torch.tensor([entrada])
+    tensor_mask = torch.ones_like(tensor_ids)
+
+    with torch.no_grad():
+        saida = modelo(input_ids=tensor_ids, attention_mask=tensor_mask)
+
+    embeddings_token = saida.last_hidden_state[0]
+    mascara = tensor_mask[0].unsqueeze(-1).float()
+    media = (embeddings_token * mascara).sum(dim=0) / mascara.sum()
+    normalizado = media / media.norm()
+    return normalizado.tolist()
