@@ -7,9 +7,12 @@ from functools import lru_cache
 import torch
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
 from app.core.config import settings
+from app.models.consultas import carregar_documentos_com_itens
 from app.models.item_pauta import ItemPauta
 
 TAMANHO_JANELA = 120
@@ -126,12 +129,6 @@ def indexar_e_persistir(documento_id: int, itens: list[ItemPauta], cliente: Qdra
     if pontos:
         cliente.upsert(collection_name=COLLECTION, points=pontos)
     return len(pontos)
-
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from app.models.consultas import carregar_documentos_com_itens
 
 
 def main() -> None:
