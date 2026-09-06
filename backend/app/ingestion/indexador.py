@@ -126,3 +126,27 @@ def indexar_e_persistir(documento_id: int, itens: list[ItemPauta], cliente: Qdra
     if pontos:
         cliente.upsert(collection_name=COLLECTION, points=pontos)
     return len(pontos)
+
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.models.consultas import carregar_documentos_com_itens
+
+
+def main() -> None:
+    engine = create_engine(settings.database_url)
+    Sessao = sessionmaker(bind=engine)
+    cliente = obter_cliente_qdrant()
+    garantir_collection(cliente)
+
+    with Sessao() as sessao:
+        documentos_com_itens = carregar_documentos_com_itens(sessao)
+        total_pontos = 0
+        for documento, itens in documentos_com_itens:
+            total_pontos += indexar_e_persistir(documento.id_documento, itens, cliente)
+        print(f"{len(documentos_com_itens)} documentos processados, {total_pontos} janelas indexadas.")
+
+
+if __name__ == "__main__":
+    main()
