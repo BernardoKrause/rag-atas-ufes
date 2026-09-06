@@ -3,7 +3,6 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.ingestion.indexador import garantir_collection, obter_cliente_qdrant
 
 
 @pytest.fixture()
@@ -42,6 +41,9 @@ def db_session():
 
 @pytest.fixture()
 def qdrant_cliente():
+    from app.ingestion.indexador import garantir_collection, obter_cliente_qdrant
+
     cliente = obter_cliente_qdrant()
     garantir_collection(cliente)
     yield cliente
+    cliente.close()
