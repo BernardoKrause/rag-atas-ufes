@@ -149,51 +149,57 @@ def test_indexar_e_persistir_cria_um_ponto_por_janela(db_session, qdrant_cliente
     documento = _criar_documento(db_session)
     item = _criar_item(db_session, documento, numero_item="1", item_id_canonico="idx_teste_1")
 
-    total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+    try:
+        total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
 
-    assert total == 1
-    resultado, _ = qdrant_cliente.scroll(
-        collection_name=COLLECTION,
-        scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_1"))]),
-    )
-    assert len(resultado) == 1
-    assert resultado[0].payload["janela_indice"] == 0
-    assert resultado[0].payload["documento_id"] == documento.id_documento
-    _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+        assert total == 1
+        resultado, _ = qdrant_cliente.scroll(
+            collection_name=COLLECTION,
+            scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_1"))]),
+        )
+        assert len(resultado) == 1
+        assert resultado[0].payload["janela_indice"] == 0
+        assert resultado[0].payload["documento_id"] == documento.id_documento
+    finally:
+        _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
 
 
 def test_indexar_e_persistir_upsert_sobrescreve_quando_texto_muda(db_session, qdrant_cliente):
     documento = _criar_documento(db_session, nome_arquivo="upsert.pdf")
     item = _criar_item(db_session, documento, numero_item="1", item_id_canonico="idx_teste_upsert")
 
-    indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
-    item.texto = "texto atualizado do mesmo item, ainda cabe em uma unica janela de tokens."
-    db_session.flush()
-    total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+    try:
+        indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
+        item.texto = "texto atualizado do mesmo item, ainda cabe em uma unica janela de tokens."
+        db_session.flush()
+        total = indexar_e_persistir(documento.id_documento, [item], qdrant_cliente)
 
-    assert total == 1
-    resultado, _ = qdrant_cliente.scroll(
-        collection_name=COLLECTION,
-        scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_upsert"))]),
-    )
-    assert len(resultado) == 1  # nao duplicou
-    _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+        assert total == 1
+        resultado, _ = qdrant_cliente.scroll(
+            collection_name=COLLECTION,
+            scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_upsert"))]),
+        )
+        assert len(resultado) == 1  # nao duplicou
+    finally:
+        _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
 
 
 def test_indexar_e_persistir_remove_pontos_orfaos_na_reindexacao(db_session, qdrant_cliente):
     documento = _criar_documento(db_session, nome_arquivo="reindex.pdf")
     item_a = _criar_item(db_session, documento, numero_item="1", item_id_canonico="idx_orfao_a")
     item_b = _criar_item(db_session, documento, numero_item="2", item_id_canonico="idx_orfao_b")
-    indexar_e_persistir(documento.id_documento, [item_a, item_b], qdrant_cliente)
+    try:
+        indexar_e_persistir(documento.id_documento, [item_a, item_b], qdrant_cliente)
 
-    # simula re-segmentacao: item_b sumiu, item_c e novo
-    item_c = _criar_item(db_session, documento, numero_item="3", item_id_canonico="idx_orfao_c")
-    indexar_e_persistir(documento.id_documento, [item_a, item_c], qdrant_cliente)
+        # simula re-segmentacao: item_b sumiu, item_c e novo
+        item_c = _criar_item(db_session, documento, numero_item="3", item_id_canonico="idx_orfao_c")
+        indexar_e_persistir(documento.id_documento, [item_a, item_c], qdrant_cliente)
 
-    resultado, _ = qdrant_cliente.scroll(
-        collection_name=COLLECTION,
-        scroll_filter=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento.id_documento))]),
-    )
-    ids_presentes = {ponto.payload["item_id_canonico"] for ponto in resultado}
-    assert ids_presentes == {"idx_orfao_a", "idx_orfao_c"}
-    _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+        resultado, _ = qdrant_cliente.scroll(
+            collection_name=COLLECTION,
+            scroll_filter=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento.id_documento))]),
+        )
+        ids_presentes = {ponto.payload["item_id_canonico"] for ponto in resultado}
+        assert ids_presentes == {"idx_orfao_a", "idx_orfao_c"}
+    finally:
+        _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
