@@ -55,6 +55,11 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 20
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - "6333:6333"
+          - "6334:6334"
     steps:
       - uses: actions/checkout@v4
 
@@ -63,6 +68,12 @@ jobs:
           python-version: "3.13"
           cache: "pip"
           cache-dependency-path: backend/requirements.txt
+
+      - name: Cache Hugging Face models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-${{ hashFiles('backend/app/ingestion/indexador.py') }}
 
       - name: Install dependencies
         run: pip install -r requirements.txt

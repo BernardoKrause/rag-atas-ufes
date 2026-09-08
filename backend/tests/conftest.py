@@ -37,3 +37,13 @@ def db_session():
     transacao.rollback()
     conexao.close()
     engine.dispose()
+
+
+@pytest.fixture()
+def qdrant_cliente():
+    from app.ingestion.indexador import _obter_cliente_qdrant, garantir_collection
+
+    cliente = _obter_cliente_qdrant()
+    garantir_collection(cliente)
+    yield cliente
+    cliente.close()
