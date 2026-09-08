@@ -95,16 +95,21 @@ def test_gerar_point_id_muda_com_item_id_canonico_diferente():
     assert gerar_point_id("42_pauta_3.2", 0) != gerar_point_id("42_pauta_3.3", 0)
 
 
-def test_garantir_collection_cria_collection_com_config_correta(qdrant_cliente):
-    qdrant_cliente.delete_collection(COLLECTION)
-    assert not qdrant_cliente.collection_exists(COLLECTION)
+def test_garantir_collection_cria_collection_com_config_correta(qdrant_cliente, monkeypatch):
+    nome_temporario = f"itens_pauta_teste_{uuid.uuid4().hex}"
+    monkeypatch.setattr("app.ingestion.indexador.COLLECTION", nome_temporario)
 
-    garantir_collection(qdrant_cliente)
+    try:
+        assert not qdrant_cliente.collection_exists(nome_temporario)
 
-    assert qdrant_cliente.collection_exists(COLLECTION)
-    info = qdrant_cliente.get_collection(COLLECTION)
-    assert info.config.params.vectors.size == DIMENSAO_EMBEDDING
-    assert info.config.params.vectors.distance == Distance.COSINE
+        garantir_collection(qdrant_cliente)
+
+        assert qdrant_cliente.collection_exists(nome_temporario)
+        info = qdrant_cliente.get_collection(nome_temporario)
+        assert info.config.params.vectors.size == DIMENSAO_EMBEDDING
+        assert info.config.params.vectors.distance == Distance.COSINE
+    finally:
+        qdrant_cliente.delete_collection(nome_temporario)
 
 
 def test_garantir_collection_e_idempotente_quando_ja_existe(qdrant_cliente):
