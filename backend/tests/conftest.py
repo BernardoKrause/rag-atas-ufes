@@ -41,9 +41,9 @@ def db_session():
 
 @pytest.fixture()
 def qdrant_cliente():
-    from app.ingestion.indexador import garantir_collection, obter_cliente_qdrant
+    from app.ingestion.indexador import _obter_cliente_qdrant, garantir_collection
 
-    cliente = obter_cliente_qdrant()
+    cliente = _obter_cliente_qdrant()
     garantir_collection(cliente)
     yield cliente
     cliente.close()

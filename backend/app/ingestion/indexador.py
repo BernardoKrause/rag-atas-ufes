@@ -60,7 +60,7 @@ def gerar_point_id(item_id_canonico: str, janela_indice: int) -> str:
     return str(uuid.uuid5(NAMESPACE_INDEXADOR, f"{item_id_canonico}_{janela_indice}"))
 
 
-def obter_cliente_qdrant() -> QdrantClient:
+def _obter_cliente_qdrant() -> QdrantClient:
     return QdrantClient(url=settings.qdrant_url)
 
 
@@ -134,7 +134,7 @@ def indexar_e_persistir(documento_id: int, itens: list[ItemPauta], cliente: Qdra
 def main() -> None:
     engine = create_engine(settings.database_url)
     Sessao = sessionmaker(bind=engine)
-    cliente = obter_cliente_qdrant()
+    cliente = _obter_cliente_qdrant()
     garantir_collection(cliente)
 
     with Sessao() as sessao:
