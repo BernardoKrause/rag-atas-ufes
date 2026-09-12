@@ -108,3 +108,26 @@ def test_recuperar_degrada_quando_expansao_de_grafo_falha(db_session, qdrant_cli
         assert "orq_degrada_grafo" in ids
     finally:
         limpar_pontos_qdrant(qdrant_cliente, documento.id_documento)
+
+
+def test_recuperar_degrada_quando_hidratacao_de_itens_falha(db_session, qdrant_cliente, grafo_driver, monkeypatch):
+    documento = criar_documento(db_session, nome_arquivo="orq_5.pdf")
+    item = criar_item(
+        db_session, documento, numero_item="1", item_id_canonico="orq_degrada_hidratacao",
+        texto="O conselho aprovou a reforma do laboratório de química por unanimidade.",
+    )
+    try:
+        _indexar_e_construir_grafo(qdrant_cliente, grafo_driver, documento, [item])
+
+        def _levanta_erro(*args, **kwargs):
+            raise RuntimeError("postgres indisponivel")
+
+        monkeypatch.setattr("app.recuperacao.orquestrador._buscar_itens_por_id", _levanta_erro)
+
+        resultado = recuperar(
+            "aprovação da reforma do laboratório de química", db_session, qdrant_cliente, grafo_driver, k=2
+        )
+
+        assert resultado == []
+    finally:
+        limpar_pontos_qdrant(qdrant_cliente, documento.id_documento)

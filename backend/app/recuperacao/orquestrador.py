@@ -38,12 +38,7 @@ def recuperar(
     if not ids_finais:
         return []
 
-    itens_por_id = {
-        item.item_id_canonico: item
-        for item in sessao.execute(
-            select(ItemPauta).where(ItemPauta.item_id_canonico.in_(ids_finais))
-        ).scalars()
-    }
+    itens_por_id = _com_degradacao("hidratacao_itens", _buscar_itens_por_id, sessao, ids_finais) or {}
     score_lexico = {hit.item_id_canonico: hit.score for hit in hits_lexico}
     score_vetorial = {hit.item_id_canonico: hit.score for hit in hits_vetorial}
     score_grafo = {hit.item_id_canonico: hit.score for hit in hits_grafo}
@@ -67,6 +62,15 @@ def recuperar(
             )
         )
     return evidencias
+
+
+def _buscar_itens_por_id(sessao: Session, ids_finais: list[str]) -> dict[str, ItemPauta]:
+    return {
+        item.item_id_canonico: item
+        for item in sessao.execute(
+            select(ItemPauta).where(ItemPauta.item_id_canonico.in_(ids_finais))
+        ).scalars()
+    }
 
 
 def _com_degradacao(nome_camada, funcao, *args):
