@@ -38,11 +38,11 @@ def test_expandir_grafo_nao_reinclui_ancoras(grafo_driver):
     documento = _documento(998002)
     item_a = ItemPauta(
         item_id_canonico="998002_PAUTA_1", documento_id=998002, secao="PAUTA", numero_item="1",
-        texto="texto a.", assunto="Bolsas de pesquisa",
+        texto="texto a.", assunto="Bolsas de iniciação científica",
     )
     item_b = ItemPauta(
         item_id_canonico="998002_PAUTA_2", documento_id=998002, secao="PAUTA", numero_item="2",
-        texto="texto b.", assunto="Bolsas de pesquisa",
+        texto="texto b.", assunto="Bolsas de iniciação científica",
     )
     construir_grafo([(documento, [item_a, item_b])], grafo_driver)
 
