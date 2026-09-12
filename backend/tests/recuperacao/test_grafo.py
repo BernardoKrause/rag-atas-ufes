@@ -3,7 +3,7 @@ from datetime import date
 from app.grafo.construtor import construir_grafo
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
-from app.recuperacao.grafo import expandir_grafo
+from app.recuperacao.grafo import expandir_grafo, obter_contexto_grafo
 from app.recuperacao.tipos import Hit
 
 
@@ -76,3 +76,51 @@ def test_expandir_grafo_usa_menor_rank_entre_ancoras_que_descobrem_mesmo_item(gr
 
 def test_expandir_grafo_sem_ancoras_retorna_vazio(grafo_driver):
     assert expandir_grafo([], grafo_driver) == []
+
+
+def test_obter_contexto_grafo_traz_departamento_sem_mencao_textual_no_item(grafo_driver):
+    # valida a pendencia registrada: o item nunca menciona "DCC" no texto, so
+    # a Ata (via PERTENCE_A) sabe o departamento.
+    documento = _documento(998004, departamento="DCC")
+    item = ItemPauta(
+        item_id_canonico="998004_PAUTA_1", documento_id=998004, secao="PAUTA", numero_item="1",
+        texto="aprovacao de um pedido qualquer sem mencionar o departamento de origem.",
+    )
+    construir_grafo([(documento, [item])], grafo_driver)
+
+    contexto = obter_contexto_grafo("998004_PAUTA_1", grafo_driver)
+
+    assert contexto["departamento"] == "DCC"
+    assert contexto["centro"] == "CT"
+
+
+def test_obter_contexto_grafo_traz_deliberacao_e_relacionadas(grafo_driver):
+    documento = _documento(998005)
+    item_antigo = ItemPauta(
+        item_id_canonico="998005_PAUTA_1", documento_id=998005, secao="PAUTA", numero_item="1",
+        texto="texto antigo", tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_10_2024",
+    )
+    item_novo = ItemPauta(
+        item_id_canonico="998005_PAUTA_2", documento_id=998005, secao="PAUTA", numero_item="2",
+        texto="Revoga-se a Resolução nº 10, de 1 de janeiro de 2024.",
+        tipo_desfecho="Aprovado", resultado_votacao="unanimidade", ato_emitido="RESOLUCAO_20_2025",
+        encaminhamento="publicar no boletim",
+    )
+    construir_grafo([(documento, [item_antigo, item_novo])], grafo_driver)
+
+    contexto = obter_contexto_grafo("998005_PAUTA_2", grafo_driver)
+
+    assert contexto["tipo_desfecho"] == "Aprovado"
+    assert contexto["resultado_votacao"] == "unanimidade"
+    assert contexto["ato_emitido"] == "RESOLUCAO_20_2025"
+    assert contexto["encaminhamento"] == "publicar no boletim"
+    assert contexto["deliberacoes_relacionadas"] == [
+        {"tipo_relacao": "revoga", "item_id_canonico": "998005_PAUTA_1", "ato_emitido": "RESOLUCAO_10_2024"}
+    ]
+
+
+def test_obter_contexto_grafo_item_inexistente_retorna_campos_none(grafo_driver):
+    contexto = obter_contexto_grafo("nao_existe_no_grafo", grafo_driver)
+
+    assert contexto["departamento"] is None
+    assert contexto["deliberacoes_relacionadas"] == []
