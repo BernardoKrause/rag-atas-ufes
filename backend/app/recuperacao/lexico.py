@@ -9,18 +9,25 @@ LIMITE_PADRAO = 50
 
 
 def buscar_lexico(pergunta: str, sessao: Session, limite: int = LIMITE_PADRAO) -> list[Hit]:
-    pergunta_or = " | ".join(pergunta.split())
+    termos = pergunta.split()
+    if not termos:
+        return []
+
+    consulta_or = " || ".join(f"plainto_tsquery('portuguese', :termo{i})" for i in range(len(termos)))
+    parametros = {f"termo{i}": termo for i, termo in enumerate(termos)}
+    parametros["limite"] = limite
+
     linhas = sessao.execute(
         text(
-            """
-            SELECT item_id_canonico, ts_rank(tsv, to_tsquery('portuguese', :pergunta)) AS score
+            f"""
+            SELECT item_id_canonico, ts_rank(tsv, {consulta_or}) AS score
             FROM itens_pauta
-            WHERE tsv @@ to_tsquery('portuguese', :pergunta)
+            WHERE tsv @@ ({consulta_or})
             ORDER BY score DESC
             LIMIT :limite
             """
         ),
-        {"pergunta": pergunta_or, "limite": limite},
+        parametros,
     ).all()
     return [
         Hit(item_id_canonico=linha.item_id_canonico, rank=indice + 1, score=float(linha.score))

@@ -47,3 +47,12 @@ def test_buscar_lexico_respeita_limite(db_session):
     resultados = buscar_lexico("aprovação relatório", db_session, limite=2)
 
     assert len(resultados) == 2
+
+
+def test_buscar_lexico_pergunta_com_caracteres_especiais_nao_quebra(db_session):
+    documento = criar_documento(db_session)
+    criar_item(db_session, documento, numero_item="1", texto="aprovação do orçamento anual.")
+
+    resultados = buscar_lexico("aprovação & (orçamento) | teste: 1", db_session)
+
+    assert isinstance(resultados, list)

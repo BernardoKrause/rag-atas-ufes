@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from sqlalchemy import text
 
 from app.grafo.cliente import obter_driver
 from app.grafo.construtor import limpar_grafo
@@ -44,8 +45,7 @@ def criar_item(sessao, documento, **overrides):
 
 
 @pytest.fixture(autouse=True)
-def _limpar_tabelas_teste(db_session):
-    from sqlalchemy import text
+def _limpar_itens_pauta_existentes(db_session):
     db_session.execute(text("DELETE FROM itens_pauta"))
     db_session.execute(text("DELETE FROM documentos"))
     db_session.flush()
