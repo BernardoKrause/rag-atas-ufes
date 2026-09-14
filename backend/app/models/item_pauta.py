@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Computed, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -16,6 +17,7 @@ class ItemPauta(Base):
             "documento_id", "secao", "numero_item", "ocorrencia_indice", "fragmento_indice",
             name="uq_itens_pauta_documento_secao_numero_ocorrencia_fragmento",
         ),
+        Index("ix_itens_pauta_tsv", "tsv", postgresql_using="gin"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -47,3 +49,7 @@ class ItemPauta(Base):
     ato_emitido: Mapped[str | None] = mapped_column(String(60), nullable=True)
     departamento_origem: Mapped[str | None] = mapped_column(String(60), nullable=True)
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    tsv: Mapped[str | None] = mapped_column(
+        TSVECTOR, Computed("to_tsvector('portuguese', texto)", persisted=True),
+        nullable=True, deferred=True,
+    )
