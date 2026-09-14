@@ -3,9 +3,7 @@ from __future__ import annotations
 from qdrant_client import QdrantClient
 
 from app.ingestion.indexador import COLLECTION, carregar_modelo, gerar_embedding, tokenizar_texto
-from app.recuperacao.tipos import Hit
-
-LIMITE_PADRAO = 50
+from app.recuperacao.tipos import LIMITE_PADRAO, Hit
 
 
 def buscar_vetorial(pergunta: str, cliente: QdrantClient, limite_janelas: int = LIMITE_PADRAO) -> list[Hit]:

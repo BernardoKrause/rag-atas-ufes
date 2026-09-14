@@ -3,9 +3,7 @@ from __future__ import annotations
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.recuperacao.tipos import Hit
-
-LIMITE_PADRAO = 50
+from app.recuperacao.tipos import LIMITE_PADRAO, Hit
 
 
 def buscar_lexico(pergunta: str, sessao: Session, limite: int = LIMITE_PADRAO) -> list[Hit]:
@@ -20,9 +18,10 @@ def buscar_lexico(pergunta: str, sessao: Session, limite: int = LIMITE_PADRAO) -
     linhas = sessao.execute(
         text(
             f"""
-            SELECT item_id_canonico, ts_rank(tsv, {consulta_or}) AS score
-            FROM itens_pauta
-            WHERE tsv @@ ({consulta_or})
+            WITH consulta AS (SELECT ({consulta_or}) AS tsquery)
+            SELECT item_id_canonico, ts_rank(itens_pauta.tsv, consulta.tsquery) AS score
+            FROM itens_pauta, consulta
+            WHERE itens_pauta.tsv @@ consulta.tsquery
             ORDER BY score DESC
             LIMIT :limite
             """

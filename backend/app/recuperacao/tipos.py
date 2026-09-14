@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+LIMITE_PADRAO = 50
+
 
 @dataclass(frozen=True)
 class Hit:
