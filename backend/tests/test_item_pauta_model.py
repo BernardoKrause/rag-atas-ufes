@@ -48,3 +48,23 @@ def test_item_pauta_aceita_campos_de_enriquecimento_preenchidos(db_session):
 
     assert item.tipo_desfecho == "Aprovado"
     assert item.ato_emitido == "RESOLUCAO_79_2025"
+
+
+def test_item_pauta_expoe_tsv_gerado_pelo_postgres(db_session):
+    documento = Documento(
+        nome_arquivo="z.pdf", url_origem="z.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
+    )
+    db_session.add(documento)
+    db_session.flush()
+
+    item = ItemPauta(
+        documento_id=documento.id_documento, item_id_canonico="3_PAUTA_1",
+        secao="PAUTA", numero_item="1", texto="aprovação da reforma do laboratório",
+    )
+    db_session.add(item)
+    db_session.flush()
+    db_session.refresh(item)
+
+    assert item.tsv is not None
+    assert "aprov" in item.tsv
