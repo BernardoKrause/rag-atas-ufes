@@ -244,6 +244,7 @@ def test_extrair_campos_fixture_ct_layout_espacado():
     assert campos["horario_inicio"] == "14:00"
     assert campos["modalidade"] == "Videoconferência"
     assert campos["quorum_declarado"] is True
+    assert campos["em_aprovacao"] is True
 
 
 def test_extrair_texto_bruto_loga_aviso_do_mupdf_em_vez_de_vazar_pro_stderr(caplog, monkeypatch):
