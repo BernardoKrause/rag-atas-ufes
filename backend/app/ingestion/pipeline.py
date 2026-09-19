@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.ingestion.cleaner import anonimizar_texto, remapear_offsets
 from app.ingestion.collector import PREFIXO_PATH_ESTENDIDO, AtaParaProcessar, coletar_atas
 from app.ingestion.extractor import extrair_campos
-from app.models.documento import Documento
+from app.models.documento import Documento, StatusAprovacao
 
 
 def _url_origem(caminho_pdf: Path) -> str:
@@ -54,6 +54,11 @@ def processar_ata(ata: AtaParaProcessar, secret_key: bytes, sessao: Session) -> 
     documento.modalidade = campos["modalidade"]
     documento.local = campos["local"]
     documento.quorum_declarado = campos["quorum_declarado"]
+    documento.status_aprovacao = (
+        StatusAprovacao.PENDENTE_APROVACAO.value
+        if campos["em_aprovacao"]
+        else StatusAprovacao.APROVADA.value
+    )
     documento.texto_limpo = texto_limpo
     # paginas_offsets vem do extrator sobre texto_bruto (pre-anonimizacao);
     # remapeado aqui pro espaco de texto_limpo, que e o que fica persistido

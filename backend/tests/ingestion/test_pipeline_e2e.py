@@ -6,7 +6,7 @@ import pytest
 import app.ingestion.pipeline as pipeline_module
 from app.ingestion.collector import AtaParaProcessar
 from app.ingestion.pipeline import executar_pipeline, processar_ata
-from app.models.documento import Documento
+from app.models.documento import Documento, StatusAprovacao
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
 SECRET_KEY = b"chave-de-teste-nao-usar-em-producao"
@@ -39,6 +39,48 @@ def test_pipeline_preenche_campos_organizacionais_e_estruturais(db_session):
     assert ccae.tipo_reuniao == "Ordinaria"
     assert ccae.horario_inicio == "14:00"
     assert ccae.modalidade == "Presencial"
+
+
+def test_pipeline_status_aprovacao_default_e_aprovada(db_session):
+    # 10-2025.pdf (CT) traz "ATA EM APROVAÇÃO" no cabeçalho de verdade —
+    # as outras 5 atas da fixture nao tem marca d'agua e ficam aprovadas
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
+    por_arquivo = {d.nome_arquivo: d for d in documentos}
+
+    assert por_arquivo["10-2025.pdf"].status_aprovacao == StatusAprovacao.PENDENTE_APROVACAO.value
+    for nome_arquivo, documento in por_arquivo.items():
+        if nome_arquivo != "10-2025.pdf":
+            assert documento.status_aprovacao == StatusAprovacao.APROVADA.value
+
+
+def test_processar_ata_marca_pendente_aprovacao_quando_ha_marca_dagua(db_session, monkeypatch):
+    monkeypatch.setattr(
+        pipeline_module,
+        "extrair_campos",
+        lambda tipo, orgao, caminho: {
+            "texto_bruto": "ATA EM APROVAÇÃO\n\nATA DA 1ª SESSÃO ORDINÁRIA",
+            "paginas_offsets": [0],
+            "tipo_orgao": "A",
+            "centro": "X",
+            "campus": "Goiabeiras",
+            "departamento": None,
+            "curso": None,
+            "area_tematica": None,
+            "horario_inicio": None,
+            "modalidade": None,
+            "local": None,
+            "quorum_declarado": None,
+            "em_aprovacao": True,
+        },
+    )
+    ata = AtaParaProcessar(
+        tipo="TIPO_A", orgao="X", numero_reuniao=1, caratere="Ordinaria",
+        data_reuniao=date(2025, 1, 1), arquivo="pendente.pdf", caminho_pdf=Path("fake.pdf"),
+    )
+
+    documento = processar_ata(ata, SECRET_KEY, db_session)
+
+    assert documento.status_aprovacao == StatusAprovacao.PENDENTE_APROVACAO.value
 
 
 def test_pipeline_preenche_paginas_offsets(db_session):
@@ -157,6 +199,7 @@ def test_processar_ata_remapeia_paginas_offsets_para_o_espaco_do_texto_limpo(db_
             "modalidade": None,
             "local": None,
             "quorum_declarado": None,
+            "em_aprovacao": False,
         },
     )
     monkeypatch.setattr(
