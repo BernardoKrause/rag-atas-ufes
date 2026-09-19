@@ -305,6 +305,14 @@ def extrair_quorum_declarado(texto: str) -> bool | None:
     return max(fins_positivo) > max(fins_negativo)
 
 
+_RE_STATUS_EM_APROVACAO = re.compile(r"ATA EM APROVA[ÇC][ÃA]O")
+
+
+def extrair_marca_dagua_em_aprovacao(texto: str) -> bool:
+    janela = _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
+    return bool(_RE_STATUS_EM_APROVACAO.search(janela))
+
+
 def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
     """quantidade_presentes, quantidade_ausentes e departamentos_representados
     ficam de fora de proposito: dependem de reconhecer nomes de pessoas de
@@ -322,4 +330,5 @@ def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
         "modalidade": extrair_modalidade(texto_bruto),
         "local": extrair_local(texto_bruto),
         "quorum_declarado": extrair_quorum_declarado(texto_bruto),
+        "em_aprovacao": extrair_marca_dagua_em_aprovacao(texto_bruto),
     }

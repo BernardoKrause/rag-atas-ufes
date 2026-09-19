@@ -11,6 +11,7 @@ from app.ingestion.extractor import (
     extrair_campos,
     extrair_horario_inicio,
     extrair_local,
+    extrair_marca_dagua_em_aprovacao,
     extrair_metadados_organizacionais,
     extrair_modalidade,
     extrair_quorum_declarado,
@@ -186,6 +187,25 @@ def test_quorum_ausente_retorna_none():
 def test_quorum_prioriza_ultimo_indicio_quando_falta_na_primeira_chamada_e_atinge_na_segunda():
     texto = "Não houve quórum na primeira chamada. Havendo quórum na segunda chamada, deu-se início à sessão."
     assert extrair_quorum_declarado(texto) is True
+
+
+def test_em_aprovacao_true_quando_marca_dagua_no_cabecalho():
+    texto = "ATA EM APROVAÇÃO\n\nATA DA 5ª SESSÃO ORDINÁRIA DO CONSELHO DEPARTAMENTAL"
+    assert extrair_marca_dagua_em_aprovacao(texto) is True
+
+
+def test_em_aprovacao_false_quando_ausente():
+    texto = "ATA DA 5ª SESSÃO ORDINÁRIA DO CONSELHO DEPARTAMENTAL, realizada no dia tal"
+    assert extrair_marca_dagua_em_aprovacao(texto) is False
+
+
+def test_em_aprovacao_false_quando_mencao_fora_da_janela_de_abertura():
+    # reproduz o falso-positivo real do corpus (ata_5a_reuniao_ordinaria_det_ceunes):
+    # mencao incidental "da ata em aprovacao" no corpo, apos a janela de abertura
+    abertura = "ATA DA 5ª SESSÃO ORDINÁRIA DO CONSELHO DEPARTAMENTAL, realizada no dia tal. "
+    preenchimento = "x" * 3000
+    texto = abertura + preenchimento + " Foi aprovada a pauta 3 da ata em aprovação anterior."
+    assert extrair_marca_dagua_em_aprovacao(texto) is False
 
 
 @pytest.mark.parametrize("centro, campus_esperado", list(CENTRO_CAMPUS.items()))
