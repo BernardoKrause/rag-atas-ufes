@@ -66,6 +66,29 @@ def test_criar_no_ata_com_departamento():
         driver.close()
 
 
+def test_criar_no_ata_propaga_status_aprovacao():
+    documento = Documento(
+        id_documento=999003, nome_arquivo="z.pdf", url_origem="z.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 8, 8), texto_limpo="texto",
+        status_aprovacao="pendente_aprovacao",
+    )
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        criar_no_ata(driver, documento)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (a:Ata {documento_id: $id}) RETURN a.status_aprovacao AS status",
+            id=999003,
+        )
+        assert resultado == [{"status": "pendente_aprovacao"}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
 def test_criar_no_item_cria_item_e_menciona_processo():
     from app.grafo.construtor import criar_no_item
 
