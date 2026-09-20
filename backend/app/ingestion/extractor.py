@@ -50,6 +50,10 @@ def _normalizar_espacos(texto: str) -> str:
     return re.sub(r"\s+", " ", texto)
 
 
+def _janela_abertura_normalizada(texto: str) -> str:
+    return _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
+
+
 RE_NUMERACAO_MARGEM = re.compile(r"(?m)^[ \t]*\d{1,3}[ \t]*$\n?")
 
 
@@ -246,7 +250,7 @@ _RE_MODALIDADE_PRESENCIAL = re.compile(r"SALA DE REUNI")
 
 
 def extrair_modalidade(texto: str) -> str | None:
-    janela = _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
+    janela = _janela_abertura_normalizada(texto)
 
     # cada modalidade concorre pelo seu ULTIMO indicio no texto — cobre o caso
     # em que a ata primeiro descarta uma modalidade ("impossibilidade de
@@ -289,7 +293,7 @@ _RE_QUORUM_POSITIVO = re.compile(r"HAVENDO QU|MERO LEGAL DE MEMBROS")
 
 
 def extrair_quorum_declarado(texto: str) -> bool | None:
-    janela = _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
+    janela = _janela_abertura_normalizada(texto)
 
     # concorre pelo ULTIMO indicio de cada lado — cobre o caso em que a ata
     # relata a falta de quorum na 1a chamada e o quorum atingido na 2a
@@ -309,7 +313,7 @@ _RE_STATUS_EM_APROVACAO = re.compile(r"ATA EM APROVA[ÇC][ÃA]O")
 
 
 def extrair_marca_dagua_em_aprovacao(texto: str) -> bool:
-    janela = _normalizar_espacos(texto[:JANELA_ABERTURA].upper())
+    janela = _janela_abertura_normalizada(texto)
     return bool(_RE_STATUS_EM_APROVACAO.search(janela))
 
 
