@@ -23,7 +23,7 @@ def criar_no_ata(driver: Driver, documento: Documento) -> None:
         driver,
         """
         MERGE (a:Ata {documento_id: $documento_id})
-        SET a.nome_arquivo = $nome_arquivo, a.tipo_orgao = $tipo_orgao
+        SET a.nome_arquivo = $nome_arquivo, a.tipo_orgao = $tipo_orgao, a.status_aprovacao = $status_aprovacao
         MERGE (c:Centro {sigla: $centro})
         MERGE (a)-[:PERTENCE_A]->(c)
         MERGE (d:Data {valor: $data_reuniao})
@@ -32,6 +32,7 @@ def criar_no_ata(driver: Driver, documento: Documento) -> None:
         documento_id=documento.id_documento, nome_arquivo=documento.nome_arquivo,
         tipo_orgao=documento.tipo_orgao, centro=documento.centro,
         data_reuniao=documento.data_reuniao.isoformat(),
+        status_aprovacao=documento.status_aprovacao,
     )
     if documento.departamento:
         executar_escrita(
