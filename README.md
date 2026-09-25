@@ -27,7 +27,21 @@ Todos os serviços de dados rodam via Docker Compose (self-hosted).
 
 ## Status
 
-Projeto em desenvolvimento incremental, dividido em partes/PRs. Ver histórico de Pull Requests para o progresso de cada etapa (infraestrutura, ingestão, segmentação, extração, indexação, recuperação, geração, autenticação, frontend, ingestão completa e avaliação final).
+Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
+
+| Parte | Etapa | Status |
+|---|---|---|
+| 1 | Infraestrutura | Concluída |
+| 2 | Ingestão (coleta, extração e anonimização) | Concluída |
+| 3 | Segmentação estrutural por item de pauta | Concluída |
+| 4 | Extração de entidades/relações e grafo | Concluída |
+| 5 | Indexação vetorial e léxica | Concluída |
+| 6 | Recuperação híbrida | Concluída |
+| 7 | Geração com citação de fontes | Próxima |
+| 8 | Autenticação e API | Pendente |
+| 9 | Frontend | Pendente |
+| 10 | Ingestão completa do corpus e validação manual | Pendente |
+| 11 | Avaliação final | Pendente |
 
 ## Licença
 
