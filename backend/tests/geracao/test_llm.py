@@ -52,6 +52,21 @@ def test_ollama_erro_http_vira_erro_geracao():
         cliente.gerar("s", "u")
 
 
+def test_ollama_resposta_sem_message_vira_erro_geracao():
+    cliente = _ollama_falso({"done_reason": "stop"})
+    with pytest.raises(ErroGeracao):
+        cliente.gerar("s", "u")
+
+
+def test_ollama_resposta_nao_json_vira_erro_geracao():
+    cliente = ClienteOllama(
+        "http://ollama.falso", "modelo-x", timeout=5, max_tokens=64,
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, text="não é json")),
+    )
+    with pytest.raises(ErroGeracao):
+        cliente.gerar("s", "u")
+
+
 def test_ollama_porta_fechada_vira_erro_geracao():
     cliente = ClienteOllama("http://127.0.0.1:1", "modelo-x", timeout=2, max_tokens=16)
     with pytest.raises(ErroGeracao):

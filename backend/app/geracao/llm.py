@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Protocol
 
 import anthropic
@@ -43,10 +44,12 @@ class ClienteOllama:
             resposta.raise_for_status()
         except httpx.HTTPError as erro:
             raise ErroGeracao(f"falha ao chamar o Ollama: {erro}") from erro
-        corpo = resposta.json()
-        return SaidaLLM(
-            texto=corpo["message"]["content"], truncada=corpo.get("done_reason") == "length"
-        )
+        try:
+            corpo = resposta.json()
+            texto = corpo["message"]["content"]
+        except (json.JSONDecodeError, KeyError, TypeError) as erro:
+            raise ErroGeracao(f"resposta inesperada do Ollama: {erro}") from erro
+        return SaidaLLM(texto=texto, truncada=corpo.get("done_reason") == "length")
 
 
 class ClienteAnthropic:
