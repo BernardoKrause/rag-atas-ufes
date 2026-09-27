@@ -70,7 +70,9 @@ def test_buscar_vizinhos_traz_assunto_anterior_e_posterior(db_session):
     criar_item(db_session, documento, numero_item="1", assunto="Aprovação da ata anterior")
     meio = criar_item(db_session, documento, numero_item="2", assunto="Reforma do laboratório")
     criar_item(db_session, documento, numero_item="3", assunto="Calendário acadêmico")
-    assert buscar_vizinhos(db_session, meio) == ("Aprovação da ata anterior", "Calendário acadêmico")
+    assert buscar_vizinhos(db_session, meio) == (
+        "Aprovação da ata anterior", "Calendário acadêmico"
+    )
 
 
 def test_buscar_vizinhos_primeiro_e_ultimo_item(db_session):
