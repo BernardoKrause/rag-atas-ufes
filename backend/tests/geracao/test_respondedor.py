@@ -58,6 +58,22 @@ def test_recuperacao_vazia_abstem_sem_chamar_llm(db_session, monkeypatch):
     assert llm.chamadas == []
 
 
+def test_evidencias_ausentes_do_postgres_abstem_sem_chamar_llm(db_session, monkeypatch):
+    fantasma = Evidencia(
+        item_id_canonico="item_que_nao_existe", texto="texto órfão", contexto_grafo={},
+        rank_final=1, scores={"lexico": None, "vetorial": None, "grafo": None},
+    )
+    monkeypatch.setattr("app.geracao.respondedor.recuperar", lambda *a, **k: [fantasma])
+    llm = LLMFalso(texto="não deveria ser chamado [1]")
+
+    resposta = _responder(db_session, llm)
+
+    assert resposta.abstencao is True
+    assert resposta.texto == FRASE_ABSTENCAO
+    assert resposta.fontes == []
+    assert llm.chamadas == []
+
+
 def test_resposta_com_citacao_valida_lista_so_a_fonte_citada(db_session, dois_itens):
     _, item_b = dois_itens
     resposta = _responder(db_session, LLMFalso(texto="O item B foi aprovado [2]."))
