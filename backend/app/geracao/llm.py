@@ -81,15 +81,23 @@ class ClienteAnthropic:
 
 
 def criar_cliente_llm(config: Settings = settings) -> ClienteLLM:
-    if config.llm_provedor == "ollama":
+    provedor = config.llm_provedor.strip().lower()
+    if provedor == "ollama":
         return ClienteOllama(
             config.ollama_base_url, config.llm_modelo, config.llm_timeout, config.llm_max_tokens,
             config.llm_num_ctx,
         )
-    if config.llm_provedor == "anthropic":
+    if provedor == "anthropic":
         segredo = config.anthropic_api_key
         chave = segredo.get_secret_value().strip() if segredo else ""
         if not chave:
             raise ErroGeracao("LLM_PROVEDOR=anthropic exige ANTHROPIC_API_KEY no .env")
+        if not config.llm_modelo.startswith("claude-"):
+            raise ErroGeracao(
+                f"LLM_MODELO={config.llm_modelo!r} não é um modelo da Anthropic "
+                "(esperado 'claude-...')"
+            )
         return ClienteAnthropic(config.llm_modelo, config.llm_timeout, config.llm_max_tokens, chave)
-    raise ValueError(f"LLM_PROVEDOR desconhecido: {config.llm_provedor}")
+    raise ErroGeracao(
+        f"LLM_PROVEDOR={config.llm_provedor!r} inválido; use 'ollama' ou 'anthropic'"
+    )

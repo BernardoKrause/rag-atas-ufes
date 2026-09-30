@@ -119,8 +119,25 @@ def test_criar_cliente_llm_anthropic_sem_chave_falha_cedo(chave):
 
 
 def test_criar_cliente_llm_rejeita_provedor_desconhecido():
-    with pytest.raises(ValueError):
-        criar_cliente_llm(settings.model_copy(update={"llm_provedor": "openai"}))
+    with pytest.raises(ErroGeracao, match="LLM_PROVEDOR='antrophic'.*'ollama' ou 'anthropic'"):
+        criar_cliente_llm(settings.model_copy(update={"llm_provedor": "antrophic"}))
+
+
+def test_criar_cliente_llm_ignora_maiusculas_e_espacos_no_provedor():
+    config = settings.model_copy(update={"llm_provedor": " Ollama "})
+    assert isinstance(criar_cliente_llm(config), ClienteOllama)
+
+
+def test_criar_cliente_llm_anthropic_com_modelo_de_outro_provedor_falha_cedo():
+    config = settings.model_copy(
+        update={
+            "llm_provedor": "anthropic",
+            "llm_modelo": "qwen2.5:7b",
+            "anthropic_api_key": SecretStr("chave-de-teste"),
+        }
+    )
+    with pytest.raises(ErroGeracao, match="LLM_MODELO='qwen2.5:7b'"):
+        criar_cliente_llm(config)
 
 
 def _ollama_tem_modelo(modelo):
