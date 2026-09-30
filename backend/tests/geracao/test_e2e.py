@@ -38,7 +38,7 @@ def cliente_llm():
 @pytest.fixture()
 def ata_indexada(db_session, qdrant_cliente, grafo_driver):
     documento = criar_documento(
-        db_session, nome_arquivo="e2e_geracao.pdf", orgao="CT_DCC", departamento="DCC",
+        db_session, nome_arquivo="e2e_geracao.pdf", orgao="CT", departamento="DCC",
         numero_reuniao=7, tipo_reuniao="Ordinária",
     )
     itens = [
@@ -76,7 +76,7 @@ def test_pergunta_sobre_conteudo_cita_a_ata_certa(
 
     assert resposta.abstencao is False
     assert "e2e_ger_2" in [f.item_id_canonico for f in resposta.fontes]
-    assert all(f.rotulo.startswith("Ata CT_DCC, 7ª reunião ordinária") for f in resposta.fontes)
+    assert all(f.rotulo.startswith("Ata CT, 7ª reunião ordinária") for f in resposta.fontes)
 
 
 def test_departamento_vem_do_grafo_sem_mencao_textual(
@@ -92,6 +92,7 @@ def test_departamento_vem_do_grafo_sem_mencao_textual(
 
     assert resposta.abstencao is False
     assert "DCC" in resposta.texto
+    assert all("DCC" not in f.rotulo for f in resposta.fontes)
     assert "e2e_ger_2" in [f.item_id_canonico for f in resposta.fontes]
 
 
