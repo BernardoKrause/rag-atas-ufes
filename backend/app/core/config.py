@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     llm_modelo: str = "qwen2.5:7b"
     llm_timeout: float = 120.0
     llm_max_tokens: int = 4096
+    llm_num_ctx: int = 16384
     anthropic_api_key: SecretStr | None = None
 
     anonymization_secret_key: SecretStr

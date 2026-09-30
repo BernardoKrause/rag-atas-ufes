@@ -30,7 +30,8 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture()
 def cliente_llm():
     return ClienteOllama(
-        settings.ollama_base_url, settings.llm_modelo, settings.llm_timeout, settings.llm_max_tokens
+        settings.ollama_base_url, settings.llm_modelo, settings.llm_timeout,
+        settings.llm_max_tokens, settings.llm_num_ctx,
     )
 
 

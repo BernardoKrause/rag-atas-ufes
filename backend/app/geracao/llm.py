@@ -21,11 +21,13 @@ class ClienteOllama:
         modelo: str,
         timeout: float,
         max_tokens: int,
+        num_ctx: int,
         transport: httpx.BaseTransport | None = None,
     ):
         self._cliente = httpx.Client(base_url=base_url, timeout=timeout, transport=transport)
         self._modelo = modelo
         self._max_tokens = max_tokens
+        self._num_ctx = num_ctx
 
     def gerar(self, sistema: str, usuario: str) -> SaidaLLM:
         try:
@@ -38,7 +40,11 @@ class ClienteOllama:
                         {"role": "system", "content": sistema},
                         {"role": "user", "content": usuario},
                     ],
-                    "options": {"temperature": 0, "num_predict": self._max_tokens},
+                    "options": {
+                        "temperature": 0,
+                        "num_predict": self._max_tokens,
+                        "num_ctx": self._num_ctx,
+                    },
                 },
             )
             resposta.raise_for_status()
@@ -77,11 +83,13 @@ class ClienteAnthropic:
 def criar_cliente_llm(config: Settings = settings) -> ClienteLLM:
     if config.llm_provedor == "ollama":
         return ClienteOllama(
-            config.ollama_base_url, config.llm_modelo, config.llm_timeout, config.llm_max_tokens
+            config.ollama_base_url, config.llm_modelo, config.llm_timeout, config.llm_max_tokens,
+            config.llm_num_ctx,
         )
     if config.llm_provedor == "anthropic":
-        chave = config.anthropic_api_key.get_secret_value() if config.anthropic_api_key else ""
-        return ClienteAnthropic(
-            config.llm_modelo, config.llm_timeout, config.llm_max_tokens, api_key=chave or None
-        )
+        segredo = config.anthropic_api_key
+        chave = segredo.get_secret_value().strip() if segredo else ""
+        if not chave:
+            raise ErroGeracao("LLM_PROVEDOR=anthropic exige ANTHROPIC_API_KEY no .env")
+        return ClienteAnthropic(config.llm_modelo, config.llm_timeout, config.llm_max_tokens, chave)
     raise ValueError(f"LLM_PROVEDOR desconhecido: {config.llm_provedor}")

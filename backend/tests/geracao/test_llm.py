@@ -17,7 +17,7 @@ def _ollama_falso(resposta_json=None, status=200, capturar=None):
             capturar.append(json.loads(request.content))
         return httpx.Response(status, json=resposta_json or {})
     return ClienteOllama(
-        "http://ollama.falso", "modelo-x", timeout=5, max_tokens=64,
+        "http://ollama.falso", "modelo-x", timeout=5, max_tokens=64, num_ctx=8192,
         transport=httpx.MockTransport(responder),
     )
 
@@ -38,7 +38,7 @@ def test_ollama_envia_sistema_usuario_e_temperatura_zero():
         {"role": "system", "content": "regras"},
         {"role": "user", "content": "pergunta"},
     ]
-    assert corpo["options"] == {"temperature": 0, "num_predict": 64}
+    assert corpo["options"] == {"temperature": 0, "num_predict": 64, "num_ctx": 8192}
 
 
 def test_ollama_marca_truncada_quando_done_reason_length():
@@ -60,7 +60,7 @@ def test_ollama_resposta_sem_message_vira_erro_geracao():
 
 def test_ollama_resposta_nao_json_vira_erro_geracao():
     cliente = ClienteOllama(
-        "http://ollama.falso", "modelo-x", timeout=5, max_tokens=64,
+        "http://ollama.falso", "modelo-x", timeout=5, max_tokens=64, num_ctx=8192,
         transport=httpx.MockTransport(lambda request: httpx.Response(200, text="não é json")),
     )
     with pytest.raises(ErroGeracao):
@@ -68,7 +68,9 @@ def test_ollama_resposta_nao_json_vira_erro_geracao():
 
 
 def test_ollama_porta_fechada_vira_erro_geracao():
-    cliente = ClienteOllama("http://127.0.0.1:1", "modelo-x", timeout=2, max_tokens=16)
+    cliente = ClienteOllama(
+        "http://127.0.0.1:1", "modelo-x", timeout=2, max_tokens=16, num_ctx=2048
+    )
     with pytest.raises(ErroGeracao):
         cliente.gerar("s", "u")
 
@@ -84,6 +86,36 @@ def test_criar_cliente_llm_escolhe_por_provedor():
     )
     assert isinstance(criar_cliente_llm(ollama), ClienteOllama)
     assert isinstance(criar_cliente_llm(anthropic_cfg), ClienteAnthropic)
+
+
+def test_criar_cliente_llm_repassa_num_ctx_ao_ollama():
+    enviados = []
+    config = settings.model_copy(update={"llm_provedor": "ollama", "llm_num_ctx": 12345})
+    cliente = criar_cliente_llm(config)
+    cliente._cliente = httpx.Client(
+        base_url="http://ollama.falso",
+        transport=httpx.MockTransport(
+            lambda request: enviados.append(json.loads(request.content))
+            or httpx.Response(200, json={"message": {"content": "ok"}, "done_reason": "stop"})
+        ),
+    )
+
+    cliente.gerar("s", "u")
+
+    assert enviados[0]["options"]["num_ctx"] == 12345
+
+
+@pytest.mark.parametrize("chave", [None, SecretStr(""), SecretStr("   ")])
+def test_criar_cliente_llm_anthropic_sem_chave_falha_cedo(chave):
+    config = settings.model_copy(
+        update={
+            "llm_provedor": "anthropic",
+            "llm_modelo": MODELO_ANTHROPIC_TESTE,
+            "anthropic_api_key": chave,
+        }
+    )
+    with pytest.raises(ErroGeracao, match="ANTHROPIC_API_KEY"):
+        criar_cliente_llm(config)
 
 
 def test_criar_cliente_llm_rejeita_provedor_desconhecido():
@@ -104,7 +136,8 @@ def _ollama_tem_modelo(modelo):
 )
 def test_ollama_real_responde_texto():
     cliente = ClienteOllama(
-        settings.ollama_base_url, settings.llm_modelo, timeout=settings.llm_timeout, max_tokens=32
+        settings.ollama_base_url, settings.llm_modelo, timeout=settings.llm_timeout, max_tokens=32,
+        num_ctx=settings.llm_num_ctx,
     )
     saida = cliente.gerar("Responda com uma palavra.", "Diga olá.")
     assert saida.texto.strip()
