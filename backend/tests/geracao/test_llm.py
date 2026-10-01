@@ -140,6 +140,22 @@ def test_criar_cliente_llm_anthropic_com_modelo_de_outro_provedor_falha_cedo():
         criar_cliente_llm(config)
 
 
+def test_criar_cliente_llm_remove_espacos_do_modelo():
+    config = settings.model_copy(update={"llm_provedor": "ollama", "llm_modelo": " qwen2.5:7b \n"})
+    assert criar_cliente_llm(config)._modelo == "qwen2.5:7b"
+
+
+def test_criar_cliente_llm_anthropic_aceita_modelo_com_espacos():
+    config = settings.model_copy(
+        update={
+            "llm_provedor": "anthropic",
+            "llm_modelo": f"  {MODELO_ANTHROPIC_TESTE} ",
+            "anthropic_api_key": SecretStr("chave-de-teste"),
+        }
+    )
+    assert criar_cliente_llm(config)._modelo == MODELO_ANTHROPIC_TESTE
+
+
 def _ollama_tem_modelo(modelo):
     try:
         tags = httpx.get(f"{settings.ollama_base_url}/api/tags", timeout=2).json()
