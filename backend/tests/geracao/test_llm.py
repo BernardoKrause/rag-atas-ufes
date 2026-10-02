@@ -140,6 +140,36 @@ def test_criar_cliente_llm_anthropic_com_modelo_de_outro_provedor_falha_cedo():
         criar_cliente_llm(config)
 
 
+def test_criar_cliente_llm_remove_espacos_do_modelo():
+    config = settings.model_copy(update={"llm_provedor": "ollama", "llm_modelo": " qwen2.5:7b \n"})
+    assert criar_cliente_llm(config)._modelo == "qwen2.5:7b"
+
+
+@pytest.mark.parametrize("provedor", ["ollama", "anthropic"])
+@pytest.mark.parametrize("modelo", ["", "   "])
+def test_criar_cliente_llm_modelo_vazio_falha_cedo(provedor, modelo):
+    config = settings.model_copy(
+        update={
+            "llm_provedor": provedor,
+            "llm_modelo": modelo,
+            "anthropic_api_key": SecretStr("chave-de-teste"),
+        }
+    )
+    with pytest.raises(ErroGeracao, match="LLM_MODELO vazio"):
+        criar_cliente_llm(config)
+
+
+def test_criar_cliente_llm_anthropic_aceita_modelo_com_espacos():
+    config = settings.model_copy(
+        update={
+            "llm_provedor": "anthropic",
+            "llm_modelo": f"  {MODELO_ANTHROPIC_TESTE} ",
+            "anthropic_api_key": SecretStr("chave-de-teste"),
+        }
+    )
+    assert criar_cliente_llm(config)._modelo == MODELO_ANTHROPIC_TESTE
+
+
 def _ollama_tem_modelo(modelo):
     try:
         tags = httpx.get(f"{settings.ollama_base_url}/api/tags", timeout=2).json()
