@@ -145,6 +145,20 @@ def test_criar_cliente_llm_remove_espacos_do_modelo():
     assert criar_cliente_llm(config)._modelo == "qwen2.5:7b"
 
 
+@pytest.mark.parametrize("provedor", ["ollama", "anthropic"])
+@pytest.mark.parametrize("modelo", ["", "   "])
+def test_criar_cliente_llm_modelo_vazio_falha_cedo(provedor, modelo):
+    config = settings.model_copy(
+        update={
+            "llm_provedor": provedor,
+            "llm_modelo": modelo,
+            "anthropic_api_key": SecretStr("chave-de-teste"),
+        }
+    )
+    with pytest.raises(ErroGeracao, match="LLM_MODELO vazio"):
+        criar_cliente_llm(config)
+
+
 def test_criar_cliente_llm_anthropic_aceita_modelo_com_espacos():
     config = settings.model_copy(
         update={

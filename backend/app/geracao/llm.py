@@ -83,6 +83,8 @@ class ClienteAnthropic:
 def criar_cliente_llm(config: Settings = settings) -> ClienteLLM:
     provedor = config.llm_provedor.strip().lower()
     modelo = config.llm_modelo.strip()
+    if not modelo:
+        raise ErroGeracao("LLM_MODELO vazio no .env")
     if provedor == "ollama":
         return ClienteOllama(
             config.ollama_base_url, modelo, config.llm_timeout, config.llm_max_tokens,
