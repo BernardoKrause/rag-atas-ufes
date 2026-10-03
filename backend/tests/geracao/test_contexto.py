@@ -126,3 +126,22 @@ def test_montar_contexto_descarta_evidencia_sem_item_no_postgres(db_session):
     numeradas = montar_contexto([fantasma, _evidencia(item, 2)], db_session)
 
     assert [(e.numero, e.fonte.item_id_canonico) for e in numeradas] == [(1, item.item_id_canonico)]
+
+
+def test_montar_contexto_preenche_trecho_pagina_e_url_origem(db_session):
+    documento = criar_documento(
+        db_session, nome_arquivo="ctx_3.pdf", url_origem="https://ufes.br/ata_ctx_3.pdf"
+    )
+    com_pagina = criar_item(
+        db_session, documento, numero_item="1", texto="texto A", pagina_inicio=3
+    )
+    sem_pagina = criar_item(db_session, documento, numero_item="2", texto="texto B")
+
+    numeradas = montar_contexto(
+        [_evidencia(com_pagina, 1), _evidencia(sem_pagina, 2)], db_session
+    )
+
+    assert [(e.fonte.trecho, e.fonte.pagina, e.fonte.url_origem) for e in numeradas] == [
+        ("texto A", 3, "https://ufes.br/ata_ctx_3.pdf"),
+        ("texto B", None, "https://ufes.br/ata_ctx_3.pdf"),
+    ]
