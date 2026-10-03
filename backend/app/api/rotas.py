@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencias import obter_sessao
 from app.api.esquemas import PedidoConsulta, RespostaConsulta, para_resposta_consulta
 from app.geracao.respondedor import responder
+from app.ingestion.collector import path_seguro
 from app.models.documento import Documento
 
 roteador = APIRouter()
@@ -33,10 +34,13 @@ def consultar(
 @roteador.get("/documentos/{id_documento}/pdf")
 def baixar_pdf(id_documento: int, sessao: Session = Depends(obter_sessao)) -> FileResponse:
     documento = sessao.get(Documento, id_documento)
-    if documento is None or not Path(documento.url_origem).is_file():
+    if documento is None:
+        raise HTTPException(status_code=404, detail="Documento não encontrado.")
+    caminho = path_seguro(Path(documento.url_origem))
+    if not caminho.is_file():
         raise HTTPException(status_code=404, detail="Documento não encontrado.")
     return FileResponse(
-        documento.url_origem,
+        caminho,
         media_type="application/pdf",
         filename=documento.nome_arquivo,
         content_disposition_type="inline",
