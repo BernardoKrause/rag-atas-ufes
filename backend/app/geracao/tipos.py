@@ -11,7 +11,6 @@ class Fonte:
     rotulo: str
     trecho: str
     pagina: int | None
-    url_origem: str
 
 
 @dataclass(frozen=True)

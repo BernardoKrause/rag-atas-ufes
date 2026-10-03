@@ -14,10 +14,7 @@ def _evidencia(item, rank):
 
 @pytest.fixture()
 def perguntas_recebidas(db_session, monkeypatch):
-    documento = criar_documento(
-        db_session, nome_arquivo="api_1.pdf", orgao="CT_DB",
-        url_origem="https://ufes.br/ata_api_1.pdf",
-    )
+    documento = criar_documento(db_session, nome_arquivo="api_1.pdf", orgao="CT_DB")
     item = criar_item(
         db_session, documento, numero_item="4", texto="O conselho aprovou o calendário.",
         pagina_inicio=2,
@@ -52,7 +49,7 @@ def test_consulta_devolve_resposta_com_fonte_completa(
                 "rotulo": "Ata CT_DB, 01/01/2025, pauta, item 4, p. 2",
                 "trecho": "O conselho aprovou o calendário.",
                 "pagina": 2,
-                "url_origem": "https://ufes.br/ata_api_1.pdf",
+                "url_pdf": f"/documentos/{item.documento_id}/pdf",
             }
         ],
     }

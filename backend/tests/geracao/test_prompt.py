@@ -12,7 +12,6 @@ def _evidencia(numero, texto, anterior=None, posterior=None, frases=None):
             rotulo=f"Ata X{numero}",
             trecho=texto,
             pagina=None,
-            url_origem="http://exemplo",
         ),
         texto=texto,
         frases_grafo=frases or [],

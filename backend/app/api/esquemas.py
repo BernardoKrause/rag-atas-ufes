@@ -19,7 +19,7 @@ class FonteSaida(BaseModel):
     rotulo: str
     trecho: str
     pagina: int | None
-    url_origem: str
+    url_pdf: str
 
 
 class RespostaConsulta(BaseModel):
@@ -39,7 +39,7 @@ def para_resposta_consulta(resposta: Resposta) -> RespostaConsulta:
                 rotulo=fonte.rotulo,
                 trecho=fonte.trecho,
                 pagina=fonte.pagina,
-                url_origem=fonte.url_origem,
+                url_pdf=f"/documentos/{fonte.documento_id}/pdf",
             )
             for fonte in resposta.fontes
         ],

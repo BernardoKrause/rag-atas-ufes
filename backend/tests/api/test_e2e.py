@@ -35,4 +35,4 @@ def test_departamento_via_grafo_pela_api(cliente_api_real, ata_indexada):  # noq
     assert "DCC" in corpo["texto"]
     fonte = next(f for f in corpo["fontes"] if f["item_id_canonico"] == "e2e_ger_2")
     assert "Aprendizado de Máquina Aplicado" in fonte["trecho"]
-    assert fonte["url_origem"] == "http://exemplo"
+    assert fonte["url_pdf"] == f"/documentos/{ata_indexada[1].documento_id}/pdf"

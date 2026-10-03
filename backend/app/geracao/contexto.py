@@ -103,7 +103,6 @@ def montar_contexto(evidencias: list[Evidencia], sessao: Session) -> list[Eviden
                     rotulo=montar_rotulo(documento, item),
                     trecho=item.texto,
                     pagina=item.pagina_inicio,
-                    url_origem=documento.url_origem,
                 ),
                 texto=evidencia.texto,
                 frases_grafo=frases_grafo(evidencia.contexto_grafo),
