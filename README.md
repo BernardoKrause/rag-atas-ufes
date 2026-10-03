@@ -37,9 +37,9 @@ Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
 | 4 | Extração de entidades/relações e grafo | Concluída |
 | 5 | Indexação vetorial e léxica | Concluída |
 | 6 | Recuperação híbrida | Concluída |
-| 7 | Geração com citação de fontes | Próxima |
-| 8 | Autenticação e API | Pendente |
-| 9 | Frontend | Pendente |
+| 7 | Geração com citação de fontes | Concluída |
+| 8 | API de consulta | Concluída |
+| 9 | Frontend | Próxima |
 | 10 | Ingestão completa do corpus e validação manual | Pendente |
 | 11 | Avaliação final | Pendente |
 
