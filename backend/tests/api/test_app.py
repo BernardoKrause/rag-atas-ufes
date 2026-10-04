@@ -24,6 +24,34 @@ def test_lifespan_guarda_clientes_no_estado(llm_falso):
         assert app.state.fabrica_sessao is not None
 
 
+def test_lifespan_aquece_modelo_de_embedding(llm_falso, monkeypatch):
+    chamadas = []
+    monkeypatch.setattr("app.api.dependencias.carregar_modelo", lambda: chamadas.append(1))
+    with TestClient(criar_app(fabrica_llm=lambda: llm_falso)):
+        assert chamadas == [1]
+
+
+def test_lifespan_fecha_qdrant_se_startup_falha_depois(llm_falso, monkeypatch):
+    class QdrantFalso:
+        fechado = False
+
+        def close(self):
+            self.fechado = True
+
+    qdrant = QdrantFalso()
+    monkeypatch.setattr("app.api.dependencias._obter_cliente_qdrant", lambda: qdrant)
+
+    def driver_quebrado():
+        raise RuntimeError("neo4j indisponivel")
+
+    monkeypatch.setattr("app.api.dependencias.obter_driver", driver_quebrado)
+
+    with pytest.raises(RuntimeError, match="neo4j indisponivel"):
+        with TestClient(criar_app(fabrica_llm=lambda: llm_falso)):
+            pass
+    assert qdrant.fechado
+
+
 def test_health(cliente_api):
     resposta = cliente_api.get("/health")
     assert resposta.status_code == 200
