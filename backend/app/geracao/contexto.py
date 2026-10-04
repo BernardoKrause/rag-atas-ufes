@@ -101,6 +101,8 @@ def montar_contexto(evidencias: list[Evidencia], sessao: Session) -> list[Eviden
                     item_id_canonico=item.item_id_canonico,
                     documento_id=documento.id_documento,
                     rotulo=montar_rotulo(documento, item),
+                    trecho=item.texto,
+                    pagina=item.pagina_inicio,
                 ),
                 texto=evidencia.texto,
                 frases_grafo=frases_grafo(evidencia.contexto_grafo),

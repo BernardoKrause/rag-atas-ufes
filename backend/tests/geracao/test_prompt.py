@@ -10,6 +10,8 @@ def _evidencia(numero, texto, anterior=None, posterior=None, frases=None):
             item_id_canonico=f"i{numero}",
             documento_id=1,
             rotulo=f"Ata X{numero}",
+            trecho=texto,
+            pagina=None,
         ),
         texto=texto,
         frases_grafo=frases or [],

@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 4096
     llm_num_ctx: int = 16384
     anthropic_api_key: SecretStr | None = None
+    cors_origens: list[str] = ["http://localhost:5173"]
 
     anonymization_secret_key: SecretStr
     atas_corpus_path: Path

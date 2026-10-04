@@ -20,7 +20,7 @@ class AtaParaProcessar:
     caminho_pdf: Path
 
 
-def _path_seguro(caminho: Path) -> Path:
+def path_seguro(caminho: Path) -> Path:
     # alguns nomes de arquivo do corpus ultrapassam o limite classico de 260
     # caracteres do Windows; o prefixo \\?\ pede ao SO pra tratar o caminho
     # como extended-length, sem precisar habilitar long paths globalmente
@@ -54,7 +54,7 @@ def coletar_atas(atas_corpus_path: Path) -> list[AtaParaProcessar]:
                 continue
 
             pasta_orgao = _resolver_pasta_tipo(atas_corpus_path, linha["tipo"]) / linha["orgao"]
-            caminho_pdf = _path_seguro(pasta_orgao / linha["arquivo"])
+            caminho_pdf = path_seguro(pasta_orgao / linha["arquivo"])
             if not caminho_pdf.is_file():
                 raise FileNotFoundError(f"PDF não encontrado: {caminho_pdf}")
 
