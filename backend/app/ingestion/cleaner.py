@@ -22,6 +22,8 @@ RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 
 RE_CPF_SEM_PONTUACAO = re.compile(r"\b\d{11}\b")
 
+RE_CPF_APOS_PALAVRA_CPF = re.compile(r"\bCPF\s*(?:n[ºo°]\.?)?[:\s]*(\d{11})(?!\d)", re.IGNORECASE)
+
 # proximidade da palavra "RG": nao ha formato nacional unico de RG, entao a
 # deteccao e por contexto (palavra-chave) em vez de regex solto — validado
 # contra o corpus real (342 documentos) sem nenhum falso positivo. O "n[ºo°]"
@@ -35,7 +37,9 @@ RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
 
 RE_SIAPE = re.compile(r"\bSIAPE\s*(?:n[ºo°]\.?)?[:\s]*\d{6,8}\b", re.IGNORECASE)
 
-RE_MATRICULA = re.compile(r"\bmatr[íi]cula\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}\d{6,12}\b", re.IGNORECASE)
+RE_MATRICULA = re.compile(
+    r"\bmatr(?:[íi]cula)?(?:\s+UFES)?\s*(?:n[ºo°]\.?)?\s*:?\s*\d{6,12}\b", re.IGNORECASE
+)
 
 RE_LINK_PESSOAL = re.compile(
     r"(?:https?://)?(?:lattes\.cnpq\.br/\d+|conferenciaweb\.rnp\.br/sala/[\w-]+(?:\.[\w-]+)*)", re.IGNORECASE
@@ -120,6 +124,16 @@ def _cpf_valido(digitos: str) -> bool:
         if soma * 10 % 11 % 10 != numeros[posicao]:
             return False
     return True
+
+
+def _achar_cpfs_sem_pontuacao(texto: str, intervalos_pessoa: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    fins_pessoa = {fim for _inicio, fim in intervalos_pessoa}
+    intervalos = [m.span(1) for m in RE_CPF_APOS_PALAVRA_CPF.finditer(texto)]
+    for m in RE_CPF_SEM_PONTUACAO.finditer(texto):
+        inicio_espacos = len(texto[: m.start()].rstrip())
+        if _cpf_valido(m.group(0)) or inicio_espacos in fins_pessoa:
+            intervalos.append(m.span())
+    return intervalos
 
 
 def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -263,6 +277,7 @@ def anonimizar_texto(
     tamanho fixo, diferente do nome/processo real que substitui, entao quem
     tiver offsets calculados sobre o texto original (ex.: paginas_offsets)
     precisa dessa lista pra reprojeta-los via remapear_offsets()."""
+    intervalos_pessoa_ner = _achar_entidades_pessoa(texto)
     intervalos_processo = [(m.start(), m.end()) for m in RE_NUMERO_PROCESSO.finditer(texto)]
     intervalos_email = [
         (m.start(), m.end())
@@ -270,11 +285,7 @@ def anonimizar_texto(
         if m.group(0).lower() not in EMAILS_INSTITUCIONAIS
     ]
     intervalos_cpf = [(m.start(), m.end()) for m in RE_CPF.finditer(texto)]
-    intervalos_cpf += [
-        (m.start(), m.end())
-        for m in RE_CPF_SEM_PONTUACAO.finditer(texto)
-        if _cpf_valido(m.group(0))
-    ]
+    intervalos_cpf += _achar_cpfs_sem_pontuacao(texto, intervalos_pessoa_ner)
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
     intervalos_siape = [(m.start(), m.end()) for m in RE_SIAPE.finditer(texto)]
     intervalos_matricula = [(m.start(), m.end()) for m in RE_MATRICULA.finditer(texto)]
@@ -289,7 +300,7 @@ def anonimizar_texto(
     )
 
     intervalos_pessoa = _recortar_sobreposicao(
-        _achar_entidades_pessoa(texto),
+        intervalos_pessoa_ner,
         intervalos_processo,
         intervalos_email,
         intervalos_cpf,

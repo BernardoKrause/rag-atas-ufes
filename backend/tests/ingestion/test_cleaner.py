@@ -267,6 +267,26 @@ def test_onze_digitos_com_digito_verificador_invalido_nao_vira_cpf(db_session):
     assert "CPF_" not in resultado
 
 
+@pytest.mark.parametrize("trecho", ["CPF nº 52998224726", "CPF: 52998224726", "CPF nº52998224726"])
+def test_onze_digitos_apos_palavra_cpf_vira_cpf_mesmo_com_digito_verificador_invalido(db_session, trecho):
+    texto = f"Declaro que Fulano, {trecho}, compareceu."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "52998224726" not in resultado
+    assert "CPF_" in resultado
+
+
+def test_onze_digitos_logo_apos_pessoa_viram_cpf_mesmo_com_digito_verificador_invalido(db_session, monkeypatch):
+    texto = "AGOSTO 2025\n     Fulano de Tal\n17420032761 Zootecnia"
+    inicio_pessoa = texto.index("Fulano")
+    fim_pessoa = inicio_pessoa + len("Fulano de Tal")
+    monkeypatch.setattr(cleaner, "_achar_entidades_pessoa", lambda _texto: [(inicio_pessoa, fim_pessoa)])
+
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    assert "17420032761" not in resultado
+    assert re.search(r"PESSOA_\d+\nCPF_\d+ Zootecnia$", resultado)
+
+
 def test_rg_precedido_de_identidade_e_substituido_por_token(db_session):
     texto = "CPF: 52998224725; Identidade: 19202197; Curso: Geologia."
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
@@ -291,6 +311,27 @@ def test_matricula_e_substituida_por_token(db_session, trecho):
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
     assert not re.search(r"\d{7,}", resultado)
     assert "MATRICULA_" in resultado
+
+
+@pytest.mark.parametrize("trecho", [
+    "matrícula UFES 2004106239",
+    "matrícula UFES: \n100681",
+    "(matr: 2020103379)",
+    "(matr: \n    2020103379)",
+    "Matrícula:        2022100123",
+])
+def test_matricula_com_sufixo_ufes_abreviada_ou_espacada_e_substituida_por_token(db_session, trecho):
+    texto = f"Fulano, {trecho}, ocupante do cargo."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    numero = re.search(r"\d{6,}", trecho).group(0)
+    assert numero not in resultado
+    assert "MATRICULA_" in resultado
+
+
+def test_palavra_matriculados_seguida_de_numero_nao_vira_matricula(db_session):
+    texto = "Foram matriculados 1234567 estudantes no total."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "MATRICULA_" not in resultado
 
 
 def test_matricula_sem_numero_permanece_intacta(db_session):
