@@ -23,9 +23,12 @@ class Settings(BaseSettings):
     neo4j_password: SecretStr
     neo4j_host: str = "localhost"
     neo4j_bolt_port: int = 7687
+    neo4j_teste_bolt_port: int = 7688
 
     qdrant_host: str = "localhost"
     qdrant_http_port: int = 6333
+    qdrant_collection: str = "itens_pauta"
+    qdrant_collection_teste: str = "itens_pauta_teste"
 
     ollama_host: str = "localhost"
     ollama_port: int = 11434

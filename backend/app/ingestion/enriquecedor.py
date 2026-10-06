@@ -70,9 +70,13 @@ def enriquecer_item(tipo_orgao: str, centro: str, item_texto: str, data_reuniao:
 
 
 def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao: Session) -> None:
+    assunto_por_item: dict[tuple[str, str, int], str | None] = {}
     for item in itens:
+        chave = (item.secao, item.numero_item, item.ocorrencia_indice)
         campos = enriquecer_item(documento.tipo_orgao, documento.centro, item.texto, documento.data_reuniao)
-        item.assunto = campos.assunto
+        if item.fragmento_indice == 0:
+            assunto_por_item[chave] = campos.assunto
+        item.assunto = assunto_por_item.get(chave, campos.assunto)
         item.tipo_desfecho = campos.tipo_desfecho
         item.resultado_votacao = campos.resultado_votacao
         item.encaminhamento = campos.encaminhamento

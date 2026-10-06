@@ -1,5 +1,7 @@
 import re
 
+import pytest
+
 from app.ingestion import cleaner
 from app.ingestion.cleaner import (
     _obter_ou_criar_token,
@@ -249,6 +251,144 @@ def test_cpf_e_substituido_por_token(db_session):
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
     assert "150.233.587-55" not in resultado
     assert "CPF_" in resultado
+
+
+def test_cpf_sem_pontuacao_e_substituido_por_token(db_session):
+    texto = "Declaro que Fulano, CPF nº 52998224725, matrícula nº 2022."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "52998224725" not in resultado
+    assert "CPF_" in resultado
+
+
+def test_onze_digitos_com_digito_verificador_invalido_nao_vira_cpf(db_session):
+    texto = "LTC, 2008. ISBN: 97821616061. Bibliografia complementar."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "97821616061" in resultado
+    assert "CPF_" not in resultado
+
+
+@pytest.mark.parametrize("trecho", ["CPF nº 52998224726", "CPF: 52998224726", "CPF nº52998224726"])
+def test_onze_digitos_apos_palavra_cpf_vira_cpf_mesmo_com_digito_verificador_invalido(db_session, trecho):
+    texto = f"Declaro que Fulano, {trecho}, compareceu."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "52998224726" not in resultado
+    assert "CPF_" in resultado
+
+
+def test_onze_digitos_logo_apos_pessoa_viram_cpf_mesmo_com_digito_verificador_invalido(db_session, monkeypatch):
+    texto = "AGOSTO 2025\n     Fulano de Tal\n17420032761 Zootecnia"
+    inicio_pessoa = texto.index("Fulano")
+    fim_pessoa = inicio_pessoa + len("Fulano de Tal")
+    monkeypatch.setattr(cleaner, "_achar_entidades_pessoa", lambda _texto: [(inicio_pessoa, fim_pessoa)])
+
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+
+    assert "17420032761" not in resultado
+    assert re.search(r"PESSOA_\d+\nCPF_\d+ Zootecnia$", resultado)
+
+
+def test_rg_precedido_de_identidade_e_substituido_por_token(db_session):
+    texto = "CPF: 52998224725; Identidade: 19202197; Curso: Geologia."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "19202197" not in resultado
+    assert "RG_" in resultado
+
+
+@pytest.mark.parametrize("trecho", [
+    "SIAPE 1234567", "Siape 1234567", "SIAPE: 1234567", "SIAPE nº 1234567", "SIAPE no. 1234567", "SIAPE1234567",
+    "SIAPE\n         \n1234567",
+])
+def test_siape_e_substituido_por_token(db_session, trecho):
+    texto = f"Assinado por Fulano - {trecho} Chefe do Departamento."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "1234567" not in resultado
+    assert "SIAPE_" in resultado
+
+
+@pytest.mark.parametrize("trecho", ["Matrícula: 2022100123", "MATRÍCULA 1234567", "matrícula nº 2022100123"])
+def test_matricula_e_substituida_por_token(db_session, trecho):
+    texto = f"Fulano; Curso: Geologia; {trecho}; Departamento de Geologia."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert not re.search(r"\d{7,}", resultado)
+    assert "MATRICULA_" in resultado
+
+
+@pytest.mark.parametrize("trecho", [
+    "matrícula UFES 2004106239",
+    "matrícula UFES: \n100681",
+    "(matr: 2020103379)",
+    "(matr: \n    2020103379)",
+    "Matrícula:        2022100123",
+])
+def test_matricula_com_sufixo_ufes_abreviada_ou_espacada_e_substituida_por_token(db_session, trecho):
+    texto = f"Fulano, {trecho}, ocupante do cargo."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    numero = re.search(r"\d{6,}", trecho).group(0)
+    assert numero not in resultado
+    assert "MATRICULA_" in resultado
+
+
+@pytest.mark.parametrize("trecho", ["(28) 99922-3480", "(28) \n    99922-3480", "28 99922-3480", "99922-3480", "(27) 9 9922-3480"])
+def test_celular_e_substituido_por_token(db_session, trecho):
+    texto = f"Fulano (matr: 2020103379), contato: {trecho}; e Beltrano."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "3480" not in resultado
+    assert "TELEFONE_" in resultado
+    assert resultado.endswith("; e Beltrano.")
+
+
+@pytest.mark.parametrize("trecho", ["Telefone: (28) 3552-8600", "Tel.: (27) 4009-2000", "mandato 2016-2020"])
+def test_telefone_fixo_e_intervalo_de_anos_permanecem_intactos(db_session, trecho):
+    texto = f"Secretaria do Departamento. {trecho}."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert resultado == texto
+
+
+@pytest.mark.parametrize("texto", [
+    "PESSOA_1\nNutrição\n2019104567\nHISTOLOGIA",
+    "Fulano\n52998224725 Zootecnia\n2021200345 ANATOMIA ANIMAL",
+    "os alunos Fulano (2020103379), e Beltrano",
+    "Curso: Geologia; Matrícula: \n2 \n2018100222; Departamento",
+])
+def test_numero_no_formato_de_matricula_ufes_vira_matricula_mesmo_sem_rotulo(db_session, texto):
+    numero = re.search(r"(?<!\d)20\d{8}(?!\d)", texto).group(0)
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert numero not in resultado
+    assert "MATRICULA_" in resultado
+
+
+@pytest.mark.parametrize("texto", [
+    "hash a9f2019104567c3d do documento",
+    "telefone 2733357000 da secretaria",
+    "processo 2019104567.1 e ISBN 9782019104567",
+])
+def test_numero_parecido_com_matricula_mas_fora_do_formato_permanece_intacto(db_session, texto):
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "MATRICULA_" not in resultado
+
+
+def test_palavra_matriculados_seguida_de_numero_nao_vira_matricula(db_session):
+    texto = "Foram matriculados 1234567 estudantes no total."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "MATRICULA_" not in resultado
+
+
+def test_matricula_sem_numero_permanece_intacta(db_session):
+    texto = "Fim do período de ajuste de matrícula do período 2024/1."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert resultado == texto
+
+
+@pytest.mark.parametrize("link", [
+    "http://lattes.cnpq.br/5316649375200085",
+    "https://conferenciaweb.rnp.br/sala/fulano-de-tal-silva",
+])
+def test_link_que_identifica_pessoa_e_substituido_por_token(db_session, link):
+    texto = f"Currículo e sala: ({link}), sob a presidência."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert link not in resultado
+    assert "LINK_PESSOAL_" in resultado
+    assert "), sob a presidência." in resultado
 
 
 def test_rg_e_substituido_por_token(db_session):

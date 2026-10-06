@@ -3,8 +3,8 @@ from datetime import date
 
 from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue
 
+from app.core.config import settings
 from app.ingestion.indexador import (
-    COLLECTION,
     DIMENSAO_EMBEDDING,
     carregar_modelo,
     gerar_embedding,
@@ -46,7 +46,7 @@ def _criar_item(sessao, documento, **overrides):
 
 def _limpar_pontos_do_documento(cliente, documento_id):
     cliente.delete(
-        collection_name=COLLECTION,
+        collection_name=settings.qdrant_collection,
         points_selector=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento_id))]),
     )
 
@@ -97,7 +97,7 @@ def test_gerar_point_id_muda_com_item_id_canonico_diferente():
 
 def test_garantir_collection_cria_collection_com_config_correta(qdrant_cliente, monkeypatch):
     nome_temporario = f"itens_pauta_teste_{uuid.uuid4().hex}"
-    monkeypatch.setattr("app.ingestion.indexador.COLLECTION", nome_temporario)
+    monkeypatch.setattr(settings, "qdrant_collection", nome_temporario)
 
     try:
         assert not qdrant_cliente.collection_exists(nome_temporario)
@@ -117,7 +117,7 @@ def test_garantir_collection_e_idempotente_quando_ja_existe(qdrant_cliente):
 
     garantir_collection(qdrant_cliente)  # nao deve levantar erro
 
-    assert qdrant_cliente.collection_exists(COLLECTION)
+    assert qdrant_cliente.collection_exists(settings.qdrant_collection)
 
 
 def test_gerar_embedding_retorna_vetor_normalizado_de_768_dimensoes():
@@ -182,7 +182,7 @@ def test_indexar_e_persistir_cria_um_ponto_por_janela(db_session, qdrant_cliente
 
         assert total == 1
         resultado, _ = qdrant_cliente.scroll(
-            collection_name=COLLECTION,
+            collection_name=settings.qdrant_collection,
             scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_1"))]),
         )
         assert len(resultado) == 1
@@ -204,7 +204,7 @@ def test_indexar_e_persistir_upsert_sobrescreve_quando_texto_muda(db_session, qd
 
         assert total == 1
         resultado, _ = qdrant_cliente.scroll(
-            collection_name=COLLECTION,
+            collection_name=settings.qdrant_collection,
             scroll_filter=Filter(must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_upsert"))]),
         )
         assert len(resultado) == 1  # nao duplicou
@@ -232,7 +232,7 @@ def test_indexar_e_persistir_gera_um_ponto_por_janela_em_texto_longo(db_session,
         assert total > 1  # confirma que o texto de fato exercita o caminho multi-janela
 
         resultado, _ = qdrant_cliente.scroll(
-            collection_name=COLLECTION,
+            collection_name=settings.qdrant_collection,
             scroll_filter=Filter(
                 must=[FieldCondition(key="item_id_canonico", match=MatchValue(value="idx_teste_multi_janela"))]
             ),
@@ -260,10 +260,16 @@ def test_indexar_e_persistir_remove_pontos_orfaos_na_reindexacao(db_session, qdr
         indexar_e_persistir(documento.id_documento, [item_a, item_c], qdrant_cliente)
 
         resultado, _ = qdrant_cliente.scroll(
-            collection_name=COLLECTION,
+            collection_name=settings.qdrant_collection,
             scroll_filter=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento.id_documento))]),
         )
         ids_presentes = {ponto.payload["item_id_canonico"] for ponto in resultado}
         assert ids_presentes == {"idx_orfao_a", "idx_orfao_c"}
     finally:
         _limpar_pontos_do_documento(qdrant_cliente, documento.id_documento)
+
+
+def test_suite_usa_a_collection_de_teste_e_nao_a_de_desenvolvimento(qdrant_cliente):
+    assert settings.qdrant_collection_teste != "itens_pauta"
+    garantir_collection(qdrant_cliente)
+    assert qdrant_cliente.collection_exists(settings.qdrant_collection_teste)

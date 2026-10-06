@@ -18,7 +18,6 @@ from app.models.item_pauta import ItemPauta
 TAMANHO_JANELA = 120
 SOBREPOSICAO_JANELA = 20
 
-COLLECTION = "itens_pauta"
 DIMENSAO_EMBEDDING = 768
 
 NOME_MODELO = "PORTULAN/serafim-100m-portuguese-pt-sentence-encoder-ir"
@@ -65,10 +64,10 @@ def _obter_cliente_qdrant() -> QdrantClient:
 
 
 def garantir_collection(cliente: QdrantClient) -> None:
-    if cliente.collection_exists(COLLECTION):
+    if cliente.collection_exists(settings.qdrant_collection):
         return
     cliente.create_collection(
-        collection_name=COLLECTION,
+        collection_name=settings.qdrant_collection,
         vectors_config=VectorParams(size=DIMENSAO_EMBEDDING, distance=Distance.COSINE),
     )
 
@@ -123,11 +122,11 @@ def indexar_e_persistir(documento_id: int, itens: list[ItemPauta], cliente: Qdra
             )
 
     cliente.delete(
-        collection_name=COLLECTION,
+        collection_name=settings.qdrant_collection,
         points_selector=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento_id))]),
     )
     if pontos:
-        cliente.upsert(collection_name=COLLECTION, points=pontos)
+        cliente.upsert(collection_name=settings.qdrant_collection, points=pontos)
     return len(pontos)
 
 

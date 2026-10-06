@@ -37,6 +37,14 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
 
+  neo4j-teste:
+    image: neo4j:5-community
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER}/${NEO4J_PASSWORD}
+    ports:
+      - "${NEO4J_TESTE_BOLT_PORT:-7688}:7687"
+
   ollama:
     image: ollama/ollama:latest
     restart: unless-stopped

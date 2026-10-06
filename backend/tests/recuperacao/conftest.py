@@ -4,6 +4,7 @@ import pytest
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 from sqlalchemy import text
 
+from app.core.config import settings
 from app.grafo.cliente import obter_driver
 from app.grafo.construtor import limpar_grafo
 from app.models.documento import Documento
@@ -55,6 +56,6 @@ def _limpar_itens_pauta_existentes(db_session):
 
 def limpar_pontos_qdrant(cliente, documento_id):
     cliente.delete(
-        collection_name="itens_pauta",
+        collection_name=settings.qdrant_collection,
         points_selector=Filter(must=[FieldCondition(key="documento_id", match=MatchValue(value=documento_id))]),
     )

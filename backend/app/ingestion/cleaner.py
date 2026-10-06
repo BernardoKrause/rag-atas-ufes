@@ -20,16 +20,34 @@ RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\s{0,6}\d{6}/\d{4}-\s{0,6}\d{2}")
 
 RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 
+RE_CPF_SEM_PONTUACAO = re.compile(r"\b\d{11}\b")
+
+RE_CPF_APOS_PALAVRA_CPF = re.compile(r"\bCPF\s*(?:n[ºo°]\.?)?[:\s]*(\d{11})(?!\d)", re.IGNORECASE)
+
 # proximidade da palavra "RG": nao ha formato nacional unico de RG, entao a
 # deteccao e por contexto (palavra-chave) em vez de regex solto — validado
 # contra o corpus real (342 documentos) sem nenhum falso positivo. O "n[ºo°]"
 # opcional cobre a abreviatura "RG nº"/"RG n°"/"RG no", tao comum quanto "RG"
 # sozinho em documento institucional.
 RE_RG = re.compile(
-    r"\bRG\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE
+    r"\b(?:RG|Identidade)\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE
 )
 
 RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
+
+RE_SIAPE = re.compile(r"\bSIAPE\s*(?:n[ºo°]\.?)?[:\s]*\d{6,8}\b", re.IGNORECASE)
+
+RE_MATRICULA = re.compile(
+    r"\bmatr(?:[íi]cula)?(?:\s+UFES)?\s*(?:n[ºo°]\.?)?\s*:?\s*\d{6,12}\b", re.IGNORECASE
+)
+
+RE_MATRICULA_SEM_ROTULO = re.compile(r"(?<![\w./-])(?:19[89]\d|20[0-2]\d)\d{6}(?![\w./-])")
+
+RE_CELULAR = re.compile(r"(?<![\w./-])(?:\(\d{2}\)\s*|\d{2}\s)?9\s?\d{4}[-\s]\d{4}(?![\w./-])")
+
+RE_LINK_PESSOAL = re.compile(
+    r"(?:https?://)?(?:lattes\.cnpq\.br/\d+|conferenciaweb\.rnp\.br/sala/[\w-]+(?:\.[\w-]+)*)", re.IGNORECASE
+)
 
 # enderecos institucionais/de funcao confirmados no corpus real — nao
 # identificam uma pessoa, entao ficam fora da anonimizacao. Qualquer
@@ -51,6 +69,10 @@ SEQUENCIA_NUMERACAO_TOKEN = {
     TipoEntidade.CPF: Sequence("seq_entidades_anonimizadas_cpf"),
     TipoEntidade.RG: Sequence("seq_entidades_anonimizadas_rg"),
     TipoEntidade.EMAIL: Sequence("seq_entidades_anonimizadas_email"),
+    TipoEntidade.SIAPE: Sequence("seq_entidades_anonimizadas_siape"),
+    TipoEntidade.MATRICULA: Sequence("seq_entidades_anonimizadas_matricula"),
+    TipoEntidade.LINK_PESSOAL: Sequence("seq_entidades_anonimizadas_link_pessoal"),
+    TipoEntidade.TELEFONE: Sequence("seq_entidades_anonimizadas_telefone"),
 }
 
 MODELO_NER = "Gpaiva/NERDE-base"
@@ -96,6 +118,27 @@ def _janelas_para_ner(texto: str, tokenizer) -> list[tuple[int, str]]:
             break
         inicio_token = fim_token - SOBREPOSICAO_JANELA_NER_TOKENS
     return janelas
+
+
+def _cpf_valido(digitos: str) -> bool:
+    if len(set(digitos)) == 1:
+        return False
+    numeros = [int(d) for d in digitos]
+    for posicao in (9, 10):
+        soma = sum(numeros[i] * (posicao + 1 - i) for i in range(posicao))
+        if soma * 10 % 11 % 10 != numeros[posicao]:
+            return False
+    return True
+
+
+def _achar_cpfs_sem_pontuacao(texto: str, intervalos_pessoa: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    fins_pessoa = {fim for _inicio, fim in intervalos_pessoa}
+    intervalos = [m.span(1) for m in RE_CPF_APOS_PALAVRA_CPF.finditer(texto)]
+    for m in RE_CPF_SEM_PONTUACAO.finditer(texto):
+        inicio_espacos = len(texto[: m.start()].rstrip())
+        if _cpf_valido(m.group(0)) or inicio_espacos in fins_pessoa:
+            intervalos.append(m.span())
+    return intervalos
 
 
 def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -239,6 +282,7 @@ def anonimizar_texto(
     tamanho fixo, diferente do nome/processo real que substitui, entao quem
     tiver offsets calculados sobre o texto original (ex.: paginas_offsets)
     precisa dessa lista pra reprojeta-los via remapear_offsets()."""
+    intervalos_pessoa_ner = _achar_entidades_pessoa(texto)
     intervalos_processo = [(m.start(), m.end()) for m in RE_NUMERO_PROCESSO.finditer(texto)]
     intervalos_email = [
         (m.start(), m.end())
@@ -246,18 +290,33 @@ def anonimizar_texto(
         if m.group(0).lower() not in EMAILS_INSTITUCIONAIS
     ]
     intervalos_cpf = [(m.start(), m.end()) for m in RE_CPF.finditer(texto)]
+    intervalos_cpf += _achar_cpfs_sem_pontuacao(texto, intervalos_pessoa_ner)
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
+    intervalos_siape = [(m.start(), m.end()) for m in RE_SIAPE.finditer(texto)]
+    intervalos_matricula = [
+        (m.start(), m.end()) for regex in (RE_MATRICULA, RE_MATRICULA_SEM_ROTULO) for m in regex.finditer(texto)
+    ]
+    intervalos_link = [(m.start(), m.end()) for m in RE_LINK_PESSOAL.finditer(texto)]
+    intervalos_telefone = [(m.start(), m.end()) for m in RE_CELULAR.finditer(texto)]
 
-    intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg = _remover_sobreposicoes(
-        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg
+    (
+        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg,
+        intervalos_siape, intervalos_matricula, intervalos_link, intervalos_telefone,
+    ) = _remover_sobreposicoes(
+        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg,
+        intervalos_siape, intervalos_matricula, intervalos_link, intervalos_telefone,
     )
 
     intervalos_pessoa = _recortar_sobreposicao(
-        _achar_entidades_pessoa(texto),
+        intervalos_pessoa_ner,
         intervalos_processo,
         intervalos_email,
         intervalos_cpf,
         intervalos_rg,
+        intervalos_siape,
+        intervalos_matricula,
+        intervalos_link,
+        intervalos_telefone,
     )
 
     ocorrencias: list[tuple[int, int, TipoEntidade]] = [
@@ -267,6 +326,10 @@ def anonimizar_texto(
     ocorrencias += [(inicio, fim, TipoEntidade.EMAIL) for inicio, fim in intervalos_email]
     ocorrencias += [(inicio, fim, TipoEntidade.CPF) for inicio, fim in intervalos_cpf]
     ocorrencias += [(inicio, fim, TipoEntidade.RG) for inicio, fim in intervalos_rg]
+    ocorrencias += [(inicio, fim, TipoEntidade.SIAPE) for inicio, fim in intervalos_siape]
+    ocorrencias += [(inicio, fim, TipoEntidade.MATRICULA) for inicio, fim in intervalos_matricula]
+    ocorrencias += [(inicio, fim, TipoEntidade.LINK_PESSOAL) for inicio, fim in intervalos_link]
+    ocorrencias += [(inicio, fim, TipoEntidade.TELEFONE) for inicio, fim in intervalos_telefone]
 
     # ordem decrescente de inicio: substituir do fim pro comeco preserva os
     # indices das ocorrencias ainda nao processadas

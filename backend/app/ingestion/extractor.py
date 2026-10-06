@@ -332,7 +332,6 @@ def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
         "paginas_offsets": paginas_offsets,
         "horario_inicio": extrair_horario_inicio(texto_bruto),
         "modalidade": extrair_modalidade(texto_bruto),
-        "local": extrair_local(texto_bruto),
         "quorum_declarado": extrair_quorum_declarado(texto_bruto),
         "em_aprovacao": extrair_marca_dagua_em_aprovacao(texto_bruto),
     }

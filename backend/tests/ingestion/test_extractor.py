@@ -231,7 +231,7 @@ def test_extrair_campos_fixture_ccae():
     assert campos["horario_inicio"] == "14:00"
     assert campos["modalidade"] == "Presencial"
     assert campos["quorum_declarado"] is True
-    assert "reuni" in campos["local"].lower()
+    assert "reuni" in extrair_local(campos["texto_bruto"]).lower()
     assert len(campos["texto_bruto"]) > 100
 
 

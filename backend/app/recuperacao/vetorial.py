@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from qdrant_client import QdrantClient
 
-from app.ingestion.indexador import COLLECTION, carregar_modelo, gerar_embedding, tokenizar_texto
+from app.core.config import settings
+from app.ingestion.indexador import carregar_modelo, gerar_embedding, tokenizar_texto
 from app.recuperacao.tipos import LIMITE_PADRAO, Hit
 
 
@@ -10,7 +11,7 @@ def buscar_vetorial(pergunta: str, cliente: QdrantClient, limite_janelas: int = 
     tokenizer, modelo = carregar_modelo()
     embedding = gerar_embedding(tokenizer, modelo, tokenizar_texto(tokenizer, pergunta))
 
-    resultado = cliente.query_points(collection_name=COLLECTION, query=embedding, limit=limite_janelas)
+    resultado = cliente.query_points(collection_name=settings.qdrant_collection, query=embedding, limit=limite_janelas)
 
     melhor_score_por_item: dict[str, float] = {}
     for ponto in resultado.points:
