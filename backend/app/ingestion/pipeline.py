@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.ingestion.cleaner import anonimizar_texto, remapear_offsets
 from app.ingestion.collector import PREFIXO_PATH_ESTENDIDO, AtaParaProcessar, coletar_atas
-from app.ingestion.extractor import extrair_campos
+from app.ingestion.extractor import extrair_campos, extrair_local
 from app.models.documento import Documento, StatusAprovacao
 
 
@@ -52,7 +52,7 @@ def processar_ata(ata: AtaParaProcessar, secret_key: bytes, sessao: Session) -> 
     documento.data_reuniao = ata.data_reuniao
     documento.horario_inicio = campos["horario_inicio"]
     documento.modalidade = campos["modalidade"]
-    documento.local = campos["local"]
+    documento.local = extrair_local(texto_limpo)
     documento.quorum_declarado = campos["quorum_declarado"]
     documento.status_aprovacao = (
         StatusAprovacao.PENDENTE_APROVACAO.value

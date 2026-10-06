@@ -83,6 +83,36 @@ def test_processar_ata_marca_pendente_aprovacao_quando_ha_marca_dagua(db_session
     assert documento.status_aprovacao == StatusAprovacao.PENDENTE_APROVACAO.value
 
 
+def test_processar_ata_extrai_local_do_texto_ja_anonimizado(db_session, monkeypatch):
+    monkeypatch.setattr(
+        pipeline_module,
+        "extrair_campos",
+        lambda tipo, orgao, caminho: {
+            "texto_bruto": "ATA DA 1ª SESSÃO, currículo em http://lattes.cnpq.br/5316649375200085 do relator",
+            "paginas_offsets": [0],
+            "tipo_orgao": "A",
+            "centro": "X",
+            "campus": "Goiabeiras",
+            "departamento": None,
+            "curso": None,
+            "area_tematica": None,
+            "horario_inicio": None,
+            "modalidade": None,
+            "local": "http://lattes.cnpq.br/5316649375200085",
+            "quorum_declarado": None,
+            "em_aprovacao": False,
+        },
+    )
+    ata = AtaParaProcessar(
+        tipo="TIPO_A", orgao="X", numero_reuniao=1, caratere="Ordinaria",
+        data_reuniao=date(2025, 1, 1), arquivo="local.pdf", caminho_pdf=Path("fake.pdf"),
+    )
+
+    documento = processar_ata(ata, SECRET_KEY, db_session)
+
+    assert documento.local is None
+
+
 def test_pipeline_preenche_paginas_offsets(db_session):
     documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
     ccae = next(d for d in documentos if d.nome_arquivo == "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf")
