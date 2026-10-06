@@ -33,6 +33,14 @@ RE_RG = re.compile(
 
 RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
 
+RE_SIAPE = re.compile(r"\bSIAPE\s*(?:n[ºo°]\.?)?[:\s]*\d{6,8}\b", re.IGNORECASE)
+
+RE_MATRICULA = re.compile(r"\bmatr[íi]cula\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}\d{6,12}\b", re.IGNORECASE)
+
+RE_LINK_PESSOAL = re.compile(
+    r"(?:https?://)?(?:lattes\.cnpq\.br/\d+|conferenciaweb\.rnp\.br/sala/[\w-]+(?:\.[\w-]+)*)", re.IGNORECASE
+)
+
 # enderecos institucionais/de funcao confirmados no corpus real — nao
 # identificam uma pessoa, entao ficam fora da anonimizacao. Qualquer
 # endereco novo desse tipo achado depois deve ser adicionado aqui.
@@ -53,6 +61,9 @@ SEQUENCIA_NUMERACAO_TOKEN = {
     TipoEntidade.CPF: Sequence("seq_entidades_anonimizadas_cpf"),
     TipoEntidade.RG: Sequence("seq_entidades_anonimizadas_rg"),
     TipoEntidade.EMAIL: Sequence("seq_entidades_anonimizadas_email"),
+    TipoEntidade.SIAPE: Sequence("seq_entidades_anonimizadas_siape"),
+    TipoEntidade.MATRICULA: Sequence("seq_entidades_anonimizadas_matricula"),
+    TipoEntidade.LINK_PESSOAL: Sequence("seq_entidades_anonimizadas_link_pessoal"),
 }
 
 MODELO_NER = "Gpaiva/NERDE-base"
@@ -265,9 +276,16 @@ def anonimizar_texto(
         if _cpf_valido(m.group(0))
     ]
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
+    intervalos_siape = [(m.start(), m.end()) for m in RE_SIAPE.finditer(texto)]
+    intervalos_matricula = [(m.start(), m.end()) for m in RE_MATRICULA.finditer(texto)]
+    intervalos_link = [(m.start(), m.end()) for m in RE_LINK_PESSOAL.finditer(texto)]
 
-    intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg = _remover_sobreposicoes(
-        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg
+    (
+        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg,
+        intervalos_siape, intervalos_matricula, intervalos_link,
+    ) = _remover_sobreposicoes(
+        intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg,
+        intervalos_siape, intervalos_matricula, intervalos_link,
     )
 
     intervalos_pessoa = _recortar_sobreposicao(
@@ -276,6 +294,9 @@ def anonimizar_texto(
         intervalos_email,
         intervalos_cpf,
         intervalos_rg,
+        intervalos_siape,
+        intervalos_matricula,
+        intervalos_link,
     )
 
     ocorrencias: list[tuple[int, int, TipoEntidade]] = [
@@ -285,6 +306,9 @@ def anonimizar_texto(
     ocorrencias += [(inicio, fim, TipoEntidade.EMAIL) for inicio, fim in intervalos_email]
     ocorrencias += [(inicio, fim, TipoEntidade.CPF) for inicio, fim in intervalos_cpf]
     ocorrencias += [(inicio, fim, TipoEntidade.RG) for inicio, fim in intervalos_rg]
+    ocorrencias += [(inicio, fim, TipoEntidade.SIAPE) for inicio, fim in intervalos_siape]
+    ocorrencias += [(inicio, fim, TipoEntidade.MATRICULA) for inicio, fim in intervalos_matricula]
+    ocorrencias += [(inicio, fim, TipoEntidade.LINK_PESSOAL) for inicio, fim in intervalos_link]
 
     # ordem decrescente de inicio: substituir do fim pro comeco preserva os
     # indices das ocorrencias ainda nao processadas

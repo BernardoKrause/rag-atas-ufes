@@ -1,5 +1,7 @@
 import re
 
+import pytest
+
 from app.ingestion import cleaner
 from app.ingestion.cleaner import (
     _obter_ou_criar_token,
@@ -270,6 +272,43 @@ def test_rg_precedido_de_identidade_e_substituido_por_token(db_session):
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
     assert "19202197" not in resultado
     assert "RG_" in resultado
+
+
+@pytest.mark.parametrize("trecho", [
+    "SIAPE 1234567", "Siape 1234567", "SIAPE: 1234567", "SIAPE nº 1234567", "SIAPE no. 1234567", "SIAPE1234567",
+    "SIAPE\n         \n1234567",
+])
+def test_siape_e_substituido_por_token(db_session, trecho):
+    texto = f"Assinado por Fulano - {trecho} Chefe do Departamento."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "1234567" not in resultado
+    assert "SIAPE_" in resultado
+
+
+@pytest.mark.parametrize("trecho", ["Matrícula: 2022100123", "MATRÍCULA 1234567", "matrícula nº 2022100123"])
+def test_matricula_e_substituida_por_token(db_session, trecho):
+    texto = f"Fulano; Curso: Geologia; {trecho}; Departamento de Geologia."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert not re.search(r"\d{7,}", resultado)
+    assert "MATRICULA_" in resultado
+
+
+def test_matricula_sem_numero_permanece_intacta(db_session):
+    texto = "Fim do período de ajuste de matrícula do período 2024/1."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert resultado == texto
+
+
+@pytest.mark.parametrize("link", [
+    "http://lattes.cnpq.br/5316649375200085",
+    "https://conferenciaweb.rnp.br/sala/fulano-de-tal-silva",
+])
+def test_link_que_identifica_pessoa_e_substituido_por_token(db_session, link):
+    texto = f"Currículo e sala: ({link}), sob a presidência."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert link not in resultado
+    assert "LINK_PESSOAL_" in resultado
+    assert "), sob a presidência." in resultado
 
 
 def test_rg_e_substituido_por_token(db_session):
