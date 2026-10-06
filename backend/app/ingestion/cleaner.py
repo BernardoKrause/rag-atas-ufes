@@ -41,6 +41,8 @@ RE_MATRICULA = re.compile(
     r"\bmatr(?:[íi]cula)?(?:\s+UFES)?\s*(?:n[ºo°]\.?)?\s*:?\s*\d{6,12}\b", re.IGNORECASE
 )
 
+RE_CELULAR = re.compile(r"(?<![\w./-])(?:\(\d{2}\)\s*|\d{2}\s)?9\s?\d{4}[-\s]\d{4}(?![\w./-])")
+
 RE_LINK_PESSOAL = re.compile(
     r"(?:https?://)?(?:lattes\.cnpq\.br/\d+|conferenciaweb\.rnp\.br/sala/[\w-]+(?:\.[\w-]+)*)", re.IGNORECASE
 )
@@ -68,6 +70,7 @@ SEQUENCIA_NUMERACAO_TOKEN = {
     TipoEntidade.SIAPE: Sequence("seq_entidades_anonimizadas_siape"),
     TipoEntidade.MATRICULA: Sequence("seq_entidades_anonimizadas_matricula"),
     TipoEntidade.LINK_PESSOAL: Sequence("seq_entidades_anonimizadas_link_pessoal"),
+    TipoEntidade.TELEFONE: Sequence("seq_entidades_anonimizadas_telefone"),
 }
 
 MODELO_NER = "Gpaiva/NERDE-base"
@@ -290,13 +293,14 @@ def anonimizar_texto(
     intervalos_siape = [(m.start(), m.end()) for m in RE_SIAPE.finditer(texto)]
     intervalos_matricula = [(m.start(), m.end()) for m in RE_MATRICULA.finditer(texto)]
     intervalos_link = [(m.start(), m.end()) for m in RE_LINK_PESSOAL.finditer(texto)]
+    intervalos_telefone = [(m.start(), m.end()) for m in RE_CELULAR.finditer(texto)]
 
     (
         intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg,
-        intervalos_siape, intervalos_matricula, intervalos_link,
+        intervalos_siape, intervalos_matricula, intervalos_link, intervalos_telefone,
     ) = _remover_sobreposicoes(
         intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg,
-        intervalos_siape, intervalos_matricula, intervalos_link,
+        intervalos_siape, intervalos_matricula, intervalos_link, intervalos_telefone,
     )
 
     intervalos_pessoa = _recortar_sobreposicao(
@@ -308,6 +312,7 @@ def anonimizar_texto(
         intervalos_siape,
         intervalos_matricula,
         intervalos_link,
+        intervalos_telefone,
     )
 
     ocorrencias: list[tuple[int, int, TipoEntidade]] = [
@@ -320,6 +325,7 @@ def anonimizar_texto(
     ocorrencias += [(inicio, fim, TipoEntidade.SIAPE) for inicio, fim in intervalos_siape]
     ocorrencias += [(inicio, fim, TipoEntidade.MATRICULA) for inicio, fim in intervalos_matricula]
     ocorrencias += [(inicio, fim, TipoEntidade.LINK_PESSOAL) for inicio, fim in intervalos_link]
+    ocorrencias += [(inicio, fim, TipoEntidade.TELEFONE) for inicio, fim in intervalos_telefone]
 
     # ordem decrescente de inicio: substituir do fim pro comeco preserva os
     # indices das ocorrencias ainda nao processadas

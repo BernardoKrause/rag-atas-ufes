@@ -328,6 +328,22 @@ def test_matricula_com_sufixo_ufes_abreviada_ou_espacada_e_substituida_por_token
     assert "MATRICULA_" in resultado
 
 
+@pytest.mark.parametrize("trecho", ["(28) 99922-3480", "(28) \n    99922-3480", "28 99922-3480", "99922-3480", "(27) 9 9922-3480"])
+def test_celular_e_substituido_por_token(db_session, trecho):
+    texto = f"Fulano (matr: 2020103379), contato: {trecho}; e Beltrano."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "3480" not in resultado
+    assert "TELEFONE_" in resultado
+    assert resultado.endswith("; e Beltrano.")
+
+
+@pytest.mark.parametrize("trecho", ["Telefone: (28) 3552-8600", "Tel.: (27) 4009-2000", "mandato 2016-2020"])
+def test_telefone_fixo_e_intervalo_de_anos_permanecem_intactos(db_session, trecho):
+    texto = f"Secretaria do Departamento. {trecho}."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert resultado == texto
+
+
 def test_palavra_matriculados_seguida_de_numero_nao_vira_matricula(db_session):
     texto = "Foram matriculados 1234567 estudantes no total."
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)

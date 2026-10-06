@@ -24,6 +24,7 @@ class TipoEntidade(str, enum.Enum):
     SIAPE = "siape"
     MATRICULA = "matricula"
     LINK_PESSOAL = "link_pessoal"
+    TELEFONE = "telefone"
 
 
 class Documento(Base):
