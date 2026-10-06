@@ -35,6 +35,35 @@ def test_enriquecer_e_persistir_preenche_campos_do_item(db_session, monkeypatch)
     assert item.departamento_origem == "INFORMATICA"
 
 
+def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monkeypatch):
+    import app.ingestion.enriquecedor as mod
+    monkeypatch.setitem(
+        mod.CONFIG_ENRIQUECEDOR, ("B", "CT"),
+        lambda texto, data_reuniao: CamposEnriquecidos(texto, None, None, None, None, None),
+    )
+
+    documento = Documento(
+        nome_arquivo="f.pdf", url_origem="f.pdf", centro="CT", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CT", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
+    )
+    db_session.add(documento)
+    db_session.flush()
+    inicio = ItemPauta(
+        documento_id=documento.id_documento, item_id_canonico="3_PAUTA_1",
+        secao="PAUTA", numero_item="1", fragmento_indice=0, texto="PAUTA 1: inicio do item",
+    )
+    continuacao = ItemPauta(
+        documento_id=documento.id_documento, item_id_canonico="3_PAUTA_1_F1",
+        secao="PAUTA", numero_item="1", fragmento_indice=1, texto="meio do texto do item",
+    )
+    db_session.add_all([inicio, continuacao])
+    db_session.flush()
+
+    enriquecer_e_persistir(documento, [inicio, continuacao], db_session)
+
+    assert continuacao.assunto == "PAUTA 1: inicio do item"
+
+
 def test_enriquecer_e_persistir_e_idempotente(db_session, monkeypatch):
     import app.ingestion.enriquecedor as mod
     chamadas = []
