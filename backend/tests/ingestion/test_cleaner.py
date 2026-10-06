@@ -251,6 +251,27 @@ def test_cpf_e_substituido_por_token(db_session):
     assert "CPF_" in resultado
 
 
+def test_cpf_sem_pontuacao_e_substituido_por_token(db_session):
+    texto = "Declaro que Fulano, CPF nº 52998224725, matrícula nº 2022."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "52998224725" not in resultado
+    assert "CPF_" in resultado
+
+
+def test_onze_digitos_com_digito_verificador_invalido_nao_vira_cpf(db_session):
+    texto = "LTC, 2008. ISBN: 97821616061. Bibliografia complementar."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "97821616061" in resultado
+    assert "CPF_" not in resultado
+
+
+def test_rg_precedido_de_identidade_e_substituido_por_token(db_session):
+    texto = "CPF: 52998224725; Identidade: 19202197; Curso: Geologia."
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "19202197" not in resultado
+    assert "RG_" in resultado
+
+
 def test_rg_e_substituido_por_token(db_session):
     texto = "Portador do RG 28631510-6, compareceu à sessão."
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)

@@ -20,13 +20,15 @@ RE_NUMERO_PROCESSO = re.compile(r"\d{5}\.\s{0,6}\d{6}/\d{4}-\s{0,6}\d{2}")
 
 RE_CPF = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 
+RE_CPF_SEM_PONTUACAO = re.compile(r"\b\d{11}\b")
+
 # proximidade da palavra "RG": nao ha formato nacional unico de RG, entao a
 # deteccao e por contexto (palavra-chave) em vez de regex solto — validado
 # contra o corpus real (342 documentos) sem nenhum falso positivo. O "n[ºo°]"
 # opcional cobre a abreviatura "RG nº"/"RG n°"/"RG no", tao comum quanto "RG"
 # sozinho em documento institucional.
 RE_RG = re.compile(
-    r"\bRG\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE
+    r"\b(?:RG|Identidade)\s{0,2}(?:n[ºo°]\.?)?[:\s]{1,4}[\d]{1,2}\.?\d{3}\.?\d{3}-?[\dxX]\b", re.IGNORECASE
 )
 
 RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
@@ -96,6 +98,17 @@ def _janelas_para_ner(texto: str, tokenizer) -> list[tuple[int, str]]:
             break
         inicio_token = fim_token - SOBREPOSICAO_JANELA_NER_TOKENS
     return janelas
+
+
+def _cpf_valido(digitos: str) -> bool:
+    if len(set(digitos)) == 1:
+        return False
+    numeros = [int(d) for d in digitos]
+    for posicao in (9, 10):
+        soma = sum(numeros[i] * (posicao + 1 - i) for i in range(posicao))
+        if soma * 10 % 11 % 10 != numeros[posicao]:
+            return False
+    return True
 
 
 def _mesclar_intervalos(intervalos: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -246,6 +259,11 @@ def anonimizar_texto(
         if m.group(0).lower() not in EMAILS_INSTITUCIONAIS
     ]
     intervalos_cpf = [(m.start(), m.end()) for m in RE_CPF.finditer(texto)]
+    intervalos_cpf += [
+        (m.start(), m.end())
+        for m in RE_CPF_SEM_PONTUACAO.finditer(texto)
+        if _cpf_valido(m.group(0))
+    ]
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
 
     intervalos_processo, intervalos_email, intervalos_cpf, intervalos_rg = _remover_sobreposicoes(
