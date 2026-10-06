@@ -27,6 +27,8 @@ class Settings(BaseSettings):
 
     qdrant_host: str = "localhost"
     qdrant_http_port: int = 6333
+    qdrant_collection: str = "itens_pauta"
+    qdrant_collection_teste: str = "itens_pauta_teste"
 
     ollama_host: str = "localhost"
     ollama_port: int = 11434
