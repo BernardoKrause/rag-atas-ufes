@@ -344,6 +344,29 @@ def test_telefone_fixo_e_intervalo_de_anos_permanecem_intactos(db_session, trech
     assert resultado == texto
 
 
+@pytest.mark.parametrize("texto", [
+    "PESSOA_1\nNutrição\n2019104567\nHISTOLOGIA",
+    "Fulano\n52998224725 Zootecnia\n2021200345 ANATOMIA ANIMAL",
+    "os alunos Fulano (2020103379), e Beltrano",
+    "Curso: Geologia; Matrícula: \n2 \n2018100222; Departamento",
+])
+def test_numero_no_formato_de_matricula_ufes_vira_matricula_mesmo_sem_rotulo(db_session, texto):
+    numero = re.search(r"(?<!\d)20\d{8}(?!\d)", texto).group(0)
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert numero not in resultado
+    assert "MATRICULA_" in resultado
+
+
+@pytest.mark.parametrize("texto", [
+    "hash a9f2019104567c3d do documento",
+    "telefone 2733357000 da secretaria",
+    "processo 2019104567.1 e ISBN 9782019104567",
+])
+def test_numero_parecido_com_matricula_mas_fora_do_formato_permanece_intacto(db_session, texto):
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "MATRICULA_" not in resultado
+
+
 def test_palavra_matriculados_seguida_de_numero_nao_vira_matricula(db_session):
     texto = "Foram matriculados 1234567 estudantes no total."
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)

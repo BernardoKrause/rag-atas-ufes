@@ -41,6 +41,8 @@ RE_MATRICULA = re.compile(
     r"\bmatr(?:[íi]cula)?(?:\s+UFES)?\s*(?:n[ºo°]\.?)?\s*:?\s*\d{6,12}\b", re.IGNORECASE
 )
 
+RE_MATRICULA_SEM_ROTULO = re.compile(r"(?<![\w./-])(?:19[89]\d|20[0-2]\d)\d{6}(?![\w./-])")
+
 RE_CELULAR = re.compile(r"(?<![\w./-])(?:\(\d{2}\)\s*|\d{2}\s)?9\s?\d{4}[-\s]\d{4}(?![\w./-])")
 
 RE_LINK_PESSOAL = re.compile(
@@ -291,7 +293,9 @@ def anonimizar_texto(
     intervalos_cpf += _achar_cpfs_sem_pontuacao(texto, intervalos_pessoa_ner)
     intervalos_rg = [(m.start(), m.end()) for m in RE_RG.finditer(texto)]
     intervalos_siape = [(m.start(), m.end()) for m in RE_SIAPE.finditer(texto)]
-    intervalos_matricula = [(m.start(), m.end()) for m in RE_MATRICULA.finditer(texto)]
+    intervalos_matricula = [
+        (m.start(), m.end()) for regex in (RE_MATRICULA, RE_MATRICULA_SEM_ROTULO) for m in regex.finditer(texto)
+    ]
     intervalos_link = [(m.start(), m.end()) for m in RE_LINK_PESSOAL.finditer(texto)]
     intervalos_telefone = [(m.start(), m.end()) for m in RE_CELULAR.finditer(texto)]
 
