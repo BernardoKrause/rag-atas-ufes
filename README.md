@@ -24,6 +24,7 @@ Desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computaç
 | LLM (avaliação final) | Claude 3 Sonnet (API Anthropic) |
 
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
+Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
 
 ## Status
 

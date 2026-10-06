@@ -4,6 +4,8 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
+settings.neo4j_bolt_port = settings.neo4j_teste_bolt_port
+
 
 @pytest.fixture()
 def db_session():
