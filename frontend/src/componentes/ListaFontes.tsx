@@ -23,12 +23,9 @@ export function ListaFontes({ fontes, destacada }: Props) {
                 estaDestacada ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-white'
               }`}
             >
-              <div className="flex items-baseline justify-between gap-4">
-                <p className="font-medium text-slate-900">
-                  [{fonte.numero}] {fonte.rotulo}
-                </p>
-                {fonte.pagina !== null && <span className="shrink-0 text-sm text-slate-500">p. {fonte.pagina}</span>}
-              </div>
+              <p className="font-medium text-slate-900">
+                [{fonte.numero}] {fonte.rotulo}
+              </p>
               <p className="mt-2 text-sm text-slate-700">{fonte.trecho}</p>
               <a
                 href={urlPdf(fonte)}

@@ -10,7 +10,7 @@ const resposta: RespostaConsulta = {
     {
       numero: 1,
       item_id_canonico: 'ATA_1_PAUTA_1',
-      rotulo: 'Ata 1/2024, item 1',
+      rotulo: 'Ata 1/2024, item 1, p. 2',
       trecho: 'Aprovada a proposta.',
       pagina: 2,
       url_pdf: '/documentos/5/pdf',
@@ -39,19 +39,18 @@ describe('ResultadoConsulta', () => {
     expect(screen.getByText(/O conselho aprovou a proposta/)).toBeInTheDocument()
   })
 
-  it('lista as fontes com rótulo, trecho, página e link do PDF', () => {
+  it('lista as fontes com rótulo, trecho e link do PDF', () => {
     render(<ResultadoConsulta resposta={resposta} />)
 
     const primeira = document.getElementById('fonte-1')!
-    expect(within(primeira).getByText(/Ata 1\/2024, item 1/)).toBeInTheDocument()
+    expect(within(primeira).getByText('[1] Ata 1/2024, item 1, p. 2')).toBeInTheDocument()
     expect(within(primeira).getByText('Aprovada a proposta.')).toBeInTheDocument()
-    expect(within(primeira).getByText('p. 2')).toBeInTheDocument()
+    expect(within(primeira).queryAllByText(/p\. 2/)).toHaveLength(1)
     const link = within(primeira).getByRole('link', { name: 'Abrir PDF' })
     expect(link).toHaveAttribute('href', `${API_URL}/documentos/5/pdf#page=2`)
     expect(link).toHaveAttribute('target', '_blank')
 
     const segunda = document.getElementById('fonte-2')!
-    expect(within(segunda).queryByText(/^p\./)).not.toBeInTheDocument()
     expect(within(segunda).getByRole('link', { name: 'Abrir PDF' })).toHaveAttribute(
       'href',
       `${API_URL}/documentos/5/pdf`,
