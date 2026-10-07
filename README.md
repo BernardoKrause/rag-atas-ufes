@@ -38,6 +38,8 @@ npm run dev            # http://localhost:5173
 npm test
 ```
 
+Para apontar para outra API, defina `VITE_API_URL` em `frontend/.env` (padrão `http://localhost:8000`).
+
 A API precisa estar rodando (`cd backend && uvicorn app.main:app`).
 
 ## Status

@@ -35,7 +35,7 @@ export function FormularioPergunta({ carregando, aoEnviar }: Props) {
         placeholder="Ex.: O que foi deliberado sobre afastamentos para pós-graduação?"
         onChange={(evento) => setPergunta(evento.target.value)}
         onKeyDown={(evento) => {
-          if (evento.key === 'Enter' && !evento.shiftKey) {
+          if (evento.key === 'Enter' && !evento.shiftKey && !evento.nativeEvent.isComposing) {
             evento.preventDefault()
             enviar()
           }

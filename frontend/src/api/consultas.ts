@@ -25,7 +25,7 @@ export class ErroConsulta extends Error {
   }
 }
 
-export const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+export const API_URL: string = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
 
 export function ehCancelamento(erro: unknown): boolean {
   return typeof erro === 'object' && erro !== null && (erro as { name?: unknown }).name === 'AbortError'

@@ -65,7 +65,7 @@ describe('ResultadoConsulta', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver fonte 2' }))
 
-    expect(segunda.scrollIntoView).toHaveBeenCalled()
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toEqual([segunda])
     expect(segunda).toHaveAttribute('data-destacada', 'true')
     expect(document.getElementById('fonte-1')).toHaveAttribute('data-destacada', 'false')
 
