@@ -26,6 +26,23 @@ Desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computaç
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
 
+## Frontend
+
+Interface web em React + TypeScript (Vite + Tailwind CSS) para consultas em linguagem natural, com a resposta e as fontes citadas.
+
+```bash
+cd frontend
+cp .env.example .env   # opcional; por padrão a API é http://localhost:8000
+npm install
+npm run dev            # http://localhost:5173
+npm test
+```
+
+Para apontar para outra API, defina `VITE_API_URL` em `frontend/.env` (padrão `http://localhost:8000`).
+
+A API precisa estar rodando (`cd backend && uvicorn app.main:app`).
+A origem do frontend precisa estar em `CORS_ORIGENS` no `.env` da API (padrão `["http://localhost:5173"]`); abrindo por `127.0.0.1` ou pelo `npm run preview` (porta 4173), adicione essa origem, senão a tela acusa API fora do ar.
+
 ## Status
 
 Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
@@ -40,8 +57,8 @@ Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
 | 6 | Recuperação híbrida | Concluída |
 | 7 | Geração com citação de fontes | Concluída |
 | 8 | API de consulta | Concluída |
-| 9 | Frontend | Próxima |
-| 10 | Ingestão completa do corpus e validação manual | Pendente |
+| 9 | Frontend | Concluída |
+| 10 | Ingestão completa do corpus e validação manual | Próxima |
 | 11 | Avaliação final | Pendente |
 
 ## Licença
