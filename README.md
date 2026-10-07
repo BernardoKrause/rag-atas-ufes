@@ -26,6 +26,20 @@ Desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computaç
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
 
+## Frontend
+
+Interface web em React + TypeScript (Vite + Tailwind CSS) para consultas em linguagem natural, com a resposta e as fontes citadas.
+
+```bash
+cd frontend
+cp .env.example .env   # opcional; por padrão a API é http://localhost:8000
+npm install
+npm run dev            # http://localhost:5173
+npm test
+```
+
+A API precisa estar rodando (`cd backend && uvicorn app.main:app`).
+
 ## Status
 
 Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
