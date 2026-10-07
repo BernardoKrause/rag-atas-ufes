@@ -26,7 +26,9 @@ export function ListaFontes({ fontes, destacada }: Props) {
               <p className="font-medium text-slate-900">
                 [{fonte.numero}] {fonte.rotulo}
               </p>
-              <p className="mt-2 text-sm text-slate-700">{fonte.trecho}</p>
+              <p className="mt-2 max-h-48 overflow-y-auto whitespace-pre-line text-sm text-slate-700">
+                {fonte.trecho}
+              </p>
               <a
                 href={urlPdf(fonte)}
                 target="_blank"

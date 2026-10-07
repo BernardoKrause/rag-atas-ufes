@@ -41,6 +41,7 @@ npm test
 Para apontar para outra API, defina `VITE_API_URL` em `frontend/.env` (padrão `http://localhost:8000`).
 
 A API precisa estar rodando (`cd backend && uvicorn app.main:app`).
+A origem do frontend precisa estar em `CORS_ORIGENS` no `.env` da API (padrão `["http://localhost:5173"]`); abrindo por `127.0.0.1` ou pelo `npm run preview` (porta 4173), adicione essa origem, senão a tela acusa API fora do ar.
 
 ## Status
 
