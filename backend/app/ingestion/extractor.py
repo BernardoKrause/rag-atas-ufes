@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from pathlib import Path
 
 import fitz
@@ -39,8 +40,19 @@ def mapear_campus(centro: str) -> str:
         raise ValueError(f"centro sem campus mapeado: {centro}") from None
 
 
-def _corrigir_ligadura_ti_quebrada(texto: str) -> str:
-    return texto.replace("Ɵ", "ti")
+RE_LIGADURA_UNICODE = re.compile("[ﬀ-ﬆ]")
+
+GLIFOS_TROCADOS = {"İ": "fí", "ơ": "tí", "Ō": "ft"}
+RE_GLIFO_TROCADO = re.compile(
+    rf"(?<=\w)[{''.join(GLIFOS_TROCADOS)}]|[{''.join(GLIFOS_TROCADOS)}](?=\w)"
+)
+
+
+def normalizar_ligaduras(texto: str) -> str:
+    texto = texto.replace("Ɵ", "ti")
+    texto = RE_LIGADURA_UNICODE.sub(lambda m: unicodedata.normalize("NFKC", m.group()), texto)
+    texto = unicodedata.normalize("NFC", texto)
+    return RE_GLIFO_TROCADO.sub(lambda m: GLIFOS_TROCADOS[m.group()], texto)
 
 
 def _normalizar_espacos(texto: str) -> str:
@@ -143,7 +155,7 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
     try:
         doc = fitz.open(caminho_pdf)
         try:
-            paginas_texto = [_corrigir_ligadura_ti_quebrada(pagina.get_text()) for pagina in doc]
+            paginas_texto = [normalizar_ligaduras(pagina.get_text()) for pagina in doc]
         finally:
             doc.close()
     finally:

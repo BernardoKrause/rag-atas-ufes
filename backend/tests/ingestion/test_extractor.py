@@ -17,6 +17,7 @@ from app.ingestion.extractor import (
     extrair_quorum_declarado,
     extrair_texto_bruto,
     mapear_campus,
+    normalizar_ligaduras,
 )
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
@@ -407,3 +408,32 @@ def test_remove_cabecalho_nao_quebra_quando_primeira_pagina_e_mais_curta_que_as_
     )
 
     assert paginas == ["CABECALHO\nFIXO", "CORPO1", "CORPO2"]
+
+
+@pytest.mark.parametrize(
+    ("entrada", "esperado"),
+    [
+        ("Justiﬁcou", "Justificou"),
+        ("ﬂuentes", "fluentes"),
+        ("Schiﬄer", "Schiffler"),
+        ("Vitória", "Vitória"),
+        ("caça", "caça"),
+        ("İsicos", "físicos"),
+        ("Oİcio", "Ofício"),
+        ("noơcias", "notícias"),
+        ("Estaơstica", "Estatística"),
+        ("SoŌware", "Software"),
+        ("parƟcipar", "participar"),
+    ],
+)
+def test_normalizar_ligaduras_corrige_casos_do_corpus(entrada, esperado):
+    assert normalizar_ligaduras(entrada) == esperado
+
+
+def test_normalizar_ligaduras_preserva_glifo_isolado():
+    assert normalizar_ligaduras("letra İ isolada") == "letra İ isolada"
+
+
+def test_normalizar_ligaduras_nao_altera_texto_comum():
+    texto = "Aprovado por unanimidade.\n  Item 2: ofício nº 3/2025"
+    assert normalizar_ligaduras(texto) == texto
