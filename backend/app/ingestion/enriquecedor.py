@@ -70,17 +70,26 @@ def enriquecer_item(tipo_orgao: str, centro: str, item_texto: str, data_reuniao:
 
 
 def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao: Session) -> None:
+    campos_por_item = [
+        enriquecer_item(documento.tipo_orgao, documento.centro, item.texto, documento.data_reuniao)
+        for item in itens
+    ]
     assunto_por_item: dict[tuple[str, str, int], str | None] = {}
-    for item in itens:
+    desfecho_por_item: dict[tuple[str, str, int], CamposEnriquecidos] = {}
+    for item, campos in sorted(zip(itens, campos_por_item), key=lambda par: par[0].fragmento_indice):
         chave = (item.secao, item.numero_item, item.ocorrencia_indice)
-        campos = enriquecer_item(documento.tipo_orgao, documento.centro, item.texto, documento.data_reuniao)
         if item.fragmento_indice == 0:
             assunto_por_item[chave] = campos.assunto
+        if campos.tipo_desfecho is not None:
+            desfecho_por_item[chave] = campos
+    for item, campos in zip(itens, campos_por_item):
+        chave = (item.secao, item.numero_item, item.ocorrencia_indice)
+        desfecho = desfecho_por_item.get(chave, campos)
         item.assunto = assunto_por_item.get(chave, campos.assunto)
-        item.tipo_desfecho = campos.tipo_desfecho
-        item.resultado_votacao = campos.resultado_votacao
-        item.encaminhamento = campos.encaminhamento
-        item.ato_emitido = campos.ato_emitido
+        item.tipo_desfecho = desfecho.tipo_desfecho
+        item.resultado_votacao = desfecho.resultado_votacao
+        item.encaminhamento = desfecho.encaminhamento
+        item.ato_emitido = desfecho.ato_emitido
         item.departamento_origem = campos.departamento_origem
     sessao.flush()
 
@@ -110,6 +119,21 @@ def _limites_da_frase(texto: str, posicao: int) -> tuple[int, int]:
             fim = ponto + 1
             break
     return inicio, fim
+
+
+RE_ENCAMINHAMENTO_DOIS_PONTOS = re.compile(r"\bencaminhamento\b[^.:,\n]{0,80}:\s*", re.IGNORECASE)
+RE_ENCAMINHAMENTO_DESTINO = re.compile(r"\bencaminhamento\s+(?:[àa]s?|ao|aos|para)\s+(?!(?:a\s+)?vota)", re.IGNORECASE)
+
+
+def extrair_encaminhamento(corpo: str) -> str | None:
+    for padrao in (RE_ENCAMINHAMENTO_DOIS_PONTOS, RE_ENCAMINHAMENTO_DESTINO):
+        match = padrao.search(corpo)
+        if not match:
+            continue
+        fim = _limites_da_frase(corpo, match.end())[1]
+        inicio = match.end() if padrao is RE_ENCAMINHAMENTO_DOIS_PONTOS else match.start()
+        return corpo[inicio:fim].strip(" .") or None
+    return None
 
 
 RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
@@ -147,9 +171,11 @@ def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
         tipo_desfecho, resultado_votacao = None, None
         assunto = corpo.strip(" .")
 
+    encaminhamento = extrair_encaminhamento(corpo) if tipo_desfecho else None
+
     return CamposEnriquecidos(
         assunto=assunto or None, tipo_desfecho=tipo_desfecho, resultado_votacao=resultado_votacao,
-        encaminhamento=None, ato_emitido=None, departamento_origem=departamento_origem,
+        encaminhamento=encaminhamento, ato_emitido=None, departamento_origem=departamento_origem,
     )
 
 
@@ -229,10 +255,11 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
     inicio_frase, fim_frase = _limites_da_frase(corpo, ultimo.start())
     resultado_votacao = corpo[inicio_frase:fim_frase].strip(" .") or None
     assunto = corpo[:inicio_frase].strip(" .") or corpo[:ultimo.start()].strip(" .")
+    encaminhamento = extrair_encaminhamento(corpo) if tipo_desfecho else None
 
     return CamposEnriquecidos(
         assunto=assunto or None, tipo_desfecho=tipo_desfecho, resultado_votacao=resultado_votacao,
-        encaminhamento=None, ato_emitido=None, departamento_origem=None,
+        encaminhamento=encaminhamento, ato_emitido=None, departamento_origem=None,
     )
 
 

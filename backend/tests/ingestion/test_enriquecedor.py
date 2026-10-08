@@ -483,3 +483,122 @@ def test_extrair_corpo_sem_marcador_remove_traco_inicial(texto):
     from app.ingestion.enriquecedor import extrair_corpo_sem_marcador
 
     assert extrair_corpo_sem_marcador("", "1.2 " + texto) == "Resposta que os alunos receberam sobre o tema."
+
+
+def _persistir_fragmentos(db_session, textos):
+    documento = Documento(
+        nome_arquivo="g.pdf", url_origem="g.pdf", centro="CCJE", campus="Goiabeiras",
+        tipo_orgao="A", orgao="CCJE", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
+    )
+    db_session.add(documento)
+    db_session.flush()
+    itens = [
+        ItemPauta(
+            documento_id=documento.id_documento, item_id_canonico=f"teste{documento.id_documento}_PAUTA_3_F{i}",
+            secao="PAUTA", numero_item="3", fragmento_indice=i, texto=texto,
+        )
+        for i, texto in enumerate(textos)
+    ]
+    db_session.add_all(itens)
+    db_session.flush()
+    enriquecer_e_persistir(documento, itens, db_session)
+    return itens
+
+
+def test_fragmentos_herdam_desfecho_do_ultimo_fragmento_que_o_tem(db_session):
+    itens = _persistir_fragmentos(db_session, [
+        "PAUTA 3: Análise do parecer sobre o relatório do projeto.",
+        "A relatora leu o parecer e a comissão discutiu o assunto.",
+        "Após discussão, o parecer foi colocado em votação e aprovado por unanimidade.",
+    ])
+
+    assert [i.tipo_desfecho for i in itens] == ["Aprovado"] * 3
+    resultado = itens[2].resultado_votacao
+    assert resultado and "unanimidade" in resultado
+    assert {i.resultado_votacao for i in itens} == {resultado}
+    assert itens[1].assunto == itens[0].assunto
+
+
+def test_fragmentos_sem_desfecho_em_nenhum_ficam_sem_desfecho(db_session):
+    itens = _persistir_fragmentos(db_session, [
+        "PAUTA 3: Informes gerais da coordenação.",
+        "A coordenadora relatou o andamento das atividades.",
+    ])
+
+    assert [i.tipo_desfecho for i in itens] == [None, None]
+    assert [i.encaminhamento for i in itens] == [None, None]
+
+
+def test_fragmentos_herdam_o_ultimo_desfecho_quando_ha_mais_de_um(db_session):
+    itens = _persistir_fragmentos(db_session, [
+        "PAUTA 3: Em votação, o ponto foi aprovado por unanimidade.",
+        "Em nova votação, o ponto foi reprovado por maioria.",
+        "Texto final sem votação.",
+    ])
+
+    assert [i.tipo_desfecho for i in itens] == ["Reprovado"] * 3
+
+
+def test_encaminhamento_apos_dois_pontos():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(
+        "Assim, a Coordenadora propôs este encaminhamento: realizar uma reunião com os secretários "
+        "do Colegiado para ouvir suas contribuições sobre o documento. Aprovado por unanimidade."
+    ) == "realizar uma reunião com os secretários do Colegiado para ouvir suas contribuições sobre o documento"
+    assert extrair_encaminhamento(
+        "O Presidente PESSOA_165296 apresenta sua sugestão de encaminhamento: um pedido de criação "
+        "da diretoria acadêmica. Aprovado."
+    ) == "um pedido de criação da diretoria acadêmica"
+    assert extrair_encaminhamento(
+        "Por fim, o encaminhamento de uma proposta momentânea do Departamento foi: que a subcoordenação "
+        "de curso assuma a coordenação de estágio. Aprovado."
+    ) == "que a subcoordenação de curso assuma a coordenação de estágio"
+
+
+def test_encaminhamento_com_destino():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(
+        "Recomendo a aprovação do relatório e do pedido de renovação e solicito encaminhamento "
+        "às instâncias competentes."
+    ) == "encaminhamento às instâncias competentes"
+    assert extrair_encaminhamento(
+        "Sou, portanto, favorável à sua aprovação e encaminhamento para registro junto à "
+        "Pró-Reitoria de Extensão."
+    ) == "encaminhamento para registro junto à Pró-Reitoria de Extensão"
+
+
+@pytest.mark.parametrize("corpo", [
+    "Relatou sobre a situação de ausência da servidora PESSOA_164476, que interferiu no andamento "
+    "de alguns encaminhamentos do setor.",
+    "A dinâmica no segundo dia do Fórum foi a formação de grupos de trabalho para pensar "
+    "encaminhamentos a respeito do que se faria.",
+    "Art. 17º A diretoria é a instância responsável pelo encaminhamento e execução das atividades "
+    "cotidianas da entidade.",
+    "A Chefe do Departamento propôs como encaminhamento colocar em votação a Proposta 2.",
+])
+def test_encaminhamento_rejeita_casos_genericos_e_procedimentais(corpo):
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(corpo) is None
+
+
+def test_extrair_generico_preenche_encaminhamento_somente_com_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+    com = extrair_generico(
+        "PAUTA 1: Parecer. Sou favorável à sua aprovação e encaminhamento para registro junto à "
+        "Pró-Reitoria de Extensão. Em votação, aprovado por unanimidade.", date(2025, 1, 1),
+    )
+    assert com.tipo_desfecho == "Aprovado"
+    assert com.encaminhamento == "encaminhamento para registro junto à Pró-Reitoria de Extensão"
+
+    sem = extrair_generico(
+        "PAUTA 1: Informe. Relatou sobre a ausência da servidora, que interferiu no andamento de "
+        "alguns encaminhamentos: algo importante.", date(2025, 1, 1),
+    )
+    assert sem.tipo_desfecho is None
+    assert sem.encaminhamento is None
+
+
+def test_encaminhamento_para_votacao_e_procedimental_e_nao_conta():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento("Colocou o encaminhamento para votação do Colegiado.") is None
+    assert extrair_encaminhamento("O encaminhamento a votação foi aprovado.") is None
