@@ -29,4 +29,5 @@ O TCC1 pede a anonimização de nomes e números de processo. Os outros tipos en
 
 - Matrícula antiga fora do formato `AAAA` + 6 dígitos só é detectada com a palavra-chave.
 - Formatos raros fora dos padrões acima passam: link do conferenciaweb em `/webconf/`, RG de 7 dígitos sem dígito verificador.
-- Mudar as regras não altera atas já processadas. É preciso reprocessar o corpus (Parte 10).
+- Mudar as regras não altera atas já processadas: é preciso reprocessar o corpus. O corpus inteiro foi reprocessado com as regras atuais na Parte 10 (2026-10).
+- O NER pode cortar sobrenomes (ex.: "PESSOA_165708ísio"), e números de documento avulso fora do formato de processo (um caso no corpus, `028498/25-52`) não são anonimizados. Ver `docs/validacao-manual.md`.

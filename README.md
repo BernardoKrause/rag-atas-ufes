@@ -73,8 +73,8 @@ Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
 | 7 | Geração com citação de fontes | Concluída |
 | 8 | API de consulta | Concluída |
 | 9 | Frontend | Concluída |
-| 10 | Ingestão completa do corpus e validação manual | Próxima |
-| 11 | Avaliação final | Pendente |
+| 10 | Ingestão completa do corpus e validação manual | Concluída |
+| 11 | Avaliação final | Próxima |
 
 ## Licença
 
