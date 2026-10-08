@@ -94,7 +94,7 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
 
 _ABREVIACOES = {"dr", "dra", "drª", "prof", "profa", "sr", "sra", "nº", "n", "art", "cons", "depart", "doc", "prot"}
 
-RE_PONTO_FINAL_DE_FRASE = re.compile(r"\.(?=\s|$)")
+RE_PONTO_FINAL_DE_FRASE = re.compile(r"\.[”\"’'»)\]]*(?=\s|$)")
 RE_ULTIMA_PALAVRA = re.compile(r"([\wª]+)$")
 
 
@@ -104,17 +104,17 @@ def _pontos_de_fronteira(texto: str) -> list[int]:
         palavra = RE_ULTIMA_PALAVRA.search(texto[:match.start()])
         if palavra and palavra.group(1).lower() in _ABREVIACOES:
             continue
-        fronteiras.append(match.start())
+        fronteiras.append(match.end())
     return fronteiras
 
 
 def _limites_da_frase(texto: str, posicao: int) -> tuple[int, int]:
     inicio, fim = 0, len(texto)
-    for ponto in _pontos_de_fronteira(texto):
-        if ponto < posicao:
-            inicio = ponto + 1
+    for fronteira in _pontos_de_fronteira(texto):
+        if fronteira <= posicao:
+            inicio = fronteira
         else:
-            fim = ponto + 1
+            fim = fronteira
             break
     return inicio, fim
 

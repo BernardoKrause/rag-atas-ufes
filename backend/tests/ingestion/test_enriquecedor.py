@@ -602,3 +602,19 @@ def test_encaminhamento_para_votacao_e_procedimental_e_nao_conta():
     from app.ingestion.enriquecedor import extrair_encaminhamento
     assert extrair_encaminhamento("Colocou o encaminhamento para votação do Colegiado.") is None
     assert extrair_encaminhamento("O encaminhamento a votação foi aprovado.") is None
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    (
+        "3.03 Diretrizes. Solicitamos que se dê conhecimento ao colegiado, para melhor andamento dos processos e esclarecimento de todos.” As diretrizes foram aprovadas por unanimidade.",
+        "As diretrizes foram aprovadas por unanimidade",
+    ),
+    (
+        "3.03 Sistema. O prazo não seria flexibilizado e seria aplicado apenas a falhas de sistema.” Posto o assunto em discussão e votação, a proposta foi aprovada por unanimidade.",
+        "Posto o assunto em discussão e votação, a proposta foi aprovada por unanimidade",
+    ),
+])
+def test_extrair_generico_fim_de_frase_seguido_de_aspas(texto, esperado):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).resultado_votacao == esperado
