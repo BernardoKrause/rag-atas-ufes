@@ -30,6 +30,17 @@ Sem o Tesseract, as atas com texto nativo continuam sendo processadas normalment
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
 
+## Ingestão do corpus
+
+Para processar o corpus inteiro de ponta a ponta (extração e anonimização, segmentação, enriquecimento, indexação no Qdrant e grafo no Neo4j):
+
+```bash
+cd backend
+python -m app.ingestion.completa
+```
+
+Todas as etapas são idempotentes, então a reexecução atualiza o que mudou sem duplicar nada. Ao final, o comando lista os documentos com OCR e os documentos sem item de pauta.
+
 ## Frontend
 
 Interface web em React + TypeScript (Vite + Tailwind CSS) para consultas em linguagem natural, com a resposta e as fontes citadas.
