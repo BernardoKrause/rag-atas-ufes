@@ -123,6 +123,27 @@ def test_extrair_ct_aprovado_com_departamento():
     assert "Decisão" not in campos.assunto
 
 
+@pytest.mark.parametrize("decisao", [
+    "Decisão: | Aprovado(a) por unanimidade.",
+    "Decisão: A Aprovado(a) por unanimidade.",
+    "Decisão: . o Aprovado(a) por unanimidade.",
+    "Decisão: 4S er Aprovado(a) por unanimidade.",
+    "Decisão; Aprovado(a) por unanimidade.",
+])
+def test_extrair_ct_tolera_ruido_de_ocr_antes_do_desfecho(decisao):
+    from app.ingestion.enriquecedor import extrair_ct
+    campos = extrair_ct(f"PAUTA 1: PROCESSO_31740 - Afastamento. {decisao}", date(2023, 3, 1))
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.resultado_votacao == "por unanimidade."
+    assert campos.assunto == "PROCESSO_31740 - Afastamento"
+
+
+def test_extrair_ct_ruido_de_ocr_nao_aprova_texto_sem_desfecho():
+    from app.ingestion.enriquecedor import extrair_ct
+    campos = extrair_ct("PAUTA 1: PROCESSO_31740 - Afastamento. Decisão: o Conselho discutiu.", date(2023, 3, 1))
+    assert campos.tipo_desfecho is None
+
+
 def test_extrair_ct_retirado_sem_departamento():
     from app.ingestion.enriquecedor import extrair_ct
     texto = 'PAUTA 5: Processo digital nº 23068.000001/2025-00 - Análise de recurso. Decisão: Retirado(a).'

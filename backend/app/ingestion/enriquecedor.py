@@ -138,8 +138,9 @@ def extrair_encaminhamento(corpo: str) -> str | None:
     return None
 
 
-RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
-RE_DECISAO_NAO_APROVADO_CT = re.compile(r"Decis[ãa]o:\s*N[ãa]o\s+aprovad[oa]\(?a?\)?\.?\s*(.*)", re.DOTALL)
+_ROTULO_DECISAO_CT = r"Decis[ãa]o\s*[:;]\s*(?:(?:[^\w\s]|\w{1,2}(?=\s))\s*){0,3}?"
+RE_DECISAO_CT = re.compile(_ROTULO_DECISAO_CT + r"([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
+RE_DECISAO_NAO_APROVADO_CT = re.compile(_ROTULO_DECISAO_CT + r"N[ãa]o\s+aprovad[oa]\(?a?\)?\.?\s*(.*)", re.DOTALL)
 RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-.:]+?)\s*[-.:]")
 
 LIMITE_DEPARTAMENTO_ORIGEM = 60
