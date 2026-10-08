@@ -139,6 +139,7 @@ def extrair_encaminhamento(corpo: str) -> str | None:
 
 
 RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
+RE_DECISAO_NAO_APROVADO_CT = re.compile(r"Decis[ãa]o:\s*N[ãa]o\s+aprovad[oa]\(?a?\)?\.?\s*(.*)", re.DOTALL)
 RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-.:]+?)\s*[-.:]")
 
 LIMITE_DEPARTAMENTO_ORIGEM = 60
@@ -162,8 +163,14 @@ def extrair_ct(texto: str, data_reuniao: date, secao: str | None = None) -> Camp
     match_dep = RE_DEPARTAMENTO_CT.search(corpo)
     departamento_origem = _normalizar_departamento(match_dep.group(1)) if match_dep else None
 
+    match_nao_aprovado = RE_DECISAO_NAO_APROVADO_CT.search(corpo)
     match_decisao = RE_DECISAO_CT.search(corpo)
-    if match_decisao:
+    if match_nao_aprovado:
+        tipo_desfecho = "Reprovado"
+        resultado = match_nao_aprovado.group(1).strip()
+        resultado_votacao = resultado[:_limites_da_frase(resultado, 0)[1]].strip() or None
+        assunto = corpo[:match_nao_aprovado.start()].strip(" .")
+    elif match_decisao:
         chave = match_decisao.group(1).upper()
         tipo_desfecho = _DESFECHO_CT.get(chave)
         resultado = match_decisao.group(2).strip()
@@ -187,7 +194,7 @@ CONFIG_ENRIQUECEDOR[("B", "CEUNES")] = extrair_ct
 
 
 RE_PALAVRA_CHAVE_DESFECHO = re.compile(
-    r"\b(APROVAD[OA]S?|REPROVAD[OA]S?|RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?|BAIXAD[OA]S?\s+DE\s+PAUTA|ADIAD[OA]S?|"
+    r"\b(N[ÃA]O\s+(?:FOI\s+|FORAM\s+)?APROVAD[OA]S?|REJEITAD[OA]S?|INDEFERID[OA]S?|APROVAD[OA]S?|REPROVAD[OA]S?|RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?|BAIXAD[OA]S?\s+DE\s+PAUTA|ADIAD[OA]S?|"
     r"ENCAMINHAD[OA]S?|HOMOLOGAD[OA]S?)\b",
     re.IGNORECASE,
 )
@@ -200,7 +207,9 @@ _DESFECHO_GENERICO = {
     "ADIADO": "Adiado", "ADIADA": "Adiado",
     "ENCAMINHADO": "Encaminhado", "ENCAMINHADA": "Encaminhado",
     "HOMOLOGADO": "Aprovado", "HOMOLOGADA": "Aprovado",
+    "REJEITADO": "Reprovado", "REJEITADA": "Reprovado", "INDEFERIDO": "Reprovado", "INDEFERIDA": "Reprovado",
 }
+RE_REJEICAO = re.compile(r"N[ÃA]O\s+|REJEITAD|INDEFERID", re.IGNORECASE)
 
 
 RE_MARCA_DE_VOTACAO = re.compile(r"votaç|votac|unanimidade|maioria|\bvotos?\b|abstenç|contrári", re.IGNORECASE)
@@ -224,11 +233,16 @@ def _secao_deliberativa(secao: str | None) -> bool:
 def _ocorrencia_valida(corpo: str, ocorrencia: re.Match) -> bool:
     inicio, fim = _limites_da_frase(corpo, ocorrencia.start())
     frase = corpo[inicio:fim]
+    if RE_REJEICAO.match(ocorrencia.group(1)):
+        antes = corpo[inicio:ocorrencia.start()].rstrip().lower()
+        return bool(RE_MARCA_DE_VOTACAO.search(frase)) and not antes.endswith(" ou")
     if RE_MARCA_DE_VOTACAO.search(frase) and not RE_NEGACAO_DE_APROVACAO.search(frase):
         return True
     if RE_PALAVRA_CHAVE_DESFECHO.match(frase.lstrip()):
         return True
     palavra = ocorrencia.group(1)
+    if RE_REJEICAO.match(palavra):
+        return False
     if re.search(r"\s+DE\s+PAUTA$", palavra, re.IGNORECASE):
         return True
     if RE_RETIRADO.match(palavra):
@@ -282,10 +296,13 @@ def extrair_generico(texto: str, data_reuniao: date | None, secao: str | None = 
 
     ultimo = ocorrencias[-1]
     palavra = re.sub(r"\s+DE\s+PAUTA$", "", ultimo.group(1).upper())
-    chave = re.sub(r"S$", "", palavra)
-    if chave not in _DESFECHO_GENERICO and palavra in _DESFECHO_GENERICO:
-        chave = palavra
-    tipo_desfecho = _DESFECHO_GENERICO.get(palavra) or _DESFECHO_GENERICO.get(chave)
+    if re.match(r"N[ÃA]O\s", palavra):
+        tipo_desfecho = "Reprovado"
+    else:
+        chave = re.sub(r"S$", "", palavra)
+        if chave not in _DESFECHO_GENERICO and palavra in _DESFECHO_GENERICO:
+            chave = palavra
+        tipo_desfecho = _DESFECHO_GENERICO.get(palavra) or _DESFECHO_GENERICO.get(chave)
 
     inicio_frase, fim_frase = _limites_da_frase(corpo, ultimo.start())
     resultado_votacao = corpo[inicio_frase:fim_frase].strip(" .") or None

@@ -813,8 +813,60 @@ def test_extrair_encaminhamento_nao_confunde_horario_com_dois_pontos():
     assert extrair_encaminhamento("O encaminhamento das 10:30: algo foi feito.") is None
 
 
-def test_extrair_generico_negacao_vale_tambem_com_marca_de_votacao():
+def test_extrair_generico_negacao_com_marca_de_votacao_nao_e_aprovado():
     from app.ingestion.enriquecedor import extrair_generico
 
     campos = extrair_generico("1.1 Tema. Em votação, a proposta não foi aprovada por maioria.", None)
-    assert campos.tipo_desfecho is None
+    assert campos.tipo_desfecho == "Reprovado"
+
+
+@pytest.mark.parametrize("texto", [
+    "3.2 Tema do recurso. Rejeitado por maioria, com nove votos contrários.",
+    "04.09 Recurso. Portanto, o recurso do candidato foi REJEITADO POR UNANIMIDADE.",
+    "04.01 Sugestão. Em votação, a sugestão NÃO FOI APROVADA POR MAIORIA.",
+    "04.01 Sugestão. A sugestão foi votada e NÃO APROVADA POR MAIORIA.",
+    "9 Parecer. Após a leitura, o parecer foi colocado em votação e rejeitado por unanimidade.",
+    "11 Impugnação. Após discussão, a solicitação de impugnação foi colocada em votação e não aprovada por maioria absoluta do Conselho Departamental, com um voto favorável do Conselheiro Professor PESSOA_166322 .",
+    "7 Parecer. Após discussão, o parecer foi colocado em votação e rejeitado pela maioria dos presentes.",
+    "8 Proposta. A proposta do Prof. PESSOA_166034 foi colocada em votação e não foi aprovada.",
+    "17 Parecer. O parecer foi rejeitado devido a maioria ter votado contrário.",
+])
+def test_extrair_generico_rejeicao_em_frase_de_votacao_e_reprovado(texto):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).tipo_desfecho == "Reprovado"
+
+
+def test_extrair_generico_rejeitado_e_depois_aprovado_vale_o_ultimo():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "3.22 Repasse. Posto em discussão e votação, o parecer foi rejeitado por maioria e foi aprovada "
+        "a dispensa de repasse de recursos destinados ao Desenvolvimento de Ensino."
+    )
+    assert extrair_generico(texto, None).tipo_desfecho == "Aprovado"
+
+
+def test_extrair_generico_cedula_aprovado_ou_nao_aprovado_nao_gera_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "2.1 Votação. A votação será feita pelos membros da Câmara Departamental respondendo da seguinte "
+        "forma: 1 Aprovação da Ata: 1.1 APROVADO ou NÃO APROVADO;"
+    )
+    assert extrair_generico(texto, None).tipo_desfecho is None
+
+
+def test_extrair_generico_rejeitado_sem_marca_de_votacao_nao_gera_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico("1.1 Tema. O pedido anterior foi rejeitado pelo setor.", None).tipo_desfecho is None
+
+
+def test_extrair_ct_nao_aprovado_e_reprovado():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    campos = extrair_ct("PAUTA 6: PROCESSO_31739 - Banca. Decisão: Não aprovado(a) por maioria.", date(2025, 6, 6))
+    assert campos.tipo_desfecho == "Reprovado"
+    assert campos.resultado_votacao == "por maioria."
+    assert campos.assunto == "PROCESSO_31739 - Banca"
