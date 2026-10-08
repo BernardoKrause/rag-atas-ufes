@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from app.ingestion.enriquecedor import CamposEnriquecidos, enriquecer_e_persistir
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
@@ -374,3 +376,110 @@ def test_todas_as_variantes_do_segmentador_tem_extrator_no_enriquecedor():
 
     for tipo_orgao, centro in CONFIG_VARIANTES:
         _obter_extrator(tipo_orgao, centro)  # nao deve levantar ValueError
+
+
+@pytest.mark.parametrize("texto", [
+    "1.1 Informes. Foi informada a entrada da servidora PESSOA_163997, aprovada no último concurso público para Taes da Ufes no lugar da servidora PESSOA_163996 na Secretaria da Direção.",
+    "1.2 A proposta de informatização dos pedidos de 3ª etapa ainda não foi aprovada na Ufes e teve um revés com a aposentadoria da PESSOA_164335, do DRCA.",
+    "1.3 Ademais, como a busca consumiu algum tempo, o acolhimento precisou ser adiado para que seja feita a divulgação adequada.",
+    "1.4 Mencionou que a situação já foi encaminhada para Direção do Centro de Educação e que o setor buscará orientação junto à PROGEP.",
+    "1.5 Sabemos que pela Legislação em vigor, o aluno com mais de 25% de faltas já está automaticamente reprovado na disciplina que ele faltou.",
+    "1.6 Alguns alunos não poderiam estar participando, por terem sido reprovados e alguns colado grau antecipado.",
+])
+def test_extrair_generico_palavra_chave_em_narrativa_nao_gera_desfecho(texto):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho is None
+    assert campos.resultado_votacao is None
+
+
+def test_extrair_generico_parecer_longo_usa_a_frase_da_votacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "2.1 Parecer sobre recurso. O relator concluiu pelo indeferimento, por ter o candidato "
+        "sido reprovado na prova de aptidão didático-prática. Após discussão, o parecer foi "
+        "colocado em votação e aprovado por unanimidade."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho == "Aprovado"
+    assert "votação" in campos.resultado_votacao
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    ("1.1 Calendário. Em discussão. Em votação. Aprovado por unanimidade.", "Aprovado"),
+    ("1.1 Calendário. Após discussão, o calendário foi aprovado por unanimidade.", "Aprovado"),
+    ("1.1 Designação. Posta em votação, a designação foi homologada por unanimidade.", "Aprovado"),
+    ("1.1 Tema. Em apreciação, em votação, aprovado por unanimidade dos presentes.", "Aprovado"),
+    ("1.1 Diagnóstico do ensino de graduação no Centro de Educação – ano 2020. Retirado de pauta.", "Retirado"),
+    ("1.1 Constituição da Comissão Própria de Avaliação do Curso de Pedagogia. Retirado de Pauta. EM DISCUSSÃO. APROVADO.", "Aprovado"),
+    ("1.1 Tema. Sob deliberação, o encaminhamento aprovado por unanimidade.", "Aprovado"),
+    ("1.1 Solicitação. O item foi retirado de pauta e voltará depois.", "Retirado"),
+    ("4.3. Apreciação de estudante. Ponto de pauta retirado.", "Retirado"),
+])
+def test_extrair_generico_desfechos_validos_continuam(texto, esperado):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).tipo_desfecho == esperado
+
+
+def test_extrair_generico_retirado_no_fim_so_vale_para_retirado():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico("1.1 Tema discutido. O processo foi adiado.", None).tipo_desfecho is None
+    assert extrair_generico("1.1 Tema discutido. O processo foi aprovado.", None).tipo_desfecho is None
+
+
+def test_extrair_generico_resultado_votacao_nao_quebra_em_abreviacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "1.1 Processo de progressão. Em apreciação, após relato e parecer favorável do conselheiro "
+        "professor Dr. PESSOA_164023 foi aprovado por unanimidade."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == (
+        "Em apreciação, após relato e parecer favorável do conselheiro professor Dr. PESSOA_164023 "
+        "foi aprovado por unanimidade"
+    )
+
+
+def test_extrair_generico_resultado_votacao_termina_na_frase():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "1.1 Tema. Em votação. Aprovado por unanimidade. Baixada a DECISÃO NÚMERO SETENTA E CINCO BARRA DOIS MIL E VINTE E CINCO."
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == "Aprovado por unanimidade"
+
+
+def test_extrair_ccae_mantem_ato_com_resultado_delimitado():
+    from app.ingestion.enriquecedor import extrair_ccae
+
+    texto = "3.1 Tema. Em votação. Aprovado por unanimidade. Baixada a DECISÃO NÚMERO SETENTA E CINCO BARRA DOIS MIL E VINTE E CINCO."
+    campos = extrair_ccae(texto, date(2025, 3, 1))
+    assert campos.ato_emitido == "DECISAO_75_2025"
+    assert campos.resultado_votacao == "Aprovado por unanimidade"
+
+
+def test_extrair_ct_resultado_votacao_termina_na_primeira_frase():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    texto = (
+        "PAUTA 3: Processo digital nº 23068.000001/2025-00 - Recurso. Decisão: Homologado(a) por maioria. "
+        "Para fundamentar que não concorda com a homologação do ponto de pauta, o conselheiro PESSOA_8903, informou que votou contra."
+    )
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.resultado_votacao == "por maioria."
+
+
+@pytest.mark.parametrize("texto", [
+    "– Resposta que os alunos receberam sobre o tema.",
+    "- Resposta que os alunos receberam sobre o tema.",
+    "— Resposta que os alunos receberam sobre o tema.",
+])
+def test_extrair_corpo_sem_marcador_remove_traco_inicial(texto):
+    from app.ingestion.enriquecedor import extrair_corpo_sem_marcador
+
+    assert extrair_corpo_sem_marcador("", "1.2 " + texto) == "Resposta que os alunos receberam sobre o tema."

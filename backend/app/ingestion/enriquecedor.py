@@ -50,7 +50,7 @@ def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     if match_encerramento:
         texto = texto[:match_encerramento.start()]
 
-    return texto.strip()
+    return re.sub(r"^[\s–—-]+", "", texto).strip()
 
 
 CONFIG_ENRIQUECEDOR: dict[tuple[str, str], Callable[[str, date], CamposEnriquecidos]] = {}
@@ -85,6 +85,33 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
     sessao.flush()
 
 
+_ABREVIACOES = {"dr", "dra", "drª", "prof", "profa", "sr", "sra", "nº", "n", "art", "cons", "depart", "doc", "prot"}
+
+RE_PONTO_FINAL_DE_FRASE = re.compile(r"\.(?=\s|$)")
+RE_ULTIMA_PALAVRA = re.compile(r"([\wª]+)$")
+
+
+def _pontos_de_fronteira(texto: str) -> list[int]:
+    fronteiras = []
+    for match in RE_PONTO_FINAL_DE_FRASE.finditer(texto):
+        palavra = RE_ULTIMA_PALAVRA.search(texto[:match.start()])
+        if palavra and palavra.group(1).lower() in _ABREVIACOES:
+            continue
+        fronteiras.append(match.start())
+    return fronteiras
+
+
+def _limites_da_frase(texto: str, posicao: int) -> tuple[int, int]:
+    inicio, fim = 0, len(texto)
+    for ponto in _pontos_de_fronteira(texto):
+        if ponto < posicao:
+            inicio = ponto + 1
+        else:
+            fim = ponto + 1
+            break
+    return inicio, fim
+
+
 RE_DECISAO_CT = re.compile(r"Decis[ãa]o:\s*([A-ZÀ-Ú][a-zà-ú]+)\(?a?\)?\.?\s*(.*)", re.DOTALL)
 RE_DEPARTAMENTO_CT = re.compile(r"-\s*Departamento de ([^-.:]+?)\s*[-.:]")
 
@@ -113,7 +140,8 @@ def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
     if match_decisao:
         chave = match_decisao.group(1).upper()
         tipo_desfecho = _DESFECHO_CT.get(chave)
-        resultado_votacao = match_decisao.group(2).strip() or None
+        resultado = match_decisao.group(2).strip()
+        resultado_votacao = resultado[:_limites_da_frase(resultado, 0)[1]].strip() or None
         assunto = corpo[:match_decisao.start()].strip(" .")
     else:
         tipo_desfecho, resultado_votacao = None, None
@@ -146,6 +174,27 @@ _DESFECHO_GENERICO = {
 }
 
 
+RE_MARCA_DE_VOTACAO = re.compile(r"votaç|votac|unanimidade|maioria|\bvotos?\b|abstenç|contrári", re.IGNORECASE)
+RE_RETIRADO = re.compile(r"RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?$", re.IGNORECASE)
+
+
+def _ocorrencia_valida(corpo: str, ocorrencia: re.Match) -> bool:
+    inicio, fim = _limites_da_frase(corpo, ocorrencia.start())
+    frase = corpo[inicio:fim]
+    if RE_MARCA_DE_VOTACAO.search(frase):
+        return True
+    if RE_PALAVRA_CHAVE_DESFECHO.match(frase.lstrip()):
+        return True
+    palavra = ocorrencia.group(1)
+    if re.search(r"\s+DE\s+PAUTA$", palavra, re.IGNORECASE):
+        return True
+    if RE_RETIRADO.match(palavra):
+        depois = corpo[ocorrencia.end():fim].strip(" .")
+        antes = corpo[inicio:ocorrencia.start()].rstrip()
+        return not depois or antes.lower().endswith("pauta")
+    return False
+
+
 RE_APROVACAO_ATA_INVERTIDA = re.compile(
     r"^Foi\s+apreciad[oa]\s+e\s+aprovad[oa],?\s+por\s+unanimidade\s*:\s*", re.IGNORECASE
 )
@@ -163,7 +212,7 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
 
     corpo = extrair_corpo_sem_marcador("", texto)
 
-    ocorrencias = list(RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo))
+    ocorrencias = [o for o in RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo) if _ocorrencia_valida(corpo, o)]
     if not ocorrencias:
         return CamposEnriquecidos(
             assunto=corpo or None, tipo_desfecho=None, resultado_votacao=None,
@@ -177,8 +226,8 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
         chave = palavra
     tipo_desfecho = _DESFECHO_GENERICO.get(palavra) or _DESFECHO_GENERICO.get(chave)
 
-    inicio_frase = corpo.rfind(".", 0, ultimo.start()) + 1
-    resultado_votacao = corpo[inicio_frase:].strip(" .") or None
+    inicio_frase, fim_frase = _limites_da_frase(corpo, ultimo.start())
+    resultado_votacao = corpo[inicio_frase:fim_frase].strip(" .") or None
     assunto = corpo[:inicio_frase].strip(" .") or corpo[:ultimo.start()].strip(" .")
 
     return CamposEnriquecidos(
