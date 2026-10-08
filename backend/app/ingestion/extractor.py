@@ -1,5 +1,8 @@
+import functools
 import logging
 import re
+import shutil
+import subprocess
 import unicodedata
 from pathlib import Path
 
@@ -161,13 +164,42 @@ def _precisa_de_ocr(pagina: fitz.Page, texto_nativo: str) -> bool:
     return bool(pagina.get_images()) or bool(pagina.get_drawings())
 
 
-def _texto_por_ocr(pagina: fitz.Page) -> str:
+RE_TESSDATA_LISTAGEM = re.compile(r'"([^"]+)"')
+
+
+@functools.cache
+def _localizar_tessdata() -> str | None:
     try:
-        textpage = pagina.get_textpage_ocr(language="por", dpi=DPI_OCR, full=True)
-    except RuntimeError as erro:
+        return fitz.get_tessdata()
+    except RuntimeError:
+        pass
+    binario = shutil.which("tesseract")
+    if binario is None:
+        return None
+    try:
+        saida = subprocess.run(
+            [binario, "--list-langs"], capture_output=True, text=True, timeout=30
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    achado = RE_TESSDATA_LISTAGEM.search(saida.split("\n", 1)[0])
+    return achado.group(1) if achado else None
+
+
+def _texto_por_ocr(pagina: fitz.Page) -> str:
+    if shutil.which("tesseract") is None:
         raise TesseractAusenteError(
             "pagina sem camada de texto exige OCR: instale com "
             "`brew install tesseract tesseract-lang`"
+        )
+    try:
+        textpage = pagina.get_textpage_ocr(
+            language="por", dpi=DPI_OCR, full=True, tessdata=_localizar_tessdata()
+        )
+    except RuntimeError as erro:
+        raise TesseractAusenteError(
+            "Tesseract instalado, mas os dados do idioma `por` nao foram encontrados: "
+            "instale com `brew install tesseract-lang` ou defina TESSDATA_PREFIX"
         ) from erro
     return pagina.get_text(textpage=textpage)
 

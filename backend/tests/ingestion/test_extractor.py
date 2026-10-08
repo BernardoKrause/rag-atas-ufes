@@ -7,9 +7,9 @@ import pytest
 
 from app.ingestion.extractor import (
     CENTRO_CAMPUS,
+    TesseractAusenteError,
     _neutralizar_numeracao_de_margem,
     _remover_cabecalho_e_rodape_repetidos,
-    TesseractAusenteError,
     extrair_campos,
     extrair_horario_inicio,
     extrair_local,
@@ -475,13 +475,26 @@ def test_extrair_texto_bruto_nao_chama_ocr_em_pdf_com_texto(monkeypatch):
     assert paginas_ocr == []
 
 
-def test_extrair_texto_bruto_sem_tesseract_levanta_erro_orientando_instalacao(monkeypatch):
+def test_extrair_texto_bruto_sem_binario_do_tesseract_orienta_instalacao(monkeypatch):
     def _sem_tesseract(*args, **kwargs):
         raise RuntimeError("No tessdata specified and Tesseract is not installed")
 
     monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _sem_tesseract)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: None)
 
-    with pytest.raises(TesseractAusenteError, match="brew install tesseract"):
+    with pytest.raises(TesseractAusenteError, match="brew install tesseract tesseract-lang"):
+        extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+
+def test_extrair_texto_bruto_com_tesseract_sem_dados_do_idioma_orienta_tessdata(monkeypatch):
+    def _sem_idioma(*args, **kwargs):
+        raise RuntimeError("Failed to init tesseract")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _sem_idioma)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: None)
+
+    with pytest.raises(TesseractAusenteError, match="TESSDATA_PREFIX"):
         extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
 
 
