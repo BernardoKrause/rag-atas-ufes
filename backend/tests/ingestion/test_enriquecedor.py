@@ -63,7 +63,8 @@ def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monke
 
     enriquecer_e_persistir(documento, [inicio, continuacao], db_session)
 
-    assert continuacao.assunto == inicio.assunto
+    assert inicio.assunto == "PAUTA 1: inicio do item"
+    assert continuacao.assunto == "PAUTA 1: inicio do item"
 
 
 def test_enriquecer_e_persistir_e_idempotente(db_session, monkeypatch):
@@ -546,6 +547,44 @@ def test_frase_de_votacao_que_cruza_a_fronteira_do_fragmento_vem_inteira(db_sess
     assert len(itens) == 2
     assert frase not in itens[0].texto and frase[:10] in itens[0].texto
     assert {i.resultado_votacao for i in itens} == {frase.rstrip(".")}
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+
+
+def _texto_com_frase_em(posicao: int, frase: str, inicio: str = "PAUTA 3: Análise do parecer. ") -> str:
+    enchimento = "A comissão discutiu o relatório apresentado. "
+    prefixo = inicio + enchimento * 100
+    prefixo = prefixo[:posicao - 1]
+    prefixo = prefixo[:prefixo.rindex(".") + 1] + " "
+    faltam = posicao - len(prefixo)
+    prefixo = prefixo[:-1] + " " * faltam + " " if faltam > 0 else prefixo
+    return prefixo + frase + " " + enchimento * 80
+
+
+def test_frase_de_votacao_que_comeca_antes_do_fragmento_1_vem_inteira_em_todos(db_session):
+    from app.ingestion.segmentador import TAMANHO_MAX_FRAGMENTO, SOBREPOSICAO_FRAGMENTO
+    inicio_f1 = TAMANHO_MAX_FRAGMENTO - SOBREPOSICAO_FRAGMENTO
+    frase = (
+        "Em votação, o parecer da comissão sobre o relatório e o pedido de renovação do projeto "
+        "foi aprovado por unanimidade dos presentes à reunião."
+    )
+    texto = _texto_com_frase_em(inicio_f1 - 50, frase)
+    assert texto.index(frase) < inicio_f1 < texto.index(frase) + len(frase)
+
+    itens = _persistir_fragmentos(db_session, texto)
+
+    assert len(itens) >= 2
+    assert {i.resultado_votacao for i in itens} == {frase.rstrip(".")}
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+
+
+def test_encaminhamento_so_no_fragmento_0_e_votacao_so_no_ultimo_chegam_a_todos(db_session):
+    enc = "Assim, a Coordenadora propôs este encaminhamento: realizar uma reunião com os secretários do Colegiado."
+    frase = "Em votação, o encaminhamento foi aprovado por unanimidade."
+    texto = _texto_longo(f"PAUTA 3: Análise. {enc}", frase)
+    itens = _persistir_fragmentos(db_session, texto)
+
+    assert len(itens) > 2
+    assert {i.encaminhamento for i in itens} == {"realizar uma reunião com os secretários do Colegiado"}
     assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
 
 
