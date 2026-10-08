@@ -12,7 +12,8 @@ from app.core.config import settings
 from app.core.texto import remover_acentos_maiusculo, slugificar
 from app.ingestion._extenso import parse_cardinal, tokenizar
 from app.ingestion.segmentador import (
-    RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT, RE_ITEM_PONTILHADO,
+    RE_ENCERRAMENTO_ATA, RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT,
+    RE_ITEM_PONTILHADO,
 )
 from app.models.consultas import carregar_documentos_com_itens
 from app.models.documento import Documento
@@ -30,9 +31,6 @@ class CamposEnriquecidos:
 
 
 _MARCADORES_ITEM = [RE_ITEM_CT, RE_ITEM_CAR, RE_ITEM_CEFD, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_PONTILHADO]
-
-RE_ENCERRAMENTO_ATA = re.compile(r"Nada\s+mais\s+havendo\s+a\s+tratar", re.IGNORECASE)
-
 
 def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     """O marcador de abertura do item (ex. "PAUTA 2:", "4.3", "[3]") sempre

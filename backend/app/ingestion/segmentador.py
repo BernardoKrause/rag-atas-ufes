@@ -205,6 +205,17 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
         corpo = texto_normalizado[inicio_corpo:fim_corpo]
 
         matches_item = list(RE_ITEM_CEFD.finditer(corpo))
+        if not matches_item and corpo.strip():
+            inicio_item = inicio_corpo + len(corpo) - len(corpo.lstrip())
+            itens.append(
+                ItemDetectado(
+                    secao=secao,
+                    numero_item="1",
+                    inicio=inicio_item,
+                    fim=fim_corpo,
+                    texto=texto_normalizado[inicio_item:fim_corpo].strip(),
+                )
+            )
         for j, item_match in enumerate(matches_item):
             inicio_item = inicio_corpo + item_match.start()
             fim_item = (
@@ -316,11 +327,42 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
     raise ValueError(f"variante sem detector mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
 
 
+RE_ENCERRAMENTO_ATA = re.compile(r"Nada\s+mais\s+havendo\s+a\s+tratar", re.IGNORECASE)
+
+
+def _aparar_encerramento(texto_normalizado: str, itens: list[ItemDetectado]) -> list[ItemDetectado]:
+    if not itens:
+        return itens
+    inicio_primeiro = min(item.inicio for item in itens)
+    posicoes = [
+        m.start() for m in RE_ENCERRAMENTO_ATA.finditer(texto_normalizado)
+        if m.start() >= inicio_primeiro
+    ]
+    if not posicoes:
+        return itens
+    ultima = posicoes[-1]
+    resultado = []
+    for item in itens:
+        if item.inicio >= ultima:
+            continue
+        fim = next((p for p in posicoes if item.inicio <= p < item.fim), item.fim)
+        if fim != item.fim:
+            item = ItemDetectado(
+                secao=item.secao,
+                numero_item=item.numero_item,
+                inicio=item.inicio,
+                fim=fim,
+                texto=texto_normalizado[item.inicio:fim].strip(),
+            )
+        resultado.append(item)
+    return resultado
+
+
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
     detector = _obter_detector(tipo_orgao, centro)
 
     texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
-    itens = detector(texto_normalizado)
+    itens = _aparar_encerramento(texto_normalizado, detector(texto_normalizado))
     return itens, mapa
 
 
