@@ -797,3 +797,24 @@ def test_baixado_de_pauta_em_lista_de_informes_nao_vale():
     )
     assert extrair_generico(texto, None, secao="COMUNICAÇÕES").tipo_desfecho is None
     assert extrair_generico(texto, None).tipo_desfecho is None
+
+
+def test_extrair_generico_resultado_votacao_nao_quebra_em_abreviacao_profa():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "1.1 Processo. Em apreciação, o parecer da Profª. PESSOA_1 foi aprovado por unanimidade."
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == "Em apreciação, o parecer da Profª. PESSOA_1 foi aprovado por unanimidade"
+
+
+def test_extrair_encaminhamento_nao_confunde_horario_com_dois_pontos():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+
+    assert extrair_encaminhamento("O encaminhamento das 10:30: algo foi feito.") is None
+
+
+def test_extrair_generico_negacao_vale_tambem_com_marca_de_votacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico("1.1 Tema. Em votação, a proposta não foi aprovada por maioria.", None)
+    assert campos.tipo_desfecho is None

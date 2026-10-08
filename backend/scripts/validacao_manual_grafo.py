@@ -114,6 +114,9 @@ def gerar_linha_csv(documento: Documento, item: ItemPauta, relacoes_assunto: lis
 
 
 def exportar_csv(caminho: Path, linhas: list[dict]) -> None:
+    if not linhas:
+        print("nenhum item correspondente; nada foi gravado.")
+        return
     with open(caminho, "w", newline="", encoding="utf-8") as arquivo:
         escritor = csv.DictWriter(arquivo, fieldnames=list(linhas[0].keys()))
         escritor.writeheader()
@@ -137,7 +140,7 @@ def main() -> None:
                 for item in itens
             ]
             if args.ids:
-                ids = {linha.strip() for linha in args.ids.read_text().splitlines() if linha.strip()}
+                ids = {linha.strip() for linha in args.ids.read_text(encoding="utf-8").splitlines() if linha.strip()}
                 amostra = filtrar_por_ids(pares, ids)
                 destino = Path("validacao_revalidacao.csv")
             else:
@@ -165,7 +168,8 @@ def main() -> None:
                 ))
 
             exportar_csv(destino, linhas)
-            print(f"{len(linhas)} itens exportados para {destino}.")
+            if linhas:
+                print(f"{len(linhas)} itens exportados para {destino}.")
     finally:
         driver.close()
 

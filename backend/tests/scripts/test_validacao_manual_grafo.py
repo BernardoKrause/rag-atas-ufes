@@ -130,3 +130,13 @@ def test_amostrar_itens_e_deterministica():
     segunda = [i.item_id_canonico for _, i in amostrar_itens(pares, n_por_tipo=5)]
 
     assert primeira == segunda
+
+
+def test_exportar_csv_sem_linhas_nao_levanta_nem_grava(tmp_path, capsys):
+    from scripts.validacao_manual_grafo import exportar_csv
+
+    destino = tmp_path / "saida.csv"
+    exportar_csv(destino, [])
+
+    assert not destino.exists()
+    assert "nenhum item" in capsys.readouterr().out.lower()

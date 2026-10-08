@@ -97,7 +97,7 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
     sessao.flush()
 
 
-_ABREVIACOES = {"dr", "dra", "drª", "prof", "profa", "sr", "sra", "nº", "n", "art", "cons", "depart", "doc", "prot"}
+_ABREVIACOES = {"dr", "dra", "drª", "prof", "profa", "profª", "sr", "sra", "nº", "n", "art", "cons", "depart", "doc", "prot"}
 
 RE_PONTO_FINAL_DE_FRASE = re.compile(r"\.[”\"’'»)\]]*(?=\s|$)")
 RE_ULTIMA_PALAVRA = re.compile(r"([\wª]+)$")
@@ -124,7 +124,7 @@ def _limites_da_frase(texto: str, posicao: int) -> tuple[int, int]:
     return inicio, fim
 
 
-RE_ENCAMINHAMENTO_DOIS_PONTOS = re.compile(r"\bencaminhamento\b[^.:,\n]{0,80}:\s*", re.IGNORECASE)
+RE_ENCAMINHAMENTO_DOIS_PONTOS = re.compile(r"\bencaminhamento\b[^.:,\n]{0,80}:(?!\d)\s*", re.IGNORECASE)
 RE_ENCAMINHAMENTO_DESTINO = re.compile(r"\bencaminhamento\s+(?:[àa]s?|ao|aos|para)\s+(?!(?:a\s+)?vota)", re.IGNORECASE)
 
 
@@ -225,7 +225,7 @@ def _secao_deliberativa(secao: str | None) -> bool:
 def _ocorrencia_valida(corpo: str, ocorrencia: re.Match) -> bool:
     inicio, fim = _limites_da_frase(corpo, ocorrencia.start())
     frase = corpo[inicio:fim]
-    if RE_MARCA_DE_VOTACAO.search(frase):
+    if RE_MARCA_DE_VOTACAO.search(frase) and not RE_NEGACAO_DE_APROVACAO.search(frase):
         return True
     if RE_PALAVRA_CHAVE_DESFECHO.match(frase.lstrip()):
         return True

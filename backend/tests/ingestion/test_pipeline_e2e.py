@@ -260,6 +260,7 @@ def test_processar_ata_remapeia_paginas_offsets_para_o_espaco_do_texto_limpo(db_
 def test_pipeline_fixtures_nativas_nao_tem_paginas_ocr(db_session):
     documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
 
+    assert documentos
     assert all(documento.paginas_ocr == [] for documento in documentos)
 
 
