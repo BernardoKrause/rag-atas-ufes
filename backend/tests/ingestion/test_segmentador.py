@@ -713,13 +713,14 @@ def test_segmentar_texto_encerra_ultimo_item_na_formula_de_encerramento():
     assert "lavrei" not in itens[0].texto
 
 
-def test_segmentar_texto_descarta_itens_apos_o_ultimo_encerramento():
+def test_segmentar_texto_mantem_itens_apos_o_ultimo_encerramento():
     texto = (
         "PAUTA 1: Primeiro assunto. Nada mais havendo a tratar, lavrei a presente ata. "
-        "PAUTA 2: Hashs únicas referente à esse envelope SHA256 abc."
+        "PAUTA 8: Alteração no PPC do curso. Aprovado por unanimidade."
     )
     itens, _ = segmentar_texto("B", "CT", texto)
-    assert [i.numero_item for i in itens] == ["1"]
+    assert [i.numero_item for i in itens] == ["1", "8"]
+    assert itens[0].texto == "PAUTA 1: Primeiro assunto."
 
 
 def test_segmentar_texto_mantem_itens_de_atas_concatenadas():

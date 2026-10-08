@@ -340,11 +340,8 @@ def _aparar_encerramento(texto_normalizado: str, itens: list[ItemDetectado]) -> 
     ]
     if not posicoes:
         return itens
-    ultima = posicoes[-1]
     resultado = []
     for item in itens:
-        if item.inicio >= ultima:
-            continue
         fim = next((p for p in posicoes if item.inicio <= p < item.fim), item.fim)
         if fim != item.fim:
             item = ItemDetectado(
