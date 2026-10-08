@@ -76,6 +76,9 @@ jobs:
           path: ~/.cache/huggingface
           key: hf-${{ hashFiles('backend/app/ingestion/indexador.py') }}
 
+      - name: Install Tesseract
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-por
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 

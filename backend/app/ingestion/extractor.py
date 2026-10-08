@@ -147,15 +147,47 @@ def _remover_cabecalho_e_rodape_repetidos(paginas_texto: list[str]) -> list[str]
     return novas_paginas
 
 
-def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
-    """Retorna o texto completo e, junto, o offset (indice no texto) onde
-    cada pagina comeca — necessario pro segmentador (Parte 3) saber em que
-    pagina do PDF cada item de pauta cai."""
+LIMIAR_PAGINA_SEM_TEXTO = 20
+DPI_OCR = 300
+
+
+class TesseractAusenteError(RuntimeError):
+    pass
+
+
+def _precisa_de_ocr(pagina: fitz.Page, texto_nativo: str) -> bool:
+    if len("".join(texto_nativo.split())) >= LIMIAR_PAGINA_SEM_TEXTO:
+        return False
+    return bool(pagina.get_images()) or bool(pagina.get_drawings())
+
+
+def _texto_por_ocr(pagina: fitz.Page) -> str:
+    try:
+        textpage = pagina.get_textpage_ocr(language="por", dpi=DPI_OCR, full=True)
+    except RuntimeError as erro:
+        raise TesseractAusenteError(
+            "pagina sem camada de texto exige OCR: instale com "
+            "`brew install tesseract tesseract-lang`"
+        ) from erro
+    return pagina.get_text(textpage=textpage)
+
+
+def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int], list[int]]:
+    """Retorna o texto completo, o offset (indice no texto) onde cada pagina
+    comeca — necessario pro segmentador (Parte 3) saber em que pagina do PDF
+    cada item de pauta cai — e os numeros das paginas cujo texto veio de OCR."""
     fitz.TOOLS.mupdf_display_errors(False)
+    paginas_texto = []
+    paginas_ocr = []
     try:
         doc = fitz.open(caminho_pdf)
         try:
-            paginas_texto = [normalizar_ligaduras(pagina.get_text()) for pagina in doc]
+            for numero, pagina in enumerate(doc, start=1):
+                texto = pagina.get_text()
+                if _precisa_de_ocr(pagina, texto):
+                    texto = _texto_por_ocr(pagina)
+                    paginas_ocr.append(numero)
+                paginas_texto.append(normalizar_ligaduras(texto))
         finally:
             doc.close()
     finally:
@@ -174,7 +206,7 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int]]:
         offsets.append(offset_atual)
         offset_atual += len(texto_pagina) + 1  # +1 pelo separador "\n" do join
 
-    return "\n".join(paginas_texto), offsets
+    return "\n".join(paginas_texto), offsets, paginas_ocr
 
 
 def extrair_metadados_organizacionais(tipo: str, orgao: str) -> dict[str, str | None]:
@@ -335,13 +367,14 @@ def extrair_campos(tipo: str, orgao: str, caminho_pdf: Path) -> dict:
     forma confiavel, o que e trabalho do NER do cleaner.py (proximo
     fragmento) — nao faz sentido duplicar essa logica aqui com regex fragil.
     """
-    texto_bruto, paginas_offsets = extrair_texto_bruto(caminho_pdf)
+    texto_bruto, paginas_offsets, paginas_ocr = extrair_texto_bruto(caminho_pdf)
     metadados = extrair_metadados_organizacionais(tipo, orgao)
 
     return {
         **metadados,
         "texto_bruto": texto_bruto,
         "paginas_offsets": paginas_offsets,
+        "paginas_ocr": paginas_ocr,
         "horario_inicio": extrair_horario_inicio(texto_bruto),
         "modalidade": extrair_modalidade(texto_bruto),
         "quorum_declarado": extrair_quorum_declarado(texto_bruto),

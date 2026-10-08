@@ -23,6 +23,11 @@ Desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computaç
 | LLM (dev) | Ollama (local) |
 | LLM (avaliação final) | Claude 3 Sonnet (API Anthropic) |
 
+A extração usa OCR (Tesseract, português) só nas páginas sem camada de texto, como atas escaneadas ou PDFs com o texto convertido em desenho.
+Instale com `brew install tesseract tesseract-lang` (macOS) ou `apt install tesseract-ocr tesseract-ocr-por` (Linux).
+No macOS, se o PyMuPDF não achar os dados de idioma, exporte `TESSDATA_PREFIX=$(brew --prefix)/share/tessdata`.
+Sem o Tesseract, as atas com texto nativo continuam sendo processadas normalmente.
+
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
 
