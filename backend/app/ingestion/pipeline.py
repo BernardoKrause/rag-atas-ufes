@@ -64,6 +64,7 @@ def processar_ata(ata: AtaParaProcessar, secret_key: bytes, sessao: Session) -> 
     # remapeado aqui pro espaco de texto_limpo, que e o que fica persistido
     # e o que segmentador.py usa pra calcular pagina_inicio/pagina_fim
     documento.paginas_offsets = remapear_offsets(campos["paginas_offsets"], substituicoes)
+    documento.paginas_ocr = campos["paginas_ocr"]
 
     sessao.flush()
     return documento

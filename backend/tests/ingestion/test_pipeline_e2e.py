@@ -60,6 +60,7 @@ def test_processar_ata_marca_pendente_aprovacao_quando_ha_marca_dagua(db_session
         lambda tipo, orgao, caminho: {
             "texto_bruto": "ATA EM APROVAÇÃO\n\nATA DA 1ª SESSÃO ORDINÁRIA",
             "paginas_offsets": [0],
+            "paginas_ocr": [],
             "tipo_orgao": "A",
             "centro": "X",
             "campus": "Goiabeiras",
@@ -90,6 +91,7 @@ def test_processar_ata_extrai_local_do_texto_ja_anonimizado(db_session, monkeypa
         lambda tipo, orgao, caminho: {
             "texto_bruto": "ATA DA 1ª SESSÃO, currículo em http://lattes.cnpq.br/5316649375200085 do relator",
             "paginas_offsets": [0],
+            "paginas_ocr": [],
             "tipo_orgao": "A",
             "centro": "X",
             "campus": "Goiabeiras",
@@ -219,6 +221,7 @@ def test_processar_ata_remapeia_paginas_offsets_para_o_espaco_do_texto_limpo(db_
         lambda tipo, orgao, caminho: {
             "texto_bruto": texto_bruto,
             "paginas_offsets": [0, offset_pagina_2],
+            "paginas_ocr": [],
             "tipo_orgao": "A",
             "centro": "X",
             "campus": "Goiabeiras",
@@ -252,3 +255,40 @@ def test_processar_ata_remapeia_paginas_offsets_para_o_espaco_do_texto_limpo(db_
 
     offset_pauta_no_texto_limpo = documento.texto_limpo.index("PAUTA:")
     assert documento.paginas_offsets == [0, offset_pauta_no_texto_limpo]
+
+
+def test_pipeline_fixtures_nativas_nao_tem_paginas_ocr(db_session):
+    documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
+
+    assert all(documento.paginas_ocr == [] for documento in documentos)
+
+
+def test_processar_ata_persiste_paginas_ocr(db_session, monkeypatch):
+    monkeypatch.setattr(
+        pipeline_module,
+        "extrair_campos",
+        lambda tipo, orgao, caminho: {
+            "texto_bruto": "ATA DA 1ª SESSÃO ORDINÁRIA",
+            "paginas_offsets": [0],
+            "paginas_ocr": [1],
+            "tipo_orgao": "A",
+            "centro": "X",
+            "campus": "Goiabeiras",
+            "departamento": None,
+            "curso": None,
+            "area_tematica": None,
+            "horario_inicio": None,
+            "modalidade": None,
+            "local": None,
+            "quorum_declarado": None,
+            "em_aprovacao": False,
+        },
+    )
+    ata = AtaParaProcessar(
+        tipo="TIPO_A", orgao="X", numero_reuniao=1, caratere="Ordinaria",
+        data_reuniao=date(2025, 1, 1), arquivo="escaneada.pdf", caminho_pdf=Path("fake.pdf"),
+    )
+
+    documento = processar_ata(ata, SECRET_KEY, db_session)
+
+    assert documento.paginas_ocr == [1]
