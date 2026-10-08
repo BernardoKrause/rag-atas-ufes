@@ -38,6 +38,7 @@ docker/volumes/
 
 # --- Saidas operacionais (geradas por scripts, não versionadas) ---
 backend/validacao_manual_grafo.csv
+backend/validacao_revalidacao.csv
 
 # --- Superpowers (artefatos locais, não versionados) ---
 docs/superpowers/
