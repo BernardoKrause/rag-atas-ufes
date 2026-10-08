@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
-import inspect
 from typing import Callable
 
 from sqlalchemy import create_engine
@@ -53,10 +52,12 @@ def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     return re.sub(r"^[\s–—-]+", "", texto).strip()
 
 
-CONFIG_ENRIQUECEDOR: dict[tuple[str, str], Callable[..., CamposEnriquecidos]] = {}
+ExtratorEnriquecimento = Callable[[str, date, str | None], CamposEnriquecidos]
+
+CONFIG_ENRIQUECEDOR: dict[tuple[str, str], ExtratorEnriquecimento] = {}
 
 
-def _obter_extrator(tipo_orgao: str, centro: str) -> Callable[..., CamposEnriquecidos]:
+def _obter_extrator(tipo_orgao: str, centro: str) -> ExtratorEnriquecimento:
     if (tipo_orgao, centro) in CONFIG_ENRIQUECEDOR:
         return CONFIG_ENRIQUECEDOR[(tipo_orgao, centro)]
     if (tipo_orgao, "*") in CONFIG_ENRIQUECEDOR:
@@ -68,9 +69,7 @@ def enriquecer_item(
     tipo_orgao: str, centro: str, item_texto: str, data_reuniao: date, secao: str | None = None,
 ) -> CamposEnriquecidos:
     extrator = _obter_extrator(tipo_orgao, centro)
-    if "secao" in inspect.signature(extrator).parameters:
-        return extrator(item_texto, data_reuniao, secao=secao)
-    return extrator(item_texto, data_reuniao)
+    return extrator(item_texto, data_reuniao, secao=secao)
 
 
 def reconstruir_texto_do_item(fragmentos: list[str]) -> str:

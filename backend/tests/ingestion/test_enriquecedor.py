@@ -11,7 +11,7 @@ def test_enriquecer_e_persistir_preenche_campos_do_item(db_session, monkeypatch)
     import app.ingestion.enriquecedor as mod
     monkeypatch.setitem(
         mod.CONFIG_ENRIQUECEDOR, ("B", "CT"),
-        lambda texto, data_reuniao: CamposEnriquecidos(
+        lambda texto, data_reuniao, secao=None: CamposEnriquecidos(
             assunto="assunto teste", tipo_desfecho="Aprovado", resultado_votacao="unanimidade",
             encaminhamento=None, ato_emitido=None, departamento_origem="INFORMATICA",
         ),
@@ -41,7 +41,7 @@ def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monke
     import app.ingestion.enriquecedor as mod
     monkeypatch.setitem(
         mod.CONFIG_ENRIQUECEDOR, ("B", "CT"),
-        lambda texto, data_reuniao: CamposEnriquecidos(texto, None, None, None, None, None),
+        lambda texto, data_reuniao, secao=None: CamposEnriquecidos(texto, None, None, None, None, None),
     )
 
     documento = Documento(
@@ -70,7 +70,7 @@ def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monke
 def test_enriquecer_e_persistir_e_idempotente(db_session, monkeypatch):
     import app.ingestion.enriquecedor as mod
     chamadas = []
-    def _fake(texto, data_reuniao):
+    def _fake(texto, data_reuniao, secao=None):
         chamadas.append(texto)
         return CamposEnriquecidos(None, "Aprovado", None, None, None, None)
     monkeypatch.setitem(mod.CONFIG_ENRIQUECEDOR, ("B", "CT"), _fake)
