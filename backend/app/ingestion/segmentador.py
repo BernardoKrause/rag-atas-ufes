@@ -155,7 +155,7 @@ def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])')
+RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])(?=\s*(?:[A-ZÀ-Ý]|(?i:proc)))')
 
 
 def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:

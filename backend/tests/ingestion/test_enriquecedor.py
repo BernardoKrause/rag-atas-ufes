@@ -684,3 +684,116 @@ def test_extrair_generico_fim_de_frase_seguido_de_aspas(texto, esperado):
     from app.ingestion.enriquecedor import extrair_generico
 
     assert extrair_generico(texto, None).resultado_votacao == esperado
+
+
+@pytest.mark.parametrize("texto", [
+    "1.2 Programa de coordenadores. Os coordenadores trocaram informações sobre os procedimentos e regras desse programa. Como não houve deliberações, o assunto foi baixado de pauta.",
+    "1.3 Prorrogação da resolução nº 56/2020 Cepe – Earte e Ensino Híbrido. Não houve tempo para discutir o ponto. O assunto foi baixado de pauta.",
+])
+def test_extrair_generico_baixado_de_pauta_vale_como_retirado(texto):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(texto, None, secao="PAUTA")
+    assert campos.tipo_desfecho == "Retirado"
+    assert "baixado de pauta" in campos.resultado_votacao
+
+
+@pytest.mark.parametrize("frase", [
+    "A secretaria apresentou uma proposta de calendário que foi discutida e aprovada como segue: 08/02, 08/03, 05/04.",
+    "Homologação da Eleição de Chefe e Subchefe do Departamento de Estatística/UFES, sendo aprovado pelos presentes.",
+    "Ponto 12, sendo aprovadas pelo Conselho Departamental.",
+    "Após discussão foi aprovado uma Comissão com três professores do Departamento de Química.",
+])
+@pytest.mark.parametrize("secao", ["PAUTA", "ORDEM DO DIA"])
+def test_aprovacao_sem_marca_de_votacao_vale_em_secao_deliberativa(frase, secao):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(f"3) Assunto qualquer. {frase}", None, secao=secao).tipo_desfecho == "Aprovado"
+
+
+@pytest.mark.parametrize("secao", ["INFORMES", "COMUNICAÇÕES", "EXPEDIENTE", "PALAVRA LIVRE", None])
+def test_aprovacao_sem_marca_de_votacao_nao_vale_em_secao_nao_deliberativa(secao):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "3) Assunto. Ponto 12, sendo aprovadas pelo Conselho Departamental."
+    assert extrair_generico(texto, None, secao=secao).tipo_desfecho is None
+
+
+@pytest.mark.parametrize("frase", [
+    "A proposta de informatização dos pedidos de 3ª etapa ainda não foi aprovada na Ufes e teve um revés.",
+    "Informando que não serão mais aprovadas pelo Gabinete, passagens e diárias fora do prazo.",
+    "Lavrei a presente ata que, após lida e aprovada, vai devidamente assinada pelos presentes.",
+    "As normas elaboradas e aprovadas pelo DEST a meu ver estão bem diferentes da que é usada.",
+    "Não foi aprovada pelos presentes a proposta.",
+])
+def test_aprovacao_em_secao_deliberativa_continua_sem_desfecho_em_negacao_e_formulas(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(f"3) Assunto. {frase}", None, secao="PAUTA").tipo_desfecho is None
+
+
+def test_candidataram_se_aprovados_respectivamente_fica_sem_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    frase = "Candidataram-se os professores PESSOA_8947 e PESSOA_163566 que foram aprovados respectivamente como titular e suplente."
+    assert extrair_generico(f"3) Eleição. {frase}", None, secao="PAUTA").tipo_desfecho is None
+
+
+def test_enriquecer_item_repassa_secao_ao_extrator_generico():
+    from app.ingestion.enriquecedor import enriquecer_item
+
+    texto = "3) Assunto. Ponto 12, sendo aprovadas pelo Conselho Departamental."
+    assert enriquecer_item("B", "CAR", texto, date(2025, 1, 1), secao="PAUTA").tipo_desfecho == "Aprovado"
+    assert enriquecer_item("B", "CAR", texto, date(2025, 1, 1)).tipo_desfecho is None
+
+
+def test_enriquecer_e_persistir_repassa_secao_do_item(db_session):
+    documento = Documento(
+        nome_arquivo="s.pdf", url_origem="s.pdf", centro="CAR", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CAR", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
+    )
+    db_session.add(documento)
+    db_session.flush()
+    item = ItemPauta(
+        documento_id=documento.id_documento, item_id_canonico="9_PAUTA_3",
+        secao="PAUTA", numero_item="3", texto="3) Assunto. Ponto 12, sendo aprovadas pelo Conselho Departamental.",
+    )
+    db_session.add(item)
+    db_session.flush()
+
+    enriquecer_e_persistir(documento, [item], db_session)
+
+    assert item.tipo_desfecho == "Aprovado"
+
+
+def test_marca_adicional_de_aprovacao_nao_substitui_aprovacao_com_votacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "5) Comissões. Após ampla discussão, foi APROVADA por unanimidade a criação das comissões. "
+        "Na banca de Química, foi indicada a professora, sendo aprovado o nome da professora."
+    )
+    campos = extrair_generico(texto, None, secao="PAUTA")
+    assert campos.resultado_votacao == "Após ampla discussão, foi APROVADA por unanimidade a criação das comissões"
+
+
+@pytest.mark.parametrize("frase", [
+    "As normas aprovadas pelo DEST não podem ser aplicadas, pois ainda não foram homologadas pelo Conselho do CCE.",
+    "Informou que a mobilidade foi aprovada pela Comissão de Ensino e pelo Colegiado à época.",
+])
+def test_marca_pelo_conselho_so_vale_junto_da_palavra_aprovado(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(f"3) Assunto. {frase}", None, secao="PAUTA").tipo_desfecho is None
+
+
+def test_baixado_de_pauta_em_lista_de_informes_nao_vale():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "1.02 Informes da Câmara Central. D) Foi aprovada uma norma que regulamenta a defesa de TCC; "
+        "E) O PPC do Bacharelado de Ciências Biológicas foi baixado de pauta porque o parecerista não compareceu; "
+        "G) Vai ocorrer o Seminário de estágios."
+    )
+    assert extrair_generico(texto, None, secao="COMUNICAÇÕES").tipo_desfecho is None
+    assert extrair_generico(texto, None).tipo_desfecho is None

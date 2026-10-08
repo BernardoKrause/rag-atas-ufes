@@ -759,3 +759,16 @@ def test_cefd_secao_sem_marcador_vira_um_item():
 def test_cefd_secao_vazia_nao_gera_item():
     itens = detectar_itens_cefd("EM PAUTA: [1] Primeiro. PALAVRA LIVRE:   ")
     assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_detectar_itens_car_aceita_processo_em_minuscula_e_ignora_enumeracao_interna():
+    texto = (
+        "PAUTA: 12) processo digital nº PROCESSO_1565, Professora solicitando autorização. "
+        "02) proc. digital n PROCESSO_31008. Ata do Departamento. "
+        "03) Processo digital n° PROCESSO_31054, Coordenação do Curso. "
+        "1) atende aos requisitos legais; 2) descreve adequadamente as atividades; "
+        "2), na condição de professor permanente do PósCom. 6) / Desenho (Cód. Cnpq). "
+        "17) Doc. Avulso n. 028498/25-52."
+    )
+    itens = detectar_itens_car(texto)
+    assert [i.numero_item for i in itens] == ["12", "02", "03", "17"]

@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
+import inspect
 from typing import Callable
 
 from sqlalchemy import create_engine
@@ -13,7 +14,8 @@ from app.core.texto import remover_acentos_maiusculo, slugificar
 from app.ingestion._extenso import parse_cardinal, tokenizar
 from app.ingestion.segmentador import (
     RE_ENCERRAMENTO_ATA, RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT,
-    RE_ITEM_PONTILHADO, SOBREPOSICAO_FRAGMENTO,
+    RE_ITEM_PONTILHADO, SECAO_COMUNICACOES, SECAO_EXPEDIENTE, SECAO_INFORMES, SECAO_PALAVRA_LIVRE,
+    SOBREPOSICAO_FRAGMENTO,
 )
 from app.models.consultas import carregar_documentos_com_itens
 from app.models.documento import Documento
@@ -51,10 +53,10 @@ def extrair_corpo_sem_marcador(secao: str, texto: str) -> str:
     return re.sub(r"^[\s–—-]+", "", texto).strip()
 
 
-CONFIG_ENRIQUECEDOR: dict[tuple[str, str], Callable[[str, date], CamposEnriquecidos]] = {}
+CONFIG_ENRIQUECEDOR: dict[tuple[str, str], Callable[..., CamposEnriquecidos]] = {}
 
 
-def _obter_extrator(tipo_orgao: str, centro: str) -> Callable[[str, date], CamposEnriquecidos]:
+def _obter_extrator(tipo_orgao: str, centro: str) -> Callable[..., CamposEnriquecidos]:
     if (tipo_orgao, centro) in CONFIG_ENRIQUECEDOR:
         return CONFIG_ENRIQUECEDOR[(tipo_orgao, centro)]
     if (tipo_orgao, "*") in CONFIG_ENRIQUECEDOR:
@@ -62,8 +64,12 @@ def _obter_extrator(tipo_orgao: str, centro: str) -> Callable[[str, date], Campo
     raise ValueError(f"variante sem extrator mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
 
 
-def enriquecer_item(tipo_orgao: str, centro: str, item_texto: str, data_reuniao: date) -> CamposEnriquecidos:
+def enriquecer_item(
+    tipo_orgao: str, centro: str, item_texto: str, data_reuniao: date, secao: str | None = None,
+) -> CamposEnriquecidos:
     extrator = _obter_extrator(tipo_orgao, centro)
+    if "secao" in inspect.signature(extrator).parameters:
+        return extrator(item_texto, data_reuniao, secao=secao)
     return extrator(item_texto, data_reuniao)
 
 
@@ -78,7 +84,9 @@ def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao:
     for fragmentos in por_item.values():
         fragmentos.sort(key=lambda f: f.fragmento_indice)
         texto = reconstruir_texto_do_item([f.texto for f in fragmentos])
-        campos = enriquecer_item(documento.tipo_orgao, documento.centro, texto, documento.data_reuniao)
+        campos = enriquecer_item(
+            documento.tipo_orgao, documento.centro, texto, documento.data_reuniao, secao=fragmentos[0].secao,
+        )
         for fragmento in fragmentos:
             fragmento.assunto = campos.assunto
             fragmento.tipo_desfecho = campos.tipo_desfecho
@@ -149,7 +157,7 @@ def _normalizar_departamento(bruto: str) -> str | None:
     return normalizado or None
 
 
-def extrair_ct(texto: str, data_reuniao: date) -> CamposEnriquecidos:
+def extrair_ct(texto: str, data_reuniao: date, secao: str | None = None) -> CamposEnriquecidos:
     corpo = extrair_corpo_sem_marcador("PAUTA", texto)
 
     match_dep = RE_DEPARTAMENTO_CT.search(corpo)
@@ -180,7 +188,7 @@ CONFIG_ENRIQUECEDOR[("B", "CEUNES")] = extrair_ct
 
 
 RE_PALAVRA_CHAVE_DESFECHO = re.compile(
-    r"\b(APROVAD[OA]S?|REPROVAD[OA]S?|RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?|ADIAD[OA]S?|"
+    r"\b(APROVAD[OA]S?|REPROVAD[OA]S?|RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?|BAIXAD[OA]S?\s+DE\s+PAUTA|ADIAD[OA]S?|"
     r"ENCAMINHAD[OA]S?|HOMOLOGAD[OA]S?)\b",
     re.IGNORECASE,
 )
@@ -189,6 +197,7 @@ _DESFECHO_GENERICO = {
     "APROVADO": "Aprovado", "APROVADA": "Aprovado", "APROVADOS": "Aprovado", "APROVADAS": "Aprovado",
     "REPROVADO": "Reprovado", "REPROVADA": "Reprovado",
     "RETIRADO": "Retirado", "RETIRADA": "Retirado",
+    "BAIXADO": "Retirado", "BAIXADA": "Retirado",
     "ADIADO": "Adiado", "ADIADA": "Adiado",
     "ENCAMINHADO": "Encaminhado", "ENCAMINHADA": "Encaminhado",
     "HOMOLOGADO": "Aprovado", "HOMOLOGADA": "Aprovado",
@@ -197,6 +206,20 @@ _DESFECHO_GENERICO = {
 
 RE_MARCA_DE_VOTACAO = re.compile(r"votaç|votac|unanimidade|maioria|\bvotos?\b|abstenç|contrári", re.IGNORECASE)
 RE_RETIRADO = re.compile(r"RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?$", re.IGNORECASE)
+RE_BAIXADO = re.compile(r"BAIXAD", re.IGNORECASE)
+RE_APROVADO = re.compile(r"APROVAD[OA]S?$", re.IGNORECASE)
+RE_MARCA_DE_APROVACAO_DELIBERATIVA = re.compile(
+    r"aprovad[oa]s?\s+(?:\S+\s+){0,3}pel[oa]s?\s+(presentes|membros|conselheir|conselho|c[aâ]mara|colegiado)"
+    r"|discutid[oa]s?\s+e\s+aprovad|sendo\s+aprovad|ap[oó]s\s+(ampla\s+)?(discuss|apreci|esclarec)",
+    re.IGNORECASE,
+)
+RE_NEGACAO_DE_APROVACAO = re.compile(r"n[aã]o\s+(foi\s+|ser[aã]o?\s+|mais\s+)*aprovad", re.IGNORECASE)
+RE_ATA_LIDA_E_APROVADA = re.compile(r"lida\s+e\s+aprovada", re.IGNORECASE)
+_SECOES_NAO_DELIBERATIVAS = {SECAO_INFORMES, SECAO_COMUNICACOES, SECAO_EXPEDIENTE, SECAO_PALAVRA_LIVRE}
+
+
+def _secao_deliberativa(secao: str | None) -> bool:
+    return secao is not None and secao not in _SECOES_NAO_DELIBERATIVAS
 
 
 def _ocorrencia_valida(corpo: str, ocorrencia: re.Match) -> bool:
@@ -216,12 +239,24 @@ def _ocorrencia_valida(corpo: str, ocorrencia: re.Match) -> bool:
     return False
 
 
+def _aprovacao_deliberativa_valida(corpo: str, ocorrencia: re.Match) -> bool:
+    if not RE_APROVADO.match(ocorrencia.group(1)):
+        return False
+    inicio, fim = _limites_da_frase(corpo, ocorrencia.start())
+    frase = corpo[inicio:fim]
+    return (
+        bool(RE_MARCA_DE_APROVACAO_DELIBERATIVA.search(frase))
+        and not RE_NEGACAO_DE_APROVACAO.search(frase)
+        and not RE_ATA_LIDA_E_APROVADA.search(frase)
+    )
+
+
 RE_APROVACAO_ATA_INVERTIDA = re.compile(
     r"^Foi\s+apreciad[oa]\s+e\s+aprovad[oa],?\s+por\s+unanimidade\s*:\s*", re.IGNORECASE
 )
 
 
-def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecidos:
+def extrair_generico(texto: str, data_reuniao: date | None, secao: str | None = None) -> CamposEnriquecidos:
     match_invertido = RE_APROVACAO_ATA_INVERTIDA.match(texto)
     if match_invertido:
         resultado_votacao = match_invertido.group(0).strip(" :")
@@ -233,7 +268,13 @@ def extrair_generico(texto: str, data_reuniao: date | None) -> CamposEnriquecido
 
     corpo = extrair_corpo_sem_marcador("", texto)
 
-    ocorrencias = [o for o in RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo) if _ocorrencia_valida(corpo, o)]
+    candidatas = [
+        o for o in RE_PALAVRA_CHAVE_DESFECHO.finditer(corpo)
+        if _secao_deliberativa(secao) or not RE_BAIXADO.match(o.group(1))
+    ]
+    ocorrencias = [o for o in candidatas if _ocorrencia_valida(corpo, o)]
+    if not ocorrencias and _secao_deliberativa(secao):
+        ocorrencias = [o for o in candidatas if _aprovacao_deliberativa_valida(corpo, o)]
     if not ocorrencias:
         return CamposEnriquecidos(
             assunto=corpo or None, tipo_desfecho=None, resultado_votacao=None,
@@ -279,8 +320,8 @@ def _extrair_numero_extenso(bruto: str) -> int | None:
     return valor
 
 
-def extrair_ccae(texto: str, data_reuniao: date) -> CamposEnriquecidos:
-    campos_base = extrair_generico(texto, data_reuniao)
+def extrair_ccae(texto: str, data_reuniao: date, secao: str | None = None) -> CamposEnriquecidos:
+    campos_base = extrair_generico(texto, data_reuniao, secao)
 
     match = RE_ATO_EMITIDO.search(texto)
     if not match:
