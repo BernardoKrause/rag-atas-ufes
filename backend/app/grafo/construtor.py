@@ -187,6 +187,24 @@ def criar_no_deliberacao(driver: Driver, item: ItemPauta) -> None:
         )
 
 
+def _e_primeiro_fragmento(item: ItemPauta) -> bool:
+    return (item.fragmento_indice or 0) == 0
+
+
+def _chave_item_logico(item: ItemPauta) -> tuple:
+    return (item.documento_id, item.secao, item.numero_item, item.ocorrencia_indice or 0)
+
+
+def ligar_fragmento_a_deliberacao(driver: Driver, item: ItemPauta, deliberacao_item_id: str) -> None:
+    executar_escrita(
+        driver,
+        "MATCH (i:ItemPauta {item_id_canonico: $item_id}) "
+        "MATCH (del:Deliberação {item_id_canonico: $deliberacao_item_id}) "
+        "MERGE (i)-[:GERA]->(del)",
+        item_id=item.item_id_canonico, deliberacao_item_id=deliberacao_item_id,
+    )
+
+
 RE_CITACAO_DELIBERACAO = re.compile(
     r"(Revoga-se|Altera-se|Substitui-se)\s+a\s+(Resolu[çc][ãa]o|Decis[ãa]o)"
     r"(?:\s+[A-Z/]+)?\s+n?[º°.o]*\s*(\d+)(?:/(\d{4})|,\s*de\s+\d{1,2}\s+de\s+\w+\s+de\s+(\d{4}))",
@@ -213,7 +231,7 @@ def resolver_citacoes_deliberacao(driver: Driver, itens: list[ItemPauta]) -> Non
                 # criaria uma aresta por no casado, e no maximo uma delas
                 # apontaria pra deliberacao de fato citada.
                 f"""
-                MATCH (nova:Deliberação {{item_id_canonico: $item_id}})
+                MATCH (:ItemPauta {{item_id_canonico: $item_id}})-[:GERA]->(nova:Deliberação)
                 MATCH (antiga:Deliberação {{ato_emitido: $ato_citado}})
                 WITH nova, antiga ORDER BY antiga.item_id_canonico LIMIT 1
                 MERGE (nova)-[:{relacao}]->(antiga)
@@ -224,7 +242,7 @@ def resolver_citacoes_deliberacao(driver: Driver, itens: list[ItemPauta]) -> Non
 
 def criar_relacao_mesmo_assunto(driver: Driver, agrupamento: dict[str, list[ItemPauta]]) -> None:
     for membros in agrupamento.values():
-        ids_com_deliberacao = [i.item_id_canonico for i in membros if i.tipo_desfecho is not None]
+        ids_com_deliberacao = [i.item_id_canonico for i in membros if i.tipo_desfecho is not None and _e_primeiro_fragmento(i)]
         pares = [
             {"id_a": id_a, "id_b": id_b}
             for i, id_a in enumerate(ids_com_deliberacao)
@@ -248,12 +266,20 @@ def construir_grafo(documentos_com_itens: list[tuple[Documento, list[ItemPauta]]
     limpar_grafo(driver)
 
     todos_itens = []
+    primeiros: dict[tuple, ItemPauta] = {}
     for documento, itens in documentos_com_itens:
         criar_no_ata(driver, documento)
         for item in itens:
             criar_no_item(driver, documento.id_documento, item)
-            criar_no_deliberacao(driver, item)
+            if _e_primeiro_fragmento(item):
+                criar_no_deliberacao(driver, item)
+                primeiros[_chave_item_logico(item)] = item
             todos_itens.append(item)
+
+    for item in todos_itens:
+        primeiro = primeiros.get(_chave_item_logico(item))
+        if not _e_primeiro_fragmento(item) and primeiro is not None and primeiro.tipo_desfecho is not None:
+            ligar_fragmento_a_deliberacao(driver, item, primeiro.item_id_canonico)
 
     agrupamento = agrupar_assuntos(todos_itens)
     criar_nos_assunto(driver, agrupamento)

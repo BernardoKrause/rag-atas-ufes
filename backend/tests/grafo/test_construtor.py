@@ -719,3 +719,109 @@ def test_construir_grafo_cria_relacoes_cross_documento(db_session):
     finally:
         limpar_grafo(driver)
         driver.close()
+
+
+def _fragmentos_do_mesmo_item():
+    return [
+        ItemPauta(
+            item_id_canonico="999001_PAUTA_1", documento_id=999001, secao="PAUTA", numero_item="1",
+            ocorrencia_indice=0, fragmento_indice=indice,
+            texto="PAUTA 1: menciona PROCESSO_2024001", assunto="Bolsas de pesquisa",
+            tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_1_2024", encaminhamento="publicar",
+        ) if indice == 0 else ItemPauta(
+            item_id_canonico=f"999001_PAUTA_1_F{indice}", documento_id=999001, secao="PAUTA", numero_item="1",
+            ocorrencia_indice=0, fragmento_indice=indice,
+            texto="continuacao PROCESSO_2024001", assunto="Bolsas de pesquisa",
+            tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_1_2024", encaminhamento="publicar",
+        )
+        for indice in range(3)
+    ]
+
+
+def test_construir_grafo_cria_deliberacao_so_no_primeiro_fragmento(db_session):
+    from app.grafo.construtor import construir_grafo
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        construir_grafo([(_documento_teste(), _fragmentos_do_mesmo_item())], driver)
+
+        deliberacoes = executar_leitura(
+            driver, "MATCH (d:Deliberação) RETURN d.item_id_canonico AS id",
+        )
+        encaminhamentos = executar_leitura(
+            driver, "MATCH (e:Encaminhamento) RETURN count(e) AS total",
+        )
+        itens = executar_leitura(driver, "MATCH (i:ItemPauta) RETURN count(i) AS total")
+        assert deliberacoes == [{"id": "999001_PAUTA_1"}]
+        assert encaminhamentos == [{"total": 1}]
+        assert itens == [{"total": 3}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_construir_grafo_fragmentos_seguintes_alcancam_a_deliberacao_do_primeiro(db_session):
+    from app.grafo.construtor import construir_grafo
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        construir_grafo([(_documento_teste(), _fragmentos_do_mesmo_item())], driver)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (i:ItemPauta)-[:GERA]->(d:Deliberação) "
+            "RETURN i.item_id_canonico AS item, d.item_id_canonico AS del ORDER BY item",
+        )
+        assert resultado == [
+            {"item": "999001_PAUTA_1", "del": "999001_PAUTA_1"},
+            {"item": "999001_PAUTA_1_F1", "del": "999001_PAUTA_1"},
+            {"item": "999001_PAUTA_1_F2", "del": "999001_PAUTA_1"},
+        ]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_construir_grafo_nao_liga_mesmo_assunto_entre_fragmentos_do_mesmo_item(db_session):
+    from app.grafo.construtor import construir_grafo
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        construir_grafo([(_documento_teste(), _fragmentos_do_mesmo_item())], driver)
+
+        resultado = executar_leitura(
+            driver, "MATCH ()-[r:trata_do_mesmo_assunto]->() RETURN count(r) AS total",
+        )
+        assert resultado == [{"total": 0}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_construir_grafo_resolve_citacao_presente_em_fragmento_posterior(db_session):
+    from app.grafo.construtor import construir_grafo
+
+    antiga = ItemPauta(
+        item_id_canonico="999001_PAUTA_9", documento_id=999001, secao="PAUTA", numero_item="9",
+        texto="PAUTA 9: texto", tipo_desfecho="Aprovado", ato_emitido="RESOLUCAO_5_2020",
+    )
+    fragmentos = _fragmentos_do_mesmo_item()
+    fragmentos[2].texto = "Revoga-se a Resolução nº 5/2020 do conselho."
+
+    driver = obter_driver()
+    try:
+        limpar_grafo(driver)
+        construir_grafo([(_documento_teste(), [antiga, *fragmentos])], driver)
+
+        resultado = executar_leitura(
+            driver,
+            "MATCH (:Deliberação {item_id_canonico: '999001_PAUTA_1'})-[:revoga]->"
+            "(:Deliberação {item_id_canonico: '999001_PAUTA_9'}) RETURN count(*) AS total",
+        )
+        assert resultado == [{"total": 1}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
