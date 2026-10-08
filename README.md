@@ -25,7 +25,7 @@ Desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computaç
 
 A extração usa OCR (Tesseract, português) só nas páginas sem camada de texto, como atas escaneadas ou PDFs com o texto convertido em desenho.
 Instale com `brew install tesseract tesseract-lang` (macOS) ou `apt install tesseract-ocr tesseract-ocr-por` (Linux).
-Sem o Tesseract, as atas com texto nativo continuam sendo processadas normalmente.
+A ingestão completa exige o Tesseract: sem ele, a extração para na primeira página sem camada de texto (atas escaneadas).
 
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
