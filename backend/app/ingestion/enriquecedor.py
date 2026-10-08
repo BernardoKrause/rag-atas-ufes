@@ -13,7 +13,7 @@ from app.core.texto import remover_acentos_maiusculo, slugificar
 from app.ingestion._extenso import parse_cardinal, tokenizar
 from app.ingestion.segmentador import (
     RE_ENCERRAMENTO_ATA, RE_ITEM_CAR, RE_ITEM_CCE, RE_ITEM_CE_D, RE_ITEM_CEFD, RE_ITEM_CT,
-    RE_ITEM_PONTILHADO,
+    RE_ITEM_PONTILHADO, SOBREPOSICAO_FRAGMENTO,
 )
 from app.models.consultas import carregar_documentos_com_itens
 from app.models.documento import Documento
@@ -67,28 +67,25 @@ def enriquecer_item(tipo_orgao: str, centro: str, item_texto: str, data_reuniao:
     return extrator(item_texto, data_reuniao)
 
 
+def reconstruir_texto_do_item(fragmentos: list[str]) -> str:
+    return fragmentos[0] + "".join(f[SOBREPOSICAO_FRAGMENTO:] for f in fragmentos[1:])
+
+
 def enriquecer_e_persistir(documento: Documento, itens: list[ItemPauta], sessao: Session) -> None:
-    campos_por_item = [
-        enriquecer_item(documento.tipo_orgao, documento.centro, item.texto, documento.data_reuniao)
-        for item in itens
-    ]
-    assunto_por_item: dict[tuple[str, str, int], str | None] = {}
-    desfecho_por_item: dict[tuple[str, str, int], CamposEnriquecidos] = {}
-    for item, campos in sorted(zip(itens, campos_por_item), key=lambda par: par[0].fragmento_indice):
-        chave = (item.secao, item.numero_item, item.ocorrencia_indice)
-        if item.fragmento_indice == 0:
-            assunto_por_item[chave] = campos.assunto
-        if campos.tipo_desfecho is not None:
-            desfecho_por_item[chave] = campos
-    for item, campos in zip(itens, campos_por_item):
-        chave = (item.secao, item.numero_item, item.ocorrencia_indice)
-        desfecho = desfecho_por_item.get(chave, campos)
-        item.assunto = assunto_por_item.get(chave, campos.assunto)
-        item.tipo_desfecho = desfecho.tipo_desfecho
-        item.resultado_votacao = desfecho.resultado_votacao
-        item.encaminhamento = desfecho.encaminhamento
-        item.ato_emitido = desfecho.ato_emitido
-        item.departamento_origem = campos.departamento_origem
+    por_item: dict[tuple[str, str, int], list[ItemPauta]] = {}
+    for item in itens:
+        por_item.setdefault((item.secao, item.numero_item, item.ocorrencia_indice), []).append(item)
+    for fragmentos in por_item.values():
+        fragmentos.sort(key=lambda f: f.fragmento_indice)
+        texto = reconstruir_texto_do_item([f.texto for f in fragmentos])
+        campos = enriquecer_item(documento.tipo_orgao, documento.centro, texto, documento.data_reuniao)
+        for fragmento in fragmentos:
+            fragmento.assunto = campos.assunto
+            fragmento.tipo_desfecho = campos.tipo_desfecho
+            fragmento.resultado_votacao = campos.resultado_votacao
+            fragmento.encaminhamento = campos.encaminhamento
+            fragmento.ato_emitido = campos.ato_emitido
+            fragmento.departamento_origem = campos.departamento_origem
     sessao.flush()
 
 

@@ -63,7 +63,7 @@ def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monke
 
     enriquecer_e_persistir(documento, [inicio, continuacao], db_session)
 
-    assert continuacao.assunto == "PAUTA 1: inicio do item"
+    assert continuacao.assunto == inicio.assunto
 
 
 def test_enriquecer_e_persistir_e_idempotente(db_session, monkeypatch):
@@ -485,7 +485,17 @@ def test_extrair_corpo_sem_marcador_remove_traco_inicial(texto):
     assert extrair_corpo_sem_marcador("", "1.2 " + texto) == "Resposta que os alunos receberam sobre o tema."
 
 
-def _persistir_fragmentos(db_session, textos):
+FRASE_VOTACAO = "Em votação, o parecer foi aprovado por unanimidade dos presentes."
+
+
+def _texto_longo(inicio: str, fim: str, tamanho: int = 7000) -> str:
+    enchimento = "A comissão discutiu detalhadamente o relatório apresentado pela relatora. "
+    meio = enchimento * (tamanho // len(enchimento))
+    return f"{inicio} {meio}{fim}"
+
+
+def _persistir_fragmentos(db_session, texto):
+    from app.ingestion.segmentador import dividir_fragmentos
     documento = Documento(
         nome_arquivo="g.pdf", url_origem="g.pdf", centro="CCJE", campus="Goiabeiras",
         tipo_orgao="A", orgao="CCJE", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
@@ -495,9 +505,9 @@ def _persistir_fragmentos(db_session, textos):
     itens = [
         ItemPauta(
             documento_id=documento.id_documento, item_id_canonico=f"teste{documento.id_documento}_PAUTA_3_F{i}",
-            secao="PAUTA", numero_item="3", fragmento_indice=i, texto=texto,
+            secao="PAUTA", numero_item="3", fragmento_indice=i, texto=fragmento,
         )
-        for i, texto in enumerate(textos)
+        for i, fragmento in enumerate(dividir_fragmentos(texto))
     ]
     db_session.add_all(itens)
     db_session.flush()
@@ -505,38 +515,55 @@ def _persistir_fragmentos(db_session, textos):
     return itens
 
 
-def test_fragmentos_herdam_desfecho_do_ultimo_fragmento_que_o_tem(db_session):
-    itens = _persistir_fragmentos(db_session, [
-        "PAUTA 3: Análise do parecer sobre o relatório do projeto.",
-        "A relatora leu o parecer e a comissão discutiu o assunto.",
-        "Após discussão, o parecer foi colocado em votação e aprovado por unanimidade.",
-    ])
+def test_reconstruir_texto_do_item_e_inverso_de_dividir_fragmentos():
+    from app.ingestion.enriquecedor import reconstruir_texto_do_item
+    from app.ingestion.segmentador import dividir_fragmentos
+    texto = _texto_longo("PAUTA 3: Análise do parecer.", FRASE_VOTACAO, 7500)
+    fragmentos = dividir_fragmentos(texto)
+    assert len(fragmentos) > 2
+    assert reconstruir_texto_do_item(fragmentos) == texto
+    assert reconstruir_texto_do_item([texto[:100]]) == texto[:100]
 
-    assert [i.tipo_desfecho for i in itens] == ["Aprovado"] * 3
-    resultado = itens[2].resultado_votacao
-    assert resultado and "unanimidade" in resultado
-    assert {i.resultado_votacao for i in itens} == {resultado}
-    assert itens[1].assunto == itens[0].assunto
+
+def test_todos_os_fragmentos_recebem_os_campos_do_item_completo(db_session):
+    itens = _persistir_fragmentos(db_session, _texto_longo("PAUTA 3: Análise do parecer.", FRASE_VOTACAO))
+
+    assert len(itens) > 2
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+    assert {i.resultado_votacao for i in itens} == {FRASE_VOTACAO.rstrip(".")}
+    assert len({i.assunto for i in itens}) == 1
+
+
+def test_frase_de_votacao_que_cruza_a_fronteira_do_fragmento_vem_inteira(db_session):
+    from app.ingestion.segmentador import TAMANHO_MAX_FRAGMENTO
+    frase = "Em votação, o parecer da comissão sobre o relatório foi aprovado por unanimidade."
+    prefixo = "PAUTA 3: Análise. "
+    enchimento = "A comissão discutiu o relatório apresentado. "
+    antes = (prefixo + enchimento * 200)[:TAMANHO_MAX_FRAGMENTO - 30]
+    antes = antes[:antes.rindex(".") + 1]
+    itens = _persistir_fragmentos(db_session, antes + " " + frase + " Encerrada a discussão.")
+
+    assert len(itens) == 2
+    assert frase not in itens[0].texto and frase[:10] in itens[0].texto
+    assert {i.resultado_votacao for i in itens} == {frase.rstrip(".")}
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
 
 
 def test_fragmentos_sem_desfecho_em_nenhum_ficam_sem_desfecho(db_session):
-    itens = _persistir_fragmentos(db_session, [
-        "PAUTA 3: Informes gerais da coordenação.",
-        "A coordenadora relatou o andamento das atividades.",
-    ])
+    itens = _persistir_fragmentos(db_session, _texto_longo("PAUTA 3: Informes gerais.", "Fim dos informes."))
 
-    assert [i.tipo_desfecho for i in itens] == [None, None]
-    assert [i.encaminhamento for i in itens] == [None, None]
+    assert {i.tipo_desfecho for i in itens} == {None}
+    assert {i.encaminhamento for i in itens} == {None}
 
 
-def test_fragmentos_herdam_o_ultimo_desfecho_quando_ha_mais_de_um(db_session):
-    itens = _persistir_fragmentos(db_session, [
+def test_ultimo_desfecho_do_item_vale_para_todos_os_fragmentos(db_session):
+    texto = _texto_longo(
         "PAUTA 3: Em votação, o ponto foi aprovado por unanimidade.",
         "Em nova votação, o ponto foi reprovado por maioria.",
-        "Texto final sem votação.",
-    ])
+    )
+    itens = _persistir_fragmentos(db_session, texto)
 
-    assert [i.tipo_desfecho for i in itens] == ["Reprovado"] * 3
+    assert {i.tipo_desfecho for i in itens} == {"Reprovado"}
 
 
 def test_encaminhamento_apos_dois_pontos():
