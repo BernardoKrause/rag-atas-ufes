@@ -126,7 +126,7 @@ Depois da regra de rejeição, 4 itens com rejeição explícita continuam como 
   - encerramentos sem a fórmula "Nada mais havendo a tratar";
   - seções seguintes absorvidas em variantes sem seção explícita;
   - 4 atas com formato único sem nenhum item.
-- **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). "maioria" conta como marca de votação, o que aceita frases como "a maioria dos alunos foi aprovada". Uma frase com negação e aprovação juntas é julgada como um todo.
+- **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). "maioria" conta como marca de votação, o que aceita frases como "a maioria dos alunos foi aprovada". Uma frase com negação e aprovação juntas é julgada como um todo e pode inverter o desfecho: em "aprovado por unanimidade o recurso, cujo plano não foi aprovado anteriormente", a negação anula a aprovação e o item vira Reprovado. Nenhum dos 9 itens Reprovado do corpus está nessa situação.
 - **OCR.**
   - A qualidade do OCR depende do escaneamento. Nos 2 itens de OCR amostrados (um por rodada) não houve erro atribuído a ele. Fora da amostra, o OCR da tabela do DCAB inseria ruído entre o rótulo e o desfecho ("Decisão: | Aprovado(a)", "Decisão; Aprovado(a)") e deixava 8 itens sem desfecho. O extrator do CT passou a tolerar esse ruído.
   - Páginas em branco que contenham algum desenho, como bordas, também passam pelo OCR.
