@@ -235,6 +235,50 @@ def _achar_entidades_pessoa(texto: str) -> list[tuple[int, int]]:
     return _mesclar_intervalos(intervalos)
 
 
+ABREVIACOES_DE_TITULO = frozenset({
+    "dr", "dra", "drs", "drª", "me", "ma", "prof", "profa", "profª", "profs", "sr", "sra",
+})
+
+
+def _expandir_ate_limite_da_palavra(texto: str, intervalos: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    expandidos = []
+    for inicio, fim in intervalos:
+        while inicio > 0 and texto[inicio - 1].isalnum():
+            inicio -= 1
+        while fim < len(texto) and texto[fim].isalnum():
+            fim += 1
+        if texto[inicio:fim].lower() not in ABREVIACOES_DE_TITULO:
+            expandidos.append((inicio, fim))
+    return _mesclar_intervalos(expandidos)
+
+
+RE_NOME_APOS_TITULO = re.compile(
+    r"\b(?:(?i:prof(?:\.?ª|a|s)?\.?|professor(?:a|es|as)?|conselheir[oa]s?|senhor(?:a)?|servidor(?:a|es|as)?|estudantes?|discentes?|alun[oa]s?)|Dr(?:a|ª)?\.|Sr(?:a|ª)?\.)"
+    r"(?:\s+(?:Dr(?:a|ª|s)?\.|Me\.|Ma\.))?\s+"
+    r"([A-ZÀ-Ý][a-zà-ÿ]+(?:[ \t]+(?:(?:d[aeo]s?|e)[ \t]+)?[A-ZÀ-Ý][a-zà-ÿ]+){0,4})"
+)
+
+PALAVRAS_QUE_NAO_SAO_NOME_APOS_TITULO = frozenset({
+    "Acompanhante", "Adjunto", "Adjunta", "Aposentado", "Aposentada", "Aposentados", "Assistente",
+    "Associado", "Associada", "Associados", "Auxiliar", "Colaborador", "Colaboradora", "Coordenador",
+    "Coordenadora", "Cursos", "Diretor", "Diretora", "Doutor", "Doutora", "Doutores", "Efetivo", "Efetiva",
+    "Emérito", "Emérita", "Equivalente", "Estruturante", "Formador", "Formadora", "Iniciante", "Ministro",
+    "Novo", "Nova", "Orientador", "Orientadora", "Permanente", "Presidente", "Pró", "Relator", "Relatora",
+    "Responsável", "Substituto", "Substituta", "Supervisor", "Supervisora", "Temporário", "Temporária",
+    "Temporários", "Titular", "Titulares", "Vice", "Visitante", "Visitantes", "Voluntário", "Voluntária",
+    "Voluntários", "Reitor", "Reitora", "Decano", "Chefe", "Membro", "Suplente", "Representante",
+    "Técnico", "Técnica", "Técnicos", "Dr", "Dra", "Drs", "Me", "Ma", "Civil", "Civis", "Ingressantes",
+    "Docentes",
+})
+
+
+def _achar_nomes_apos_titulo(texto: str) -> list[tuple[int, int]]:
+    return [
+        m.span(1) for m in RE_NOME_APOS_TITULO.finditer(texto)
+        if m.group(1).split()[0] not in PALAVRAS_QUE_NAO_SAO_NOME_APOS_TITULO
+    ]
+
+
 def _normalizar_entidade(tipo: TipoEntidade, texto: str) -> str:
     texto = unicodedata.normalize("NFKC", texto).upper()
     if tipo is TipoEntidade.PROCESSO:
@@ -282,7 +326,9 @@ def anonimizar_texto(
     tamanho fixo, diferente do nome/processo real que substitui, entao quem
     tiver offsets calculados sobre o texto original (ex.: paginas_offsets)
     precisa dessa lista pra reprojeta-los via remapear_offsets()."""
-    intervalos_pessoa_ner = _achar_entidades_pessoa(texto)
+    intervalos_pessoa_ner = _expandir_ate_limite_da_palavra(
+        texto, _achar_entidades_pessoa(texto) + _achar_nomes_apos_titulo(texto)
+    )
     intervalos_processo = [(m.start(), m.end()) for m in RE_NUMERO_PROCESSO.finditer(texto)]
     intervalos_email = [
         (m.start(), m.end())
