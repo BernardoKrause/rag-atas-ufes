@@ -12,11 +12,11 @@ O processamento completo é feito com `python -m app.ingestion.completa`, que ro
 |---|---|
 | Atas | 357 |
 | Atas com páginas extraídas por OCR | 16 (12 do CEUNES_DCAB, 3 do Conselho do CEUNES, 1 anexo do CCENS_DG) |
-| Itens de pauta lógicos / linhas com fragmentos | 3.362 / 3.588 |
+| Itens de pauta lógicos / linhas com fragmentos | 3.362 / 3.587 |
 | Janelas no Qdrant | 8.947 |
-| Desfecho por item lógico | Aprovado 2.254, sem desfecho 955, Retirado 141, Reprovado 9, Encaminhado 3 |
+| Desfecho por item lógico | Aprovado 2.253, sem desfecho 956, Retirado 141, Reprovado 9, Encaminhado 3 |
 | Itens com ato emitido / departamento de origem / encaminhamento | 67 / 113 / 32 |
-| Grafo | 357 atas, 2.407 deliberações, 32 encaminhamentos, 1.588 processos, 3.053 assuntos, 362 relações `trata_do_mesmo_assunto` |
+| Grafo | 357 atas, 2.406 deliberações, 32 encaminhamentos, 1.588 processos, 3.053 assuntos, 362 relações `trata_do_mesmo_assunto` |
 | Ligaduras ou glifos trocados no texto | 0 |
 
 ### OCR
@@ -71,7 +71,7 @@ Erros da medição inicial (14 errados e 3 parciais):
 | Segmentação incorreta | 2 | o último item absorvia o encerramento, as assinaturas e os protocolos de assinatura digital | cada item termina em "Nada mais havendo a tratar". Os itens que começam depois de um encerramento são mantidos, porque os extratos de ata do CCE (docs 1976 e 1988) repetem o fecho a cada página |
 | Deliberação sem desfecho identificado | 1 | fragmentos de item longo eram enriquecidos isoladamente | enriquecimento do texto completo do item |
 | Encaminhamento não extraído | 1 | o campo nunca era extraído (vazio nos 3.716 itens) | extração conservadora: "encaminhamento: ..." ou "encaminhamento à/ao/para ..." em item com desfecho |
-| Anonimização parcial | 1 | o NER cortou um sobrenome ("PESSOA_165708ísio") | limitação (isolado) |
+| Anonimização parcial | 1 | o NER cortou um sobrenome ("PESSOA_165708ísio") | tratado como isolado na revisão; a super-review mostrou que era sistemático (146 sobras em 77 atas) e o trecho do NER passou a ser expandido até o limite da palavra (ver `docs/anonimizacao.md`) |
 
 ## Rodada 2: amostra independente (semente 2026, 76 itens)
 
@@ -131,7 +131,7 @@ Depois da regra de rejeição, 4 itens com rejeição explícita continuam como 
   - A qualidade do OCR depende do escaneamento. Nos 2 itens de OCR amostrados (um por rodada) não houve erro atribuído a ele. Fora da amostra, o OCR da tabela do DCAB inseria ruído entre o rótulo e o desfecho ("Decisão: | Aprovado(a)", "Decisão; Aprovado(a)") e deixava 8 itens sem desfecho. O extrator do CT passou a tolerar esse ruído.
   - Páginas em branco que contenham algum desenho, como bordas, também passam pelo OCR.
   - A ingestão completa exige o Tesseract instalado.
-- **Anonimização.** O NER pode cortar sobrenomes. Há um número de documento avulso (formato 028498/25-52, um único caso no corpus) que não segue o padrão de processo e não é anonimizado.
+- **Anonimização.** Um primeiro nome isolado sem título antes (um caso no corpus) depende só do NER. Há um número de documento avulso (formato 028498/25-52, um único caso no corpus) que não segue o padrão de processo e não é anonimizado.
 - **Atas anexadas.** O doc 1709 (CCENS_DQF, reunião de 05/05/2025) traz anexada a ata da 21ª sessão ordinária de 15/12/2022. Os itens 2.1 a 3.8 dessa ata anexada são indexados com os metadados da reunião de 2025.
 
 ## Planilhas
