@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.grafo import construtor
 from app.ingestion import enriquecedor, indexador, pipeline, segmentador
+from app.ingestion.extractor import verificar_tesseract
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -34,6 +35,7 @@ def resumir_corpus(sessao: Session) -> dict:
 
 
 def main() -> None:
+    verificar_tesseract()
     executar_etapas([
         ("ingestao", pipeline.main),
         ("segmentacao", segmentador.main),

@@ -76,12 +76,16 @@ def executar_pipeline(
     """Commita apos cada ata processada: uma ata que falha (PDF corrompido,
     orgao desconhecido) aborta o restante do corpus, mas as atas ja
     processadas com sucesso nesta execucao permanecem persistidas em vez de
-    serem descartadas — um rerun, sendo idempotente, so reprocessa o que
-    faltou."""
+    serem descartadas. Um rerun reprocessa o corpus inteiro; o upsert por ata
+    evita duplicatas."""
     atas = coletar_atas(atas_corpus_path)
     documentos = []
     for ata in atas:
-        documentos.append(processar_ata(ata, secret_key, sessao))
+        try:
+            documentos.append(processar_ata(ata, secret_key, sessao))
+        except Exception as erro:
+            erro.add_note(f"ata que falhou: {ata.orgao} {ata.arquivo} ({ata.caminho_pdf})")
+            raise
         sessao.commit()
     return documentos
 

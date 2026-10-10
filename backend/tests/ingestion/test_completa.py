@@ -2,7 +2,9 @@ from datetime import date
 
 import pytest
 
+from app.ingestion import completa
 from app.ingestion.completa import executar_etapas, resumir_corpus
+from app.ingestion.extractor import TesseractAusenteError
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -56,3 +58,18 @@ def test_resumir_corpus_lista_documentos_sem_item_e_com_ocr(db_session):
     assert f"{sem_item.id_documento} TESTE_RESUMO sem_item.pdf" in resumo["documentos_com_ocr"]
     assert resumo["documentos"] >= 2
     assert resumo["itens"] >= 1
+
+
+def test_main_verifica_o_tesseract_antes_da_primeira_etapa(monkeypatch):
+    chamadas = []
+
+    def _sem_tesseract():
+        raise TesseractAusenteError("sem tesseract")
+
+    monkeypatch.setattr(completa, "verificar_tesseract", _sem_tesseract)
+    monkeypatch.setattr(completa, "executar_etapas", chamadas.append)
+
+    with pytest.raises(TesseractAusenteError):
+        completa.main()
+
+    assert chamadas == []

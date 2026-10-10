@@ -20,6 +20,7 @@ from app.ingestion.extractor import (
     extrair_texto_bruto,
     mapear_campus,
     normalizar_ligaduras,
+    verificar_tesseract,
 )
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
@@ -501,3 +502,29 @@ def test_extrair_texto_bruto_com_tesseract_sem_dados_do_idioma_orienta_tessdata(
 def test_extrair_campos_expoe_paginas_ocr():
     campos = extrair_campos("TIPO_B", "CAR", CAR)
     assert campos["paginas_ocr"] == []
+
+
+def test_verificar_tesseract_sem_binario_orienta_instalacao(monkeypatch):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: None)
+
+    with pytest.raises(TesseractAusenteError, match="brew install tesseract tesseract-lang"):
+        verificar_tesseract()
+
+
+@pytest.mark.parametrize("tessdata", [None, "sem_por"])
+def test_verificar_tesseract_sem_dados_do_idioma_orienta_tessdata(monkeypatch, tmp_path, tessdata):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr(
+        "app.ingestion.extractor._localizar_tessdata", lambda: tessdata and str(tmp_path)
+    )
+
+    with pytest.raises(TesseractAusenteError, match="TESSDATA_PREFIX"):
+        verificar_tesseract()
+
+
+def test_verificar_tesseract_com_dados_do_idioma_passa(monkeypatch, tmp_path):
+    (tmp_path / "por.traineddata").touch()
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: str(tmp_path))
+
+    verificar_tesseract()

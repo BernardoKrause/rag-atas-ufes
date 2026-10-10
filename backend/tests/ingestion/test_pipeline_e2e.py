@@ -198,9 +198,10 @@ def test_falha_no_meio_do_lote_preserva_atas_ja_processadas(db_session, monkeypa
     # extrair_texto_bruto usa pymupdf, cuja excecao de arquivo ausente e uma
     # classe propria (pymupdf.FileNotFoundError), nao o FileNotFoundError do
     # builtins — so importa que algo falhe, nao qual excecao especificamente
-    with pytest.raises(Exception):
+    with pytest.raises(Exception) as excinfo:
         executar_pipeline(Path("caminho-nao-usado"), SECRET_KEY, db_session)
 
+    assert "CT ruim.pdf" in "\n".join(getattr(excinfo.value, "__notes__", []))
     assert db_session.query(Documento).filter_by(nome_arquivo="boa.pdf").count() == 1
     assert db_session.query(Documento).filter_by(nome_arquivo="ruim.pdf").count() == 0
 
