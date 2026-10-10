@@ -100,12 +100,13 @@ _ABREVIACOES = {"dr", "dra", "drª", "prof", "profa", "profª", "sr", "sra", "n�
 
 RE_PONTO_FINAL_DE_FRASE = re.compile(r"\.[”\"’'»)\]]*(?=\s|$)")
 RE_ULTIMA_PALAVRA = re.compile(r"([\wª]+)$")
+_JANELA_ABREVIACAO = 20
 
 
 def _pontos_de_fronteira(texto: str) -> list[int]:
     fronteiras = []
     for match in RE_PONTO_FINAL_DE_FRASE.finditer(texto):
-        palavra = RE_ULTIMA_PALAVRA.search(texto[:match.start()])
+        palavra = RE_ULTIMA_PALAVRA.search(texto, max(0, match.start() - _JANELA_ABREVIACAO), match.start())
         if palavra and palavra.group(1).lower() in _ABREVIACOES:
             continue
         fronteiras.append(match.end())

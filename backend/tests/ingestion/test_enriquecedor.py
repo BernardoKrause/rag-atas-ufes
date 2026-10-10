@@ -891,3 +891,15 @@ def test_extrair_ct_nao_aprovado_e_reprovado():
     assert campos.tipo_desfecho == "Reprovado"
     assert campos.resultado_votacao == "por maioria."
     assert campos.assunto == "PROCESSO_31739 - Banca"
+
+
+def test_extrair_generico_item_longo_nao_tem_custo_quadratico():
+    import time
+
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "O Prof. PESSOA_0001 apresentou o processo nº 123. " * 4000 + "Em votação, aprovado por unanimidade."
+    inicio = time.perf_counter()
+    campos = extrair_generico(texto, None)
+    assert time.perf_counter() - inicio < 1
+    assert campos.resultado_votacao == "Em votação, aprovado por unanimidade"
