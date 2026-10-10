@@ -903,3 +903,24 @@ def test_extrair_generico_item_longo_nao_tem_custo_quadratico():
     campos = extrair_generico(texto, None)
     assert time.perf_counter() - inicio < 1
     assert campos.resultado_votacao == "Em votação, aprovado por unanimidade"
+
+
+@pytest.mark.parametrize("frase", [
+    "Reprovado.", "Rejeitado.", "Indeferido.", "Não aprovado.", "INDEFERIDO por falta de apresentação de trabalho.",
+])
+def test_extrair_generico_rejeicao_no_inicio_da_frase_vale_sem_marca_de_votacao(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(f"1.1 Pedido de afastamento do professor PESSOA_0001. {frase}", None, secao="PAUTA")
+    assert campos.tipo_desfecho == "Reprovado"
+
+
+@pytest.mark.parametrize("frase", [
+    "Recurso contra o pedido que foi indeferido pela comissão no semestre passado.",
+    "Não foi aprovado ainda o orçamento pela PROAD, então o pedido aguarda.",
+])
+def test_extrair_generico_rejeicao_fora_da_forma_de_veredito_sem_marca_de_votacao_nao_vale(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(f"1.1 Pedido de afastamento do professor PESSOA_0001. {frase}", None, secao="PAUTA")
+    assert campos.tipo_desfecho is None

@@ -212,6 +212,7 @@ _DESFECHO_GENERICO = {
     "REJEITADO": "Reprovado", "REJEITADA": "Reprovado", "INDEFERIDO": "Reprovado", "INDEFERIDA": "Reprovado",
 }
 RE_REJEICAO = re.compile(r"N[ÃA]O\s+|REJEITAD|INDEFERID", re.IGNORECASE)
+RE_NEGACAO_COM_VERBO = re.compile(r"N[ÃA]O\s+(?:FOI|FORAM)\s", re.IGNORECASE)
 
 
 RE_MARCA_DE_VOTACAO = re.compile(r"votaç|votac|unanimidade|maioria|\bvotos?\b|abstenç|contrári", re.IGNORECASE)
@@ -237,6 +238,8 @@ def _ocorrencia_valida(corpo: str, ocorrencia: re.Match) -> bool:
     frase = corpo[inicio:fim]
     if RE_REJEICAO.match(ocorrencia.group(1)):
         antes = corpo[inicio:ocorrencia.start()].rstrip().lower()
+        if not antes and not RE_NEGACAO_COM_VERBO.match(ocorrencia.group(1)):
+            return True
         return bool(RE_MARCA_DE_VOTACAO.search(frase)) and not antes.endswith(" ou")
     if RE_MARCA_DE_VOTACAO.search(frase) and not RE_NEGACAO_DE_APROVACAO.search(frase):
         return True

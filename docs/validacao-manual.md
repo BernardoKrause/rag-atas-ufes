@@ -112,6 +112,7 @@ As relações entre atas conferidas incluem um processo retirado de pauta numa r
 | Aprovação sem palavra de votação ("discutida e aprovada", "sendo aprovado pelos presentes", "após discussão") aceita só em seções deliberativas e só quando não há outra ocorrência válida no item | +15 Aprovado (2 falsos positivos: 1953_PAUTA_23, 1959_PAUTA_20) |
 | Enumeração interna do CAR: o marcador "N)" só abre item seguido de letra maiúscula ou de "proc" | −16 marcadores espúrios |
 | Rejeição em frase de votação ("rejeitado por unanimidade", "não foi aprovada por maioria", "Decisão: Não aprovado(a)") passa a ser Reprovado | Reprovado de 0 para 9 |
+| Palavra de veredito abrindo a frase ("INDEFERIDO.", "Rejeitado.", "Não aprovado.") vale sem marca de votação, como já valia para "Reprovado."; "Não foi/foram aprovado" continua exigindo a marca | +3 Reprovado (1749_ORDEM_DO_DIA_4.9, 1749_ORDEM_DO_DIA_04.13, 1784_PAUTA_3.1) |
 | A deliberação é criada só no primeiro fragmento do item; os demais fragmentos se ligam a ela | 185 nós `Deliberação` duplicados a menos; fragmentos do mesmo item deixam de se ligar como "mesmo assunto" |
 
 Depois da regra de rejeição, 4 itens com rejeição explícita continuam como Aprovado: 1667_ORDEM_DO_DIA_3.2, 1750_PAUTA_04.01, 1964_PAUTA_9 e 1732_PAUTA_3.22. Em todos eles há uma aprovação válida mais adiante no mesmo item, e a regra usa a última ocorrência válida.
