@@ -277,6 +277,47 @@ def test_detectar_itens_cefd_secao_sem_marcador_vira_item_unico():
     ]
 
 
+@pytest.mark.parametrize("corpo", [
+    "Não houve…................………………………………………………",
+    "Não houve…………….. ",
+    "NÃO HOUVE.",
+    "nao  houve",
+])
+def test_cefd_secao_so_com_nao_houve_nao_vira_item(corpo):
+    itens = detectar_itens_cefd(f"COMUNICAÇÕES: A reitoria comunicou o calendário. PALAVRA LIVRE: {corpo}")
+    assert [(i.secao, i.texto) for i in itens] == [(SECAO_COMUNICACOES, "A reitoria comunicou o calendário.")]
+
+
+def test_cefd_ultima_secao_so_com_nao_houve_antes_do_encerramento_nao_vira_item():
+    texto = (
+        "COMUNICAÇÕES: A reitoria comunicou o calendário. PALAVRA LIVRE: Não \nhouve……………….\n.\n"
+        "Nada mais havendo a tratar, a reunião foi encerrada. Vitória, 30 de agosto de 2023."
+    )
+    itens, _ = segmentar_texto("B", "CEFD", texto)
+    assert [(i.secao, i.texto) for i in itens] == [(SECAO_COMUNICACOES, "A reitoria comunicou o calendário.")]
+
+
+def test_cefd_ultima_secao_com_conteudo_depois_do_nao_houve_vira_item():
+    texto = (
+        "PALAVRA LIVRE: Não houve…… O acadêmico PESSOA_0002 questionou a reforma.\n"
+        "Nada mais havendo a tratar, a reunião foi encerrada."
+    )
+    itens, _ = segmentar_texto("B", "CEFD", texto)
+    assert [(i.secao, i.texto) for i in itens] == [
+        (SECAO_PALAVRA_LIVRE, "Não houve…… O acadêmico PESSOA_0002 questionou a reforma.")
+    ]
+
+
+@pytest.mark.parametrize("corpo", [
+    "Não houve, mas o professor PESSOA_0001 comunicou a reforma da cantina.",
+    "Não houve quórum para deliberar.",
+    "Não houve…….. O acadêmico PESSOA_0002 questionou a reforma.",
+])
+def test_cefd_secao_que_continua_depois_do_nao_houve_vira_item(corpo):
+    itens = detectar_itens_cefd(f"PALAVRA LIVRE: {corpo}")
+    assert [(i.secao, i.texto) for i in itens] == [(SECAO_PALAVRA_LIVRE, corpo)]
+
+
 def test_cefd_aceita_ponto_final_em_vez_de_dois_pontos_no_cabecalho():
     texto = "PROCESSOS/PROJETOS. [1] SOLICITAÇÃO DE AFASTAMENTO PARA DOUTORADO."
     itens = detectar_itens_cefd(texto)

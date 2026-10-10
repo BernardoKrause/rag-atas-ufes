@@ -185,6 +185,7 @@ RE_SECAO_CEFD = re.compile(
     r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE)[:.]"
 )
 RE_ITEM_CEFD = re.compile(r'(?<![\d"“])\[(\d{1,2})\](?!\d)(?!["”])')
+RE_SECAO_VAZIA_CEFD = re.compile(r"[\W_]*n[aã]o\s+houve[\W_]*", re.IGNORECASE)
 
 _SECAO_CEFD = {
     "EM PAUTA": SECAO_PAUTA,
@@ -205,7 +206,8 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
         corpo = texto_normalizado[inicio_corpo:fim_corpo]
 
         matches_item = list(RE_ITEM_CEFD.finditer(corpo))
-        if not matches_item and corpo.strip():
+        corpo_ate_encerramento = RE_ENCERRAMENTO_ATA.split(corpo, maxsplit=1)[0]
+        if not matches_item and corpo.strip() and not RE_SECAO_VAZIA_CEFD.fullmatch(corpo_ate_encerramento):
             inicio_item = inicio_corpo + len(corpo) - len(corpo.lstrip())
             itens.append(
                 ItemDetectado(
