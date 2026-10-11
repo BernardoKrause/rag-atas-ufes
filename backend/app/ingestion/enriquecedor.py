@@ -215,7 +215,7 @@ RE_REJEICAO = re.compile(r"N[ÃA]O\s+|REJEITAD|INDEFERID", re.IGNORECASE)
 RE_NEGACAO_COM_VERBO = re.compile(r"N[ÃA]O\s+(?:FOI|FORAM)\s", re.IGNORECASE)
 
 
-RE_MARCA_DE_VOTACAO = re.compile(r"votaç|votac|unanimidade|maioria|\bvotos?\b|abstenç|contrári", re.IGNORECASE)
+RE_MARCA_DE_VOTACAO = re.compile(r"votaç|votac|votad[oa]s?\b|unanimidade|\bvotos?\b|abstenç|contrári", re.IGNORECASE)
 RE_RETIRADO = re.compile(r"RETIRAD[OA]S?(?:\s+DE\s+PAUTA)?$", re.IGNORECASE)
 RE_BAIXADO = re.compile(r"BAIXAD", re.IGNORECASE)
 RE_APROVADO = re.compile(r"APROVAD[OA]S?$", re.IGNORECASE)

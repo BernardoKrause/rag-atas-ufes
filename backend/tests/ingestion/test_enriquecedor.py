@@ -858,6 +858,16 @@ def test_extrair_generico_rejeicao_em_frase_de_votacao_e_reprovado(texto):
     assert extrair_generico(texto, None).tipo_desfecho == "Reprovado"
 
 
+@pytest.mark.parametrize(("texto", "desfecho_indevido"), [
+    ("1.1 Tema. O parecer relata que o pedido foi indeferido pela maioria das instâncias anteriores.", "Reprovado"),
+    ("1.1 Tema. O relatório informa que a maioria dos alunos foi aprovada na disciplina.", "Aprovado"),
+])
+def test_extrair_generico_maioria_fora_de_votacao_nao_define_desfecho(texto, desfecho_indevido):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).tipo_desfecho != desfecho_indevido
+
+
 def test_extrair_generico_rejeitado_e_depois_aprovado_vale_o_ultimo():
     from app.ingestion.enriquecedor import extrair_generico
 

@@ -113,6 +113,7 @@ As relações entre atas conferidas incluem um processo retirado de pauta numa r
 | Enumeração interna do CAR: o marcador "N)" só abre item seguido de letra maiúscula ou de "proc" | −16 marcadores espúrios |
 | Rejeição em frase de votação ("rejeitado por unanimidade", "não foi aprovada por maioria", "Decisão: Não aprovado(a)") passa a ser Reprovado | Reprovado de 0 para 9 |
 | Palavra de veredito abrindo a frase ("INDEFERIDO.", "Rejeitado.", "Não aprovado.") vale sem marca de votação, como já valia para "Reprovado."; "Não foi/foram aprovado" continua exigindo a marca | +3 Reprovado (1749_ORDEM_DO_DIA_4.9, 1749_ORDEM_DO_DIA_04.13, 1784_PAUTA_3.1) |
+| "maioria" deixa de ser marca de votação e "votada/votado" passa a ser, para que frases como "a maioria dos alunos foi aprovada" ou "indeferido pela maioria das instâncias" não definam desfecho | +1 Aprovado (1774_PAUTA_3.03, deliberação real captada por "não seja votada" na mesma frase); nenhum outro dos 3.362 desfechos muda |
 | A deliberação é criada só no primeiro fragmento do item; os demais fragmentos se ligam a ela | 185 nós `Deliberação` duplicados a menos; fragmentos do mesmo item deixam de se ligar como "mesmo assunto" |
 
 Depois da regra de rejeição, 4 itens com rejeição explícita continuam como Aprovado: 1667_ORDEM_DO_DIA_3.2, 1750_PAUTA_04.01, 1964_PAUTA_9 e 1732_PAUTA_3.22. Em todos eles há uma aprovação válida mais adiante no mesmo item, e a regra usa a última ocorrência válida.
@@ -127,7 +128,7 @@ Depois da regra de rejeição, 4 itens com rejeição explícita continuam como 
   - encerramentos sem a fórmula "Nada mais havendo a tratar";
   - seções seguintes absorvidas em variantes sem seção explícita;
   - 4 atas com formato único sem nenhum item.
-- **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). "maioria" conta como marca de votação, o que aceita frases como "a maioria dos alunos foi aprovada". Uma frase com negação e aprovação juntas é julgada como um todo e pode inverter o desfecho: em "aprovado por unanimidade o recurso, cujo plano não foi aprovado anteriormente", a negação anula a aprovação e o item vira Reprovado. Nenhum dos 9 itens Reprovado do corpus está nessa situação.
+- **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). Uma frase com negação e aprovação juntas é julgada como um todo e pode inverter o desfecho: em "aprovado por unanimidade o recurso, cujo plano não foi aprovado anteriormente", a negação anula a aprovação e o item vira Reprovado. Nenhum dos 9 itens Reprovado do corpus está nessa situação.
 - **OCR.**
   - A qualidade do OCR depende do escaneamento. Nos 2 itens de OCR amostrados (um por rodada) não houve erro atribuído a ele. Fora da amostra, o OCR da tabela do DCAB inseria ruído entre o rótulo e o desfecho ("Decisão: | Aprovado(a)", "Decisão; Aprovado(a)") e deixava 8 itens sem desfecho. O extrator do CT passou a tolerar esse ruído.
   - Páginas em branco que contenham algum desenho, como bordas, também passam pelo OCR.
