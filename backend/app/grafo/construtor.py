@@ -118,7 +118,9 @@ def agrupar_assuntos(itens: list[ItemPauta]) -> dict[str, list[ItemPauta]]:
 
     por_processo: dict[str, list[ItemPauta]] = {}
     por_assunto: dict[str, list[ItemPauta]] = {}
+    por_item_logico: dict[tuple, list[ItemPauta]] = {}
     for item in itens:
+        por_item_logico.setdefault(_chave_item_logico(item), []).append(item)
         for token in set(RE_TOKEN_PROCESSO.findall(item.texto)):
             por_processo.setdefault(token, []).append(item)
         if item.assunto:
@@ -126,7 +128,7 @@ def agrupar_assuntos(itens: list[ItemPauta]) -> dict[str, list[ItemPauta]]:
             if _assunto_e_sinal_util(chave):
                 por_assunto.setdefault(chave, []).append(item)
 
-    for grupo in list(por_processo.values()) + list(por_assunto.values()):
+    for grupo in [*por_processo.values(), *por_assunto.values(), *por_item_logico.values()]:
         for outro in grupo[1:]:
             uniao.union(grupo[0].item_id_canonico, outro.item_id_canonico)
 

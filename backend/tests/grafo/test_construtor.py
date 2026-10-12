@@ -199,6 +199,27 @@ def test_agrupar_assuntos_ignora_degenerado_mas_mantem_sinal_forte_de_processo()
     assert len(agrupamento) == 1
 
 
+def test_agrupar_assuntos_mantem_fragmentos_do_mesmo_item_juntos():
+    from app.grafo.construtor import agrupar_assuntos
+
+    fragmento0 = ItemPauta(
+        item_id_canonico="1_F", documento_id=1, secao="PAUTA", numero_item="2",
+        texto="sem processo", assunto=None, fragmento_indice=0,
+    )
+    fragmento1 = ItemPauta(
+        item_id_canonico="1_F_1", documento_id=1, secao="PAUTA", numero_item="2",
+        texto="PROCESSO_0042 continuação", assunto=None, fragmento_indice=1,
+    )
+    outro = ItemPauta(
+        item_id_canonico="2_F", documento_id=2, secao="PAUTA", numero_item="1",
+        texto="PROCESSO_0042 x", assunto=None,
+    )
+
+    agrupamento = agrupar_assuntos([fragmento0, fragmento1, outro])
+
+    assert len(agrupamento) == 1
+
+
 def test_criar_nos_assunto_cria_relacoes_trata_de(db_session):
     from app.grafo.construtor import agrupar_assuntos, criar_no_item, criar_nos_assunto
 
