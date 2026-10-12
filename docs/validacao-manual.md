@@ -6,12 +6,12 @@ Este documento descreve como a validação foi feita sobre o corpus completo, os
 
 ## Corpus processado
 
-O processamento completo é feito com `python -m app.ingestion.completa`, que roda em sequência a extração, a anonimização, a segmentação, o enriquecimento, a indexação e o grafo.
+O processamento completo é feito com `python -m app.ingestion.completa`, que roda em sequência a extração, a anonimização, a segmentação, o enriquecimento, a indexação e o grafo. A tabela abaixo é a saída de `python -m scripts.totais_corpus`, que consulta o Postgres, o Qdrant e o Neo4j.
 
 | | Valor |
 |---|---|
 | Atas | 357 |
-| Atas com páginas extraídas por OCR | 16 (12 do CEUNES_DCAB, 3 do Conselho do CEUNES, 1 anexo do CCENS_DG) |
+| Atas com páginas extraídas por OCR | 16 (CEUNES_DCAB 12, CEUNES 3, CCENS_DG 1) |
 | Itens de pauta lógicos / linhas com fragmentos | 3.362 / 3.587 |
 | Janelas no Qdrant | 8.947 |
 | Desfecho por item lógico | Aprovado 2.253, sem desfecho 956, Retirado 141, Reprovado 9, Encaminhado 3 |
@@ -21,7 +21,7 @@ O processamento completo é feito com `python -m app.ingestion.completa`, que ro
 
 ### OCR
 
-As atas do CEUNES_DCAB são fotos ou escaneamentos da ata impressa. As três primeiras sessões de 2024 do Conselho do CEUNES foram geradas pelo "Print To PDF" com o texto convertido em desenho. Nenhuma das duas tem camada de texto. A extração aplica OCR (Tesseract, `por`) apenas às páginas sem texto nativo e registra essas páginas em `documentos.paginas_ocr`.
+As atas do CEUNES_DCAB são fotos ou escaneamentos da ata impressa. As três primeiras sessões de 2024 do Conselho do CEUNES foram geradas pelo "Print To PDF" com o texto convertido em desenho. Uma ata do CCENS_DG traz um anexo escaneado. Nenhum desses casos tem camada de texto. A extração aplica OCR (Tesseract, `por`) apenas às páginas sem texto nativo e registra essas páginas em `documentos.paginas_ocr`.
 
 Sem o OCR, o DCAB inteiro ficaria fora do corpus e a cobertura cairia de 16 para 15 departamentos.
 
