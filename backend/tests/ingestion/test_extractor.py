@@ -592,3 +592,13 @@ def test_verificar_tesseract_sem_idioma_por_cita_apt(monkeypatch):
         verificar_tesseract()
 
     assert "apt install tesseract-ocr-por" in str(erro.value)
+
+
+def test_extrair_texto_bruto_nao_marca_como_ocr_pagina_que_volta_vazia(monkeypatch, caplog):
+    monkeypatch.setattr("app.ingestion.extractor._texto_por_ocr", lambda _pagina: "  \n ")
+
+    with caplog.at_level(logging.WARNING, logger="app.ingestion.extractor"):
+        _texto, _offsets, paginas_ocr = extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+    assert paginas_ocr == []
+    assert "OCR nao reconheceu texto" in caplog.text

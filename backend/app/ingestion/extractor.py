@@ -231,7 +231,10 @@ def extrair_texto_bruto(caminho_pdf: Path) -> tuple[str, list[int], list[int]]:
                 texto = pagina.get_text()
                 if _precisa_de_ocr(pagina, texto):
                     texto = _texto_por_ocr(pagina)
-                    paginas_ocr.append(numero)
+                    if len("".join(texto.split())) >= LIMIAR_PAGINA_SEM_TEXTO:
+                        paginas_ocr.append(numero)
+                    else:
+                        logger.warning("OCR nao reconheceu texto na pagina %d de %s", numero, caminho_pdf)
                 paginas_texto.append(normalizar_ligaduras(texto))
         finally:
             doc.close()

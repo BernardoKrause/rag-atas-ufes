@@ -131,7 +131,7 @@ Depois da regra de rejeição, 4 itens com rejeição explícita continuam como 
 - **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). Uma frase com negação e aprovação juntas é julgada como um todo e pode inverter o desfecho: em "aprovado por unanimidade o recurso, cujo plano não foi aprovado anteriormente", a negação anula a aprovação e o item vira Reprovado. Nenhum dos 9 itens Reprovado do corpus está nessa situação.
 - **OCR.**
   - A qualidade do OCR depende do escaneamento. Nos 2 itens de OCR amostrados (um por rodada) não houve erro atribuído a ele. Fora da amostra, o OCR da tabela do DCAB inseria ruído entre o rótulo e o desfecho ("Decisão: | Aprovado(a)", "Decisão; Aprovado(a)") e deixava 8 itens sem desfecho. O extrator do CT passou a tolerar esse ruído.
-  - Páginas em branco que contenham algum desenho, como bordas, também passam pelo OCR.
+  - Páginas em branco que contenham algum desenho, como bordas, também passam pelo OCR. Se o OCR não reconhecer texto, a página não é marcada como OCR e a ingestão registra um aviso. No corpus, nenhuma das 81 páginas com OCR voltou vazia.
   - A ingestão completa exige o Tesseract instalado.
 - **Anonimização.** Um primeiro nome isolado sem título antes (um caso no corpus) depende só do NER. Há um número de documento avulso (formato 028498/25-52, um único caso no corpus) que não segue o padrão de processo e não é anonimizado.
 - **Atas anexadas.** O doc 1709 (CCENS_DQF, reunião de 05/05/2025) traz anexada a ata da 21ª sessão ordinária de 15/12/2022. Os itens 2.1 a 3.8 dessa ata anexada são indexados com os metadados da reunião de 2025.
