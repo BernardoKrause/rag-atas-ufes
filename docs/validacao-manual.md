@@ -135,6 +135,7 @@ Depois da regra de rejeição, 4 itens com rejeição explícita continuam como 
   - A ingestão completa exige o Tesseract instalado.
 - **Anonimização.** Um primeiro nome isolado sem título antes (um caso no corpus) depende só do NER. Há um número de documento avulso (formato 028498/25-52, um único caso no corpus) que não segue o padrão de processo e não é anonimizado.
 - **Atas anexadas.** O doc 1709 (CCENS_DQF, reunião de 05/05/2025) traz anexada a ata da 21ª sessão ordinária de 15/12/2022. Os itens 2.1 a 3.8 dessa ata anexada são indexados com os metadados da reunião de 2025.
+- **Sorteio por fragmento.** A amostra sorteia linhas do banco, e um item longo dividido em fragmentos tem uma linha por fragmento, então tem mais chance de ser sorteado que um item curto. Nenhum item lógico aparece duas vezes nas amostras. Na rodada 2, 3 das 76 linhas são fragmentos posteriores ao primeiro. Sem elas, o acerto passa de 84,2% para 84,9% (de 89,5% para 90,4% com os parciais), uma diferença menor que 1 ponto percentual.
 
 ## Planilhas
 
