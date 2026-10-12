@@ -60,10 +60,16 @@ def _sortear_por_tipo(
     return amostra
 
 
-def amostrar_itens(pares: list[tuple[Documento, ItemPauta]], n_por_tipo: int) -> list[tuple[Documento, ItemPauta]]:
+def amostrar_itens(
+    pares: list[tuple[Documento, ItemPauta]],
+    n_por_tipo: int,
+    semente: int = SEMENTE_AMOSTRAGEM,
+    excluir: set[str] | frozenset[str] = frozenset(),
+) -> list[tuple[Documento, ItemPauta]]:
     # TCC1: tipos A-D em proporcao equivalente; estratos suplementares porque
     # campos raros (ato_emitido, departamento_origem) quase nunca caem na amostra base
-    aleatorio = random.Random(SEMENTE_AMOSTRAGEM)
+    pares = [p for p in pares if p[1].item_id_canonico not in excluir]
+    aleatorio = random.Random(semente)
     ja_escolhidos: set[str] = set()
     amostra = _sortear_por_tipo(pares, n_por_tipo, ja_escolhidos, aleatorio)
 
@@ -123,9 +129,15 @@ def exportar_csv(caminho: Path, linhas: list[dict]) -> None:
         escritor.writerows(linhas)
 
 
+def _ler_ids(caminho: Path) -> set[str]:
+    return {linha.strip() for linha in caminho.read_text(encoding="utf-8").splitlines() if linha.strip()}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ids", type=Path, help="arquivo com um item_id_canonico por linha (revalidacao)")
+    parser.add_argument("--semente", type=int, default=SEMENTE_AMOSTRAGEM)
+    parser.add_argument("--excluir", type=Path, help="arquivo com os item_id_canonico que nao podem ser sorteados")
     args = parser.parse_args()
 
     engine = create_engine(settings.database_url)
@@ -140,11 +152,11 @@ def main() -> None:
                 for item in itens
             ]
             if args.ids:
-                ids = {linha.strip() for linha in args.ids.read_text(encoding="utf-8").splitlines() if linha.strip()}
-                amostra = filtrar_por_ids(pares, ids)
+                amostra = filtrar_por_ids(pares, _ler_ids(args.ids))
                 destino = Path("validacao_revalidacao.csv")
             else:
-                amostra = amostrar_itens(pares, n_por_tipo=N_POR_TIPO)
+                excluir = _ler_ids(args.excluir) if args.excluir else set()
+                amostra = amostrar_itens(pares, n_por_tipo=N_POR_TIPO, semente=args.semente, excluir=excluir)
                 destino = Path("validacao_manual_grafo.csv")
 
             linhas = []

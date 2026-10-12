@@ -140,3 +140,20 @@ def test_exportar_csv_sem_linhas_nao_levanta_nem_grava(tmp_path, capsys):
 
     assert not destino.exists()
     assert "nenhum item" in capsys.readouterr().out.lower()
+
+
+def test_amostrar_itens_com_outra_semente_muda_o_sorteio():
+    pares = _pares_com_raros()
+    padrao = [i.item_id_canonico for _, i in amostrar_itens(pares, n_por_tipo=5)]
+    outra = [i.item_id_canonico for _, i in amostrar_itens(pares, n_por_tipo=5, semente=2026)]
+
+    assert padrao != outra
+
+
+def test_amostrar_itens_nao_sorteia_ids_excluidos():
+    pares = _pares_com_raros()
+    excluidos = {f"COMUM{i}" for i in range(50)} | {"ATO1", "REPROVADO1"}
+
+    amostra = amostrar_itens(pares, n_por_tipo=5, excluir=excluidos)
+
+    assert not {i.item_id_canonico for _, i in amostra} & excluidos
