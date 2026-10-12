@@ -29,6 +29,7 @@ A ingestão completa exige o Tesseract: sem ele, a extração para na primeira p
 
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
+O Postgres é o mesmo do desenvolvimento: cada teste roda numa transação desfeita no fim, sem deixar resíduo. Por isso não rode a suíte em paralelo nem durante a ingestão completa, porque as transações podem travar umas às outras.
 
 ## Ingestão do corpus
 

@@ -41,6 +41,7 @@ def _documento(nome_arquivo: str, paginas_ocr: list[int]) -> Documento:
 
 
 def test_resumir_corpus_lista_documentos_sem_item_e_com_ocr(db_session):
+    antes = resumir_corpus(db_session)
     sem_item = _documento("sem_item.pdf", [1, 2])
     com_item = _documento("com_item.pdf", [])
     db_session.add_all([sem_item, com_item])
@@ -56,8 +57,8 @@ def test_resumir_corpus_lista_documentos_sem_item_e_com_ocr(db_session):
     assert f"{sem_item.id_documento} TESTE_RESUMO sem_item.pdf" in resumo["documentos_sem_item"]
     assert f"{com_item.id_documento} TESTE_RESUMO com_item.pdf" not in resumo["documentos_sem_item"]
     assert f"{sem_item.id_documento} TESTE_RESUMO sem_item.pdf" in resumo["documentos_com_ocr"]
-    assert resumo["documentos"] >= 2
-    assert resumo["itens"] >= 1
+    assert resumo["documentos"] == antes["documentos"] + 2
+    assert resumo["itens"] == antes["itens"] + 1
 
 
 def test_main_verifica_o_tesseract_antes_da_primeira_etapa(monkeypatch):
