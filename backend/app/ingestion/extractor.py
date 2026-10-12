@@ -187,11 +187,13 @@ def _localizar_tessdata() -> str | None:
 
 
 MENSAGEM_SEM_TESSERACT = (
-    "pagina sem camada de texto exige OCR: instale com `brew install tesseract tesseract-lang`"
+    "pagina sem camada de texto exige OCR: instale com `brew install tesseract tesseract-lang` "
+    "(macOS) ou `apt install tesseract-ocr tesseract-ocr-por` (Linux)"
 )
 MENSAGEM_SEM_IDIOMA_POR = (
     "Tesseract instalado, mas os dados do idioma `por` nao foram encontrados: "
-    "instale com `brew install tesseract-lang` ou defina TESSDATA_PREFIX"
+    "instale com `brew install tesseract-lang` (macOS) ou `apt install tesseract-ocr-por` (Linux), "
+    "ou defina TESSDATA_PREFIX"
 )
 
 
@@ -211,7 +213,7 @@ def _texto_por_ocr(pagina: fitz.Page) -> str:
             language="por", dpi=DPI_OCR, full=True, tessdata=_localizar_tessdata()
         )
     except RuntimeError as erro:
-        raise TesseractAusenteError(MENSAGEM_SEM_IDIOMA_POR) from erro
+        raise TesseractAusenteError(f"{MENSAGEM_SEM_IDIOMA_POR} (erro do OCR: {erro})") from erro
     return pagina.get_text(textpage=textpage)
 
 

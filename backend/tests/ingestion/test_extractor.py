@@ -528,3 +528,67 @@ def test_verificar_tesseract_com_dados_do_idioma_passa(monkeypatch, tmp_path):
     monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: str(tmp_path))
 
     verificar_tesseract()
+
+
+class _SaidaDoTesseract:
+    def __init__(self, stdout):
+        self.stdout = stdout
+
+
+@pytest.mark.parametrize(
+    ("primeira_linha", "esperado"),
+    [
+        ('List of available languages in "/opt/homebrew/share/tessdata/" (162):', "/opt/homebrew/share/tessdata/"),
+        ("List of available languages (3):", None),
+    ],
+)
+def test_localizar_tessdata_le_o_caminho_da_listagem_do_tesseract(monkeypatch, primeira_linha, esperado):
+    from app.ingestion.extractor import _localizar_tessdata
+
+    def _sem_tessdata_no_pymupdf():
+        raise RuntimeError("No tessdata specified and Tesseract is not installed")
+
+    monkeypatch.setattr(fitz, "get_tessdata", _sem_tessdata_no_pymupdf)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr(
+        "app.ingestion.extractor.subprocess.run",
+        lambda *args, **kwargs: _SaidaDoTesseract(f"{primeira_linha}\neng\npor\n"),
+    )
+    _localizar_tessdata.cache_clear()
+    try:
+        assert _localizar_tessdata() == esperado
+    finally:
+        _localizar_tessdata.cache_clear()
+
+
+def test_extrair_texto_bruto_com_falha_do_ocr_mostra_o_erro_original(monkeypatch):
+    def _falha_do_ocr(*args, **kwargs):
+        raise RuntimeError("code=2: falha ao rasterizar a pagina")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _falha_do_ocr)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+
+    with pytest.raises(TesseractAusenteError, match="falha ao rasterizar a pagina"):
+        extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+
+@pytest.mark.parametrize(
+    "comando", ["brew install tesseract tesseract-lang", "apt install tesseract-ocr tesseract-ocr-por"]
+)
+def test_verificar_tesseract_sem_binario_cita_brew_e_apt(monkeypatch, comando):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: None)
+
+    with pytest.raises(TesseractAusenteError) as erro:
+        verificar_tesseract()
+
+    assert comando in str(erro.value)
+
+
+def test_verificar_tesseract_sem_idioma_por_cita_apt(monkeypatch):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: None)
+
+    with pytest.raises(TesseractAusenteError) as erro:
+        verificar_tesseract()
+
+    assert "apt install tesseract-ocr-por" in str(erro.value)
