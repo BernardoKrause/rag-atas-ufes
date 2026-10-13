@@ -12,11 +12,11 @@ O processamento completo é feito com `python -m app.ingestion.completa`, que ro
 |---|---|
 | Atas | 357 |
 | Atas com páginas extraídas por OCR | 16 (CEUNES_DCAB 12, CEUNES 3, CCENS_DG 1) |
-| Itens de pauta lógicos / linhas com fragmentos | 3.362 / 3.587 |
-| Janelas no Qdrant | 8.947 |
-| Desfecho por item lógico | Aprovado 2.253, sem desfecho 956, Retirado 141, Reprovado 9, Encaminhado 3 |
+| Itens de pauta lógicos / linhas com fragmentos | 3.357 / 3.582 |
+| Janelas no Qdrant | 8.942 |
+| Desfecho por item lógico | Aprovado 2.254, sem desfecho 947, Retirado 141, Reprovado 12, Encaminhado 3 |
 | Itens com ato emitido / departamento de origem / encaminhamento | 67 / 113 / 32 |
-| Grafo | 357 atas, 2.406 deliberações, 32 encaminhamentos, 1.588 processos, 3.053 assuntos, 362 relações `trata_do_mesmo_assunto` |
+| Grafo | 357 atas, 2.410 deliberações, 32 encaminhamentos, 1.588 processos, 3.047 assuntos, 362 relações `trata_do_mesmo_assunto` |
 | Ligaduras ou glifos trocados no texto | 0 |
 
 ### OCR
@@ -129,7 +129,7 @@ Depois da regra de rejeição, 4 itens com rejeição explícita continuam como 
   - seções seguintes absorvidas em variantes sem seção explícita;
   - 4 atas com formato único sem nenhum item.
   - o item é cortado na primeira fórmula "Nada mais havendo a tratar" dentro dele. Se a fórmula aparecesse no meio de um item ("nada mais havendo a tratar sobre este ponto"), o resto do item se perderia. No corpus, as 320 ocorrências da fórmula são encerramentos reais, e os 230 cortes descartam só fecho, assinaturas e anexos.
-- **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). Uma frase com negação e aprovação juntas é julgada como um todo e pode inverter o desfecho: em "aprovado por unanimidade o recurso, cujo plano não foi aprovado anteriormente", a negação anula a aprovação e o item vira Reprovado. Nenhum dos 9 itens Reprovado do corpus está nessa situação.
+- **Regras de frase.** Faltam abreviações raras (Exmo., pág., inc.). Uma frase com negação e aprovação juntas é julgada como um todo e pode inverter o desfecho: em "aprovado por unanimidade o recurso, cujo plano não foi aprovado anteriormente", a negação anula a aprovação e o item vira Reprovado. Nenhum dos 12 itens Reprovado do corpus está nessa situação.
 - **OCR.**
   - A qualidade do OCR depende do escaneamento. Nos 2 itens de OCR amostrados (um por rodada) não houve erro atribuído a ele. Fora da amostra, o OCR da tabela do DCAB inseria ruído entre o rótulo e o desfecho ("Decisão: | Aprovado(a)", "Decisão; Aprovado(a)") e deixava 8 itens sem desfecho. O extrator do CT passou a tolerar esse ruído.
   - Páginas em branco que contenham algum desenho, como bordas, também passam pelo OCR. Se o OCR não reconhecer texto, a página não é marcada como OCR e a ingestão registra um aviso. No corpus, nenhuma das 81 páginas com OCR voltou vazia.
