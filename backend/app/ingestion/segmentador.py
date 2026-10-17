@@ -155,7 +155,7 @@ def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])')
+RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])(?=\s*(?:[A-ZÀ-Ý]|(?i:proc)))')
 
 
 def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
@@ -185,6 +185,7 @@ RE_SECAO_CEFD = re.compile(
     r"(EM PAUTA|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|PROCESSOS/PROJETOS|PALAVRA LIVRE)[:.]"
 )
 RE_ITEM_CEFD = re.compile(r'(?<![\d"“])\[(\d{1,2})\](?!\d)(?!["”])')
+RE_SECAO_VAZIA_CEFD = re.compile(r"[\W_]*n[aã]o\s+houve[\W_]*", re.IGNORECASE)
 
 _SECAO_CEFD = {
     "EM PAUTA": SECAO_PAUTA,
@@ -205,6 +206,18 @@ def detectar_itens_cefd(texto_normalizado: str) -> list[ItemDetectado]:
         corpo = texto_normalizado[inicio_corpo:fim_corpo]
 
         matches_item = list(RE_ITEM_CEFD.finditer(corpo))
+        corpo_ate_encerramento = RE_ENCERRAMENTO_ATA.split(corpo, maxsplit=1)[0]
+        if not matches_item and corpo.strip() and not RE_SECAO_VAZIA_CEFD.fullmatch(corpo_ate_encerramento):
+            inicio_item = inicio_corpo + len(corpo) - len(corpo.lstrip())
+            itens.append(
+                ItemDetectado(
+                    secao=secao,
+                    numero_item="1",
+                    inicio=inicio_item,
+                    fim=fim_corpo,
+                    texto=texto_normalizado[inicio_item:fim_corpo].strip(),
+                )
+            )
         for j, item_match in enumerate(matches_item):
             inicio_item = inicio_corpo + item_match.start()
             fim_item = (
@@ -316,11 +329,39 @@ def _obter_detector(tipo_orgao: str, centro: str) -> Callable[[str], list[ItemDe
     raise ValueError(f"variante sem detector mapeado: tipo_orgao={tipo_orgao!r} centro={centro!r}")
 
 
+RE_ENCERRAMENTO_ATA = re.compile(r"Nada\s+mais\s+havendo\s+a\s+tratar", re.IGNORECASE)
+
+
+def _aparar_encerramento(texto_normalizado: str, itens: list[ItemDetectado]) -> list[ItemDetectado]:
+    if not itens:
+        return itens
+    inicio_primeiro = min(item.inicio for item in itens)
+    posicoes = [
+        m.start() for m in RE_ENCERRAMENTO_ATA.finditer(texto_normalizado)
+        if m.start() >= inicio_primeiro
+    ]
+    if not posicoes:
+        return itens
+    resultado = []
+    for item in itens:
+        fim = next((p for p in posicoes if item.inicio <= p < item.fim), item.fim)
+        if fim != item.fim:
+            item = ItemDetectado(
+                secao=item.secao,
+                numero_item=item.numero_item,
+                inicio=item.inicio,
+                fim=fim,
+                texto=texto_normalizado[item.inicio:fim].strip(),
+            )
+        resultado.append(item)
+    return resultado
+
+
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
     detector = _obter_detector(tipo_orgao, centro)
 
     texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
-    itens = detector(texto_normalizado)
+    itens = _aparar_encerramento(texto_normalizado, detector(texto_normalizado))
     return itens, mapa
 
 

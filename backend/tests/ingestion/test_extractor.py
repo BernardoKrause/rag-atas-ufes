@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 
 import fitz
@@ -6,6 +7,7 @@ import pytest
 
 from app.ingestion.extractor import (
     CENTRO_CAMPUS,
+    TesseractAusenteError,
     _neutralizar_numeracao_de_margem,
     _remover_cabecalho_e_rodape_repetidos,
     extrair_campos,
@@ -17,6 +19,8 @@ from app.ingestion.extractor import (
     extrair_quorum_declarado,
     extrair_texto_bruto,
     mapear_campus,
+    normalizar_ligaduras,
+    verificar_tesseract,
 )
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "atas_sample"
@@ -72,13 +76,13 @@ def test_metadados_tipo_d_curso_com_multiplos_segmentos_nao_trunca():
 
 def test_extrair_texto_bruto_retorna_conteudo_nao_vazio():
     caminho = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CAR" / "ata_05_02_2025.pdf"
-    texto, _offsets = extrair_texto_bruto(caminho)
+    texto, _offsets, _paginas_ocr = extrair_texto_bruto(caminho)
     assert "CENTRO DE ARTES" in texto.upper()
 
 
 def test_extrair_texto_bruto_retorna_offsets_de_pagina():
     caminho = FIXTURES / "TIPO_B__Conselho_Departamental_do_Centro" / "CT" / "10-2025.pdf"
-    texto, offsets = extrair_texto_bruto(caminho)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(caminho)
 
     assert offsets[0] == 0
     assert len(offsets) >= 2
@@ -92,7 +96,7 @@ def test_extrair_texto_bruto_corrige_ligadura_ti_quebrada():
         FIXTURES / "TIPO_C__Camara_Local_Tematica" / "CCHN_CamaraLocal_Graduacao"
         / "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf"
     )
-    texto, _offsets = extrair_texto_bruto(caminho)
+    texto, _offsets, _paginas_ocr = extrair_texto_bruto(caminho)
     assert "Ɵ" not in texto
     assert "participar" in texto
 
@@ -268,7 +272,7 @@ CCENS_DC_2_PAGINAS = FIXTURES / "TIPO_A__Camara_Departamental" / "CCENS_DC" / "a
 
 
 def test_extrair_texto_bruto_remove_cabecalho_institucional_repetido_da_pagina_seguinte():
-    texto, offsets = extrair_texto_bruto(CCENS_DB)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CCENS_DB)
     pagina2 = texto[offsets[1]:]
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
@@ -276,14 +280,14 @@ def test_extrair_texto_bruto_remove_cabecalho_institucional_repetido_da_pagina_s
 
 
 def test_extrair_texto_bruto_preserva_cabecalho_da_primeira_pagina():
-    texto, offsets = extrair_texto_bruto(CCENS_DB)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CCENS_DB)
     pagina1 = texto[offsets[0]:offsets[1]]
 
     assert "Universidade Federal do Espírito Santo" in pagina1
 
 
 def test_extrair_texto_bruto_remove_cabecalho_repetido_em_multiplas_paginas():
-    texto, offsets = extrair_texto_bruto(CCHN_CAMARA_LOCAL)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CCHN_CAMARA_LOCAL)
     pagina2 = texto[offsets[1]:]
 
     assert "CONSELHO DEPARTAMENTAL" not in pagina2
@@ -295,14 +299,14 @@ def test_extrair_texto_bruto_preserva_numero_isolado_de_pagina_sem_linha_fixa_de
     # nenhuma linha fixa antes dele repetida entre paginas -- nao ha como distinguir
     # com confianca de um numero que faca parte do proprio conteudo do item (ver
     # caso real do fixture colped/CE-D), entao esse caso fica de fora de proposito
-    texto, offsets = extrair_texto_bruto(CCENS_DB)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CCENS_DB)
     pagina1 = texto[offsets[0]:offsets[1]]
 
     assert pagina1.rstrip().endswith("1")
 
 
 def test_extrair_texto_bruto_remove_rodape_com_timestamp_fixo_e_contador_de_pagina_variavel():
-    texto, _offsets = extrair_texto_bruto(CT)
+    texto, _offsets, _paginas_ocr = extrair_texto_bruto(CT)
 
     assert "Emissão: 11/03/2026 12:00:13" not in texto
     assert "Página 1/8" not in texto
@@ -310,7 +314,7 @@ def test_extrair_texto_bruto_remove_rodape_com_timestamp_fixo_e_contador_de_pagi
 
 
 def test_extrair_texto_bruto_nao_remove_nada_quando_paginas_nao_repetem_conteudo():
-    texto, offsets = extrair_texto_bruto(CAR)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CAR)
     pagina2 = texto[offsets[1]:]
 
     assert pagina2.lstrip().startswith("concessão da solicitação")
@@ -322,7 +326,7 @@ def test_extrair_texto_bruto_remove_cabecalho_mesmo_com_linha_em_branco_extra_na
     # -- exigir que a 1a pagina bata linha a linha com as demais pra descobrir o
     # cabecalho falharia aqui; o padrao precisa ser descoberto so entre as
     # paginas 2+ quando ha pelo menos duas delas pra concordar entre si
-    texto, offsets = extrair_texto_bruto(CCENS_DC)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CCENS_DC)
     pagina2 = texto[offsets[1]:]
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
@@ -333,7 +337,7 @@ def test_extrair_texto_bruto_remove_cabecalho_com_linha_em_branco_extra_em_docum
     # mesmo problema do teste anterior, mas no caso de fallback (documento com
     # so 2 paginas, onde a 1a obrigatoriamente entra na comparacao porque nao ha
     # nenhuma outra pagina pra descobrir o padrao sem ela)
-    texto, offsets = extrair_texto_bruto(CCENS_DC_2_PAGINAS)
+    texto, offsets, _paginas_ocr = extrair_texto_bruto(CCENS_DC_2_PAGINAS)
     pagina2 = texto[offsets[1]:]
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
@@ -391,7 +395,7 @@ def test_extrair_texto_bruto_corrige_numero_de_processo_partido_por_numeracao_de
 
     from app.ingestion.cleaner import RE_NUMERO_PROCESSO
 
-    texto, _offsets = extrair_texto_bruto(caminho)
+    texto, _offsets, _paginas_ocr = extrair_texto_bruto(caminho)
     match = RE_NUMERO_PROCESSO.search(texto)
 
     assert match is not None
@@ -407,3 +411,194 @@ def test_remove_cabecalho_nao_quebra_quando_primeira_pagina_e_mais_curta_que_as_
     )
 
     assert paginas == ["CABECALHO\nFIXO", "CORPO1", "CORPO2"]
+
+
+@pytest.mark.parametrize(
+    ("entrada", "esperado"),
+    [
+        ("Justiﬁcou", "Justificou"),
+        ("ﬂuentes", "fluentes"),
+        ("Schiﬄer", "Schiffler"),
+        ("Vitória", "Vitória"),
+        ("caça", "caça"),
+        ("İsicos", "físicos"),
+        ("Oİcio", "Ofício"),
+        ("noơcias", "notícias"),
+        ("Estaơstica", "Estatística"),
+        ("SoŌware", "Software"),
+        ("parƟcipar", "participar"),
+    ],
+)
+def test_normalizar_ligaduras_corrige_casos_do_corpus(entrada, esperado):
+    assert normalizar_ligaduras(entrada) == esperado
+
+
+def test_normalizar_ligaduras_preserva_glifo_isolado():
+    assert normalizar_ligaduras("letra İ isolada") == "letra İ isolada"
+
+
+def test_normalizar_ligaduras_nao_altera_texto_comum():
+    texto = "Aprovado por unanimidade.\n  Item 2: ofício nº 3/2025"
+    assert normalizar_ligaduras(texto) == texto
+
+
+FIXTURES_OCR = Path(__file__).parent.parent / "fixtures" / "ocr"
+SEM_TESSERACT = shutil.which("tesseract") is None
+
+
+@pytest.mark.skipif(SEM_TESSERACT, reason="tesseract nao instalado")
+def test_extrair_texto_bruto_usa_ocr_em_pagina_escaneada():
+    texto, offsets, paginas_ocr = extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+    assert paginas_ocr == [1]
+    assert offsets == [0]
+    assert "INFORME" in texto
+    assert "Departamental" in texto
+
+
+@pytest.mark.skipif(SEM_TESSERACT, reason="tesseract nao instalado")
+def test_extrair_texto_bruto_usa_ocr_em_texto_vetorizado():
+    texto, _offsets, paginas_ocr = extrair_texto_bruto(FIXTURES_OCR / "ceunes_texto_vetorizado.pdf")
+
+    assert paginas_ocr == [1]
+    assert "CONSELHO" in texto
+    assert "Mateus" in texto
+
+
+def test_extrair_texto_bruto_nao_chama_ocr_em_pdf_com_texto(monkeypatch):
+    def _ocr_proibido(*args, **kwargs):
+        raise AssertionError("OCR chamado em pagina com texto nativo")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _ocr_proibido)
+
+    _texto, _offsets, paginas_ocr = extrair_texto_bruto(CAR)
+
+    assert paginas_ocr == []
+
+
+def test_extrair_texto_bruto_sem_binario_do_tesseract_orienta_instalacao(monkeypatch):
+    def _sem_tesseract(*args, **kwargs):
+        raise RuntimeError("No tessdata specified and Tesseract is not installed")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _sem_tesseract)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: None)
+
+    with pytest.raises(TesseractAusenteError, match="brew install tesseract tesseract-lang"):
+        extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+
+def test_extrair_texto_bruto_com_tesseract_sem_dados_do_idioma_orienta_tessdata(monkeypatch):
+    def _sem_idioma(*args, **kwargs):
+        raise RuntimeError("Failed to init tesseract")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _sem_idioma)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: None)
+
+    with pytest.raises(TesseractAusenteError, match="TESSDATA_PREFIX"):
+        extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+
+def test_extrair_campos_expoe_paginas_ocr():
+    campos = extrair_campos("TIPO_B", "CAR", CAR)
+    assert campos["paginas_ocr"] == []
+
+
+def test_verificar_tesseract_sem_binario_orienta_instalacao(monkeypatch):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: None)
+
+    with pytest.raises(TesseractAusenteError, match="brew install tesseract tesseract-lang"):
+        verificar_tesseract()
+
+
+@pytest.mark.parametrize("tessdata", [None, "sem_por"])
+def test_verificar_tesseract_sem_dados_do_idioma_orienta_tessdata(monkeypatch, tmp_path, tessdata):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr(
+        "app.ingestion.extractor._localizar_tessdata", lambda: tessdata and str(tmp_path)
+    )
+
+    with pytest.raises(TesseractAusenteError, match="TESSDATA_PREFIX"):
+        verificar_tesseract()
+
+
+def test_verificar_tesseract_com_dados_do_idioma_passa(monkeypatch, tmp_path):
+    (tmp_path / "por.traineddata").touch()
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: str(tmp_path))
+
+    verificar_tesseract()
+
+
+class _SaidaDoTesseract:
+    def __init__(self, stdout):
+        self.stdout = stdout
+
+
+@pytest.mark.parametrize(
+    ("primeira_linha", "esperado"),
+    [
+        ('List of available languages in "/opt/homebrew/share/tessdata/" (162):', "/opt/homebrew/share/tessdata/"),
+        ("List of available languages (3):", None),
+    ],
+)
+def test_localizar_tessdata_le_o_caminho_da_listagem_do_tesseract(monkeypatch, primeira_linha, esperado):
+    from app.ingestion.extractor import _localizar_tessdata
+
+    def _sem_tessdata_no_pymupdf():
+        raise RuntimeError("No tessdata specified and Tesseract is not installed")
+
+    monkeypatch.setattr(fitz, "get_tessdata", _sem_tessdata_no_pymupdf)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr(
+        "app.ingestion.extractor.subprocess.run",
+        lambda *args, **kwargs: _SaidaDoTesseract(f"{primeira_linha}\neng\npor\n"),
+    )
+    _localizar_tessdata.cache_clear()
+    try:
+        assert _localizar_tessdata() == esperado
+    finally:
+        _localizar_tessdata.cache_clear()
+
+
+def test_extrair_texto_bruto_com_falha_do_ocr_mostra_o_erro_original(monkeypatch):
+    def _falha_do_ocr(*args, **kwargs):
+        raise RuntimeError("code=2: falha ao rasterizar a pagina")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", _falha_do_ocr)
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+
+    with pytest.raises(TesseractAusenteError, match="falha ao rasterizar a pagina"):
+        extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+
+@pytest.mark.parametrize(
+    "comando", ["brew install tesseract tesseract-lang", "apt install tesseract-ocr tesseract-ocr-por"]
+)
+def test_verificar_tesseract_sem_binario_cita_brew_e_apt(monkeypatch, comando):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: None)
+
+    with pytest.raises(TesseractAusenteError) as erro:
+        verificar_tesseract()
+
+    assert comando in str(erro.value)
+
+
+def test_verificar_tesseract_sem_idioma_por_cita_apt(monkeypatch):
+    monkeypatch.setattr("app.ingestion.extractor.shutil.which", lambda _nome: "/usr/bin/tesseract")
+    monkeypatch.setattr("app.ingestion.extractor._localizar_tessdata", lambda: None)
+
+    with pytest.raises(TesseractAusenteError) as erro:
+        verificar_tesseract()
+
+    assert "apt install tesseract-ocr-por" in str(erro.value)
+
+
+def test_extrair_texto_bruto_nao_marca_como_ocr_pagina_que_volta_vazia(monkeypatch, caplog):
+    monkeypatch.setattr("app.ingestion.extractor._texto_por_ocr", lambda _pagina: "  \n ")
+
+    with caplog.at_level(logging.WARNING, logger="app.ingestion.extractor"):
+        _texto, _offsets, paginas_ocr = extrair_texto_bruto(FIXTURES_OCR / "dcab_pagina_escaneada.pdf")
+
+    assert paginas_ocr == []
+    assert "OCR nao reconheceu texto" in caplog.text

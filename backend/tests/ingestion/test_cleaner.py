@@ -481,3 +481,64 @@ def test_processo_fora_do_prefixo_sipac_padrao_e_substituido(db_session):
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
     assert "23546.071495/2021-22" not in resultado
     assert "PROCESSO_" in resultado
+
+
+
+@pytest.mark.parametrize("texto", [
+    "O Prof. Armando informou que a IFES em convênio oferece vagas.",
+    "Após a manifestação da Conselheira Sandra, o ponto foi votado.",
+    "Foi lido o parecer do Conselheiro Osmar. Relator(a): ninguém.",
+    "A correção será realizada no PAD pelo Professor Luciano e a ressalva encaminhada.",
+    "Após entendimentos, o professor Luciano se comprometeu.",
+    "Os projetos a serem desenvolvidos pelo professor Orlando, conforme o plano.",
+    "Encaminhamentos sobre o estudante Davi. A subcoordenadora informou.",
+    "O servidor Renato informou que já está em execução.",
+])
+def test_primeiro_nome_apos_titulo_e_anonimizado_quando_o_ner_falha(db_session, monkeypatch, texto):
+    monkeypatch.setattr(cleaner, "_achar_entidades_pessoa", lambda _texto: [])
+    nome = re.search(r"(?:Prof\.|Conselheir[oa]|[Pp]rofessor|estudante|servidor) (\w+)", texto).group(1)
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert nome not in resultado
+    assert "PESSOA_" in resultado
+
+
+def test_nome_apos_titulo_ignora_cargo_e_qualificacao():
+    texto = (
+        "Professor Adjunto do Departamento de Física. Professor Visitante Estrangeiro. "
+        "Senhor Presidente. Prof. Dr. Valdemar apresentou. Professora Titular. "
+        "Os servidores Técnico Administrativos. Prof. Dr. JOÃO SILVA. Profa. Dra. MARIA. Prof. Me. ANA. "
+        "Diárias para Servidor Civil. Estudantes Ingressantes. Servidores Docentes."
+    )
+    assert [texto[i:f] for i, f in cleaner._achar_nomes_apos_titulo(texto)] == ["Valdemar"]
+
+
+def test_nome_apos_titulo_inclui_sobrenomes():
+    texto = "o Prof. Francisco de Assis Souza informou"
+    assert [texto[i:f] for i, f in cleaner._achar_nomes_apos_titulo(texto)] == ["Francisco de Assis Souza"]
+
+
+def test_pedaco_de_nome_do_ner_e_expandido_ate_o_limite_da_palavra(db_session, monkeypatch):
+    texto = "A Profa. FABRÍCIA Souza e o servidor Osmar assinaram."
+    inicio_fab, inicio_osm = texto.index("CIA"), texto.index("Osmar")
+    monkeypatch.setattr(
+        cleaner, "_achar_entidades_pessoa",
+        lambda _texto: [(inicio_fab, inicio_fab + 3), (inicio_osm, inicio_osm + 2)],
+    )
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "FABRÍ" not in resultado
+    assert "mar" not in resultado
+
+
+def test_nome_apos_titulo_nao_atravessa_a_quebra_de_linha():
+    texto = "Profª. Tatiane Sanches Soares \nProf.ª Vanessa Holanda \nProf. Elias Terra"
+    assert [texto[i:f] for i, f in cleaner._achar_nomes_apos_titulo(texto)] == [
+        "Tatiane Sanches Soares", "Vanessa Holanda", "Elias Terra",
+    ]
+
+
+def test_abreviacao_de_titulo_marcada_pelo_ner_nao_vira_pessoa(db_session, monkeypatch):
+    texto = "O Prof. Dr. ELIAS TERRA fez a leitura."
+    inicio = texto.index("Dr")
+    monkeypatch.setattr(cleaner, "_achar_entidades_pessoa", lambda _texto: [(inicio + 1, inicio + 2)])
+    resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
+    assert "Prof. Dr. ELIAS" in resultado

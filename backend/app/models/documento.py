@@ -73,6 +73,7 @@ class Documento(Base):
     # Parte 3 — os 357 documentos ja ingeridos precisam de um rerun idempotente
     # pra essa coluna deixar de ser nula
     paginas_offsets: Mapped[list[int] | None] = mapped_column(JSON, nullable=True)
+    paginas_ocr: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list, server_default="[]")
 
 
 class EntidadeAnonimizada(Base):

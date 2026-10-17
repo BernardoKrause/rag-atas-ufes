@@ -259,16 +259,63 @@ def test_detectar_itens_cefd():
     )
     itens = detectar_itens_cefd(texto)
     assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
         (SECAO_COMUNICACOES, "1"),
         (SECAO_COMUNICACOES, "2"),
         (SECAO_PROCESSOS_PROJETOS, "1"),
         (SECAO_PROCESSOS_PROJETOS, "2"),
+        (SECAO_PALAVRA_LIVRE, "1"),
     ]
 
 
-def test_detectar_itens_cefd_secao_sem_itens_e_pulada():
+def test_detectar_itens_cefd_secao_sem_marcador_vira_item_unico():
     texto = "EM PAUTA: SEM ITENS NUMERADOS. PALAVRA LIVRE: NENHUM REGISTRO."
-    assert detectar_itens_cefd(texto) == []
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item, i.texto) for i in itens] == [
+        (SECAO_PAUTA, "1", "SEM ITENS NUMERADOS."),
+        (SECAO_PALAVRA_LIVRE, "1", "NENHUM REGISTRO."),
+    ]
+
+
+@pytest.mark.parametrize("corpo", [
+    "Não houve…................………………………………………………",
+    "Não houve…………….. ",
+    "NÃO HOUVE.",
+    "nao  houve",
+])
+def test_cefd_secao_so_com_nao_houve_nao_vira_item(corpo):
+    itens = detectar_itens_cefd(f"COMUNICAÇÕES: A reitoria comunicou o calendário. PALAVRA LIVRE: {corpo}")
+    assert [(i.secao, i.texto) for i in itens] == [(SECAO_COMUNICACOES, "A reitoria comunicou o calendário.")]
+
+
+def test_cefd_ultima_secao_so_com_nao_houve_antes_do_encerramento_nao_vira_item():
+    texto = (
+        "COMUNICAÇÕES: A reitoria comunicou o calendário. PALAVRA LIVRE: Não \nhouve……………….\n.\n"
+        "Nada mais havendo a tratar, a reunião foi encerrada. Vitória, 30 de agosto de 2023."
+    )
+    itens, _ = segmentar_texto("B", "CEFD", texto)
+    assert [(i.secao, i.texto) for i in itens] == [(SECAO_COMUNICACOES, "A reitoria comunicou o calendário.")]
+
+
+def test_cefd_ultima_secao_com_conteudo_depois_do_nao_houve_vira_item():
+    texto = (
+        "PALAVRA LIVRE: Não houve…… O acadêmico PESSOA_0002 questionou a reforma.\n"
+        "Nada mais havendo a tratar, a reunião foi encerrada."
+    )
+    itens, _ = segmentar_texto("B", "CEFD", texto)
+    assert [(i.secao, i.texto) for i in itens] == [
+        (SECAO_PALAVRA_LIVRE, "Não houve…… O acadêmico PESSOA_0002 questionou a reforma.")
+    ]
+
+
+@pytest.mark.parametrize("corpo", [
+    "Não houve, mas o professor PESSOA_0001 comunicou a reforma da cantina.",
+    "Não houve quórum para deliberar.",
+    "Não houve…….. O acadêmico PESSOA_0002 questionou a reforma.",
+])
+def test_cefd_secao_que_continua_depois_do_nao_houve_vira_item(corpo):
+    itens = detectar_itens_cefd(f"PALAVRA LIVRE: {corpo}")
+    assert [(i.secao, i.texto) for i in itens] == [(SECAO_PALAVRA_LIVRE, corpo)]
 
 
 def test_cefd_aceita_ponto_final_em_vez_de_dois_pontos_no_cabecalho():
@@ -692,3 +739,78 @@ def test_segmentar_documento_sem_paginas_offsets_deixa_pagina_nula(db_session):
     documento = _criar_documento(db_session, paginas_offsets=None, nome_arquivo="sem_paginas.pdf")
     itens = segmentar_e_persistir(documento, db_session)
     assert all(i.pagina_inicio is None and i.pagina_fim is None for i in itens)
+
+
+def test_segmentar_texto_encerra_ultimo_item_na_formula_de_encerramento():
+    texto = (
+        "PAUTA 1: Diagnóstico do ensino de graduação no Centro de Educação – ano 2020. "
+        "Retirado de pauta. Nada mais havendo a tratar, eu, PESSOA_164382, Secretária do "
+        "Colegiado, lavrei a presente Ata. PROTOCOLO DE ASSINATURA SIAPE_0407 "
+        "https://api.lepisma.ufes.br/arquivos-assinados/1"
+    )
+    itens, _ = segmentar_texto("B", "CT", texto)
+    assert len(itens) == 1
+    assert itens[0].texto.endswith("Retirado de pauta.")
+    assert "lavrei" not in itens[0].texto
+
+
+def test_segmentar_texto_mantem_itens_apos_o_ultimo_encerramento():
+    texto = (
+        "PAUTA 1: Primeiro assunto. Nada mais havendo a tratar, lavrei a presente ata. "
+        "PAUTA 8: Alteração no PPC do curso. Aprovado por unanimidade."
+    )
+    itens, _ = segmentar_texto("B", "CT", texto)
+    assert [i.numero_item for i in itens] == ["1", "8"]
+    assert itens[0].texto == "PAUTA 1: Primeiro assunto."
+
+
+def test_segmentar_texto_mantem_itens_de_atas_concatenadas():
+    texto = (
+        "PAUTA 1: Assunto da primeira ata. Nada mais havendo a tratar, lavrei a presente ata. "
+        "Assinaturas da primeira. "
+        "PAUTA 1: Assunto da segunda ata. Nada mais havendo a tratar, lavrei a presente ata. "
+        "Assinaturas da segunda."
+    )
+    itens, _ = segmentar_texto("B", "CT", texto)
+    assert [i.texto for i in itens] == [
+        "PAUTA 1: Assunto da primeira ata.",
+        "PAUTA 1: Assunto da segunda ata.",
+    ]
+
+
+def test_segmentar_texto_nao_reconhece_nada_mais_a_tratar_sem_havendo():
+    texto = "PAUTA 1: Assunto. Nada mais a tratar. Fim."
+    itens, _ = segmentar_texto("B", "CT", texto)
+    assert "Nada mais a tratar" in itens[0].texto
+
+
+def test_cefd_secao_sem_marcador_vira_um_item():
+    texto = (
+        "EM PAUTA: Leitura das atas da reunião ordinária, aprovadas por unanimidade."
+        "COMUNICAÇÕES: A Professora PESSOA_164045 comunicou que foi enviado um questionário."
+    )
+    itens = detectar_itens_cefd(texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_PAUTA, "1"),
+        (SECAO_COMUNICACOES, "1"),
+    ]
+    assert itens[0].texto.startswith("Leitura das atas")
+    assert itens[0].texto.endswith("unanimidade.")
+
+
+def test_cefd_secao_vazia_nao_gera_item():
+    itens = detectar_itens_cefd("EM PAUTA: [1] Primeiro. PALAVRA LIVRE:   ")
+    assert [(i.secao, i.numero_item) for i in itens] == [(SECAO_PAUTA, "1")]
+
+
+def test_detectar_itens_car_aceita_processo_em_minuscula_e_ignora_enumeracao_interna():
+    texto = (
+        "PAUTA: 12) processo digital nº PROCESSO_1565, Professora solicitando autorização. "
+        "02) proc. digital n PROCESSO_31008. Ata do Departamento. "
+        "03) Processo digital n° PROCESSO_31054, Coordenação do Curso. "
+        "1) atende aos requisitos legais; 2) descreve adequadamente as atividades; "
+        "2), na condição de professor permanente do PósCom. 6) / Desenho (Cód. Cnpq). "
+        "17) Doc. Avulso n. 028498/25-52."
+    )
+    itens = detectar_itens_car(texto)
+    assert [i.numero_item for i in itens] == ["12", "02", "03", "17"]

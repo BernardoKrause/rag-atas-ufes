@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from app.ingestion.enriquecedor import CamposEnriquecidos, enriquecer_e_persistir
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
@@ -9,7 +11,7 @@ def test_enriquecer_e_persistir_preenche_campos_do_item(db_session, monkeypatch)
     import app.ingestion.enriquecedor as mod
     monkeypatch.setitem(
         mod.CONFIG_ENRIQUECEDOR, ("B", "CT"),
-        lambda texto, data_reuniao: CamposEnriquecidos(
+        lambda texto, data_reuniao, secao=None: CamposEnriquecidos(
             assunto="assunto teste", tipo_desfecho="Aprovado", resultado_votacao="unanimidade",
             encaminhamento=None, ato_emitido=None, departamento_origem="INFORMATICA",
         ),
@@ -39,7 +41,7 @@ def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monke
     import app.ingestion.enriquecedor as mod
     monkeypatch.setitem(
         mod.CONFIG_ENRIQUECEDOR, ("B", "CT"),
-        lambda texto, data_reuniao: CamposEnriquecidos(texto, None, None, None, None, None),
+        lambda texto, data_reuniao, secao=None: CamposEnriquecidos(texto, None, None, None, None, None),
     )
 
     documento = Documento(
@@ -61,13 +63,14 @@ def test_fragmento_herda_assunto_do_primeiro_fragmento_do_item(db_session, monke
 
     enriquecer_e_persistir(documento, [inicio, continuacao], db_session)
 
+    assert inicio.assunto == "PAUTA 1: inicio do item"
     assert continuacao.assunto == "PAUTA 1: inicio do item"
 
 
 def test_enriquecer_e_persistir_e_idempotente(db_session, monkeypatch):
     import app.ingestion.enriquecedor as mod
     chamadas = []
-    def _fake(texto, data_reuniao):
+    def _fake(texto, data_reuniao, secao=None):
         chamadas.append(texto)
         return CamposEnriquecidos(None, "Aprovado", None, None, None, None)
     monkeypatch.setitem(mod.CONFIG_ENRIQUECEDOR, ("B", "CT"), _fake)
@@ -118,6 +121,27 @@ def test_extrair_ct_aprovado_com_departamento():
     assert campos.departamento_origem == "INFORMATICA"
     assert "Interrupção" in campos.assunto
     assert "Decisão" not in campos.assunto
+
+
+@pytest.mark.parametrize("decisao", [
+    "Decisão: | Aprovado(a) por unanimidade.",
+    "Decisão: A Aprovado(a) por unanimidade.",
+    "Decisão: . o Aprovado(a) por unanimidade.",
+    "Decisão: 4S er Aprovado(a) por unanimidade.",
+    "Decisão; Aprovado(a) por unanimidade.",
+])
+def test_extrair_ct_tolera_ruido_de_ocr_antes_do_desfecho(decisao):
+    from app.ingestion.enriquecedor import extrair_ct
+    campos = extrair_ct(f"PAUTA 1: PROCESSO_31740 - Afastamento. {decisao}", date(2023, 3, 1))
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.resultado_votacao == "por unanimidade."
+    assert campos.assunto == "PROCESSO_31740 - Afastamento"
+
+
+def test_extrair_ct_ruido_de_ocr_nao_aprova_texto_sem_desfecho():
+    from app.ingestion.enriquecedor import extrair_ct
+    campos = extrair_ct("PAUTA 1: PROCESSO_31740 - Afastamento. Decisão: o Conselho discutiu.", date(2023, 3, 1))
+    assert campos.tipo_desfecho is None
 
 
 def test_extrair_ct_retirado_sem_departamento():
@@ -374,3 +398,539 @@ def test_todas_as_variantes_do_segmentador_tem_extrator_no_enriquecedor():
 
     for tipo_orgao, centro in CONFIG_VARIANTES:
         _obter_extrator(tipo_orgao, centro)  # nao deve levantar ValueError
+
+
+@pytest.mark.parametrize("texto", [
+    "1.1 Informes. Foi informada a entrada da servidora PESSOA_163997, aprovada no último concurso público para Taes da Ufes no lugar da servidora PESSOA_163996 na Secretaria da Direção.",
+    "1.2 A proposta de informatização dos pedidos de 3ª etapa ainda não foi aprovada na Ufes e teve um revés com a aposentadoria da PESSOA_164335, do DRCA.",
+    "1.3 Ademais, como a busca consumiu algum tempo, o acolhimento precisou ser adiado para que seja feita a divulgação adequada.",
+    "1.4 Mencionou que a situação já foi encaminhada para Direção do Centro de Educação e que o setor buscará orientação junto à PROGEP.",
+    "1.5 Sabemos que pela Legislação em vigor, o aluno com mais de 25% de faltas já está automaticamente reprovado na disciplina que ele faltou.",
+    "1.6 Alguns alunos não poderiam estar participando, por terem sido reprovados e alguns colado grau antecipado.",
+])
+def test_extrair_generico_palavra_chave_em_narrativa_nao_gera_desfecho(texto):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho is None
+    assert campos.resultado_votacao is None
+
+
+def test_extrair_generico_parecer_longo_usa_a_frase_da_votacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "2.1 Parecer sobre recurso. O relator concluiu pelo indeferimento, por ter o candidato "
+        "sido reprovado na prova de aptidão didático-prática. Após discussão, o parecer foi "
+        "colocado em votação e aprovado por unanimidade."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.tipo_desfecho == "Aprovado"
+    assert "votação" in campos.resultado_votacao
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    ("1.1 Calendário. Em discussão. Em votação. Aprovado por unanimidade.", "Aprovado"),
+    ("1.1 Calendário. Após discussão, o calendário foi aprovado por unanimidade.", "Aprovado"),
+    ("1.1 Designação. Posta em votação, a designação foi homologada por unanimidade.", "Aprovado"),
+    ("1.1 Tema. Em apreciação, em votação, aprovado por unanimidade dos presentes.", "Aprovado"),
+    ("1.1 Diagnóstico do ensino de graduação no Centro de Educação – ano 2020. Retirado de pauta.", "Retirado"),
+    ("1.1 Constituição da Comissão Própria de Avaliação do Curso de Pedagogia. Retirado de Pauta. EM DISCUSSÃO. APROVADO.", "Aprovado"),
+    ("1.1 Tema. Sob deliberação, o encaminhamento aprovado por unanimidade.", "Aprovado"),
+    ("1.1 Solicitação. O item foi retirado de pauta e voltará depois.", "Retirado"),
+    ("4.3. Apreciação de estudante. Ponto de pauta retirado.", "Retirado"),
+])
+def test_extrair_generico_desfechos_validos_continuam(texto, esperado):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).tipo_desfecho == esperado
+
+
+def test_extrair_generico_retirado_no_fim_so_vale_para_retirado():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico("1.1 Tema discutido. O processo foi adiado.", None).tipo_desfecho is None
+    assert extrair_generico("1.1 Tema discutido. O processo foi aprovado.", None).tipo_desfecho is None
+
+
+def test_extrair_generico_resultado_votacao_nao_quebra_em_abreviacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "1.1 Processo de progressão. Em apreciação, após relato e parecer favorável do conselheiro "
+        "professor Dr. PESSOA_164023 foi aprovado por unanimidade."
+    )
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == (
+        "Em apreciação, após relato e parecer favorável do conselheiro professor Dr. PESSOA_164023 "
+        "foi aprovado por unanimidade"
+    )
+
+
+def test_extrair_generico_resultado_votacao_termina_na_frase():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "1.1 Tema. Em votação. Aprovado por unanimidade. Baixada a DECISÃO NÚMERO SETENTA E CINCO BARRA DOIS MIL E VINTE E CINCO."
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == "Aprovado por unanimidade"
+
+
+def test_extrair_ccae_mantem_ato_com_resultado_delimitado():
+    from app.ingestion.enriquecedor import extrair_ccae
+
+    texto = "3.1 Tema. Em votação. Aprovado por unanimidade. Baixada a DECISÃO NÚMERO SETENTA E CINCO BARRA DOIS MIL E VINTE E CINCO."
+    campos = extrair_ccae(texto, date(2025, 3, 1))
+    assert campos.ato_emitido == "DECISAO_75_2025"
+    assert campos.resultado_votacao == "Aprovado por unanimidade"
+
+
+def test_extrair_ct_resultado_votacao_termina_na_primeira_frase():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    texto = (
+        "PAUTA 3: Processo digital nº 23068.000001/2025-00 - Recurso. Decisão: Homologado(a) por maioria. "
+        "Para fundamentar que não concorda com a homologação do ponto de pauta, o conselheiro PESSOA_8903, informou que votou contra."
+    )
+    campos = extrair_ct(texto, date(2025, 6, 6))
+    assert campos.tipo_desfecho == "Aprovado"
+    assert campos.resultado_votacao == "por maioria."
+
+
+@pytest.mark.parametrize("texto", [
+    "– Resposta que os alunos receberam sobre o tema.",
+    "- Resposta que os alunos receberam sobre o tema.",
+    "— Resposta que os alunos receberam sobre o tema.",
+])
+def test_extrair_corpo_sem_marcador_remove_traco_inicial(texto):
+    from app.ingestion.enriquecedor import extrair_corpo_sem_marcador
+
+    assert extrair_corpo_sem_marcador("", "1.2 " + texto) == "Resposta que os alunos receberam sobre o tema."
+
+
+FRASE_VOTACAO = "Em votação, o parecer foi aprovado por unanimidade dos presentes."
+
+
+def _texto_longo(inicio: str, fim: str, tamanho: int = 7000) -> str:
+    enchimento = "A comissão discutiu detalhadamente o relatório apresentado pela relatora. "
+    meio = enchimento * (tamanho // len(enchimento))
+    return f"{inicio} {meio}{fim}"
+
+
+def _persistir_fragmentos(db_session, texto):
+    from app.ingestion.segmentador import dividir_fragmentos
+    documento = Documento(
+        nome_arquivo="g.pdf", url_origem="g.pdf", centro="CCJE", campus="Goiabeiras",
+        tipo_orgao="A", orgao="CCJE", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
+    )
+    db_session.add(documento)
+    db_session.flush()
+    itens = [
+        ItemPauta(
+            documento_id=documento.id_documento, item_id_canonico=f"teste{documento.id_documento}_PAUTA_3_F{i}",
+            secao="PAUTA", numero_item="3", fragmento_indice=i, texto=fragmento,
+        )
+        for i, fragmento in enumerate(dividir_fragmentos(texto))
+    ]
+    db_session.add_all(itens)
+    db_session.flush()
+    enriquecer_e_persistir(documento, itens, db_session)
+    return itens
+
+
+def test_reconstruir_texto_do_item_e_inverso_de_dividir_fragmentos():
+    from app.ingestion.enriquecedor import reconstruir_texto_do_item
+    from app.ingestion.segmentador import dividir_fragmentos
+    texto = _texto_longo("PAUTA 3: Análise do parecer.", FRASE_VOTACAO, 7500)
+    fragmentos = dividir_fragmentos(texto)
+    assert len(fragmentos) > 2
+    assert reconstruir_texto_do_item(fragmentos) == texto
+    assert reconstruir_texto_do_item([texto[:100]]) == texto[:100]
+
+
+def test_todos_os_fragmentos_recebem_os_campos_do_item_completo(db_session):
+    itens = _persistir_fragmentos(db_session, _texto_longo("PAUTA 3: Análise do parecer.", FRASE_VOTACAO))
+
+    assert len(itens) > 2
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+    assert {i.resultado_votacao for i in itens} == {FRASE_VOTACAO.rstrip(".")}
+    assert len({i.assunto for i in itens}) == 1
+
+
+def test_frase_de_votacao_que_cruza_a_fronteira_do_fragmento_vem_inteira(db_session):
+    from app.ingestion.segmentador import TAMANHO_MAX_FRAGMENTO
+    frase = "Em votação, o parecer da comissão sobre o relatório foi aprovado por unanimidade."
+    prefixo = "PAUTA 3: Análise. "
+    enchimento = "A comissão discutiu o relatório apresentado. "
+    antes = (prefixo + enchimento * 200)[:TAMANHO_MAX_FRAGMENTO - 30]
+    antes = antes[:antes.rindex(".") + 1]
+    itens = _persistir_fragmentos(db_session, antes + " " + frase + " Encerrada a discussão.")
+
+    assert len(itens) == 2
+    assert frase not in itens[0].texto and frase[:10] in itens[0].texto
+    assert {i.resultado_votacao for i in itens} == {frase.rstrip(".")}
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+
+
+def _texto_com_frase_em(posicao: int, frase: str, inicio: str = "PAUTA 3: Análise do parecer. ") -> str:
+    enchimento = "A comissão discutiu o relatório apresentado. "
+    prefixo = inicio + enchimento * 100
+    prefixo = prefixo[:posicao - 1]
+    prefixo = prefixo[:prefixo.rindex(".") + 1] + " "
+    faltam = posicao - len(prefixo)
+    prefixo = prefixo[:-1] + " " * faltam + " " if faltam > 0 else prefixo
+    return prefixo + frase + " " + enchimento * 80
+
+
+def test_frase_de_votacao_que_comeca_antes_do_fragmento_1_vem_inteira_em_todos(db_session):
+    from app.ingestion.segmentador import TAMANHO_MAX_FRAGMENTO, SOBREPOSICAO_FRAGMENTO
+    inicio_f1 = TAMANHO_MAX_FRAGMENTO - SOBREPOSICAO_FRAGMENTO
+    frase = (
+        "Em votação, o parecer da comissão sobre o relatório e o pedido de renovação do projeto "
+        "foi aprovado por unanimidade dos presentes à reunião."
+    )
+    texto = _texto_com_frase_em(inicio_f1 - 50, frase)
+    assert texto.index(frase) < inicio_f1 < texto.index(frase) + len(frase)
+
+    itens = _persistir_fragmentos(db_session, texto)
+
+    assert len(itens) >= 2
+    assert {i.resultado_votacao for i in itens} == {frase.rstrip(".")}
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+
+
+def test_encaminhamento_so_no_fragmento_0_e_votacao_so_no_ultimo_chegam_a_todos(db_session):
+    enc = "Assim, a Coordenadora propôs este encaminhamento: realizar uma reunião com os secretários do Colegiado."
+    frase = "Em votação, o encaminhamento foi aprovado por unanimidade."
+    texto = _texto_longo(f"PAUTA 3: Análise. {enc}", frase)
+    itens = _persistir_fragmentos(db_session, texto)
+
+    assert len(itens) > 2
+    assert {i.encaminhamento for i in itens} == {"realizar uma reunião com os secretários do Colegiado"}
+    assert {i.tipo_desfecho for i in itens} == {"Aprovado"}
+
+
+def test_fragmentos_sem_desfecho_em_nenhum_ficam_sem_desfecho(db_session):
+    itens = _persistir_fragmentos(db_session, _texto_longo("PAUTA 3: Informes gerais.", "Fim dos informes."))
+
+    assert {i.tipo_desfecho for i in itens} == {None}
+    assert {i.encaminhamento for i in itens} == {None}
+
+
+def test_ultimo_desfecho_do_item_vale_para_todos_os_fragmentos(db_session):
+    texto = _texto_longo(
+        "PAUTA 3: Em votação, o ponto foi aprovado por unanimidade.",
+        "Em nova votação, o ponto foi reprovado por maioria.",
+    )
+    itens = _persistir_fragmentos(db_session, texto)
+
+    assert {i.tipo_desfecho for i in itens} == {"Reprovado"}
+
+
+def test_encaminhamento_apos_dois_pontos():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(
+        "Assim, a Coordenadora propôs este encaminhamento: realizar uma reunião com os secretários "
+        "do Colegiado para ouvir suas contribuições sobre o documento. Aprovado por unanimidade."
+    ) == "realizar uma reunião com os secretários do Colegiado para ouvir suas contribuições sobre o documento"
+    assert extrair_encaminhamento(
+        "O Presidente PESSOA_165296 apresenta sua sugestão de encaminhamento: um pedido de criação "
+        "da diretoria acadêmica. Aprovado."
+    ) == "um pedido de criação da diretoria acadêmica"
+    assert extrair_encaminhamento(
+        "Por fim, o encaminhamento de uma proposta momentânea do Departamento foi: que a subcoordenação "
+        "de curso assuma a coordenação de estágio. Aprovado."
+    ) == "que a subcoordenação de curso assuma a coordenação de estágio"
+
+
+def test_encaminhamento_com_destino():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(
+        "Recomendo a aprovação do relatório e do pedido de renovação e solicito encaminhamento "
+        "às instâncias competentes."
+    ) == "encaminhamento às instâncias competentes"
+    assert extrair_encaminhamento(
+        "Sou, portanto, favorável à sua aprovação e encaminhamento para registro junto à "
+        "Pró-Reitoria de Extensão."
+    ) == "encaminhamento para registro junto à Pró-Reitoria de Extensão"
+
+
+@pytest.mark.parametrize("corpo", [
+    "Relatou sobre a situação de ausência da servidora PESSOA_164476, que interferiu no andamento "
+    "de alguns encaminhamentos do setor.",
+    "A dinâmica no segundo dia do Fórum foi a formação de grupos de trabalho para pensar "
+    "encaminhamentos a respeito do que se faria.",
+    "Art. 17º A diretoria é a instância responsável pelo encaminhamento e execução das atividades "
+    "cotidianas da entidade.",
+    "A Chefe do Departamento propôs como encaminhamento colocar em votação a Proposta 2.",
+])
+def test_encaminhamento_rejeita_casos_genericos_e_procedimentais(corpo):
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(corpo) is None
+
+
+def test_extrair_generico_preenche_encaminhamento_somente_com_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+    com = extrair_generico(
+        "PAUTA 1: Parecer. Sou favorável à sua aprovação e encaminhamento para registro junto à "
+        "Pró-Reitoria de Extensão. Em votação, aprovado por unanimidade.", date(2025, 1, 1),
+    )
+    assert com.tipo_desfecho == "Aprovado"
+    assert com.encaminhamento == "encaminhamento para registro junto à Pró-Reitoria de Extensão"
+
+    sem = extrair_generico(
+        "PAUTA 1: Informe. Relatou sobre a ausência da servidora, que interferiu no andamento de "
+        "alguns encaminhamentos: algo importante.", date(2025, 1, 1),
+    )
+    assert sem.tipo_desfecho is None
+    assert sem.encaminhamento is None
+
+
+def test_encaminhamento_para_votacao_e_procedimental_e_nao_conta():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento("Colocou o encaminhamento para votação do Colegiado.") is None
+    assert extrair_encaminhamento("O encaminhamento a votação foi aprovado.") is None
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    (
+        "3.03 Diretrizes. Solicitamos que se dê conhecimento ao colegiado, para melhor andamento dos processos e esclarecimento de todos.” As diretrizes foram aprovadas por unanimidade.",
+        "As diretrizes foram aprovadas por unanimidade",
+    ),
+    (
+        "3.03 Sistema. O prazo não seria flexibilizado e seria aplicado apenas a falhas de sistema.” Posto o assunto em discussão e votação, a proposta foi aprovada por unanimidade.",
+        "Posto o assunto em discussão e votação, a proposta foi aprovada por unanimidade",
+    ),
+])
+def test_extrair_generico_fim_de_frase_seguido_de_aspas(texto, esperado):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).resultado_votacao == esperado
+
+
+@pytest.mark.parametrize("texto", [
+    "1.2 Programa de coordenadores. Os coordenadores trocaram informações sobre os procedimentos e regras desse programa. Como não houve deliberações, o assunto foi baixado de pauta.",
+    "1.3 Prorrogação da resolução nº 56/2020 Cepe – Earte e Ensino Híbrido. Não houve tempo para discutir o ponto. O assunto foi baixado de pauta.",
+])
+def test_extrair_generico_baixado_de_pauta_vale_como_retirado(texto):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(texto, None, secao="PAUTA")
+    assert campos.tipo_desfecho == "Retirado"
+    assert "baixado de pauta" in campos.resultado_votacao
+
+
+@pytest.mark.parametrize("frase", [
+    "A secretaria apresentou uma proposta de calendário que foi discutida e aprovada como segue: 08/02, 08/03, 05/04.",
+    "Homologação da Eleição de Chefe e Subchefe do Departamento de Estatística/UFES, sendo aprovado pelos presentes.",
+    "Ponto 12, sendo aprovadas pelo Conselho Departamental.",
+    "Após discussão foi aprovado uma Comissão com três professores do Departamento de Química.",
+])
+@pytest.mark.parametrize("secao", ["PAUTA", "ORDEM DO DIA"])
+def test_aprovacao_sem_marca_de_votacao_vale_em_secao_deliberativa(frase, secao):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(f"3) Assunto qualquer. {frase}", None, secao=secao).tipo_desfecho == "Aprovado"
+
+
+@pytest.mark.parametrize("secao", ["INFORMES", "COMUNICAÇÕES", "EXPEDIENTE", "PALAVRA LIVRE", None])
+def test_aprovacao_sem_marca_de_votacao_nao_vale_em_secao_nao_deliberativa(secao):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "3) Assunto. Ponto 12, sendo aprovadas pelo Conselho Departamental."
+    assert extrair_generico(texto, None, secao=secao).tipo_desfecho is None
+
+
+@pytest.mark.parametrize("frase", [
+    "A proposta de informatização dos pedidos de 3ª etapa ainda não foi aprovada na Ufes e teve um revés.",
+    "Informando que não serão mais aprovadas pelo Gabinete, passagens e diárias fora do prazo.",
+    "Lavrei a presente ata que, após lida e aprovada, vai devidamente assinada pelos presentes.",
+    "As normas elaboradas e aprovadas pelo DEST a meu ver estão bem diferentes da que é usada.",
+    "Não foi aprovada pelos presentes a proposta.",
+])
+def test_aprovacao_em_secao_deliberativa_continua_sem_desfecho_em_negacao_e_formulas(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(f"3) Assunto. {frase}", None, secao="PAUTA").tipo_desfecho is None
+
+
+def test_candidataram_se_aprovados_respectivamente_fica_sem_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    frase = "Candidataram-se os professores PESSOA_8947 e PESSOA_163566 que foram aprovados respectivamente como titular e suplente."
+    assert extrair_generico(f"3) Eleição. {frase}", None, secao="PAUTA").tipo_desfecho is None
+
+
+def test_enriquecer_item_repassa_secao_ao_extrator_generico():
+    from app.ingestion.enriquecedor import enriquecer_item
+
+    texto = "3) Assunto. Ponto 12, sendo aprovadas pelo Conselho Departamental."
+    assert enriquecer_item("B", "CAR", texto, date(2025, 1, 1), secao="PAUTA").tipo_desfecho == "Aprovado"
+    assert enriquecer_item("B", "CAR", texto, date(2025, 1, 1)).tipo_desfecho is None
+
+
+def test_enriquecer_e_persistir_repassa_secao_do_item(db_session):
+    documento = Documento(
+        nome_arquivo="s.pdf", url_origem="s.pdf", centro="CAR", campus="Goiabeiras",
+        tipo_orgao="B", orgao="CAR", data_reuniao=date(2025, 1, 1), texto_limpo="texto",
+    )
+    db_session.add(documento)
+    db_session.flush()
+    item = ItemPauta(
+        documento_id=documento.id_documento, item_id_canonico="9_PAUTA_3",
+        secao="PAUTA", numero_item="3", texto="3) Assunto. Ponto 12, sendo aprovadas pelo Conselho Departamental.",
+    )
+    db_session.add(item)
+    db_session.flush()
+
+    enriquecer_e_persistir(documento, [item], db_session)
+
+    assert item.tipo_desfecho == "Aprovado"
+
+
+def test_marca_adicional_de_aprovacao_nao_substitui_aprovacao_com_votacao():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "5) Comissões. Após ampla discussão, foi APROVADA por unanimidade a criação das comissões. "
+        "Na banca de Química, foi indicada a professora, sendo aprovado o nome da professora."
+    )
+    campos = extrair_generico(texto, None, secao="PAUTA")
+    assert campos.resultado_votacao == "Após ampla discussão, foi APROVADA por unanimidade a criação das comissões"
+
+
+@pytest.mark.parametrize("frase", [
+    "As normas aprovadas pelo DEST não podem ser aplicadas, pois ainda não foram homologadas pelo Conselho do CCE.",
+    "Informou que a mobilidade foi aprovada pela Comissão de Ensino e pelo Colegiado à época.",
+])
+def test_marca_pelo_conselho_so_vale_junto_da_palavra_aprovado(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(f"3) Assunto. {frase}", None, secao="PAUTA").tipo_desfecho is None
+
+
+def test_baixado_de_pauta_em_lista_de_informes_nao_vale():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "1.02 Informes da Câmara Central. D) Foi aprovada uma norma que regulamenta a defesa de TCC; "
+        "E) O PPC do Bacharelado de Ciências Biológicas foi baixado de pauta porque o parecerista não compareceu; "
+        "G) Vai ocorrer o Seminário de estágios."
+    )
+    assert extrair_generico(texto, None, secao="COMUNICAÇÕES").tipo_desfecho is None
+    assert extrair_generico(texto, None).tipo_desfecho is None
+
+
+def test_extrair_generico_resultado_votacao_nao_quebra_em_abreviacao_profa():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "1.1 Processo. Em apreciação, o parecer da Profª. PESSOA_1 foi aprovado por unanimidade."
+    campos = extrair_generico(texto, None)
+    assert campos.resultado_votacao == "Em apreciação, o parecer da Profª. PESSOA_1 foi aprovado por unanimidade"
+
+
+def test_extrair_encaminhamento_nao_confunde_horario_com_dois_pontos():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+
+    assert extrair_encaminhamento("O encaminhamento das 10:30: algo foi feito.") is None
+
+
+def test_extrair_generico_negacao_com_marca_de_votacao_nao_e_aprovado():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico("1.1 Tema. Em votação, a proposta não foi aprovada por maioria.", None)
+    assert campos.tipo_desfecho == "Reprovado"
+
+
+@pytest.mark.parametrize("texto", [
+    "3.2 Tema do recurso. Rejeitado por maioria, com nove votos contrários.",
+    "04.09 Recurso. Portanto, o recurso do candidato foi REJEITADO POR UNANIMIDADE.",
+    "04.01 Sugestão. Em votação, a sugestão NÃO FOI APROVADA POR MAIORIA.",
+    "04.01 Sugestão. A sugestão foi votada e NÃO APROVADA POR MAIORIA.",
+    "9 Parecer. Após a leitura, o parecer foi colocado em votação e rejeitado por unanimidade.",
+    "11 Impugnação. Após discussão, a solicitação de impugnação foi colocada em votação e não aprovada por maioria absoluta do Conselho Departamental, com um voto favorável do Conselheiro Professor PESSOA_166322 .",
+    "7 Parecer. Após discussão, o parecer foi colocado em votação e rejeitado pela maioria dos presentes.",
+    "8 Proposta. A proposta do Prof. PESSOA_166034 foi colocada em votação e não foi aprovada.",
+    "17 Parecer. O parecer foi rejeitado devido a maioria ter votado contrário.",
+])
+def test_extrair_generico_rejeicao_em_frase_de_votacao_e_reprovado(texto):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).tipo_desfecho == "Reprovado"
+
+
+@pytest.mark.parametrize(("texto", "desfecho_indevido"), [
+    ("1.1 Tema. O parecer relata que o pedido foi indeferido pela maioria das instâncias anteriores.", "Reprovado"),
+    ("1.1 Tema. O relatório informa que a maioria dos alunos foi aprovada na disciplina.", "Aprovado"),
+])
+def test_extrair_generico_maioria_fora_de_votacao_nao_define_desfecho(texto, desfecho_indevido):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico(texto, None).tipo_desfecho != desfecho_indevido
+
+
+def test_extrair_generico_rejeitado_e_depois_aprovado_vale_o_ultimo():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "3.22 Repasse. Posto em discussão e votação, o parecer foi rejeitado por maioria e foi aprovada "
+        "a dispensa de repasse de recursos destinados ao Desenvolvimento de Ensino."
+    )
+    assert extrair_generico(texto, None).tipo_desfecho == "Aprovado"
+
+
+def test_extrair_generico_cedula_aprovado_ou_nao_aprovado_nao_gera_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = (
+        "2.1 Votação. A votação será feita pelos membros da Câmara Departamental respondendo da seguinte "
+        "forma: 1 Aprovação da Ata: 1.1 APROVADO ou NÃO APROVADO;"
+    )
+    assert extrair_generico(texto, None).tipo_desfecho is None
+
+
+def test_extrair_generico_rejeitado_sem_marca_de_votacao_nao_gera_desfecho():
+    from app.ingestion.enriquecedor import extrair_generico
+
+    assert extrair_generico("1.1 Tema. O pedido anterior foi rejeitado pelo setor.", None).tipo_desfecho is None
+
+
+def test_extrair_ct_nao_aprovado_e_reprovado():
+    from app.ingestion.enriquecedor import extrair_ct
+
+    campos = extrair_ct("PAUTA 6: PROCESSO_31739 - Banca. Decisão: Não aprovado(a) por maioria.", date(2025, 6, 6))
+    assert campos.tipo_desfecho == "Reprovado"
+    assert campos.resultado_votacao == "por maioria."
+    assert campos.assunto == "PROCESSO_31739 - Banca"
+
+
+def test_extrair_generico_item_longo_nao_tem_custo_quadratico():
+    import time
+
+    from app.ingestion.enriquecedor import extrair_generico
+
+    texto = "O Prof. PESSOA_0001 apresentou o processo nº 123. " * 4000 + "Em votação, aprovado por unanimidade."
+    inicio = time.perf_counter()
+    campos = extrair_generico(texto, None)
+    assert time.perf_counter() - inicio < 1
+    assert campos.resultado_votacao == "Em votação, aprovado por unanimidade"
+
+
+@pytest.mark.parametrize("frase", [
+    "Reprovado.", "Rejeitado.", "Indeferido.", "Não aprovado.", "INDEFERIDO por falta de apresentação de trabalho.",
+])
+def test_extrair_generico_rejeicao_no_inicio_da_frase_vale_sem_marca_de_votacao(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(f"1.1 Pedido de afastamento do professor PESSOA_0001. {frase}", None, secao="PAUTA")
+    assert campos.tipo_desfecho == "Reprovado"
+
+
+@pytest.mark.parametrize("frase", [
+    "Recurso contra o pedido que foi indeferido pela comissão no semestre passado.",
+    "Não foi aprovado ainda o orçamento pela PROAD, então o pedido aguarda.",
+])
+def test_extrair_generico_rejeicao_fora_da_forma_de_veredito_sem_marca_de_votacao_nao_vale(frase):
+    from app.ingestion.enriquecedor import extrair_generico
+
+    campos = extrair_generico(f"1.1 Pedido de afastamento do professor PESSOA_0001. {frase}", None, secao="PAUTA")
+    assert campos.tipo_desfecho is None

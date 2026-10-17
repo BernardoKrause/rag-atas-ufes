@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import random
 from pathlib import Path
@@ -16,6 +17,7 @@ from app.models.item_pauta import ItemPauta
 SEMENTE_AMOSTRAGEM = 42
 LIMITE_ESTRATO_SUPLEMENTAR = 8
 DESFECHOS_RAROS = ("Reprovado", "Adiado")
+N_POR_TIPO = 15
 
 
 def _sortear(
@@ -33,20 +35,43 @@ def _sortear(
     return escolhidos
 
 
-def amostrar_itens(pares: list[tuple[Documento, ItemPauta]], n_por_variante: int) -> list[tuple[Documento, ItemPauta]]:
-    """Estratificacao por variante mais estratos suplementares para os campos
-    raros: no corpus real ato_emitido aparece em 72/3552 itens e
-    departamento_origem em 113/3552, entao uma amostra puramente estratificada
-    por variante quase nunca cobre justamente os campos com menos calibracao."""
-    por_variante: dict[tuple[str, str], list[tuple[Documento, ItemPauta]]] = {}
+def _sortear_por_tipo(
+    pares: list[tuple[Documento, ItemPauta]],
+    n_por_tipo: int,
+    ja_escolhidos: set[str],
+    aleatorio: random.Random,
+) -> list[tuple[Documento, ItemPauta]]:
+    por_tipo: dict[str, dict[str, list[tuple[Documento, ItemPauta]]]] = {}
     for documento, item in pares:
-        por_variante.setdefault((documento.tipo_orgao, documento.centro), []).append((documento, item))
+        por_tipo.setdefault(documento.tipo_orgao, {}).setdefault(documento.centro, []).append((documento, item))
 
-    aleatorio = random.Random(SEMENTE_AMOSTRAGEM)
-    ja_escolhidos: set[str] = set()
     amostra = []
-    for grupo in por_variante.values():
-        amostra.extend(_sortear(grupo, n_por_variante, ja_escolhidos, aleatorio))
+    for tipo in sorted(por_tipo):
+        filas = [aleatorio.sample(grupo, len(grupo)) for _, grupo in sorted(por_tipo[tipo].items())]
+        escolhidos: list[tuple[Documento, ItemPauta]] = []
+        while len(escolhidos) < n_por_tipo and any(filas):
+            for fila in filas:
+                if fila and len(escolhidos) < n_por_tipo:
+                    par = fila.pop()
+                    if par[1].item_id_canonico not in ja_escolhidos:
+                        ja_escolhidos.add(par[1].item_id_canonico)
+                        escolhidos.append(par)
+        amostra.extend(escolhidos)
+    return amostra
+
+
+def amostrar_itens(
+    pares: list[tuple[Documento, ItemPauta]],
+    n_por_tipo: int,
+    semente: int = SEMENTE_AMOSTRAGEM,
+    excluir: set[str] | frozenset[str] = frozenset(),
+) -> list[tuple[Documento, ItemPauta]]:
+    # TCC1: tipos A-D em proporcao equivalente; estratos suplementares porque
+    # campos raros (ato_emitido, departamento_origem) quase nunca caem na amostra base
+    pares = [p for p in pares if p[1].item_id_canonico not in excluir]
+    aleatorio = random.Random(semente)
+    ja_escolhidos: set[str] = set()
+    amostra = _sortear_por_tipo(pares, n_por_tipo, ja_escolhidos, aleatorio)
 
     suplementares: list[tuple[list[tuple[Documento, ItemPauta]], int | None]] = [
         ([p for p in pares if p[1].ato_emitido], LIMITE_ESTRATO_SUPLEMENTAR),
@@ -59,6 +84,17 @@ def amostrar_itens(pares: list[tuple[Documento, ItemPauta]], n_por_variante: int
     return amostra
 
 
+def filtrar_por_ids(pares: list[tuple[Documento, ItemPauta]], ids: set[str]) -> list[tuple[Documento, ItemPauta]]:
+    return [p for p in pares if p[1].item_id_canonico in ids]
+
+
+def _item_veio_de_ocr(documento: Documento, item: ItemPauta) -> bool:
+    if not documento.paginas_ocr or item.pagina_inicio is None:
+        return False
+    fim = item.pagina_fim if item.pagina_fim is not None else item.pagina_inicio
+    return any(item.pagina_inicio <= pagina <= fim for pagina in documento.paginas_ocr)
+
+
 def gerar_linha_csv(documento: Documento, item: ItemPauta, relacoes_assunto: list[str], processos: list[str]) -> dict:
     return {
         "item_id_canonico": item.item_id_canonico,
@@ -67,6 +103,7 @@ def gerar_linha_csv(documento: Documento, item: ItemPauta, relacoes_assunto: lis
         "centro": documento.centro,
         "orgao": documento.orgao,
         "pagina": item.pagina_inicio,
+        "ocr": "sim" if _item_veio_de_ocr(documento, item) else "nao",
         "trecho": item.texto[:300],
         "assunto": item.assunto,
         "departamento_origem": item.departamento_origem,
@@ -83,13 +120,26 @@ def gerar_linha_csv(documento: Documento, item: ItemPauta, relacoes_assunto: lis
 
 
 def exportar_csv(caminho: Path, linhas: list[dict]) -> None:
+    if not linhas:
+        print("nenhum item correspondente; nada foi gravado.")
+        return
     with open(caminho, "w", newline="", encoding="utf-8") as arquivo:
         escritor = csv.DictWriter(arquivo, fieldnames=list(linhas[0].keys()))
         escritor.writeheader()
         escritor.writerows(linhas)
 
 
+def _ler_ids(caminho: Path) -> set[str]:
+    return {linha.strip() for linha in caminho.read_text(encoding="utf-8").splitlines() if linha.strip()}
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ids", type=Path, help="arquivo com um item_id_canonico por linha (revalidacao)")
+    parser.add_argument("--semente", type=int, default=SEMENTE_AMOSTRAGEM)
+    parser.add_argument("--excluir", type=Path, help="arquivo com os item_id_canonico que nao podem ser sorteados")
+    args = parser.parse_args()
+
     engine = create_engine(settings.database_url)
     Sessao = sessionmaker(bind=engine)
     driver = obter_driver()
@@ -101,7 +151,13 @@ def main() -> None:
                 for documento, itens in carregar_documentos_com_itens(sessao)
                 for item in itens
             ]
-            amostra = amostrar_itens(pares, n_por_variante=5)
+            if args.ids:
+                amostra = filtrar_por_ids(pares, _ler_ids(args.ids))
+                destino = Path("validacao_revalidacao.csv")
+            else:
+                excluir = _ler_ids(args.excluir) if args.excluir else set()
+                amostra = amostrar_itens(pares, n_por_tipo=N_POR_TIPO, semente=args.semente, excluir=excluir)
+                destino = Path("validacao_manual_grafo.csv")
 
             linhas = []
             for documento, item in amostra:
@@ -123,8 +179,9 @@ def main() -> None:
                     [p["token"] for p in processos],
                 ))
 
-            exportar_csv(Path("validacao_manual_grafo.csv"), linhas)
-            print(f"{len(linhas)} itens amostrados para validacao manual.")
+            exportar_csv(destino, linhas)
+            if linhas:
+                print(f"{len(linhas)} itens exportados para {destino}.")
     finally:
         driver.close()
 

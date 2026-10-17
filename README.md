@@ -23,8 +23,24 @@ Desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computaç
 | LLM (dev) | Ollama (local) |
 | LLM (avaliação final) | Claude 3 Sonnet (API Anthropic) |
 
+A extração usa OCR (Tesseract, português) só nas páginas sem camada de texto, como atas escaneadas ou PDFs com o texto convertido em desenho.
+Instale com `brew install tesseract tesseract-lang` (macOS) ou `apt install tesseract-ocr tesseract-ocr-por` (Linux).
+A ingestão completa exige o Tesseract: sem ele, a extração para na primeira página sem camada de texto (atas escaneadas).
+
 Todos os serviços de dados rodam via Docker Compose (self-hosted).
 Os testes usam um Neo4j separado (`neo4j-teste`, porta 7688), então rodar a suíte não apaga o grafo de desenvolvimento.
+O Postgres é o mesmo do desenvolvimento: cada teste roda numa transação desfeita no fim, sem deixar resíduo. Por isso não rode a suíte em paralelo nem durante a ingestão completa, porque as transações podem travar umas às outras.
+
+## Ingestão do corpus
+
+Para processar o corpus inteiro de ponta a ponta (extração e anonimização, segmentação, enriquecimento, indexação no Qdrant e grafo no Neo4j):
+
+```bash
+cd backend
+python -m app.ingestion.completa
+```
+
+Todas as etapas são idempotentes, então a reexecução atualiza o que mudou sem duplicar nada. Ao final, o comando lista os documentos com OCR e os documentos sem item de pauta.
 
 ## Frontend
 
@@ -58,8 +74,8 @@ Projeto em desenvolvimento incremental, dividido em partes (um PR por parte).
 | 7 | Geração com citação de fontes | Concluída |
 | 8 | API de consulta | Concluída |
 | 9 | Frontend | Concluída |
-| 10 | Ingestão completa do corpus e validação manual | Próxima |
-| 11 | Avaliação final | Pendente |
+| 10 | Ingestão completa do corpus e validação manual | Concluída |
+| 11 | Avaliação final | Próxima |
 
 ## Licença
 
