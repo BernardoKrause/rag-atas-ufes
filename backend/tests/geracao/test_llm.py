@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 
 import httpx
 import pytest
@@ -203,3 +204,65 @@ def test_anthropic_real_responde_texto():
     )
     saida = cliente.gerar("Responda com uma palavra.", "Diga olá.")
     assert saida.texto.strip()
+
+
+class _MensagensFalsas:
+    def __init__(self):
+        self.kwargs = None
+
+    def create(self, **kwargs):
+        self.kwargs = kwargs
+        return SimpleNamespace(
+            content=[SimpleNamespace(type="text", text="ok [1]")],
+            stop_reason="end_turn",
+            usage=SimpleNamespace(input_tokens=120, output_tokens=30),
+        )
+
+
+def _cliente_anthropic_falso(esforco=None):
+    cliente = ClienteAnthropic(
+        "claude-sonnet-5-5", timeout=5, max_tokens=100, api_key="x", esforco=esforco
+    )
+    mensagens = _MensagensFalsas()
+    cliente._cliente = SimpleNamespace(messages=mensagens)
+    return cliente, mensagens
+
+
+def test_anthropic_registra_tokens_de_entrada_e_saida():
+    cliente, _ = _cliente_anthropic_falso()
+
+    saida = cliente.gerar("sistema", "usuario")
+
+    assert (saida.tokens_entrada, saida.tokens_saida) == (120, 30)
+
+
+def test_anthropic_envia_esforco_quando_configurado():
+    cliente, mensagens = _cliente_anthropic_falso(esforco="low")
+
+    cliente.gerar("sistema", "usuario")
+
+    assert mensagens.kwargs["output_config"] == {"effort": "low"}
+    assert "temperature" not in mensagens.kwargs
+
+
+def test_anthropic_sem_esforco_nao_envia_output_config():
+    cliente, mensagens = _cliente_anthropic_falso()
+
+    cliente.gerar("sistema", "usuario")
+
+    assert "output_config" not in mensagens.kwargs
+
+
+def test_criar_cliente_llm_repassa_esforco_ao_anthropic():
+    config = settings.model_copy(
+        update={
+            "llm_provedor": "anthropic",
+            "llm_modelo": "claude-sonnet-5-5",
+            "anthropic_api_key": SecretStr("chave-de-teste"),
+            "llm_esforco": "medium",
+        }
+    )
+
+    cliente = criar_cliente_llm(config)
+
+    assert cliente._esforco == "medium"
