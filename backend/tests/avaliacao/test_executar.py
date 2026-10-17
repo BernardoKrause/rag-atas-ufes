@@ -1,0 +1,51 @@
+import anthropic
+import httpx
+import pytest
+
+from app.avaliacao import executar
+
+
+def test_etapa_desconhecida_sai_com_erro():
+    with pytest.raises(SystemExit):
+        executar.main(["inventada"])
+
+
+def test_etapa_de_rodada_exige_rodada(capsys):
+    assert executar.main(["recuperacao"]) == 1
+    assert "--rodada" in capsys.readouterr().err
+
+
+def test_geracao_recusa_modelo_diferente(monkeypatch, capsys, tmp_path):
+    monkeypatch.setattr(executar.settings, "llm_provedor", "ollama")
+    monkeypatch.setattr(executar.settings, "llm_modelo", "qwen2.5:7b")
+    gt = tmp_path / "gt.yaml"
+    gt.write_text("perguntas: []\n", encoding="utf-8")
+
+    assert executar.main(["geracao", "--rodada", "t", "--ground-truth", str(gt)]) == 1
+    assert "claude-sonnet-5-5" in capsys.readouterr().err
+
+
+def test_filtra_perguntas_por_id(tmp_path):
+    gt = tmp_path / "gt.yaml"
+    gt.write_text(
+        "perguntas:\n  - {id: q1, categoria: intra_exata}\n  - {id: q2, categoria: intra_exata}\n",
+        encoding="utf-8",
+    )
+
+    perguntas = executar.carregar_perguntas(gt, "q2")
+
+    assert [p.id for p in perguntas] == ["q2"]
+
+
+def test_falha_da_api_devolve_1_com_mensagem_de_retomada(monkeypatch, capsys, tmp_path):
+    gt = tmp_path / "gt.yaml"
+    gt.write_text("perguntas: []\n", encoding="utf-8")
+    erro = anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com"))
+
+    def levantar(args, perguntas):
+        raise erro
+
+    monkeypatch.setattr(executar, "_rodar", levantar)
+
+    assert executar.main(["recuperacao", "--rodada", "t", "--ground-truth", str(gt)]) == 1
+    assert "retomar" in capsys.readouterr().err
