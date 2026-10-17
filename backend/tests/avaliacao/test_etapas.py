@@ -1,3 +1,7 @@
+import anthropic
+import httpx
+import pytest
+
 from app.avaliacao.etapas import (
     CONFIGURACOES,
     etapa_geracao,
@@ -121,6 +125,25 @@ def test_geracao_registra_erro_e_segue(tmp_path):
     registros = ler_jsonl(saida)
     assert total == 2
     assert all(r["erro"] == "recusou" and r["texto"] is None for r in registros)
+
+
+def test_geracao_interrompe_em_falha_da_api_sem_gravar_o_par(tmp_path):
+    saida = tmp_path / "geracao.jsonl"
+    chamadas = []
+
+    def responder_fn(pergunta, camadas):
+        chamadas.append(camadas)
+        if len(chamadas) == 2:
+            conexao = anthropic.APIConnectionError(
+                request=httpx.Request("POST", "https://api.anthropic.com")
+            )
+            raise ErroGeracao("falha") from conexao
+        return _detalhada()
+
+    with pytest.raises(ErroGeracao):
+        etapa_geracao([_pergunta("q1")], responder_fn, MAPA, saida, "m")
+
+    assert [(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)] == [("q1", "A")]
 
 
 def test_pool_une_configs_e_guarda_melhor_rank():

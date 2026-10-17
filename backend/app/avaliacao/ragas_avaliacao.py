@@ -5,6 +5,7 @@ import math
 import typing as t
 from pathlib import Path
 
+import anthropic
 from ragas.embeddings.base import BaseRagasEmbedding
 from ragas.llms.base import InstructorBaseRagasLLM
 from ragas.metrics.collections import (
@@ -92,6 +93,8 @@ def criar_metricas(juiz: JuizAnthropic, embeddings: BaseRagasEmbedding) -> dict:
 async def _pontuar(metrica, **kwargs) -> tuple[float | None, str | None]:
     try:
         resultado = await metrica.ascore(**kwargs)
+    except anthropic.APIError:
+        raise
     except Exception as erro:
         return None, f"{type(erro).__name__}: {erro}"
     valor = float(resultado.value)
@@ -135,19 +138,25 @@ def etapa_ragas(
     por_id = {pergunta.id: pergunta for pergunta in perguntas}
     feitos = {(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)}
     total = 0
-    for registro in ler_jsonl(geracao):
-        pergunta = por_id.get(registro["pergunta_id"])
-        chave = (registro["pergunta_id"], registro["config"])
-        if pergunta is None or pergunta.categoria == "sem_evidencia" or registro["erro"] or chave in feitos:
-            continue
-        antes = (juiz.tokens_entrada, juiz.tokens_saida)
-        resultado = asyncio.run(avaliar_registro(metricas, pergunta, registro))
-        anexar_jsonl(saida, {
-            "pergunta_id": registro["pergunta_id"],
-            "config": registro["config"],
-            **resultado,
-            "tokens_juiz_entrada": juiz.tokens_entrada - antes[0],
-            "tokens_juiz_saida": juiz.tokens_saida - antes[1],
-        })
-        total += 1
+    with asyncio.Runner() as executor:
+        for registro in ler_jsonl(geracao):
+            pergunta = por_id.get(registro["pergunta_id"])
+            chave = (registro["pergunta_id"], registro["config"])
+            if (
+                pergunta is None
+                or pergunta.categoria == "sem_evidencia"
+                or registro["erro"]
+                or chave in feitos
+            ):
+                continue
+            antes = (juiz.tokens_entrada, juiz.tokens_saida)
+            resultado = executor.run(avaliar_registro(metricas, pergunta, registro))
+            anexar_jsonl(saida, {
+                "pergunta_id": registro["pergunta_id"],
+                "config": registro["config"],
+                **resultado,
+                "tokens_juiz_entrada": juiz.tokens_entrada - antes[0],
+                "tokens_juiz_saida": juiz.tokens_saida - antes[1],
+            })
+            total += 1
     return total

@@ -2,12 +2,15 @@ import asyncio
 import math
 from types import SimpleNamespace
 
+import anthropic
+import httpx
 import pytest
 from pydantic import BaseModel
 
 from app.avaliacao.ground_truth import PerguntaReferencia
 from app.avaliacao.jsonl import anexar_jsonl, ler_jsonl
 from app.avaliacao.ragas_avaliacao import (
+    METRICAS,
     MODELO_JUIZ,
     JuizAnthropic,
     avaliar_registro,
@@ -184,6 +187,43 @@ def test_etapa_ragas_retoma_e_pula_sem_evidencia_e_erros(tmp_path):
     assert total == 1
     assert [(r["pergunta_id"], r["config"]) for r in registros] == [("q1", "A"), ("q1", "B")]
     assert "tokens_juiz_entrada" in registros[1]
+
+
+def test_etapa_ragas_usa_um_unico_event_loop(tmp_path):
+    ids = []
+
+    class _MetricaLoop:
+        async def ascore(self, **kwargs):
+            ids.append(asyncio.get_running_loop())
+            return SimpleNamespace(value=0.5)
+
+    geracao = tmp_path / "geracao.jsonl"
+    saida = tmp_path / "ragas.jsonl"
+    anexar_jsonl(geracao, _registro(pergunta_id="q1", config="A"))
+    anexar_jsonl(geracao, _registro(pergunta_id="q1", config="B"))
+    juiz, _ = _juiz()
+    metricas = {nome: _MetricaLoop() for nome in METRICAS}
+
+    etapa_ragas([_pergunta("q1")], geracao, saida, metricas, juiz)
+
+    assert len(ids) == 8
+    assert all(loop is ids[0] for loop in ids)
+
+
+def test_etapa_ragas_interrompe_em_falha_da_api_sem_gravar_o_par(tmp_path):
+    geracao = tmp_path / "geracao.jsonl"
+    saida = tmp_path / "ragas.jsonl"
+    anexar_jsonl(geracao, _registro(pergunta_id="q1", config="A"))
+    anexar_jsonl(geracao, _registro(pergunta_id="q1", config="B"))
+    anexar_jsonl(saida, {"pergunta_id": "q1", "config": "A"})
+    conexao = anthropic.APIConnectionError(request=httpx.Request("POST", "https://x"))
+    juiz, _ = _juiz()
+    metricas = _metricas(faithfulness=_MetricaFalsa(erro=conexao))
+
+    with pytest.raises(anthropic.APIConnectionError):
+        etapa_ragas([_pergunta("q1")], geracao, saida, metricas, juiz)
+
+    assert [(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)] == [("q1", "A")]
 
 
 def _tem_chave():

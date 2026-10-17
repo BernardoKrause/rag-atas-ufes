@@ -4,6 +4,9 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 
+import anthropic
+import httpx
+
 from app.avaliacao.ground_truth import PerguntaReferencia
 from app.avaliacao.jsonl import anexar_jsonl, ler_jsonl
 from app.avaliacao.metricas import agrupar_fragmentos
@@ -95,6 +98,8 @@ def etapa_geracao(
                 detalhada = responder_fn(pergunta.pergunta, CONFIGURACOES[config])
                 registro = _registro_geracao(pergunta.id, config, modelo, detalhada, mapa_logico)
             except ErroGeracao as erro:
+                if isinstance(erro.__cause__, (anthropic.APIError, httpx.HTTPError)):
+                    raise
                 logger.warning("geração falhou em %s/%s: %s", pergunta.id, config, erro)
                 registro = _registro_erro(pergunta.id, config, modelo, erro)
             anexar_jsonl(saida, registro)
