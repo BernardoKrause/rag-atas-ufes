@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 import anthropic
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import sessionmaker
 
 from app.avaliacao.etapas import etapa_geracao, etapa_recuperacao, montar_pool
@@ -21,6 +21,7 @@ from app.avaliacao.relatorio import (
 )
 from app.core.config import REPO_ROOT, settings
 from app.geracao.tipos import ErroGeracao
+from app.models.documento import Documento
 
 MODELO_GERADOR = "claude-sonnet-5-5"
 DIR_AVALIACAO = REPO_ROOT / "docs" / "avaliacao"
@@ -75,6 +76,31 @@ def _linhas_pool(linhas, descricoes):
     return saida
 
 
+def problemas_dos_indices(
+    total_documentos: int, total_atas_grafo: int, total_pontos_qdrant: int
+) -> list[str]:
+    problemas = []
+    if total_documentos == 0:
+        problemas.append("nenhum documento no Postgres")
+    if total_atas_grafo != total_documentos:
+        problemas.append(
+            f"o grafo tem {total_atas_grafo} atas e o Postgres {total_documentos} documentos; "
+            "reconstrua o grafo (python -m app.grafo.construtor)"
+        )
+    if total_pontos_qdrant == 0:
+        problemas.append("o Qdrant não tem pontos; reindexe o corpus")
+    return problemas
+
+
+def _verificar_indices(sessao, cliente_qdrant, driver) -> list[str]:
+    from app.grafo.cliente import executar_leitura
+
+    total_documentos = sessao.scalar(select(func.count()).select_from(Documento))
+    total_atas = executar_leitura(driver, "MATCH (n:Ata) RETURN count(n) AS total")[0]["total"]
+    total_pontos = cliente_qdrant.count(settings.qdrant_collection, exact=True).count
+    return problemas_dos_indices(total_documentos, total_atas, total_pontos)
+
+
 def _rodar(args, perguntas) -> int:
     pasta = DIR_AVALIACAO / "resultados" / (args.rodada or "")
     Sessao, cliente_qdrant, driver = _clientes()
@@ -84,6 +110,11 @@ def _rodar(args, perguntas) -> int:
                 erros = validar_ground_truth(perguntas, set(mapa_item_logico(sessao).values()))
                 print("\n".join(erros) or f"{len(perguntas)} perguntas válidas")
                 return 1 if erros else 0
+            if args.etapa in ("pool", "recuperacao", "geracao"):
+                problemas = _verificar_indices(sessao, cliente_qdrant, driver)
+                if problemas:
+                    print("\n".join(problemas), file=sys.stderr)
+                    return 1
             if args.etapa == "pool":
                 linhas = montar_pool(
                     perguntas,
@@ -198,11 +229,23 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
+    if args.etapa == "ragas" and not (
+        settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value().strip()
+    ):
+        print("a etapa ragas exige ANTHROPIC_API_KEY no .env", file=sys.stderr)
+        return 1
     try:
         return _rodar(args, carregar_perguntas(args.ground_truth, args.perguntas))
-    except (anthropic.APIError, ErroGeracao) as erro:
+    except anthropic.APIError as erro:
         print(
             f"falha na API da Anthropic: {erro}. Rode o mesmo comando de novo para retomar.",
+            file=sys.stderr,
+        )
+        return 1
+    except ErroGeracao as erro:
+        print(
+            f"erro na geração: {erro}. Se for falha da API, rode o mesmo comando de novo "
+            "para retomar.",
             file=sys.stderr,
         )
         return 1
