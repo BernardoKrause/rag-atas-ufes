@@ -132,6 +132,28 @@ def test_custo():
     assert valores["total_usd"] == pytest.approx(9.0)
 
 
+def test_custo_de_modelo_local_e_zero():
+    rag = [{"tokens_juiz_entrada": 1_000_000, "tokens_juiz_saida": 100_000}]
+    ger = [_ger("q1", "A", False, tin=1_000_000, tout=100_000)]
+
+    valores = custo(ger, rag, "qwen2.5:7b", "qwen2.5:14b")
+
+    assert valores == {"gerador_usd": 0, "juiz_usd": 0, "total_usd": 0}
+
+
+def test_relatorio_mostra_tokens_e_custo_zero_para_modelos_locais():
+    rag = [{"pergunta_id": "q1", "config": "A", "tokens_juiz_entrada": 7000,
+            "tokens_juiz_saida": 50, "erros": {}, "faithfulness": None, "answer_relevancy": None,
+            "context_precision": None, "context_recall": None}]
+
+    texto = montar_relatorio(PERGUNTAS, REC, GER, rag, "qwen2.5:7b", "qwen2.5:14b")
+
+    custo_texto = texto.split("## Custo")[1]
+    assert "US$ 0,00 (modelo local)" in custo_texto
+    assert "7000" in custo_texto
+    assert "qwen2.5:14b" in custo_texto
+
+
 DESCRICOES = {
     "i1": {
         "orgao": "CT",

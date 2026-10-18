@@ -98,8 +98,15 @@ def taxas_abstencao(
 
 
 def _usd(modelo: str, entrada: int, saida: int) -> float:
+    if modelo not in PRECOS_POR_MTOK:
+        return 0
     preco_entrada, preco_saida = PRECOS_POR_MTOK[modelo]
     return (entrada * preco_entrada + saida * preco_saida) / 1_000_000
+
+
+def _preco(valor: float, modelo: str) -> str:
+    texto = f"US$ {_num(valor, 2)}"
+    return texto if modelo in PRECOS_POR_MTOK else f"{texto} (modelo local)"
 
 
 def custo(
@@ -237,6 +244,14 @@ def montar_relatorio(
 ) -> str:
     taxas = taxas_abstencao(perguntas, ger)
     valores_custo = custo(ger, rag, modelo_gerador, modelo_juiz)
+    tokens_gerador = (
+        sum(r["tokens_entrada"] or 0 for r in ger),
+        sum(r["tokens_saida"] or 0 for r in ger),
+    )
+    tokens_juiz = (
+        sum(r.get("tokens_juiz_entrada") or 0 for r in rag),
+        sum(r.get("tokens_juiz_saida") or 0 for r in rag),
+    )
     erros_geracao = sum(1 for r in ger if r["erro"] and r["erro"] != "truncada")
     truncadas = sum(1 for r in ger if r["truncada"])
     erros_ragas = sum(len(r["erros"]) for r in rag)
@@ -266,8 +281,12 @@ def montar_relatorio(
             "",
             "## Custo",
             "",
-            f"Gerador ({modelo_gerador}): US$ {_num(valores_custo['gerador_usd'], 2)}. "
-            f"Juiz ({modelo_juiz}): US$ {_num(valores_custo['juiz_usd'], 2)}. "
+            f"Gerador ({modelo_gerador}): {tokens_gerador[0]} tokens de entrada e "
+            f"{tokens_gerador[1]} de saída; {_preco(valores_custo['gerador_usd'], modelo_gerador)}.",
+            "",
+            f"Juiz ({modelo_juiz}): {tokens_juiz[0]} tokens de entrada e "
+            f"{tokens_juiz[1]} de saída; {_preco(valores_custo['juiz_usd'], modelo_juiz)}.",
+            "",
             f"Total: US$ {_num(valores_custo['total_usd'], 2)}.",
         ]
     )
