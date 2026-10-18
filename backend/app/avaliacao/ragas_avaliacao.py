@@ -6,6 +6,7 @@ import typing as t
 from pathlib import Path
 
 import anthropic
+import httpx
 from ragas.embeddings.base import BaseRagasEmbedding
 from ragas.llms.base import InstructorBaseRagasLLM
 from ragas.metrics.collections import (
@@ -19,7 +20,8 @@ from app.avaliacao.ground_truth import PerguntaReferencia
 from app.avaliacao.jsonl import anexar_jsonl, ler_jsonl
 from app.ingestion.indexador import carregar_modelo, gerar_embedding, tokenizar_texto
 
-MODELO_JUIZ = "claude-opus-5-5"
+MODELO_JUIZ = "qwen2.5:14b"
+MODELO_JUIZ_ANTHROPIC = "claude-opus-5-5"
 METRICAS = ("faithfulness", "answer_relevancy", "context_precision", "context_recall")
 SISTEMA_JUIZ = (
     "Você avalia respostas de um sistema de perguntas sobre atas de reuniões da UFES. "
@@ -34,7 +36,7 @@ class JuizAnthropic(InstructorBaseRagasLLM):
     def __init__(
         self,
         cliente,
-        modelo: str = MODELO_JUIZ,
+        modelo: str = MODELO_JUIZ_ANTHROPIC,
         max_tokens: int = 16000,
         esforco: str = "medium",
         guardar_saidas: bool = False,
@@ -69,6 +71,51 @@ class JuizAnthropic(InstructorBaseRagasLLM):
         return asyncio.run(self.agenerate(prompt, response_model))
 
 
+class JuizOllama(InstructorBaseRagasLLM):
+    def __init__(
+        self,
+        base_url: str,
+        modelo: str = MODELO_JUIZ,
+        num_ctx: int = 16384,
+        timeout: float = 600.0,
+        transport: httpx.AsyncBaseTransport | None = None,
+        guardar_saidas: bool = False,
+    ):
+        self.cliente = httpx.AsyncClient(base_url=base_url, timeout=timeout, transport=transport)
+        self.modelo = modelo
+        self.num_ctx = num_ctx
+        self.guardar_saidas = guardar_saidas
+        self.tokens_entrada = 0
+        self.tokens_saida = 0
+        self.saidas: list[dict] = []
+
+    async def agenerate(self, prompt: str, response_model: type[T]) -> T:
+        resposta = await self.cliente.post(
+            "/api/chat",
+            json={
+                "model": self.modelo,
+                "stream": False,
+                "messages": [
+                    {"role": "system", "content": SISTEMA_JUIZ},
+                    {"role": "user", "content": prompt},
+                ],
+                "format": response_model.model_json_schema(),
+                "options": {"temperature": 0, "num_ctx": self.num_ctx},
+            },
+        )
+        resposta.raise_for_status()
+        corpo = resposta.json()
+        saida = response_model.model_validate_json(corpo["message"]["content"])
+        self.tokens_entrada += corpo.get("prompt_eval_count", 0)
+        self.tokens_saida += corpo.get("eval_count", 0)
+        if self.guardar_saidas:
+            self.saidas.append(saida.model_dump())
+        return saida
+
+    def generate(self, prompt: str, response_model: type[T]) -> T:
+        return asyncio.run(self.agenerate(prompt, response_model))
+
+
 class EmbeddingsSerafim(BaseRagasEmbedding):
     def __init__(self):
         super().__init__()
@@ -81,7 +128,7 @@ class EmbeddingsSerafim(BaseRagasEmbedding):
         return self.embed_text(text)
 
 
-def criar_metricas(juiz: JuizAnthropic, embeddings: BaseRagasEmbedding) -> dict:
+def criar_metricas(juiz: InstructorBaseRagasLLM, embeddings: BaseRagasEmbedding) -> dict:
     return {
         "faithfulness": Faithfulness(llm=juiz),
         "answer_relevancy": AnswerRelevancy(llm=juiz, embeddings=embeddings),
@@ -93,7 +140,7 @@ def criar_metricas(juiz: JuizAnthropic, embeddings: BaseRagasEmbedding) -> dict:
 async def _pontuar(metrica, **kwargs) -> tuple[float | None, str | None]:
     try:
         resultado = await metrica.ascore(**kwargs)
-    except anthropic.APIError:
+    except (anthropic.APIError, httpx.HTTPError):
         raise
     except Exception as erro:
         return None, f"{type(erro).__name__}: {erro}"
@@ -133,7 +180,7 @@ def etapa_ragas(
     geracao: Path,
     saida: Path,
     metricas: dict,
-    juiz: JuizAnthropic,
+    juiz: InstructorBaseRagasLLM,
 ) -> int:
     por_id = {pergunta.id: pergunta for pergunta in perguntas}
     feitos = {(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)}

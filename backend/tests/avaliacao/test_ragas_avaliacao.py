@@ -1,18 +1,22 @@
 import asyncio
+import json
 import math
 from types import SimpleNamespace
 
 import anthropic
 import httpx
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from app.avaliacao.ground_truth import PerguntaReferencia
 from app.avaliacao.jsonl import anexar_jsonl, ler_jsonl
 from app.avaliacao.ragas_avaliacao import (
     METRICAS,
     MODELO_JUIZ,
+    MODELO_JUIZ_ANTHROPIC,
     JuizAnthropic,
+    JuizOllama,
+    _pontuar,
     avaliar_registro,
     etapa_ragas,
 )
@@ -48,7 +52,7 @@ def test_juiz_usa_structured_output_sem_sampling_nem_tool_choice():
     resultado = asyncio.run(juiz.agenerate("prompt", Saida))
 
     assert resultado == Saida(valor="oi")
-    assert mensagens.kwargs["model"] == MODELO_JUIZ
+    assert mensagens.kwargs["model"] == MODELO_JUIZ_ANTHROPIC
     assert mensagens.kwargs["output_format"] is Saida
     assert mensagens.kwargs["output_config"] == {"effort": "medium"}
     assert "português" in mensagens.kwargs["system"]
@@ -224,6 +228,84 @@ def test_etapa_ragas_interrompe_em_falha_da_api_sem_gravar_o_par(tmp_path):
         etapa_ragas([_pergunta("q1")], geracao, saida, metricas, juiz)
 
     assert [(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)] == [("q1", "A")]
+
+
+def _juiz_ollama(conteudo='{"valor": "oi"}', status=200, capturar=None, **kwargs):
+    def responder(request):
+        if capturar is not None:
+            capturar.append(json.loads(request.content))
+        corpo = {"message": {"content": conteudo}, "prompt_eval_count": 11, "eval_count": 5}
+        return httpx.Response(status, json=corpo)
+
+    return JuizOllama("http://ollama.falso", transport=httpx.MockTransport(responder), **kwargs)
+
+
+def test_juiz_ollama_envia_schema_e_opcoes_e_soma_tokens():
+    enviados = []
+    juiz = _juiz_ollama(capturar=enviados)
+
+    resultado = asyncio.run(juiz.agenerate("prompt", Saida))
+
+    assert resultado == Saida(valor="oi")
+    corpo = enviados[0]
+    assert corpo["model"] == MODELO_JUIZ == "qwen2.5:14b"
+    assert corpo["stream"] is False
+    assert corpo["format"] == Saida.model_json_schema()
+    assert corpo["options"] == {"temperature": 0, "num_ctx": 16384}
+    assert corpo["messages"][0]["role"] == "system"
+    assert "português" in corpo["messages"][0]["content"]
+    assert corpo["messages"][1] == {"role": "user", "content": "prompt"}
+    assert (juiz.tokens_entrada, juiz.tokens_saida) == (11, 5)
+
+
+def test_juiz_ollama_guarda_saidas_quando_pedido():
+    juiz = _juiz_ollama(guardar_saidas=True)
+
+    asyncio.run(juiz.agenerate("prompt", Saida))
+
+    assert juiz.saidas == [{"valor": "oi"}]
+
+
+def test_juiz_ollama_generate_sincrono():
+    assert _juiz_ollama().generate("prompt", Saida) == Saida(valor="oi")
+
+
+def test_juiz_ollama_conteudo_invalido_levanta_validation_error():
+    juiz = _juiz_ollama(conteudo='{"outro": 1}')
+
+    with pytest.raises(ValidationError):
+        asyncio.run(juiz.agenerate("prompt", Saida))
+
+
+def test_juiz_ollama_conteudo_invalido_vira_erro_de_metrica():
+    juiz = _juiz_ollama(conteudo="isto não é json")
+
+    class Metrica:
+        async def ascore(self, **kwargs):
+            return await juiz.agenerate("p", Saida)
+
+    valor, erro = asyncio.run(_pontuar(Metrica()))
+
+    assert valor is None
+    assert "ValidationError" in erro
+
+
+def test_juiz_ollama_status_500_propaga_por_etapa_ragas_sem_gravar_o_par(tmp_path):
+    geracao = tmp_path / "geracao.jsonl"
+    saida = tmp_path / "ragas.jsonl"
+    anexar_jsonl(geracao, _registro(pergunta_id="q1", config="A"))
+    juiz = _juiz_ollama(status=500)
+
+    class Metrica:
+        async def ascore(self, **kwargs):
+            return await juiz.agenerate("p", Saida)
+
+    metricas = _metricas(faithfulness=Metrica())
+
+    with pytest.raises(httpx.HTTPStatusError):
+        etapa_ragas([_pergunta("q1")], geracao, saida, metricas, juiz)
+
+    assert ler_jsonl(saida) == []
 
 
 def _tem_chave():
