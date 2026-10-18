@@ -55,7 +55,12 @@ class ClienteOllama:
             texto = corpo["message"]["content"]
         except (json.JSONDecodeError, KeyError, TypeError) as erro:
             raise ErroGeracao(f"resposta inesperada do Ollama: {erro}") from erro
-        return SaidaLLM(texto=texto, truncada=corpo.get("done_reason") == "length")
+        return SaidaLLM(
+            texto=texto,
+            truncada=corpo.get("done_reason") == "length",
+            tokens_entrada=corpo.get("prompt_eval_count"),
+            tokens_saida=corpo.get("eval_count"),
+        )
 
 
 class ClienteAnthropic:

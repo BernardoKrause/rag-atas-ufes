@@ -161,6 +161,22 @@ def test_geracao_interrompe_em_falha_da_api_sem_gravar_o_par(tmp_path):
     assert [(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)] == [("q1", "A")]
 
 
+def test_geracao_interrompe_em_falha_de_conexao_do_ollama_sem_gravar_o_par(tmp_path):
+    saida = tmp_path / "geracao.jsonl"
+    chamadas = []
+
+    def responder_fn(pergunta, camadas):
+        chamadas.append(camadas)
+        if len(chamadas) == 2:
+            raise ErroGeracao("falha") from httpx.ConnectError("recusada")
+        return _detalhada()
+
+    with pytest.raises(ErroGeracao):
+        etapa_geracao([_pergunta("q1")], responder_fn, MAPA, saida, "m")
+
+    assert [(r["pergunta_id"], r["config"]) for r in ler_jsonl(saida)] == [("q1", "A")]
+
+
 def test_pool_une_configs_e_guarda_melhor_rank():
     linhas = montar_pool([_pergunta("q1")], _recuperar_ids, MAPA, k=10)
 

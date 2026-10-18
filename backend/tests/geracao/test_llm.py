@@ -42,6 +42,17 @@ def test_ollama_envia_sistema_usuario_e_temperatura_zero():
     assert corpo["options"] == {"temperature": 0, "num_predict": 64, "num_ctx": 8192}
 
 
+def test_ollama_registra_tokens_de_entrada_e_saida():
+    cliente = _ollama_falso(
+        {"message": {"content": "ok"}, "done_reason": "stop",
+         "prompt_eval_count": 120, "eval_count": 30}
+    )
+
+    saida = cliente.gerar("s", "u")
+
+    assert (saida.tokens_entrada, saida.tokens_saida) == (120, 30)
+
+
 def test_ollama_marca_truncada_quando_done_reason_length():
     cliente = _ollama_falso({"message": {"content": "cortad"}, "done_reason": "length"})
     assert cliente.gerar("s", "u").truncada is True
