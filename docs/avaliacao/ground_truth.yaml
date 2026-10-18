@@ -1,0 +1,680 @@
+perguntas:
+- id: a01
+  categoria: intra_exata
+  origem: autor
+  pergunta: O Conselho Departamental do Centro de Artes aprovou o credenciamento da empresa júnior Archipolis Júnior?
+  resposta_referencia: Sim. Na reunião de 27/02/2025, o Conselho Departamental do Centro de Artes (CAR) aprovou por unanimidade o parecer favorável à ação de extensão e ao credenciamento da empresa júnior Archipolis Júnior, solicitado por um docente e já aprovado pelo DAU.
+  itens_relevantes:
+  - 1719_PAUTA_05
+  trechos_evidencia:
+  - sou de parecer favorável à aprovação da ação de extensão e ao credenciamento da Archipolis Júnior
+  tipo_dificuldade: termo exato no assunto (nome da empresa júnior)
+  observacao: Item recuperado em 1º lugar nas 4 configurações. O item 1717_PAUTA_06 (relatório técnico do projeto de extensão Archipolis, 18/06/2025) trata de outro assunto e foi julgado não relevante.
+- id: a02
+  categoria: intra_exata
+  origem: autor
+  pergunta: Qual foi a decisão do Conselho Departamental do CCE sobre o Projeto Político Pedagógico do curso de Licenciatura Intercultural Indígena?
+  resposta_referencia: Na reunião de 29/10/2013, o Conselho Departamental do CCE rejeitou, por maioria, o parecer da relatora que propunha devolver o processo ao Departamento de Matemática (DMAT) e, em seguida, aprovou a proposta de que o Conselho aprovasse o Projeto Político Pedagógico do curso de Licenciatura Intercultural Indígena, após encaminhar o processo ao DMAT para apensar a homologação do ad referendum da chefia do DMAT. O item está classificado como 'Reprovado', mas o que foi reprovado foi o parecer, não o projeto.
+  itens_relevantes:
+  - 1985_PAUTA_7
+  trechos_evidencia:
+  - o parecer foi colocado em votação e rejeitado pela maioria dos presentes
+  tipo_dificuldade: termo exato; desfecho do item ('Reprovado') induz a erro
+  observacao: O tipo_desfecho extraído é 'Reprovado', mas o texto mostra que o parecer foi rejeitado e o processo aprovado. Bom teste de leitura do texto em vez do rótulo.
+- id: a03
+  categoria: intra_exata
+  origem: autor
+  pergunta: Foi aprovada a criação da disciplina "Agricultura Digital" no Programa de Pós-Graduação em Agronomia do CCAE?
+  resposta_referencia: Sim. Em 13/02/2025, a proposta de criação da disciplina "Agricultura Digital" no âmbito do PPG em Agronomia (registrada nas atas do CCAE_DPV), com parecer favorável da Comissão de Ensino, foi aprovada por unanimidade.
+  itens_relevantes:
+  - 1927_ORDEM_DO_DIA_2.2
+  trechos_evidencia:
+  - Proposta de criação da disciplina “Agricultura Digital” no âmbito do PPG em Agronomia
+  tipo_dificuldade: termo exato no assunto (nome da disciplina)
+  observacao: Recuperado em 1º lugar pelas configurações B e D; o léxico (C) e a configuração A não o trouxeram no top-10.
+- id: a04
+  categoria: intra_exata
+  origem: autor
+  pergunta: O que o Departamento de Engenharia Rural (DER) do CCAE decidiu sobre a redução do número de vagas na oferta do curso de Sistemas de Informação?
+  resposta_referencia: Em 06/11/2024, o Departamento de Engenharia Rural (DER) do CCAE aprovou, por maioria, a redução do número de vagas na oferta do curso de Sistemas de Informação de 70 para 40 vagas.
+  itens_relevantes:
+  - 1864_ORDEM_DO_DIA_3.1
+  trechos_evidencia:
+  - Redução no número de vagas na oferta do curso de Sistemas de Informação de 70 para 40 vagas
+  tipo_dificuldade: termo exato no assunto (vagas de Sistemas de Informação)
+  observacao: 'Falha de recuperação: o item não apareceu no top-10 de nenhuma configuração e foi incluído no pool por busca direta. O pool trouxe itens do CCENS_DC sobre redução de vagas de uma disciplina (40 para 35), que não respondem.'
+- id: a05
+  categoria: intra_exata
+  origem: autor
+  pergunta: O que foi relatado na câmara departamental do DCAB do CEUNES sobre as sacas de café da Fazenda Experimental?
+  resposta_referencia: Na reunião de 26/02/2025 do DCAB (CEUNES), um docente relatou um erro no quantitativo das sacas de café da Fazenda Experimental, que será leiloado; o único impacto real foi no prazo, que já foi ajustado.
+  itens_relevantes:
+  - 1789_INFORMES_3
+  trechos_evidencia:
+  - houve um crro no quantitativo das sacas de café da Fazenda Experimental
+  tipo_dificuldade: termo exato; ata com OCR (CEUNES_DCAB)
+  observacao: Ata digitalizada por OCR ('crro' no lugar de 'erro'). Recuperado em 1º lugar pelas 4 configurações.
+- id: a06
+  categoria: intra_exata
+  origem: autor
+  pergunta: O Conselho Departamental do CT aprovou a proposta da Coordenação do Curso de Engenharia de Computação de alterar a nota mínima de "Matemática e suas Tecnologias" no Enem a partir do SiSU 2026?
+  resposta_referencia: Sim. Em 10/10/2025, após um pedido de vista (o conselheiro que pediu vista não compareceu nem enviou parecer), o Conselho Departamental do CT aprovou por unanimidade a proposta da Coordenação do Curso de Engenharia de Computação de alterar a nota mínima de "Matemática e suas Tecnologias" no Enem a partir do SiSU 2026. A ata não registra o novo valor da nota.
+  itens_relevantes:
+  - 1764_PAUTA_13
+  trechos_evidencia:
+  - Coordenação do Curso de Engenharia de Computação - Proposta de alteração da nota mínima
+  tipo_dificuldade: termo exato; item quase idêntico de outro curso na mesma ata
+  observacao: O item 1764_PAUTA_14 é a mesma proposta para o curso de Ciência da Computação, na mesma reunião; foi julgado não relevante porque a pergunta é sobre Engenharia de Computação. O valor da nota está ausente no texto ('para pontos').
+- id: a07
+  categoria: intra_exata
+  origem: autor
+  pergunta: O que a Câmara Local de Graduação do CCHN discutiu sobre o Setor de Tradução em Libras e a oferta de tradutores para os cursos de graduação?
+  resposta_referencia: Em 08/02/2021, a Direção informou à Câmara Local de Graduação do CCHN que as demandas de atendimento a estudantes surdos e do curso de Letras Libras superavam a capacidade da equipe do Setor de Tradução; houve reuniões com a equipe, com professores de Letras Libras e com a Reitoria, pedindo, entre outras providências, que tradutores/intérpretes do CEUNES e dos centros de Alegre apoiassem o setor. A Direção seguiria demandando a ampliação da equipe e, até lá, professores de Letras Libras fluentes em Libras poderiam ficar sem tradutores para priorizar estudantes surdos de outros cursos.
+  itens_relevantes:
+  - 1773_PAUTA_3.01
+  trechos_evidencia:
+  - Essa demanda tem sido superior à capacidade de atendimento da equipe
+  tipo_dificuldade: termo exato no assunto (Setor de Tradução em Libras)
+  observacao: Recuperado em 1º lugar pelas 4 configurações. O informe do Colegiado de Pedagogia sobre estudantes surdos (305_INFORMES_3.1) é de outro órgão e foi julgado não relevante.
+- id: a08
+  categoria: intra_exata
+  origem: autor
+  pergunta: Qual foi a decisão do Colegiado do curso de Pedagogia sobre o pedido de apostilamento de diploma para habilitação no magistério da Educação Infantil apreciado em agosto de 2021?
+  resposta_referencia: Em 02/08/2021, o Colegiado do curso de Pedagogia indeferiu o pedido de apostilamento de uma egressa de Pedagogia – Supervisão Escolar (curso concluído em 1993), porque não houve comprovação de disciplinas de metodologia e de prática de ensino/estágio da Educação Infantil exigidas pela Resolução nº 9/2007.
+  itens_relevantes:
+  - 1784_PAUTA_3.1
+  trechos_evidencia:
+  - decide pelo indeferimento do apostilamento
+  tipo_dificuldade: termo exato (apostilamento); desfecho reprovado
+  observacao: Recuperado em 1º lugar pelas 4 configurações.
+- id: a09
+  categoria: intra_exata
+  origem: autor
+  pergunta: O Conselho Departamental do CEFD aprovou o Convênio Carrefour de bolsas de estudo e permanência para pessoas negras na pós-graduação? O que o PPGEF obteve?
+  resposta_referencia: Sim. Em 28/06/2023, o Conselho Departamental do CEFD aprovou por unanimidade o Convênio Carrefour de bolsas de estudo e permanência para pessoas negras na pós-graduação, originado do Termo de Ajustamento de Conduta entre o Ministério Público Federal e o Grupo Carrefour. O PPGEF foi contemplado com uma bolsa de mestrado (24 meses) e uma de doutorado (48 meses).
+  itens_relevantes:
+  - 1755_PROCESSOS_PROJETOS_2
+  trechos_evidencia:
+  - foi contemplado com uma bolsa de mestrado e uma bolsa de doutorado
+  tipo_dificuldade: termo exato no assunto (Convênio Carrefour)
+  observacao: Recuperado em 1º lugar pelas 4 configurações. Há outra menção ao Carrefour no DCAB (1790_INFORMES_7, edital de 2023 do colegiado), fora do escopo da pergunta.
+- id: a10
+  categoria: intra_exata
+  origem: autor
+  pergunta: Como o Departamento de Educação e Ciências Humanas (DECH) do CEUNES apreciou a proposta de alteração de entrada do curso de Ciências Biológicas - Licenciatura?
+  resposta_referencia: Em 03/10/2024, o DECH apreciou a proposta do Colegiado de Ciências Biológicas – Licenciatura de alterar a entrada do curso do segundo para o primeiro semestre, com início previsto para 2025/1, mudando pré-requisitos (por exemplo, Didática e os estágios supervisionados passam a 'sem pré-requisitos') e a periodização de disciplinas ofertadas pelo DECH. A Comissão de Ensino deu parecer favorável e a proposta foi aprovada por unanimidade.
+  itens_relevantes:
+  - 1826_PAUTA_2
+  trechos_evidencia:
+  - com intuito de alterar a entrada do curso, do segundo para o primeiro semestre do ano, com previsão de início para 2025/1
+  tipo_dificuldade: termo exato no assunto (alteração de entrada de curso)
+  observacao: 'O campo tipo_desfecho do item está vazio, mas o texto termina com ''Decisão: Em pauta Aprovado por unanimidade.'''
+- id: a11
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: O Conselho do CEFD autorizou os estudantes a fazerem uma arte mural coletiva na entrada do prédio do Centro?
+  resposta_referencia: Sim. Em 27/09/2023, o Conselho Departamental do CEFD aprovou por unanimidade a proposta, apresentada pelo presidente do Diretório Acadêmico '26 de Junho', de pintura colaborativa de um painel no hall do CEFD pelos alunos; o esboço seria apresentado aos conselheiros.
+  itens_relevantes:
+  - 1754_PAUTA_2
+  trechos_evidencia:
+  - proposta de pintura de painel no hall do CEFD
+  tipo_dificuldade: paráfrase (arte mural / entrada do prédio no lugar de pintura de painel / hall)
+  observacao: 'Termos da pergunta ausentes no item: ''mural'', ''arte'', ''entrada'' não aparecem; o item fala em ''pintura de painel no hall''.'
+- id: a12
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: Algum docente do DET do CEUNES relatou ter sido ameaçado por cães soltos perto do prédio do departamento?
+  resposta_referencia: Sim. Em 25/06/2024, uma professora informou no DET que foi cercada por quatro cachorros grandes na saída do departamento e só não foi atacada porque o carro da segurança passou naquele momento; ela pediu que a chefia solicitasse providências na sessão do Conselho Departamental.
+  itens_relevantes:
+  - 1832_INFORMES_1
+  trechos_evidencia:
+  - foi cercada por quatro cachorros grandes na saída do departamento
+  tipo_dificuldade: paráfrase (cães soltos no lugar de cachorros)
+  observacao: '''cães'' aparece no corpus só em outro contexto (1788_INFORMES_5, DCAB). Recuperado pelas configurações B e D, não pelo léxico.'
+- id: a13
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: Que sistema o CCHN adotou em 2023 para colher rubricas digitais em seus papéis institucionais?
+  resposta_referencia: A plataforma Asten. Em 14/02/2023 foi comunicado ao Conselho do CCHN que, a partir de 2023, o centro passaria a usar a Asten, contratada pela Ufes, para assinatura de documentos oficiais, inclusive atas, com vantagens sobre o Lepisma (qualquer usuário @ufes pode solicitar assinaturas, envio a vários signatários ao mesmo tempo, facilidade para alunos e pessoas externas, validade fora da instituição).
+  itens_relevantes:
+  - 1737_COMUNICACOES_1.03
+  trechos_evidencia:
+  - o CCHN passará a adotar a plataforma Asten para assinatura de documentos oficiais
+  tipo_dificuldade: paráfrase (rubricas digitais / papéis institucionais no lugar de assinatura de documentos)
+  observacao: Termos-chave do item ('Asten', 'assinatura', 'documentos oficiais') não aparecem na pergunta. Recuperado em 1º lugar pelas 4 configurações.
+- id: a14
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: No Conselho Departamental do CCAE, o que foi comunicado sobre a geração de energia solar no campus de Alegre?
+  resposta_referencia: Em 12/06/2025, a Presidente do Conselho Departamental do CCAE comunicou que foi aprovada a emenda de bancada que prevê a instalação de usina fotovoltaica na Ufes Campus de Alegre; a Diretoria de Infraestrutura - Setorial Sul fez o estudo técnico dos locais de instalação e o processo já está em andamento.
+  itens_relevantes:
+  - 1722_COMUNICACOES_4.2
+  trechos_evidencia:
+  - foi aprovada a emenda de bancada que prevê a instalação de usina fotovoltaica na Ufes Campus de Alegre
+  tipo_dificuldade: paráfrase (energia solar no lugar de usina fotovoltaica)
+  observacao: '''energia solar'' não aparece em nenhum item do corpus. Só a configuração D (vetorial) trouxe o item. O informe do DFN 1682_COMUNICACOES_4.7 (energia fotovoltaica em andamento, previsão 2026) é de outro órgão e não foi considerado relevante porque a pergunta restringe ao Conselho do CCAE.'
+- id: a15
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: Em 2010, o que o Conselho Departamental do CCE decidiu sobre a época de descanso anual dos servidores técnico-administrativos do Centro?
+  resposta_referencia: 'Em 27/10/2010, o Conselho Departamental do CCE aprovou por unanimidade a alteração da Decisão nº 001/2008, que normatiza as férias dos servidores técnicos em educação do Centro: como as aulas começariam no fim de fevereiro, a primeira opção de férias passou a ser do início de janeiro ao final de fevereiro e a segunda, quinze dias em julho, no recesso acadêmico.'
+  itens_relevantes:
+  - 1957_PAUTA_10
+  trechos_evidencia:
+  - Como primeira opção, início do mês de janeiro a final de fevereiro, e como segunda opção, quinze dias em julho, no recesso acadêmico
+  tipo_dificuldade: paráfrase (época de descanso anual no lugar de férias)
+  observacao: Só a configuração D trouxe o item. 1991_PAUTA_1 (2014) menciona férias dos técnicos de acordo com o calendário acadêmico, mas não é a decisão de 2010.
+- id: a16
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: Qual preocupação a direção do CEUNES manifestou sobre a pouca procura dos estudantes pelo refeitório à noite?
+  resposta_referencia: Em 06/05/2024, o Presidente do Conselho Departamental do CEUNES manifestou preocupação com a baixa frequência dos estudantes no Restaurante Universitário no turno noturno, porque há planejamento de um número de refeições e a baixa frequência gera desperdício; o presidente do DA se comprometeu a promover a conscientização dos estudantes.
+  itens_relevantes:
+  - 1854_INFORMES_2
+  trechos_evidencia:
+  - a baixa frequência acaba gerando desperdício
+  tipo_dificuldade: paráfrase (refeitório / à noite no lugar de Restaurante Universitário / turno noturno)
+  observacao: Só a configuração D trouxe o item (rank 1).
+- id: a17
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: O museu de história natural ligado ao Departamento de Geologia do CCENS ganhou dinheiro destinado por deputados? Quanto e em que foi aplicado?
+  resposta_referencia: Sim. Em 11/03/2024 foi comunicado no Departamento de Geologia (DG/CCENS) que o MUSES recebeu 370 mil reais por meio de emenda parlamentar; a verba foi usada na compra de equipamentos e os professores foram convidados a participar de projetos no MUSES.
+  itens_relevantes:
+  - 1683_COMUNICACOES_4.5
+  trechos_evidencia:
+  - o MUSES recebeu 370 mil reais de recursos financeiros por meio de emenda parlamentar
+  tipo_dificuldade: paráfrase (museu / dinheiro de deputados no lugar de MUSES / emenda parlamentar)
+  observacao: 'O item não usa ''museu'', ''deputado'' nem ''dinheiro''. A pergunta foi reescrita depois do primeiro pool para não repetir ''verba'' (palavra do item) e o pool foi refeito só para ela: o item ficou apenas no top-10 da configuração D (rank 8). 1686_COMUNICACOES_4.1 e 4.2 (Geodia e Semana Nacional de Museus no Museu de História Natural do Sul do Estado) foram julgados não relevantes.'
+- id: a18
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: Quantos dias por semana os técnicos do DQF do CCENS poderão trabalhar de casa a partir de abril de 2025?
+  resposta_referencia: Um dia por semana. Foi comunicado no DQF em 27/03/2025 que o PGD 2.0 dos técnicos do departamento entra em vigência em abril de 2025, com 20% de teletrabalho e 80% de trabalho presencial, o que equivale a um dia da semana em teletrabalho.
+  itens_relevantes:
+  - 1707_COMUNICACOES_4.6
+  trechos_evidencia:
+  - 20% de teletrabalho e 80% de trabalho presencial
+  tipo_dificuldade: paráfrase (trabalhar de casa no lugar de teletrabalho / PGD)
+  observacao: Recuperado em 1º lugar pelas configurações A, B e D.
+- id: a19
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: O Colegiado de Pedagogia decidiu disponibilizar na internet os registros de suas reuniões?
+  resposta_referencia: Sim. Em 13/07/2022, o Colegiado de Pedagogia aprovou por unanimidade publicar no site do Centro de Educação as atas de suas reuniões a partir do início da gestão da coordenadora, abrindo espaço também para as portarias de indicação dos membros do Colegiado e do NDE.
+  itens_relevantes:
+  - 1783_INFORMES_3.1
+  trechos_evidencia:
+  - publicitar no site do Centro de Educação as atas
+  tipo_dificuldade: paráfrase (disponibilizar na internet os registros no lugar de publicização das atas)
+  observacao: Item da seção INFORMES, mas com desfecho Aprovado. Recuperado em 1º lugar pelas 4 configurações.
+- id: a20
+  categoria: intra_reformulada
+  origem: autor
+  pergunta: A câmara do Departamento de Farmácia e Nutrição decidiu continuar se reunindo à distância, por videoconferência, ou voltar a se encontrar pessoalmente?
+  resposta_referencia: 'Decidiu continuar no formato virtual: em 28/03/2025, a câmara do Departamento de Farmácia e Nutrição (DFN/CCENS) aprovou por unanimidade a manutenção das suas reuniões na modalidade virtual.'
+  itens_relevantes:
+  - 1679_ORDEM_DO_DIA_3.2
+  trechos_evidencia:
+  - Aprovada, por unanimidade, a manutenção das reuniões no formato virtual
+  tipo_dificuldade: paráfrase (à distância / videoconferência no lugar de modalidade virtual)
+  observacao: Recuperado em 1º lugar pelas configurações A, B e D.
+- id: a21
+  categoria: inter_atas
+  origem: autor
+  pergunta: Quais relatórios de empresas juniores o Departamento de Engenharia e Tecnologia (DET) do CEUNES aprovou em 2024?
+  resposta_referencia: 'Em 2024 o DET aprovou, por unanimidade, os relatórios anuais de três empresas juniores: Zetta Júnior (período de 05/2023 a 05/2024) e Energy Júnior (período de 04/2022 a 04/2023), na reunião de 09/07/2024, e Projeta Júnior (período de 06/04/2023 a 06/04/2024), na reunião de 20/08/2024.'
+  itens_relevantes:
+  - 1833_PAUTA_4
+  - 1833_PAUTA_6
+  - 1837_PAUTA_3
+  trechos_evidencia:
+  - parecer favorável ao relatório anual de atividades da Empresa Zetta Júnior
+  - Relatório anual de atividades da Empresa Energy Júnior
+  - Relatório anual 2023 da Empresa Júnior Projeta Jr
+  tipo_dificuldade: 2 atas do mesmo departamento; 3 itens
+  observacao: O item 1833_PAUTA_1 (expediente que inclui o processo da Energy Júnior na pauta) não informa aprovação e não foi considerado. Relatórios de empresas juniores de outros órgãos (DER, DFN, DCE, CAR) ficam fora do escopo.
+- id: a22
+  categoria: inter_atas
+  origem: autor
+  pergunta: O que o Departamento de Matemática Pura e Aplicada (DMPA) do CCENS aprovou em 2024 sobre a Olimpíada Alegrense de Matemática?
+  resposta_referencia: 'Em 2024 o DMPA aprovou: em 27/02/2024, o relatório final do projeto de extensão da 1ª Olimpíada Alegrense de Matemática (realizada de maio a dezembro de 2023); em 16/04/2024, por maioria, o projeto de extensão nº 4304 da 2ª Olimpíada Alegrense de Matemática (previsto de 15/04 a 20/12/2024, sem liberação de carga horária no DMPA); e em 08/08/2024, por unanimidade, a inclusão do projeto OAMAT na planilha de distribuição de carga horária para 2024/2 (6 pontos ao coordenador e 2 ao subcoordenador).'
+  itens_relevantes:
+  - 1694_ORDEM_DO_DIA_2.10
+  - 1696_ORDEM_DO_DIA_3.2
+  - 1702_ORDEM_DO_DIA_3.1
+  trechos_evidencia:
+  - 'Relatório Final de Projeto de Extensão: 1ª Olimpíada Alegrense de Matemática'
+  - Projeto de Extensão nº 4304 - 2ª Olimpíada Alegrense de Matemática
+  - OAMAT – Olimpíadas Alegrense de Matemática
+  tipo_dificuldade: 3 atas do mesmo departamento
+  observacao: O item 1702 foi encontrado no pool (top-1 nas 4 configurações). 1701_ORDEM_DO_DIA_3.1 trata da OBMEP, outra olimpíada, e foi julgado não relevante.
+- id: a23
+  categoria: inter_atas
+  origem: autor
+  pergunta: Que ações o Conselho Departamental do Centro de Educação tratou em 2025 para comemorar os 50 anos do Centro?
+  resposta_referencia: Em 31/01/2025 foi feito convite à comunidade para compor o Grupo de Trabalho organizador dos eventos dos 50 anos do CE (homenagens, exposições, debates, mostras e atividades culturais) e anunciado o edital do concurso da logo comemorativa; na mesma reunião, foi informada a aprovação de uma exposição comemorativa na Biblioteca Central (setembro a outubro de 2025). Em 28/02/2025 foi informada a instalação do GT; em 28/03/2025, o plano de trabalho do GT; em 16/05/2025 o Conselho aprovou as indicações de docentes a serem homenageados com o nome do prédio dos Departamentos e do prédio e auditório do PPGE (e a de técnico para o Anfiteatro); e em 30/05/2025 informou-se a distribuição de kits alusivos aos 50 anos aos três departamentos e ao CAp Criarte.
+  itens_relevantes:
+  - 1742_COMUNICACOES_02.02
+  - 1742_COMUNICACOES_02.03
+  - 1744_COMUNICACOES_02.05
+  - 1746_COMUNICACOES_02.03
+  - 1748_ORDEM_DO_DIA_04.06
+  - 1749_COMUNICACOES_02.05
+  trechos_evidencia:
+  - composição do Grupo de Trabalho responsável pela organização dos eventos comemorativos dos 50 anos do CE
+  - Foi aprovada a proposta para uma exposição comemorativa dos 50 anos do CE
+  - instalação do Grupo de Trabalho responsável pela organização do evento comemorativo dos 50 anos do Centro de Educação
+  - Plano de trabalho do GT organizador das comemorações dos 50 anos do CE
+  - em comemoração aos 50 anos do Centro de Educação
+  - organização de kits alusivos aos 50 anos do CE
+  tipo_dificuldade: 5 atas do mesmo conselho; 6 itens, a maioria comunicações curtas
+  observacao: 'Falha parcial de recuperação: 1742_COMUNICACOES_02.03, 1746_COMUNICACOES_02.03 e 1749_COMUNICACOES_02.05 não vieram no top-10 de nenhuma configuração e foram incluídos por busca direta.'
+- id: a24
+  categoria: inter_atas
+  origem: autor
+  pergunta: Quais conselhos departamentais aprovaram em 2025 pedidos ou planos de flexibilização da jornada dos servidores técnico-administrativos?
+  resposta_referencia: 'Dois conselhos: o Conselho Departamental do Centro de Educação aprovou por unanimidade, em 28/03/2025, o Plano de Flexibilização da Divisão de Gestão Administrativa do CE (com base na Resolução CUn nº 101/2024), e o Conselho Departamental do Centro de Artes aprovou por unanimidade, em 18/06/2025, o pedido de flexibilização da jornada de trabalho dos técnico-administrativos do CAR lotados na Secretaria Unificada da Pós-graduação (SUPG).'
+  itens_relevantes:
+  - 1746_ORDEM_DO_DIA_04.13
+  - 1717_PAUTA_18
+  trechos_evidencia:
+  - Plano de Flexibilização - Divisão de Gestão Administrativa do CE
+  - Pedido de flexibilização da jornada de trabalho dos servidores técnico-administrativos em educação do Centro de Artes
+  tipo_dificuldade: 2 conselhos diferentes (CE e CAR); distrator forte do CCE 2013-2015
+  observacao: 'Falha de recuperação: o item do CE (1746_ORDEM_DO_DIA_04.13) não veio no pool e foi incluído por busca direta; o pool foi dominado pelos itens do CCE de 2013-2015 sobre o mesmo tema (fora do recorte de 2025, julgados não relevantes).'
+- id: a25
+  categoria: inter_atas
+  origem: autor
+  pergunta: Que movimentações de docentes ou de vagas entre o DMA e o DECH do CEUNES foram tratadas nas câmaras departamentais em 2024 e 2025?
+  resposta_referencia: Em 03/10/2024, o DECH aprovou por unanimidade a remoção interna de um professor do DMA para o DECH, mediante troca de vagas (o DMA recebe como contrapartida um código de vaga oriundo de uma aposentadoria). Em 27/03/2025, no DMA, esse professor registrou sua última reunião no departamento em razão da remoção para o DECH, e o DMA aprovou por unanimidade ceder ao DECH, somente no semestre 2025/1, a vaga de um professor afastado para pós-doutorado, para contratação de professor substituto.
+  itens_relevantes:
+  - 1826_PAUTA_4
+  - 1845_INFORMES_2
+  - 1845_PAUTA_6
+  trechos_evidencia:
+  - Remoção interna DMA - DECH
+  - em função da sua remoção para o DECH
+  - para contratação de professor substituto pelo DECH ocorra somente durante o semestre de 2025/1
+  tipo_dificuldade: 2 departamentos diferentes (DECH e DMA), 2 atas
+  observacao: 1845_INFORMES_2 não veio no pool (busca direta). O título de 1845_PAUTA_6 contém um sobrenome não anonimizado; o trecho escolhido evita esse nome. 1983_PAUTA_15 (CCE, 2013, vagas do DMAT alocadas no DECH) é de outro período e órgão.
+- id: a26
+  categoria: inter_atas
+  origem: autor
+  pergunta: Quais câmaras departamentais aprovaram o credenciamento ou a atuação de seus docentes no Programa de Pós-Graduação em Agroquímica do CCENS?
+  resposta_referencia: 'Duas câmaras: o Departamento de Engenharia Rural (DER/CCAE) aprovou por unanimidade o credenciamento de docentes no Programa de Pós-Graduação em Agroquímica do CCENS em 16/12/2024 (como professor permanente) e em 03/02/2025; e o Departamento de Biologia (DB/CCENS) aprovou por unanimidade, em 04/02/2025, a atuação de uma docente no programa, credenciada como docente permanente.'
+  itens_relevantes:
+  - 1872_ORDEM_DO_DIA_3.1
+  - 1881_ORDEM_DO_DIA_3.3
+  - 300_ORDEM_DO_DIA_1.4
+  trechos_evidencia:
+  - Credenciamento no Programa de Pós-Graduação em Agroquímica do CCENS/UFES como Professor Permanente
+  - Credenciamento Programa de Pós-Graduação em Agroquímica do CCENS/UFES
+  - Atuação no Programa de 1 Pós-Graduação em Agroquímica
+  tipo_dificuldade: 3 atas de 2 departamentos de centros diferentes (CCAE e CCENS)
+  observacao: Todos os itens vieram no pool. No item do DB os tokens de pessoa da interessada e da parabenizada diferem (anonimização), mas o texto trata da mesma atuação no PPGAQ.
+- id: a27
+  categoria: inter_atas
+  origem: autor
+  pergunta: Quais departamentos apreciaram, em 2025, as solicitações do Relatório Técnico da Prograd ao PPC do curso de Agronomia, e o que decidiram?
+  resposta_referencia: 'Três departamentos: o DEAL/CCAE (17/03/2025) aprovou a oferta, ao curso de Agronomia, das disciplinas Tecnologia de Alimentos e Instalações para Agroindústrias; o Departamento de Computação (DC/CCENS, 24/04/2025) analisou o pedido de acrescentar duas referências bibliográficas complementares à disciplina COM05207 Informática, constatou que já constavam no sistema e aprovou o plano de ensino por unanimidade; e o DQF/CCENS (24/04/2025) aprovou por unanimidade a retificação da ata de 15/12/2022 para incluir o programa da disciplina DQF05566 Química Orgânica.'
+  itens_relevantes:
+  - 1905_PAUTA_3.4
+  - 1667_ORDEM_DO_DIA_3.5
+  - 1708_ORDEM_DO_DIA_3.1
+  trechos_evidencia:
+  - Solicitações propostas pelo Relatório Técnico da PROGRAD ao PPC do curso de Agronomia
+  - acrescidas duas referências bibliográficas complementares no programa da disciplina COM05207 Informática
+  - SOLICITAÇÕES PROPOSTAS PELO RELATÓRIO TÉCNICO DA PROGRAD AO PPC DE AGRONOMIA
+  tipo_dificuldade: 3 departamentos de 2 centros (CCAE e CCENS), mesmo ofício em atas diferentes
+  observacao: 1709_ORDEM_DO_DIA_3.1 (DQF, 05/05/2025, disciplinas de Física no novo PPC de Agronomia) é tema vizinho, mas não trata das solicitações do relatório técnico da Prograd; julgado não relevante.
+- id: a28
+  categoria: inter_atas
+  origem: autor
+  pergunta: Quais relatórios e projetos de extensão da Olimpíada Capixaba de Química foram aprovados pelo Conselho Departamental do CCE, e em que reuniões?
+  resposta_referencia: 'Quatro itens, todos aprovados por unanimidade: em 30/05/2011, o relatório final do projeto Olimpíadas Capixabas de Química 2010 (cerca de 10.700 participantes) e o projeto Olimpíadas Capixabas de Química 2011, que haviam sido retirados de pauta em 25/04/2011; e em 30/04/2013, o relatório do projeto Olimpíada de Química 2012 e o projeto Olimpíada Capixaba de Química 2013.'
+  itens_relevantes:
+  - 1963_PAUTA_10
+  - 1963_PAUTA_11
+  - 1979_PAUTA_10
+  - 1979_PAUTA_11
+  trechos_evidencia:
+  - Olimpíadas Capixabas de Química 2010
+  - Olimpíadas Capixabas de Química – 2011
+  - Olimpíada de Química 2012
+  - Olimpíada Capixaba de Química 2013
+  tipo_dificuldade: 2 atas do mesmo conselho (CCE antigo), anos diferentes
+  observacao: Os itens 1962_PAUTA_9 e 1962_PAUTA_10 (retirados de pauta em 25/04/2011) apareceram no pool e foram julgados não relevantes, porque a pergunta pede as aprovações; a menção a eles na resposta é contexto.
+- id: a29
+  categoria: inter_atas
+  origem: autor
+  pergunta: O que os departamentos do CEUNES comunicaram em janeiro de 2025 sobre a conferência dos estoques de produtos químicos controlados?
+  resposta_referencia: 'Na reunião de 29/01/2025, o DCAB e o DCN informaram que a Comissão Permanente de Controle de Produtos Químicos do CEUNES iniciaria em março de 2025 (a partir de 10/03, segundo o DCAB) a conferência dos estoques de produtos químicos controlados nos laboratórios e almoxarifados, para evitar infrações perante a Polícia Federal. O DCAB detalhou o cronograma: eixo 1 de 10 a 14/03 e eixo 4 de 24 a 28/03/2025.'
+  itens_relevantes:
+  - 1787_INFORMES_3
+  - 1795_INFORMES_4
+  trechos_evidencia:
+  - a conferência do eixo 1 ocorrerá entre os dias 10 e 14 de março de 2025
+  - a comissão iniciará o trabalho de conferência dos estoques de produtos químicos controlados
+  tipo_dificuldade: 2 departamentos (DCAB com OCR e DCN), mesma data
+  observacao: Ata do DCAB digitalizada por OCR. Ambos recuperados em 1º lugar pelas 4 configurações.
+- id: a30
+  categoria: inter_atas
+  origem: autor
+  pergunta: O que o Departamento de Ciências da Saúde (DCS) do CEUNES registrou sobre a Carreta de Prevenção à Hanseníase em São Mateus?
+  resposta_referencia: Em 06/05/2024 foi comunicado no DCS que a Carreta de Prevenção à Hanseníase estaria em São Mateus de 13 a 17/05/2024, com participação do projeto 'Saber Hanseníase'; em 20/05/2024, uma docente relatou que esteve em 14/05/2024 com quatro alunos de graduação na carreta, instalada em frente à Igreja Velha.
+  itens_relevantes:
+  - 1802_INFORMES_4
+  - 1803_INFORMES_7
+  trechos_evidencia:
+  - a Carreta de Prevenção à Hanseníase estará em São Mateus
+  - esteve com quatro (4) alunos de graduação na Carreta de Prevenção à Hanseníase
+  tipo_dificuldade: 2 atas do mesmo departamento, informes curtos
+  observacao: Ambos os itens vieram no pool.
+- id: a31
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como evoluiu no Conselho Departamental do CCE, em 2010, a proposta de criação do Laboratório de Geometria Algébrica?
+  resposta_referencia: 'A proposta foi retirada de pauta três vezes: em 31/05/2010 (então como criação do Laboratório de Geometria Algébrica e do Laboratório de Estudos Avançados de Matemática), em 28/06/2010 e em 25/08/2010. Em 29/09/2010, após parecer do relator, o Conselho aprovou a criação de três laboratórios (dois do Departamento de Matemática, entre eles o de Geometria Algébrica, e um do Departamento de Estatística), que funcionariam no espaço da biblioteca dos Departamentos de Matemática e Estatística, a ser dividido com a futura Biblioteca Setorial.'
+  itens_relevantes:
+  - 1953_PAUTA_30
+  - 1954_PAUTA_13
+  - 1955_PAUTA_23
+  - 1956_PAUTA_14
+  trechos_evidencia:
+  - Criação do Laboratório de Geometria Algébrica e do Laboratório de Estudos Avançados de Matemática – Retirado de pauta
+  - Homologação da formalização de Laboratórios de Matemática – Retirado de pauta
+  - homologação da formalização de Laboratórios da Matemática – Retirado de pauta
+  - Em discussão foi aprovado a criação dos três laboratórios
+  sequencia_cronologica:
+  - 1953_PAUTA_30
+  - 1954_PAUTA_13
+  - 1955_PAUTA_23
+  - 1956_PAUTA_14
+  tipo_dificuldade: requer datas de 4 reuniões; retirado 3 vezes e depois aprovado (CCE antigo)
+  observacao: Todos os itens vieram no pool.
+- id: a32
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como evoluiu no Conselho Departamental do CCE, de 2010 a 2013, a unificação dos códigos das disciplinas dos cursos do Centro?
+  resposta_referencia: Em 31/05/2010 (desfecho 'Encaminhado'), as propostas de unificação dos códigos de disciplinas idênticas, feitas a pedido da PROGRAD, foram aprovadas por unanimidade para encaminhamento à PROGRAD. Em 29/05/2013, após muita discussão, aprovou-se a criação de uma comissão pelo Diretor do Centro para analisar a uniformização dos códigos; em 26/06/2013, informou-se que essa comissão seria formada pelos coordenadores de curso; e em 17/12/2013 foi aprovada por unanimidade a unificação das disciplinas apresentada pelos coordenadores dos cursos de Estatística, Física, Matemática e Química.
+  itens_relevantes:
+  - 1953_PAUTA_25
+  - 1980_PAUTA_11
+  - 1981_PAUTA_1
+  - 1987_PAUTA_5
+  trechos_evidencia:
+  - aprovadas a unanimidade para serem encaminhadas a PROGRAD
+  - a criação de uma Comissão pelo Diretor do Centro para analisar a uniformização dos códigos das disciplinas do CCE
+  - a Comissão para unificação dos Códigos das Disciplinas do CCE será formada pelos Coordenadores de Curso
+  - Aprovada por unanimidade a unificação das disciplinas apresentada pelos Coordenadores dos cursos de Estatística, Física, Matemática e Química/CCE
+  sequencia_cronologica:
+  - 1953_PAUTA_25
+  - 1980_PAUTA_11
+  - 1981_PAUTA_1
+  - 1987_PAUTA_5
+  tipo_dificuldade: requer datas de 4 reuniões ao longo de 3 anos; desfecho encaminhado; um passo está dentro das comunicações
+  observacao: 1981_PAUTA_1 é um item de Comunicações cuja informação relevante é só o subitem 1.2. 1991_PAUTA_1 (2014) cita de passagem que 'a unificação dos códigos do CCE já está em vigor' dentro de uma carta lida; julgado não relevante por estar fora do período e ser menção de passagem.
+- id: a33
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como o Departamento de Engenharia de Alimentos (DEAL) do CCAE tratou, ao longo de 2024, a criação de uma comissão para distribuir a carga horária das disciplinas?
+  resposta_referencia: 'Em 01/04/2024, após discussão sobre cargas horárias, foi sugerida a criação de uma comissão para distribuição da carga horária das disciplinas do DEAL, a ser pautada na reunião seguinte; em 08/05/2024 a comissão foi criada, com a composição aprovada por unanimidade; em 28/06/2024 a câmara apreciou o relatório final da comissão e aprovou critérios: ranking pela carga horária semanal em disciplinas obrigatórias da graduação, possibilidade de quem passar de 12h semanais pedir redistribuição da carga de turma prática (por voluntários ou, na falta deles, pelo ranking) e uma divisão de disciplinas para a situação atual.'
+  itens_relevantes:
+  - 1890_PALAVRA_LIVRE_5.2
+  - 1894_PAUTA_3.2
+  - 1898_PAUTA_3.6
+  trechos_evidencia:
+  - foi sugerido a criação de uma Comissão para distribuição de carga horária das disciplinas ministradas pelo DEAL
+  - Criação da comissão que irá discutir a redistribuição de carga horária das disciplinas ministradas pelo DEAL
+  - Os Professores com carga horária semanal acima de 12h poderão solicitar ao Departamento a redistribuição de sua carga horária de turma prática
+  sequencia_cronologica:
+  - 1890_PALAVRA_LIVRE_5.2
+  - 1894_PAUTA_3.2
+  - 1898_PAUTA_3.6
+  tipo_dificuldade: requer datas de 3 reuniões; proposta → criação → critérios aprovados
+  observacao: 1898_PAUTA_3.6 não tem tipo_desfecho extraído, mas registra deliberações e aprovação da divisão de encargos.
+- id: a34
+  categoria: longitudinal
+  origem: autor
+  pergunta: O que aconteceu com a infiltração no teto do LTA relatada no DEAL do CCAE em 2024?
+  resposta_referencia: Em 08/05/2024 foi informado no DEAL que havia uma infiltração no teto do LTA e que a Subprefeitura faria a verificação e o planejamento do conserto na semana seguinte; em 13/06/2024 foi informado que a equipe da Subprefeitura consertou o teto do LTA e reparou o telhado para evitar a reincidência do problema.
+  itens_relevantes:
+  - 1894_INFORMES_4.2
+  - 1896_INFORMES_4.2
+  trechos_evidencia:
+  - está ocorrendo uma infiltração no teto do LTA
+  - a equipe da Subprefeitura consertou o teto do LTA e reparou o telhado
+  sequencia_cronologica:
+  - 1894_INFORMES_4.2
+  - 1896_INFORMES_4.2
+  tipo_dificuldade: 2 reuniões; problema → solução, em informes
+  observacao: Ambos os itens vieram no pool.
+- id: a35
+  categoria: longitudinal
+  origem: autor
+  pergunta: Qual foi a trajetória do novo PPC de Engenharia da Computação do CEUNES, segundo os informes do DCE, até a sua aprovação?
+  resposta_referencia: Em 28/02/2024 dois docentes falaram no DCE sobre o PPC e os documentos de base para os PPCs de Engenharia e de Ciência da Computação; em 12/03/2025 foi informado que o PPC de Engenharia da Computação retornou e precisaria de ajustes; em 09/07/2025, que o novo PPC estava na Câmara Central de Graduação, com relato e parecer, para ser apreciado na reunião seguinte; e em 17/12/2025, que a Resolução CUn nº 158/2025 aprovou a nova versão curricular (2025) do curso e que ofício da ProGrad comunicou a aprovação e ativação do PPC (Resoluções 137/2025-CEPE e 158/2025-CUn), com início em 2026.
+  itens_relevantes:
+  - 1807_INFORMES_5
+  - 1819_INFORMES_2
+  - 1821_INFORMES_1
+  - 1820_INFORMES_1
+  - 1820_INFORMES_2
+  trechos_evidencia:
+  - falaram sobre o PPC e os documentos que são utilizados de base para criar o PPC tanto da Engenharia e Ciência da Computação
+  - o PPC da Engenharia da Computação retornou e será necessário realizar alguns ajustes
+  - o Novo PPC da Engenharia da Computação (EC) está na Câmera Central de Graduação (CCG)
+  - Aprova a nova versão curricular do Curso de Graduação em Engenharia da Computação
+  - Aprovação e ativação de Projeto Pedagógico do Curso de Engenharia da Computação
+  sequencia_cronologica:
+  - 1807_INFORMES_5
+  - 1819_INFORMES_2
+  - 1821_INFORMES_1
+  - 1820_INFORMES_1
+  - 1820_INFORMES_2
+  tipo_dificuldade: requer datas de 4 reuniões; informes curtos em atas diferentes
+  observacao: '1807_INFORMES_5 não veio no pool (busca direta). 1813_INFORMES_1 (15/02/2023: ''o PPC mencionado nas reuniões anteriores já passou pelo NDE, colegiado'') não diz de qual curso é o PPC e ficou de fora; ver dúvidas no relatório.'
+- id: a36
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como evoluiu a questão da lavagem de veículos no campus do CEUNES em São Mateus entre 2023 e 2024?
+  resposta_referencia: Em 15/02/2023, o chefe do DCE informou que não seria mais possível lavar carro na Ufes, porque a liberação de quem fazia o serviço havia vencido e era preciso regularizar. Em 03/06/2024, o Conselho Departamental do CEUNES discutiu o pedido de autorização de uso de um espaço de até 12 m² no estacionamento para lavagem de veículos, e o processo foi retirado com pedido de vista. Em 01/07/2024, o parecer do relator foi rejeitado por maioria (por isso o item aparece como 'Reprovado') e foi aprovado por maioria o parecer da conselheira que pediu vista, favorável a um novo termo de autorização de uso não remunerada, com sugestões além do termo anterior.
+  itens_relevantes:
+  - 1813_INFORMES_2
+  - 1856_PAUTA_7
+  - 1858_PAUTA_10
+  trechos_evidencia:
+  - não vai poder mais lavar carro na Ufes
+  - retira o processo com um pedido de vistas a ser apreciado em outra Sessão
+  - faz a leitura de seu parecer favorável à celebração de um novo termo de autorização de uso não remunerada
+  sequencia_cronologica:
+  - 1813_INFORMES_2
+  - 1856_PAUTA_7
+  - 1858_PAUTA_10
+  tipo_dificuldade: 3 reuniões de 2 órgãos (DCE e Conselho do CEUNES); desfecho 'Reprovado' induz a erro
+  observacao: O tipo_desfecho de 1858_PAUTA_10 é 'Reprovado' (parecer do relator), mas o parecer de vista, favorável à autorização, foi aprovado.
+- id: a37
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como o Conselho Departamental do CCHN conduziu, em 2022, a ocupação e a escolha do nome do Módulo III da Pós-Graduação?
+  resposta_referencia: Em 26/04/2022, a diretora informou como seria ocupado o novo prédio do Módulo III da Pós-Graduação (térreo para a Biblioteca Setorial e setor de Documentação; demais pisos primeiro para núcleos e laboratórios da pós-graduação que estavam nos prédios da graduação e depois para os programas, por critério objetivo). Na mesma reunião, aprovou-se por maioria que o prédio homenageie um ex-aluno do centro, com recebimento de propostas, seleção de 3 a 5 pelo Conselho e votação pela comunidade do CCHN. Em 21/06/2022 foi aprovado por unanimidade o edital para escolha do nome do prédio.
+  itens_relevantes:
+  - 1734_COMUNICACOES_1.05
+  - 1734_PAUTA_3.27
+  - 1735_PAUTA_3.07
+  trechos_evidencia:
+  - todo o térreo do prédio será destinado à Biblioteca Setorial
+  - seja nomeado homenageando um ex-aluno do centro
+  - Edital para escolha do nome do prédio do Módulo III da Pós-graduação do CCHN
+  sequencia_cronologica:
+  - 1734_COMUNICACOES_1.05
+  - 1734_PAUTA_3.27
+  - 1735_PAUTA_3.07
+  tipo_dificuldade: 2 reuniões do mesmo conselho; ocupação → regras do nome → edital
+  observacao: Os dois primeiros itens são da mesma ata (26/04/2022).
+- id: a38
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como evoluiu na Câmara Local de Graduação do CCHN, entre 2020 e 2021, a proposta de revisão da resolução de matrícula (Resolução 58/2008 CEPE)?
+  resposta_referencia: Em 16/11/2020, a Câmara discutiu problemas de matrícula e aprovou levar à Câmara Central de Graduação a proposta de revisão das resoluções de matrícula; em 14/12/2020 aprovou por unanimidade um texto de revisão da Resolução 58/2008 CEPE (matrículas via portal, vínculo com PIC/PAE, terceira etapa restrita a casos excepcionais); em 15/03/2021 foi informado que, por atraso da secretaria, a proposta ainda não havia entrado na pauta da Câmara Central; em 05/04/2021, que a Câmara Central formou uma comissão para debater a alteração da Resolução 58/2008; e em 10/07/2021, que o representante do CCHN passou a integrar a comissão que elabora a nova resolução de matrícula e por isso pediu para deixar a representação na Câmara Central.
+  itens_relevantes:
+  - 1771_PAUTA_3.03
+  - 1772_PAUTA_3.03
+  - 1774_COMUNICACOES_1.04
+  - 1775_COMUNICACOES_1.02
+  - 1778_PAUTA_3.01
+  trechos_evidencia:
+  - Foi sugerido e aprovado também que essa discussão seja pautada na Câmara Central de Graduação
+  - propôs um texto de revisão da resolução 58/2008 Cepe
+  - essa demanda ainda não entrou em pauta na Câmara Central de Graduação
+  - Foi formada uma comissão para debater a proposta de alteração da Resolução nº 58/2008 CEPE que trata das matrículas
+  - passu a compor a comissão responsável pela elaboração de uma nova resolução de matrícula
+  sequencia_cronologica:
+  - 1771_PAUTA_3.03
+  - 1772_PAUTA_3.03
+  - 1774_COMUNICACOES_1.04
+  - 1775_COMUNICACOES_1.02
+  - 1778_PAUTA_3.01
+  tipo_dificuldade: requer datas de 5 reuniões da Câmara Local (tipo C)
+  observacao: 1774_COMUNICACOES_1.04 não veio no pool (busca direta). 1778_PAUTA_3.01 trata principalmente da substituição de um representante, mas registra o motivo (comissão da nova resolução de matrícula). O mesmo docente aparece com tokens de pessoa diferentes nas atas.
+- id: a39
+  categoria: longitudinal
+  origem: autor
+  pergunta: O que aconteceu no Conselho Departamental do CT com os relatórios das ações de extensão da 18ª e da 19ª Semana da Engenharia?
+  resposta_referencia: 'Em 01/08/2025, os relatórios das ações de extensão ''18ª Semana da Engenharia'' e ''19ª Semana da Engenharia'' foram retirados de pauta no Conselho Departamental do CT; em 22/08/2025 ambos foram aprovados com parecer favorável do relator: o da 18ª por maioria e o da 19ª por unanimidade.'
+  itens_relevantes:
+  - 1762_PAUTA_24
+  - 1762_PAUTA_25
+  - 1763_PAUTA_19
+  - 1763_PAUTA_20
+  trechos_evidencia:
+  - 18° Semana da Engenharia
+  - 19° Semana da Engenharia
+  - Aprovado(a) por maioria o parecer favorável do relator
+  - Aprovado(a) por unanimidade o parecer favorável do relator
+  sequencia_cronologica:
+  - 1762_PAUTA_24
+  - 1762_PAUTA_25
+  - 1763_PAUTA_19
+  - 1763_PAUTA_20
+  tipo_dificuldade: 2 reuniões; retirado → aprovado, 2 processos em paralelo
+  observacao: Os quatro itens vieram no pool, os de 01/08/2025 só pela configuração A.
+- id: a40
+  categoria: longitudinal
+  origem: autor
+  pergunta: Como foi conduzido no Departamento de Matemática Aplicada (DMA) do CEUNES o Processo Seletivo 13/2025 para professor substituto, do pedido de abertura à contratação?
+  resposta_referencia: 'Em 30/01/2025, o DMA informou que solicitou ao DGP autorização para abrir processo seletivo para 2025/1; em 20/02/2025, informou que o Processo Seletivo 13/2025 estava em andamento e aprovou por unanimidade o ad referendum que formalizou a comissão de avaliação; em 13/03/2025, informou o resultado (dois candidatos aprovados, em 1º e 2º lugar); em 27/03/2025, homologou o resultado por unanimidade (houve inscrições apenas na ampla concorrência); e em 08/05/2025, informou que as contratações tramitavam na PROGEP: a do 1º colocado seria concluída na semana seguinte, e a do 2º tinha um impedimento (havia dado aulas no IFES havia menos de dois anos), objeto de mandado de segurança à espera de resposta da Procuradoria.'
+  itens_relevantes:
+  - 1842_INFORMES_1
+  - 1843_INFORMES_1
+  - 1843_PAUTA_3
+  - 1844_INFORMES_1
+  - 1845_PAUTA_3
+  - 1846_INFORMES_1
+  trechos_evidencia:
+  - Foi solicitado ao DGP autorização para abertura de processo seletivo para 2025/1
+  - o processo seletivo de 2025 está em andamento
+  - formalização da Comissão de Avaliação do Processso Seleitivo 13/2025
+  - foi aprovado em primeiro lugar
+  - os inscritos somente se cadidataram pelo formato de Ampla concorrência
+  - a contratação dos professores substitutos ainda está tramitando na PROGEP
+  sequencia_cronologica:
+  - 1842_INFORMES_1
+  - 1843_INFORMES_1
+  - 1843_PAUTA_3
+  - 1844_INFORMES_1
+  - 1845_PAUTA_3
+  - 1846_INFORMES_1
+  tipo_dificuldade: requer datas de 5 reuniões; processo administrativo acompanhado do início à contratação
+  observacao: 'A pergunta foi reescrita depois do primeiro pool (''do pedido de abertura à contratação'', antes ''da comissão à contratação'') para abranger o pedido de 30/01/2025, e o pool foi refeito só para ela. Falha forte de recuperação: só 1842_INFORMES_1 veio no pool (configuração D); os outros cinco itens foram incluídos por busca direta. 1842_INFORMES_1 não cita o número 13/2025 (inferido pelo período). 1847_INFORMES_1 (22/05/2025, contratação de dois professores com tokens de pessoa diferentes dos aprovados) ficou de fora; ver dúvidas. 1846_INFORMES_1 contém um nome próprio não anonimizado; o trecho escolhido evita esse nome.'
+- id: a41
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: O Conselho Departamental do CT aprovou a construção de um bicicletário ou de ciclovias no campus de Goiabeiras?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: tema ausente (infraestrutura cicloviária)
+  observacao: 'Buscas ILIKE sem resultado: ''bicicleta'', ''bicicletas'', ''bicicletário'', ''ciclovia'', ''patinete'', ''mobilidade urbana''. Os 10 primeiros de cada configuração no pool (comunicações, calendários e obras do CE, CCE, CEFD e CCAE) não tratam do tema.'
+- id: a42
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: Alguma câmara ou conselho aprovou parceria com o Instituto Confúcio para a oferta de cursos de mandarim?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: tema ausente (parceria internacional comum em outras universidades)
+  observacao: 'Buscas sem resultado: ''Confúcio'', ''mandarim'', ''chinês''. ''China'' só aparece em afastamentos de docentes para eventos (CCE 1967_PAUTA_3; CT 303_PAUTA_10 e 1763_PAUTA_6). Os 10 primeiros do pool não respondem.'
+- id: a43
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: O Departamento de Ciências da Saúde do CEUNES aprovou algum projeto de telemedicina ou telessaúde?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: tema ausente; órgão do corpus (DCS)
+  observacao: 'Buscas sem resultado: ''telemedicina'', ''telessaúde'', ''teleconsulta''. O pool trouxe itens do DCS, CEUNES e CCENS sobre saúde (PET-Saúde, UPA, curso de medicina em estudo), nenhum sobre telemedicina.'
+- id: a44
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: Algum conselho decidiu que o restaurante universitário passaria a oferecer cardápio vegetariano ou vegano?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: tema ausente (RU existe no corpus, cardápio não)
+  observacao: 'Buscas sem resultado: ''vegetariano'', ''vegano''; ''cardápio'' só aparece em 1988_PAUTA_8 (CCE), sem relação. Itens do pool sobre o RU (1854_INFORMES_2, CEUNES; 1722_COMUNICACOES_4.3, CCAE) tratam de frequência e de novo contrato, não de cardápio vegetariano.'
+- id: a45
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: Quantos estudantes do CCE foram contemplados pelo programa Ciência sem Fronteiras, segundo o Conselho Departamental?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: tema ausente; período compatível com o corpus (CCE 2010-2015)
+  observacao: 'Buscas sem resultado: ''Ciência sem Fronteiras'', ''Idiomas sem Fronteiras''. ''intercâmbio'' só aparece em afastamentos e projetos de docentes. Os 10 primeiros do pool (licenças, afastamentos e encargos do CCE e CCHN) não respondem.'
+- id: a46
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: O que o Conselho Departamental do CCJE decidiu sobre afastamentos de docentes em 2024?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: órgão fora do corpus (CCJE)
+  observacao: Não há atas do Conselho Departamental do CCJE no corpus (26 órgãos listados em documentos.orgao). 'CCJE' aparece só em menções de outros órgãos (CCE 1938_PAUTA_1, 1952_PAUTA_1, 2000_PAUTA_1; CCHN 1735_PAUTA_3.03, remoção do DEPARQ/CCJE para o DHIS). O pool trouxe afastamentos de outros conselhos.
+- id: a47
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: Quais licenças para capacitação o Conselho Departamental do Centro de Ciências da Saúde (CCS) aprovou em 2023?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: órgão fora do corpus (CCS)
+  observacao: Não há atas do Centro de Ciências da Saúde no corpus. 'Centro de Ciências da Saúde' aparece só em menções (CCE 1952_PAUTA_1, 1966_PAUTA_13; CCHN 1740_PAUTA_3.12; CEUNES 1857_PAUTA_4; CCAE 1730_ORDEM_DO_DIA_3.14). O DCS do CEUNES é um departamento diferente e suas atas são de 2024. O pool trouxe licenças capacitação do CCHN (2022-2023), que não respondem.
+- id: a48
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: O que o Conselho Departamental do Centro de Educação deliberou sobre o seu calendário de reuniões de 2019?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: período fora do corpus (CE só tem atas de 2025)
+  observacao: As atas do Conselho Departamental do CE no corpus vão de 31/01/2025 a 27/06/2025. O pool trouxe o calendário de reuniões de 2025 (1742_ORDEM_DO_DIA_04.01), que não responde sobre 2019. Busca por '2019' não retorna nada do CE.
+- id: a49
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: Quais encargos acadêmicos e administrativos dos departamentos o Conselho Departamental do CCE aprovou em 2018?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: período fora do corpus (CCE só tem atas de 2010 a 2015)
+  observacao: 'As atas do CCE vão de 29/03/2010 a 08/07/2015. O pool trouxe encargos de 2010 a 2015 (ex.: 1956_PAUTA_17, 2001_PAUTA_8), nenhum de 2018. Busca por ''2018'' não retorna encargos do CCE.'
+- id: a50
+  categoria: sem_evidencia
+  origem: autor
+  pergunta: Como foi o processo eleitoral para representante dos técnico-administrativos no Conselho Departamental do CT em 2023?
+  resposta_referencia: Não há informação nas atas disponíveis para responder a essa pergunta.
+  itens_relevantes: []
+  trechos_evidencia: []
+  tipo_dificuldade: período fora do corpus (CT só tem atas de 06/2025 a 12/2025)
+  observacao: As atas do CT vão de 27/06/2025 a 12/12/2025. O pool trouxe o processo eleitoral de 2025 (303_PAUTA_5, 1761_PAUTA_9, 1763_PAUTA_1, mandato 2025-2027), que não responde sobre 2023.
