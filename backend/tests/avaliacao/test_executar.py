@@ -1,7 +1,6 @@
 import anthropic
 import httpx
 import pytest
-from pydantic import SecretStr
 
 from app.avaliacao import executar
 from app.geracao.tipos import ErroGeracao
@@ -18,13 +17,13 @@ def test_etapa_de_rodada_exige_rodada(capsys):
 
 
 def test_geracao_recusa_modelo_diferente(monkeypatch, capsys, tmp_path):
-    monkeypatch.setattr(executar.settings, "llm_provedor", "ollama")
-    monkeypatch.setattr(executar.settings, "llm_modelo", "qwen2.5:7b")
+    monkeypatch.setattr(executar.settings, "llm_provedor", "anthropic")
+    monkeypatch.setattr(executar.settings, "llm_modelo", "claude-sonnet-5-5")
     gt = tmp_path / "gt.yaml"
     gt.write_text("perguntas: []\n", encoding="utf-8")
 
     assert executar.main(["geracao", "--rodada", "t", "--ground-truth", str(gt)]) == 1
-    assert "claude-sonnet-5-5" in capsys.readouterr().err
+    assert "LLM_PROVEDOR=ollama e LLM_MODELO=qwen2.5:7b" in capsys.readouterr().err
 
 
 def test_filtra_perguntas_por_id(tmp_path):
@@ -68,14 +67,30 @@ def test_erro_de_geracao_tem_mensagem_propria(monkeypatch, capsys, tmp_path):
     assert "API da Anthropic" not in erro
 
 
-@pytest.mark.parametrize("chave", [None, SecretStr("   ")])
-def test_ragas_sem_chave_devolve_1(monkeypatch, capsys, tmp_path, chave):
+def test_falha_do_ollama_devolve_1_com_mensagem_de_retomada(monkeypatch, capsys, tmp_path):
     gt = tmp_path / "gt.yaml"
     gt.write_text("perguntas: []\n", encoding="utf-8")
-    monkeypatch.setattr(executar.settings, "anthropic_api_key", chave)
 
-    assert executar.main(["ragas", "--rodada", "t", "--ground-truth", str(gt)]) == 1
-    assert "a etapa ragas exige ANTHROPIC_API_KEY no .env" in capsys.readouterr().err
+    def levantar(args, perguntas):
+        raise httpx.ConnectError("recusada")
+
+    monkeypatch.setattr(executar, "_rodar", levantar)
+
+    assert executar.main(["recuperacao", "--rodada", "t", "--ground-truth", str(gt)]) == 1
+    assert (
+        "falha ao chamar o modelo local: recusada. Confira o Ollama e rode o mesmo comando "
+        "de novo para retomar." in capsys.readouterr().err
+    )
+
+
+def test_ragas_nao_exige_chave_da_anthropic(monkeypatch, capsys, tmp_path):
+    gt = tmp_path / "gt.yaml"
+    gt.write_text("perguntas: []\n", encoding="utf-8")
+    monkeypatch.setattr(executar.settings, "anthropic_api_key", None)
+    monkeypatch.setattr(executar, "_rodar", lambda args, perguntas: 0)
+
+    assert executar.main(["ragas", "--rodada", "t", "--ground-truth", str(gt)]) == 0
+    assert "ANTHROPIC_API_KEY" not in capsys.readouterr().err
 
 
 def test_problemas_dos_indices_tudo_certo():

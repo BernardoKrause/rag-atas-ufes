@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import anthropic
+import httpx
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import sessionmaker
 
@@ -23,7 +24,7 @@ from app.core.config import REPO_ROOT, settings
 from app.geracao.tipos import ErroGeracao
 from app.models.documento import Documento
 
-MODELO_GERADOR = "claude-sonnet-5-5"
+MODELO_GERADOR = "qwen2.5:7b"
 DIR_AVALIACAO = REPO_ROOT / "docs" / "avaliacao"
 ETAPAS = (
     "validar",
@@ -157,17 +158,14 @@ def _rodar(args, perguntas) -> int:
                 )
                 print(f"{total} respostas geradas")
             elif args.etapa == "ragas":
-                from anthropic import AsyncAnthropic
-
                 from app.avaliacao.ragas_avaliacao import (
                     EmbeddingsSerafim,
-                    JuizAnthropic,
+                    JuizOllama,
                     criar_metricas,
                     etapa_ragas,
                 )
 
-                chave = settings.anthropic_api_key.get_secret_value()
-                juiz = JuizAnthropic(AsyncAnthropic(api_key=chave))
+                juiz = JuizOllama(settings.ollama_base_url)
                 total = etapa_ragas(
                     perguntas,
                     pasta / "geracao.jsonl",
@@ -221,21 +219,23 @@ def main(argv: list[str] | None = None) -> int:
         print(f"a etapa {args.etapa} exige --rodada", file=sys.stderr)
         return 1
     if args.etapa == "geracao" and (
-        settings.llm_provedor.strip().lower() != "anthropic"
+        settings.llm_provedor.strip().lower() != "ollama"
         or settings.llm_modelo.strip() != MODELO_GERADOR
     ):
         print(
-            f"a geração da avaliação exige LLM_PROVEDOR=anthropic e LLM_MODELO={MODELO_GERADOR}",
+            f"a geração da avaliação exige LLM_PROVEDOR=ollama e LLM_MODELO={MODELO_GERADOR}",
             file=sys.stderr,
         )
         return 1
-    if args.etapa == "ragas" and not (
-        settings.anthropic_api_key and settings.anthropic_api_key.get_secret_value().strip()
-    ):
-        print("a etapa ragas exige ANTHROPIC_API_KEY no .env", file=sys.stderr)
-        return 1
     try:
         return _rodar(args, carregar_perguntas(args.ground_truth, args.perguntas))
+    except httpx.HTTPError as erro:
+        print(
+            f"falha ao chamar o modelo local: {erro}. Confira o Ollama e rode o mesmo comando "
+            "de novo para retomar.",
+            file=sys.stderr,
+        )
+        return 1
     except anthropic.APIError as erro:
         print(
             f"falha na API da Anthropic: {erro}. Rode o mesmo comando de novo para retomar.",
