@@ -70,11 +70,11 @@ def test_recuperacao_sobrescreve_rodada_anterior(tmp_path):
     assert len(ler_jsonl(saida)) == 4
 
 
-def _detalhada(abstencao=False):
+def _detalhada(abstencao=False, truncada=False):
     fonte = Fonte(1, "i1_F1", 10, "rótulo", "trecho", 1)
     evidencia = EvidenciaNumerada(1, fonte, "texto do item", ["Frase do grafo."], None, None)
     resposta = Resposta("resp [1]", [] if abstencao else [fonte], abstencao)
-    return RespostaDetalhada(resposta, [evidencia], SaidaLLM("resp [1]", False, 100, 20))
+    return RespostaDetalhada(resposta, [evidencia], SaidaLLM("resp [1]", truncada, 100, 20))
 
 
 def test_geracao_grava_a_e_b_com_contextos_e_tokens(tmp_path):
@@ -93,10 +93,25 @@ def test_geracao_grava_a_e_b_com_contextos_e_tokens(tmp_path):
     registro = registros[0]
     assert registro["fontes"] == ["i1_F1"]
     assert registro["fontes_logicas"] == ["i1"]
-    assert registro["contextos"] == ["texto do item\nFrase do grafo."]
+    assert registro["contextos"] == ["rótulo\ntexto do item\nFrase do grafo."]
     assert (registro["tokens_entrada"], registro["tokens_saida"]) == (100, 20)
     assert registro["modelo"] == "claude-sonnet-5-5"
     assert registro["erro"] is None
+
+
+def test_geracao_truncada_grava_erro_truncada_e_mantem_o_resto(tmp_path):
+    saida = tmp_path / "geracao.jsonl"
+
+    etapa_geracao(
+        [_pergunta("q1")], lambda p, c: _detalhada(abstencao=True, truncada=True), MAPA, saida, "m"
+    )
+
+    registro = ler_jsonl(saida)[0]
+    assert registro["erro"] == "truncada"
+    assert registro["truncada"] is True
+    assert registro["contextos"] == ["rótulo\ntexto do item\nFrase do grafo."]
+    assert (registro["tokens_entrada"], registro["tokens_saida"]) == (100, 20)
+    assert registro["texto"] == "resp [1]"
 
 
 def test_geracao_retoma_sem_repetir(tmp_path):

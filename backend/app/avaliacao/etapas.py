@@ -63,7 +63,7 @@ def _registro_geracao(
         "fontes": fontes,
         "fontes_logicas": agrupar_fragmentos(fontes, mapa_logico),
         "contextos": [
-            "\n".join([evidencia.texto, *evidencia.frases_grafo])
+            "\n".join([evidencia.fonte.rotulo, evidencia.texto, *evidencia.frases_grafo])
             for evidencia in detalhada.evidencias
         ],
         "tokens_entrada": saida_llm.tokens_entrada if saida_llm else None,
@@ -97,6 +97,8 @@ def etapa_geracao(
             try:
                 detalhada = responder_fn(pergunta.pergunta, CONFIGURACOES[config])
                 registro = _registro_geracao(pergunta.id, config, modelo, detalhada, mapa_logico)
+                if detalhada.saida_llm and detalhada.saida_llm.truncada:
+                    registro["erro"] = "truncada"
             except ErroGeracao as erro:
                 if isinstance(erro.__cause__, (anthropic.APIError, httpx.HTTPError)):
                     raise
