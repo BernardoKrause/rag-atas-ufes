@@ -198,3 +198,35 @@ def test_montar_relatorio_tem_as_secoes():
 
     for titulo in ("## Recuperação", "## Geração (RAGAS)", "## Abstenção", "## Custo"):
         assert titulo in texto
+
+
+def test_taxas_abstencao_sem_denominador_e_none():
+    taxas = taxas_abstencao(PERGUNTAS, [_ger("q1", "A", False, ["i1"])])
+
+    assert taxas["A"] == {"correta": None, "indevida": 0.0}
+    assert taxas["B"] == {"correta": None, "indevida": None}
+
+
+def test_relatorio_mostra_nd_e_separa_truncadas_dos_erros():
+    truncada = {**_ger("q1", "A", False, ["i1"], erro="truncada"), "truncada": True}
+
+    texto = montar_relatorio(
+        PERGUNTAS[:1], REC, [truncada], [], "claude-sonnet-5-5", "claude-opus-5-5"
+    )
+
+    assert "Erros de geração: 0. Respostas truncadas: 1." in texto
+    assert "n/d" in texto
+
+
+def test_diagnostico_citou_ata_esperada():
+    perguntas = [_p("q1", "intra_exata", ["a1_i1"])]
+    ger = [_ger("q1", "A", False, ["a1_i9"])]
+    rec = [_rec("q1", "A", ["a1_i9"])]
+
+    linha = linhas_diagnostico(perguntas, ger, rec, {})[0]
+    assert linha["citou_relevante"] == "não"
+    assert linha["citou_ata_esperada"] == "sim"
+    assert list(linha).index("citou_ata_esperada") == list(linha).index("citou_relevante") + 1
+
+    ger = [_ger("q1", "A", False, ["b2_i1"])]
+    assert linhas_diagnostico(perguntas, ger, rec, {})[0]["citou_ata_esperada"] == "não"

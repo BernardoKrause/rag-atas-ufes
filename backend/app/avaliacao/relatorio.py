@@ -23,6 +23,10 @@ def _num(valor: float, casas: int = 3) -> str:
     return f"{valor:.{casas}f}".replace(".", ",")
 
 
+def _taxa(valor: float | None) -> str:
+    return "n/d" if valor is None else _num(valor, 2)
+
+
 def _grupos(perguntas: list[PerguntaReferencia]) -> list[tuple[str, set[str]]]:
     com_evidencia = [p for p in perguntas if p.categoria != "sem_evidencia"]
     grupos = [
@@ -79,7 +83,7 @@ def tabela_ragas(perguntas: list[PerguntaReferencia], registros: list[dict]) -> 
 
 def taxas_abstencao(
     perguntas: list[PerguntaReferencia], registros: list[dict]
-) -> dict[str, dict[str, float]]:
+) -> dict[str, dict[str, float | None]]:
     sem_evidencia = {p.id for p in perguntas if p.categoria == "sem_evidencia"}
     taxas = {}
     for config in CONFIGS_GERACAO:
@@ -87,8 +91,8 @@ def taxas_abstencao(
         sem = [r for r in validos if r["pergunta_id"] in sem_evidencia]
         com = [r for r in validos if r["pergunta_id"] not in sem_evidencia]
         taxas[config] = {
-            "correta": sum(r["abstencao"] for r in sem) / len(sem) if sem else 0.0,
-            "indevida": sum(r["abstencao"] for r in com) / len(com) if com else 0.0,
+            "correta": sum(r["abstencao"] for r in sem) / len(sem) if sem else None,
+            "indevida": sum(r["abstencao"] for r in com) / len(com) if com else None,
         }
     return taxas
 
@@ -184,6 +188,7 @@ def linhas_diagnostico(
         registro = geracao.get(p.id, {})
         relevantes = set(p.itens_relevantes)
         citadas = registro.get("fontes_logicas") or []
+        atas_esperadas = {i.split("_")[0] for i in relevantes}
         cobertura = ""
         if p.sequencia_cronologica:
             encontrados = set(citadas) | set(recuperacao.get(p.id, {}).get("ranking_logico", []))
@@ -199,6 +204,9 @@ def linhas_diagnostico(
                 "abstencao": "sim" if registro.get("abstencao") else "não",
                 "fontes_citadas": ";".join(citadas),
                 "citou_relevante": "sim" if relevantes & set(citadas) else "não",
+                "citou_ata_esperada": (
+                    "sim" if any(c.split("_")[0] in atas_esperadas for c in citadas) else "não"
+                ),
                 "fontes_fora_do_gabarito": ";".join(c for c in citadas if c not in relevantes),
                 "atas_citadas": "; ".join(_ata(descricoes, c) for c in citadas),
                 "atas_esperadas": "; ".join(_ata(descricoes, i) for i in p.itens_relevantes),
@@ -229,11 +237,11 @@ def montar_relatorio(
 ) -> str:
     taxas = taxas_abstencao(perguntas, ger)
     valores_custo = custo(ger, rag, modelo_gerador, modelo_juiz)
-    erros_geracao = sum(1 for r in ger if r["erro"])
+    erros_geracao = sum(1 for r in ger if r["erro"] and r["erro"] != "truncada")
     truncadas = sum(1 for r in ger if r["truncada"])
     erros_ragas = sum(len(r["erros"]) for r in rag)
     linhas_abstencao = [
-        f"| {c} | {_num(t['correta'], 2)} | {_num(t['indevida'], 2)} |" for c, t in taxas.items()
+        f"| {c} | {_taxa(t['correta'])} | {_taxa(t['indevida'])} |" for c, t in taxas.items()
     ]
     return "\n".join(
         [
