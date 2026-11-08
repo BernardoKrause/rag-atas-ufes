@@ -108,6 +108,7 @@ def montar_contexto(evidencias: list[Evidencia], sessao: Session) -> list[Eviden
                 frases_grafo=frases_grafo(evidencia.contexto_grafo),
                 assunto_anterior=anterior,
                 assunto_posterior=posterior,
+                data_reuniao=documento.data_reuniao,
             )
         )
     return numeradas

@@ -1,8 +1,11 @@
-from app.geracao.prompt import FRASE_ABSTENCAO, montar_prompt
+import json
+from datetime import date
+
+from app.geracao.prompt import montar_prompt
 from app.geracao.tipos import EvidenciaNumerada, Fonte
 
 
-def _evidencia(numero, texto, anterior=None, posterior=None, frases=None):
+def _evidencia(numero, texto, anterior=None, posterior=None, frases=None, data=date(2025, 5, 13)):
     return EvidenciaNumerada(
         numero=numero,
         fonte=Fonte(
@@ -17,42 +20,51 @@ def _evidencia(numero, texto, anterior=None, posterior=None, frases=None):
         frases_grafo=frases or [],
         assunto_anterior=anterior,
         assunto_posterior=posterior,
+        data_reuniao=data,
     )
 
 
-def test_sistema_contem_frase_de_abstencao_e_regra_de_citacao():
+def _registros(usuario):
+    blocos = usuario.split("Evidências:\n", 1)[1].split("\n\nPergunta:", 1)[0]
+    return [json.loads(linha) for linha in blocos.splitlines()]
+
+
+def test_sistema_pede_um_registro_por_evidencia_em_json():
     sistema, _ = montar_prompt("pergunta?", [_evidencia(1, "t")])
-    assert FRASE_ABSTENCAO in sistema
-    assert "[n]" in sistema
+    assert '"eventos"' in sistema
+    assert '"relevante"' in sistema
+    assert "cada evidência separadamente" in sistema
 
 
-def test_evidencias_aparecem_numeradas_na_ordem():
+def test_cada_evidencia_vira_um_registro_com_identificador_data_fonte_e_trecho():
     _, usuario = montar_prompt(
-        "pergunta?", [_evidencia(1, "primeiro"), _evidencia(2, "segundo")]
+        "pergunta?",
+        [_evidencia(1, "primeiro"), _evidencia(2, "segundo", data=date(2025, 5, 28))],
     )
-    assert usuario.index("[1] Ata X1") < usuario.index("primeiro") < usuario.index(
-        "[2] Ata X2"
-    )
-    assert usuario.index("[2] Ata X2") < usuario.index("segundo")
+
+    assert _registros(usuario) == [
+        {"identificador": 1, "data_reuniao": "13/05/2025", "fonte": "Ata X1", "trecho": "primeiro"},
+        {"identificador": 2, "data_reuniao": "28/05/2025", "fonte": "Ata X2", "trecho": "segundo"},
+    ]
 
 
-def test_frases_do_grafo_aparecem_na_evidencia():
+def test_frases_do_grafo_entram_no_registro():
     _, usuario = montar_prompt("p?", [_evidencia(1, "t", frases=["Departamento: DCC."])])
-    assert "Departamento: DCC." in usuario
+    assert _registros(usuario)[0]["relacoes"] == ["Departamento: DCC."]
 
 
-def test_vizinhos_aparecem_sem_numero_proprio():
+def test_vizinhos_entram_como_contexto_nao_citavel():
     _, usuario = montar_prompt(
         "p?", [_evidencia(1, "t", anterior="Assunto A", posterior="Assunto B")]
     )
-    assert "Item anterior na mesma ata, não citável: Assunto A" in usuario
-    assert "Item posterior na mesma ata, não citável: Assunto B" in usuario
-    assert "[2]" not in usuario
+    registro = _registros(usuario)[0]
+    assert registro["item_anterior_nao_citavel"] == "Assunto A"
+    assert registro["item_posterior_nao_citavel"] == "Assunto B"
 
 
-def test_vizinho_ausente_nao_gera_linha():
-    _, usuario = montar_prompt("p?", [_evidencia(1, "t")])
-    assert "não citável" not in usuario
+def test_campos_ausentes_nao_aparecem():
+    _, usuario = montar_prompt("p?", [_evidencia(1, "t", data=None)])
+    assert set(_registros(usuario)[0]) == {"identificador", "fonte", "trecho"}
 
 
 def test_pergunta_vem_no_fim():

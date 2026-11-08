@@ -13,7 +13,7 @@ class LLMFalso:
         self.erro = erro
         self.chamadas = []
 
-    def gerar(self, sistema, usuario):
+    def gerar(self, sistema, usuario, esquema=None):
         self.chamadas.append((sistema, usuario))
         if self.erro:
             raise self.erro

@@ -42,6 +42,25 @@ def test_ollama_envia_sistema_usuario_e_temperatura_zero():
     assert corpo["options"] == {"temperature": 0, "num_predict": 64, "num_ctx": 8192}
 
 
+def test_ollama_envia_esquema_como_format():
+    enviados = []
+    cliente = _ollama_falso({"message": {"content": "{}"}, "done_reason": "stop"}, capturar=enviados)
+    esquema = {"type": "object", "properties": {"eventos": {"type": "array"}}}
+
+    cliente.gerar("s", "u", esquema=esquema)
+
+    assert enviados[0]["format"] == esquema
+
+
+def test_ollama_sem_esquema_nao_envia_format():
+    enviados = []
+    cliente = _ollama_falso({"message": {"content": "ok"}, "done_reason": "stop"}, capturar=enviados)
+
+    cliente.gerar("s", "u")
+
+    assert "format" not in enviados[0]
+
+
 def test_ollama_registra_tokens_de_entrada_e_saida():
     cliente = _ollama_falso(
         {"message": {"content": "ok"}, "done_reason": "stop",
