@@ -47,6 +47,18 @@ def test_fundir_rrf_respeita_k():
     assert resultado == ["a", "b"]
 
 
+def test_fundir_rrf_ignora_hits_alem_da_profundidade():
+    preenchimento = [Hit(f"x{n}", n) for n in range(1, 11)]
+    hits_lexico = [Hit("topo_lexico", 1)]
+    hits_vetorial = [*preenchimento, Hit("fundo", 11)]
+    hits_grafo = [Hit(f"y{n}", n) for n in range(1, 11)] + [Hit("fundo", 11)]
+
+    resultado = fundir_rrf(hits_lexico, hits_vetorial, hits_grafo, k=30, profundidade=10)
+
+    assert "fundo" not in resultado
+    assert "topo_lexico" in resultado
+
+
 def test_fundir_rrf_com_grafo_vazio_ainda_funciona():
     hits_lexico = [Hit("a", 1)]
     hits_vetorial = [Hit("a", 1)]
