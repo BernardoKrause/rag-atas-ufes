@@ -1,6 +1,7 @@
 from datetime import date
 
 from app.geracao.contexto import buscar_vizinhos, frases_grafo, montar_contexto, montar_rotulo
+from app.ingestion.segmentador import SOBREPOSICAO_FRAGMENTO
 from app.models.documento import StatusAprovacao
 from app.recuperacao.tipos import Evidencia
 from tests.recuperacao.conftest import criar_documento, criar_item
@@ -143,3 +144,55 @@ def test_montar_contexto_preenche_trecho_e_pagina(db_session):
         ("texto A", 3),
         ("texto B", None),
     ]
+
+
+def _fragmentos(db_session, documento, textos, numero_item="3", pagina=4):
+    return [
+        criar_item(
+            db_session, documento, numero_item=numero_item, fragmento_indice=indice, texto=texto,
+            pagina_inicio=pagina, item_id_canonico=f"{documento.id_documento}_pauta_{numero_item}"
+            + (f"_F{indice}" if indice else ""),
+        )
+        for indice, texto in enumerate(textos)
+    ]
+
+
+def test_fragmentos_do_mesmo_item_viram_uma_evidencia_na_posicao_do_primeiro(db_session):
+    documento = criar_documento(db_session, nome_arquivo="frag_1.pdf")
+    sobreposicao = "s" * SOBREPOSICAO_FRAGMENTO
+    inicio, fim = _fragmentos(db_session, documento, ["início " + sobreposicao, sobreposicao + " fim"])
+    outro = criar_item(db_session, documento, numero_item="5", texto="outro")
+
+    numeradas = montar_contexto(
+        [_evidencia(fim, 1), _evidencia(outro, 2), _evidencia(inicio, 3)], db_session
+    )
+
+    assert [e.numero for e in numeradas] == [1, 2]
+    assert numeradas[0].fonte.item_id_canonico == inicio.item_id_canonico
+    assert numeradas[0].texto == "início " + sobreposicao + " fim"
+    assert numeradas[0].fonte.trecho == "início " + sobreposicao + " fim"
+    assert numeradas[1].fonte.item_id_canonico == outro.item_id_canonico
+
+
+def test_fragmentos_nao_vizinhos_sao_unidos_com_marca_de_corte(db_session):
+    documento = criar_documento(db_session, nome_arquivo="frag_2.pdf")
+    primeiro, _, terceiro = _fragmentos(db_session, documento, ["a", "b", "c"])
+
+    numeradas = montar_contexto([_evidencia(terceiro, 1), _evidencia(primeiro, 2)], db_session)
+
+    assert len(numeradas) == 1
+    assert numeradas[0].texto == "a […] c"
+
+
+def test_fragmentos_juntam_as_relacoes_sem_repetir(db_session):
+    documento = criar_documento(db_session, nome_arquivo="frag_3.pdf")
+    inicio, fim = _fragmentos(db_session, documento, ["a", "b"])
+    evidencia_fim = Evidencia(
+        item_id_canonico=fim.item_id_canonico, texto=fim.texto,
+        contexto_grafo=_contexto_vazio(departamento="DCC", tipo_desfecho="Aprovado"), rank_final=2,
+        scores={"lexico": None, "vetorial": None, "grafo": None},
+    )
+
+    numeradas = montar_contexto([_evidencia(inicio, 1), evidencia_fim], db_session)
+
+    assert numeradas[0].frases_grafo == ["Departamento: DCC.", "Desfecho: Aprovado."]

@@ -41,7 +41,7 @@ def test_detalhada_traz_evidencias_saida_e_resposta(db_session, recuperacao_fals
 
     assert detalhada.resposta.abstencao is False
     assert [e.fonte.item_id_canonico for e in detalhada.evidencias] == [item.item_id_canonico]
-    assert detalhada.saida_llm.tokens_entrada == 50
+    assert [s.tokens_entrada for s in detalhada.saidas_eventos] == [50]
 
 
 def test_detalhada_repassa_camadas(db_session, recuperacao_falsa):
@@ -59,7 +59,7 @@ def test_detalhada_abstencao_do_llm_mantem_evidencias_e_saida(db_session, recupe
 
     assert detalhada.resposta.abstencao is True
     assert len(detalhada.evidencias) == 1
-    assert detalhada.saida_llm is not None
+    assert len(detalhada.saidas_eventos) == 1
 
 
 def test_detalhada_sem_recuperacao_nao_tem_saida(db_session, monkeypatch):
@@ -69,7 +69,7 @@ def test_detalhada_sem_recuperacao_nao_tem_saida(db_session, monkeypatch):
 
     assert detalhada.resposta.abstencao is True
     assert detalhada.evidencias == []
-    assert detalhada.saida_llm is None
+    assert detalhada.saidas_eventos == []
 
 
 def test_responder_continua_devolvendo_so_a_resposta(db_session, recuperacao_falsa):

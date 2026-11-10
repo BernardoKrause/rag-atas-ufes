@@ -74,7 +74,7 @@ def _detalhada(abstencao=False, truncada=False):
     fonte = Fonte(1, "i1_F1", 10, "rótulo", "trecho", 1)
     evidencia = EvidenciaNumerada(1, fonte, "texto do item", ["Frase do grafo."], None, None)
     resposta = Resposta("resp [1]", [] if abstencao else [fonte], abstencao)
-    return RespostaDetalhada(resposta, [evidencia], SaidaLLM("resp [1]", truncada, 100, 20))
+    return RespostaDetalhada(resposta, [evidencia], [SaidaLLM("resp [1]", truncada, 100, 20)])
 
 
 def test_geracao_grava_a_e_b_com_contextos_e_tokens(tmp_path):
@@ -118,7 +118,7 @@ def test_geracao_soma_tokens_das_duas_chamadas_e_marca_truncada_da_segunda(tmp_p
     saida = tmp_path / "geracao.jsonl"
     detalhada = _detalhada()
     detalhada = RespostaDetalhada(
-        detalhada.resposta, detalhada.evidencias, detalhada.saida_llm,
+        detalhada.resposta, detalhada.evidencias, detalhada.saidas_eventos,
         SaidaLLM('{"resposta": "r"}', True, 30, 4),
     )
 

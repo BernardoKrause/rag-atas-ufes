@@ -44,7 +44,7 @@ class SaidaLLM:
 class RespostaDetalhada:
     resposta: Resposta
     evidencias: list[EvidenciaNumerada]
-    saida_llm: SaidaLLM | None
+    saidas_eventos: list[SaidaLLM]
     saida_resposta: SaidaLLM | None = None
 
 

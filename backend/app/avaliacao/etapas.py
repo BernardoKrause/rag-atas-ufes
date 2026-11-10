@@ -49,7 +49,7 @@ def etapa_recuperacao(
 
 
 def _saidas(detalhada: RespostaDetalhada) -> list:
-    return [saida for saida in (detalhada.saida_llm, detalhada.saida_resposta) if saida]
+    return [*detalhada.saidas_eventos, *([detalhada.saida_resposta] if detalhada.saida_resposta else [])]
 
 
 def _somar(saidas: list, campo: str) -> int | None:

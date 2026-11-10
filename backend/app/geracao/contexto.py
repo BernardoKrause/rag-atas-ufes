@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.geracao.tipos import EvidenciaNumerada, Fonte
+from app.ingestion.segmentador import SOBREPOSICAO_FRAGMENTO
 from app.models.documento import Documento, StatusAprovacao
 from app.models.item_pauta import ItemPauta
 from app.recuperacao.tipos import Evidencia
@@ -77,6 +78,34 @@ def buscar_vizinhos(sessao: Session, item: ItemPauta) -> tuple[str | None, str |
     )
 
 
+def _juntar(partes: list[tuple[int, str]]) -> str:
+    texto, indice_anterior = "", None
+    for indice, parte in partes:
+        if indice_anterior is None:
+            texto = parte
+        elif (
+            indice == indice_anterior + 1
+            and texto[-SOBREPOSICAO_FRAGMENTO:] == parte[:SOBREPOSICAO_FRAGMENTO]
+        ):
+            texto += parte[SOBREPOSICAO_FRAGMENTO:]
+        else:
+            texto += " […] " + parte
+        indice_anterior = indice
+    return texto
+
+
+def _agrupar_fragmentos(evidencias, por_id) -> list[list[tuple[ItemPauta, Documento, Evidencia]]]:
+    grupos: dict[tuple, list] = {}
+    for evidencia in evidencias:
+        if evidencia.item_id_canonico not in por_id:
+            continue
+        item, documento = por_id[evidencia.item_id_canonico]
+        grupos.setdefault((item.documento_id, *_chave_item(item)), []).append(
+            (item, documento, evidencia)
+        )
+    return [sorted(grupo, key=lambda membro: membro[0].fragmento_indice) for grupo in grupos.values()]
+
+
 def montar_contexto(evidencias: list[Evidencia], sessao: Session) -> list[EvidenciaNumerada]:
     ids = [evidencia.item_id_canonico for evidencia in evidencias]
     linhas = sessao.execute(
@@ -87,12 +116,11 @@ def montar_contexto(evidencias: list[Evidencia], sessao: Session) -> list[Eviden
     por_id = {item.item_id_canonico: (item, documento) for item, documento in linhas}
 
     numeradas = []
-    for evidencia in evidencias:
-        if evidencia.item_id_canonico not in por_id:
-            continue
-        item, documento = por_id[evidencia.item_id_canonico]
+    for grupo in _agrupar_fragmentos(evidencias, por_id):
+        item, documento, _ = grupo[0]
         numero = len(numeradas) + 1
         anterior, posterior = buscar_vizinhos(sessao, item)
+        frases = [f for _, _, e in grupo for f in frases_grafo(e.contexto_grafo)]
         numeradas.append(
             EvidenciaNumerada(
                 numero=numero,
@@ -101,11 +129,11 @@ def montar_contexto(evidencias: list[Evidencia], sessao: Session) -> list[Eviden
                     item_id_canonico=item.item_id_canonico,
                     documento_id=documento.id_documento,
                     rotulo=montar_rotulo(documento, item),
-                    trecho=item.texto,
+                    trecho=_juntar([(i.fragmento_indice, i.texto) for i, _, _ in grupo]),
                     pagina=item.pagina_inicio,
                 ),
-                texto=evidencia.texto,
-                frases_grafo=frases_grafo(evidencia.contexto_grafo),
+                texto=_juntar([(i.fragmento_indice, e.texto) for i, _, e in grupo]),
+                frases_grafo=list(dict.fromkeys(frases)),
                 assunto_anterior=anterior,
                 assunto_posterior=posterior,
                 data_reuniao=documento.data_reuniao,
