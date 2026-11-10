@@ -88,3 +88,10 @@ class EntidadeAnonimizada(Base):
     tipo: Mapped[str] = mapped_column(String(20), nullable=False)
     token: Mapped[str] = mapped_column(String(50), nullable=False)
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class NumeroProcesso(Base):
+    __tablename__ = "numeros_processo"
+
+    token: Mapped[str] = mapped_column(String(50), primary_key=True)
+    numero: Mapped[str] = mapped_column(String(40), nullable=False, index=True)

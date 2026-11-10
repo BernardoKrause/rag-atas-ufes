@@ -542,3 +542,25 @@ def test_abreviacao_de_titulo_marcada_pelo_ner_nao_vira_pessoa(db_session, monke
     monkeypatch.setattr(cleaner, "_achar_entidades_pessoa", lambda _texto: [(inicio + 1, inicio + 2)])
     resultado, _ = anonimizar_texto(texto, SECRET_KEY, db_session)
     assert "Prof. Dr. ELIAS" in resultado
+
+
+def test_anonimizar_guarda_o_numero_real_do_processo(db_session):
+    from app.models.documento import NumeroProcesso
+
+    resultado, _ = anonimizar_texto(
+        "Processo 99999.000003/2025-11 e de novo 99999. 000003/2025- 11.", SECRET_KEY, db_session
+    )
+
+    linhas = db_session.query(NumeroProcesso).filter_by(numero="99999.000003/2025-11").all()
+    assert len(linhas) == 1
+    assert resultado.count(linhas[0].token) == 2
+
+
+def test_mesmo_numero_com_outra_chave_nao_quebra_a_anonimizacao(db_session):
+    from app.models.documento import NumeroProcesso
+
+    anonimizar_texto("Processo 99999.000007/2025-11.", SECRET_KEY, db_session)
+    anonimizar_texto("Processo 99999.000007/2025-11.", b"outra-chave", db_session)
+    db_session.flush()
+
+    assert db_session.query(NumeroProcesso).filter_by(numero="99999.000007/2025-11").count() == 2

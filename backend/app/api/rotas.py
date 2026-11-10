@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencias import obter_sessao
 from app.api.esquemas import PedidoConsulta, RespostaConsulta, para_resposta_consulta
+from app.api.numeros import ocultar_numeros, revelar_na_resposta
 from app.geracao.respondedor import responder
 from app.ingestion.collector import path_seguro
 from app.models.documento import Documento
@@ -26,9 +27,10 @@ def consultar(
 ) -> RespostaConsulta:
     estado = request.app.state
     resposta = responder(
-        pedido.pergunta, sessao, estado.cliente_qdrant, estado.driver, estado.cliente_llm
+        ocultar_numeros(pedido.pergunta, sessao),
+        sessao, estado.cliente_qdrant, estado.driver, estado.cliente_llm,
     )
-    return para_resposta_consulta(resposta)
+    return para_resposta_consulta(revelar_na_resposta(resposta, sessao))
 
 
 @roteador.get("/documentos/{id_documento}/pdf")
