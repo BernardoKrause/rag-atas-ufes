@@ -14,11 +14,11 @@ def camadas_falsas(db_session, monkeypatch):
     criar_item(db_session, documento, numero_item="3", item_id_canonico="cam_grafo")
     chamadas = []
 
-    def lexico(pergunta, sessao):
+    def lexico(pergunta, sessao, orgao=None):
         chamadas.append("lexico")
         return [Hit("cam_lex", 1)]
 
-    def vetorial(pergunta, cliente):
+    def vetorial(pergunta, cliente, documentos=None):
         chamadas.append("vetorial")
         return [Hit("cam_vet", 1)]
 

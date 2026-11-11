@@ -1,17 +1,28 @@
 from __future__ import annotations
 
 from qdrant_client import QdrantClient
+from qdrant_client.models import FieldCondition, Filter, MatchAny
 
 from app.core.config import settings
 from app.ingestion.indexador import carregar_modelo, gerar_embedding, tokenizar_texto
 from app.recuperacao.tipos import LIMITE_PADRAO, Hit
 
 
-def buscar_vetorial(pergunta: str, cliente: QdrantClient, limite_janelas: int = LIMITE_PADRAO) -> list[Hit]:
+def buscar_vetorial(
+    pergunta: str,
+    cliente: QdrantClient,
+    limite_janelas: int = LIMITE_PADRAO,
+    documentos: list[int] | None = None,
+) -> list[Hit]:
     tokenizer, modelo = carregar_modelo()
     embedding = gerar_embedding(tokenizer, modelo, tokenizar_texto(tokenizer, pergunta))
 
-    resultado = cliente.query_points(collection_name=settings.qdrant_collection, query=embedding, limit=limite_janelas)
+    filtro = None
+    if documentos is not None:
+        filtro = Filter(must=[FieldCondition(key="documento_id", match=MatchAny(any=documentos))])
+    resultado = cliente.query_points(
+        collection_name=settings.qdrant_collection, query=embedding, query_filter=filtro, limit=limite_janelas
+    )
 
     melhor_score_por_item: dict[str, float] = {}
     for ponto in resultado.points:
