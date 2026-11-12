@@ -250,3 +250,26 @@ def test_sem_evento_relevante_nao_pede_resposta_direta(db_session, dois_itens):
     llm = LLMFalso()
     _responder(db_session, llm)
     assert ESQUEMA_RESPOSTA not in llm.esquemas
+
+
+def test_evento_com_termo_da_pergunta_ausente_do_trecho_e_descartado(db_session, dois_itens):
+    item_a, _ = dois_itens
+    llm = LLMFalso(eventos={
+        1: _json((1, True, "O item A foi aprovado.")),
+        2: _json((2, True, "Os PADs do DAV foram aprovados.")),
+    })
+
+    resposta = responder("Qual foi a decisão sobre os PADs do DAV?", db_session, None, None, llm)
+
+    assert resposta.texto == "01/01/2025: O item A foi aprovado. [1]"
+    assert [f.item_id_canonico for f in resposta.fontes] == [item_a.item_id_canonico]
+    assert "Os PADs do DAV foram aprovados" not in llm.chamadas[-1][1]
+
+
+def test_todos_os_eventos_sem_apoio_levam_a_abstencao(db_session, dois_itens):
+    llm = LLMFalso(eventos={2: _json((2, True, "Os PADs do DAV foram aprovados."))})
+
+    resposta = responder("Qual foi a decisão sobre os PADs do DAV?", db_session, None, None, llm)
+
+    assert resposta.abstencao is True
+    assert resposta.texto == FRASE_ABSTENCAO

@@ -6,6 +6,7 @@ from app.geracao.eventos import (
     interpretar_eventos,
     ler_resposta_direta,
     montar_texto,
+    termos_sem_apoio,
 )
 
 DATAS = {1: date(2025, 5, 28), 2: date(2024, 8, 1), 3: date(2025, 5, 13)}
@@ -146,3 +147,43 @@ def test_resposta_direta_invalida_ou_ausente_vira_vazio():
     assert ler_resposta_direta('{"eventos": []}', EVENTOS) == ""
     assert ler_resposta_direta('{"resposta": 3}', EVENTOS) == ""
     assert ler_resposta_direta('{"resposta": "  "}', EVENTOS) == ""
+
+
+def test_termo_da_pergunta_ausente_do_trecho_fica_sem_apoio():
+    pergunta = "Qual foi a decisão sobre os PADs do Departamento de Artes Visuais (DAV), semestre 2024/2?"
+    descricao = "Os PADs do Departamento de Artes Visuais (DAV) do semestre 2024/2 foram aprovados."
+    trecho = "10) RADs de 2024.2 - Departamento de Comunicação Social. Aprovado a unanimidade."
+
+    assert termos_sem_apoio(descricao, pergunta, trecho) == ["DAV", "Departamento de Artes Visuais"]
+
+
+def test_semestre_da_pergunta_ausente_do_trecho_fica_sem_apoio():
+    pergunta = "Quais datas foram definidas para o Calendário de Reuniões - Semestre 2024/1?"
+    descricao = "As datas das reuniões do semestre 2024/1 foram: 24 de outubro."
+    trecho = "3.2 Proposta de Calendário de Reuniões - Semestre 2024/2. Datas: 24 de outubro."
+
+    assert termos_sem_apoio(descricao, pergunta, trecho) == ["2024/1"]
+
+
+def test_termos_presentes_no_trecho_tem_apoio_mesmo_sem_acento():
+    pergunta = "Qual foi a decisão sobre a disciplina COM10508 de Ciências da Computação?"
+    descricao = "A redução de vagas da disciplina COM10508 de Ciências da Computação foi aprovada."
+    trecho = "3.6 Reducao de vagas da disciplina COM10508 - curso de Ciencias da Computacao. Aprovado."
+
+    assert termos_sem_apoio(descricao, pergunta, trecho) == []
+
+
+def test_termo_que_nao_vem_da_pergunta_nao_e_conferido():
+    pergunta = "Qual foi a decisão sobre os PADs no setor CAR?"
+    descricao = "Os PADs do Departamento de Design foram aprovados."
+    trecho = "PAD do DDesign. Aprovado."
+
+    assert termos_sem_apoio(descricao, pergunta, trecho) == []
+
+
+def test_palavra_comum_nao_e_termo_especifico():
+    pergunta = "Que providências foram registradas sobre a licença da professora?"
+    descricao = "A professora solicitou licença, homologada por unanimidade."
+    trecho = "Licença para capacitação do Professor. Homologado por unanimidade."
+
+    assert termos_sem_apoio(descricao, pergunta, trecho) == []
