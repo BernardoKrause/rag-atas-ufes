@@ -1,0 +1,596 @@
+{
+  "id_execucao": "e5e7c6b87d46",
+  "quando": "2026-11-08T01:15:02",
+  "commit": "ab7ba7b",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Quais registros e encaminhamentos constam sobre disciplina ECH15737 no setor CEUNES?",
+  "alvos": {
+    "1849_PAUTA_4": {
+      "ata": 1849,
+      "orgao": "CEUNES",
+      "data": "2024-02-05",
+      "pagina": 2,
+      "assunto": "PROCESSO_59017 - Solicita apreciação de inclusão de PESSOA_299606 como prestadora de servi",
+      "rank_lexico": 6,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 16
+    },
+    "1852_PAUTA_9": {
+      "ata": 1852,
+      "orgao": "CEUNES",
+      "data": "2024-03-25",
+      "pagina": 3,
+      "assunto": "PROCESSO_31773 - Solicita apreciação da inclusão de PESSOA_165251 como prestador de serviç",
+      "rank_lexico": 5,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 14
+    }
+  },
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1786_INFORMES_3",
+      "score": 12.58006650563701,
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    },
+    {
+      "rank": 2,
+      "item": "1842_INFORMES_1",
+      "score": 12.444245575260414,
+      "ata": 1842,
+      "orgao": "CEUNES_DMA",
+      "data": "2025-01-30",
+      "pagina": 1,
+      "assunto": "Foi solicitado ao DGP autorização para abertura de processo seletivo para 2025/1. O proces"
+    },
+    {
+      "rank": 3,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "score": 11.798603803580264,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 4,
+      "item": "1851_INFORMES_7",
+      "score": 11.740618031038192,
+      "ata": 1851,
+      "orgao": "CEUNES",
+      "data": "2024-03-04",
+      "pagina": 2,
+      "assunto": "O Conselheiro PESSOA_165245 informa que está havendo negociações com o Governo Federal sob"
+    },
+    {
+      "rank": 5,
+      "item": "1852_PAUTA_9",
+      "score": 11.59480542950379,
+      "ata": 1852,
+      "orgao": "CEUNES",
+      "data": "2024-03-25",
+      "pagina": 3,
+      "assunto": "PROCESSO_31773 - Solicita apreciação da inclusão de PESSOA_165251 como prestador de serviç"
+    },
+    {
+      "rank": 6,
+      "item": "1849_PAUTA_4",
+      "score": 11.465740312339065,
+      "ata": 1849,
+      "orgao": "CEUNES",
+      "data": "2024-02-05",
+      "pagina": 2,
+      "assunto": "PROCESSO_59017 - Solicita apreciação de inclusão de PESSOA_299606 como prestadora de servi"
+    },
+    {
+      "rank": 7,
+      "item": "1852_INFORMES_1",
+      "score": 11.459357090008243,
+      "ata": 1852,
+      "orgao": "CEUNES",
+      "data": "2024-03-25",
+      "pagina": 1,
+      "assunto": "O servidor PESSOA_165267, Presidente da comissão Paepe do Ceunes, informa que há muitos pr"
+    },
+    {
+      "rank": 8,
+      "item": "1859_PAUTA_6",
+      "score": 11.307445482333598,
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    },
+    {
+      "rank": 9,
+      "item": "1897_INFORMES_4.4",
+      "score": 11.098164385160294,
+      "ata": 1897,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-20",
+      "pagina": 2,
+      "assunto": "O Presidente comunicou que o Departamento recebeu a resposta referente ao Documento avulso"
+    },
+    {
+      "rank": 10,
+      "item": "1712_COMUNICACOES_4.1",
+      "score": 10.902272014073699,
+      "ata": 1712,
+      "orgao": "CCENS_DQF",
+      "data": "2025-06-05",
+      "pagina": 4,
+      "assunto": "O Professor PESSOA_163017 comunicou que o professor substituto na área da Física foi contr"
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1812_PAUTA_4",
+      "score": 0.67503893,
+      "ata": 1812,
+      "orgao": "CEUNES_DCE",
+      "data": "2024-06-12",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31636 - Solicitação de apreciação de pedido de criação de dis"
+    },
+    {
+      "rank": 2,
+      "item": "1850_PAUTA_2",
+      "score": 0.66939,
+      "ata": 1850,
+      "orgao": "CEUNES",
+      "data": "2024-02-19",
+      "pagina": 2,
+      "assunto": "PROCESSO_59021 - Solicita apreciação da inclusão de PESSOA_299615 como prestadora de servi"
+    },
+    {
+      "rank": 3,
+      "item": "1856_PAUTA_7",
+      "score": 0.669344,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31802 - O Conselheiro PESSOA_164954 fez relato e parecer favorável ao pr"
+    },
+    {
+      "rank": 4,
+      "item": "1856_PAUTA_8",
+      "score": 0.6649158,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "PALAVRA LIVRE: Foi informado que o gabinete da reitoria virá nos dias e 05/06, porém, como"
+    },
+    {
+      "rank": 5,
+      "item": "1734_PAUTA_3.16",
+      "score": 0.6576793,
+      "ata": 1734,
+      "orgao": "CCHN",
+      "data": "2022-04-26",
+      "pagina": 5,
+      "assunto": "Processo digital nº PROCESSO_31220. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "rank": 6,
+      "item": "1738_PAUTA_3.07",
+      "score": 0.65455043,
+      "ata": 1738,
+      "orgao": "CCHN",
+      "data": "2023-03-14",
+      "pagina": 3,
+      "assunto": "Processo digital nº PROCESSO_31273. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "rank": 7,
+      "item": "1953_PAUTA_4",
+      "score": 0.6543689,
+      "ata": 1953,
+      "orgao": "CCE",
+      "data": "2010-05-31",
+      "pagina": 2,
+      "assunto": "Remoção do professor PESSOA_166099 para o CEUNES – O professor PESSOA_166099 encaminhou ex"
+    },
+    {
+      "rank": 8,
+      "item": "1736_PAUTA_3.07",
+      "score": 0.65271854,
+      "ata": 1736,
+      "orgao": "CCHN",
+      "data": "2023-01-31",
+      "pagina": 5,
+      "assunto": "Processo digital nº PROCESSO_31246. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "rank": 9,
+      "item": "1974_PAUTA_6",
+      "score": 0.6436102,
+      "ata": 1974,
+      "orgao": "CCE",
+      "data": "2012-05-29",
+      "pagina": 2,
+      "assunto": "Apreciação da solicitação do Colegiado de Estatística de inserção das Disciplinas Optativa"
+    },
+    {
+      "rank": 10,
+      "item": "1879_ORDEM_DO_DIA_3.3",
+      "score": 0.6412157,
+      "ata": 1879,
+      "orgao": "CCAE_DER",
+      "data": "2024-04-11",
+      "pagina": 1,
+      "assunto": "Documento avulso PROCESSO_31859. Retificação de Ata da 1ª Sessão Ordinária de Abril de 202"
+    }
+  ],
+  "ancoras": [
+    "1786_INFORMES_3",
+    "1812_PAUTA_4",
+    "1842_INFORMES_1",
+    "1850_PAUTA_2",
+    "1662_ORDEM_DO_DIA_1.5_F1",
+    "1856_PAUTA_7",
+    "1851_INFORMES_7",
+    "1856_PAUTA_8",
+    "1852_PAUTA_9",
+    "1734_PAUTA_3.16",
+    "1849_PAUTA_4",
+    "1738_PAUTA_3.07",
+    "1852_INFORMES_1",
+    "1953_PAUTA_4",
+    "1859_PAUTA_6",
+    "1736_PAUTA_3.07",
+    "1897_INFORMES_4.4",
+    "1974_PAUTA_6",
+    "1712_COMUNICACOES_4.1",
+    "1879_ORDEM_DO_DIA_3.3"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 3,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 3,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 3,
+      "item": "1858_PAUTA_10",
+      "score": null,
+      "ata": 1858,
+      "orgao": "CEUNES",
+      "data": "2024-07-01",
+      "pagina": 3,
+      "assunto": "Documento avulso nº PROCESSO_31802 - Solicita autorização para que o Sr. PESSOA_165321 uti"
+    },
+    {
+      "rank": 3,
+      "item": "1856_PAUTA_6",
+      "score": null,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31803 - O Conselheiro PESSOA_164691 fez a leitura do relato e parecer fa"
+    },
+    {
+      "rank": 3,
+      "item": "1856_PAUTA_1",
+      "score": null,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Expediente - Não houve exclusões e foram solicitadas pelos Conselheiros PESSOA_164691 e PE"
+    },
+    {
+      "rank": 8,
+      "item": "1859_PAUTA_6_F1",
+      "score": null,
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    },
+    {
+      "rank": 10,
+      "item": "1879_ORDEM_DO_DIA_3.3_F1",
+      "score": null,
+      "ata": 1879,
+      "orgao": "CCAE_DER",
+      "data": "2024-04-11",
+      "pagina": 1,
+      "assunto": "Documento avulso PROCESSO_31859. Retificação de Ata da 1ª Sessão Ordinária de Abril de 202"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1786_INFORMES_3",
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    },
+    {
+      "posicao": 2,
+      "item": "1812_PAUTA_4",
+      "ata": 1812,
+      "orgao": "CEUNES_DCE",
+      "data": "2024-06-12",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31636 - Solicitação de apreciação de pedido de criação de dis"
+    },
+    {
+      "posicao": 3,
+      "item": "1842_INFORMES_1",
+      "ata": 1842,
+      "orgao": "CEUNES_DMA",
+      "data": "2025-01-30",
+      "pagina": 1,
+      "assunto": "Foi solicitado ao DGP autorização para abertura de processo seletivo para 2025/1. O proces"
+    },
+    {
+      "posicao": 4,
+      "item": "1850_PAUTA_2",
+      "ata": 1850,
+      "orgao": "CEUNES",
+      "data": "2024-02-19",
+      "pagina": 2,
+      "assunto": "PROCESSO_59021 - Solicita apreciação da inclusão de PESSOA_299615 como prestadora de servi"
+    },
+    {
+      "posicao": 5,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 6,
+      "item": "1856_PAUTA_7",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31802 - O Conselheiro PESSOA_164954 fez relato e parecer favorável ao pr"
+    },
+    {
+      "posicao": 7,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 8,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 9,
+      "item": "1858_PAUTA_10",
+      "ata": 1858,
+      "orgao": "CEUNES",
+      "data": "2024-07-01",
+      "pagina": 3,
+      "assunto": "Documento avulso nº PROCESSO_31802 - Solicita autorização para que o Sr. PESSOA_165321 uti"
+    },
+    {
+      "posicao": 10,
+      "item": "1856_PAUTA_6",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31803 - O Conselheiro PESSOA_164691 fez a leitura do relato e parecer fa"
+    },
+    {
+      "posicao": 11,
+      "item": "1856_PAUTA_1",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Expediente - Não houve exclusões e foram solicitadas pelos Conselheiros PESSOA_164691 e PE"
+    },
+    {
+      "posicao": 12,
+      "item": "1851_INFORMES_7",
+      "ata": 1851,
+      "orgao": "CEUNES",
+      "data": "2024-03-04",
+      "pagina": 2,
+      "assunto": "O Conselheiro PESSOA_165245 informa que está havendo negociações com o Governo Federal sob"
+    },
+    {
+      "posicao": 13,
+      "item": "1856_PAUTA_8",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "PALAVRA LIVRE: Foi informado que o gabinete da reitoria virá nos dias e 05/06, porém, como"
+    },
+    {
+      "posicao": 14,
+      "item": "1852_PAUTA_9",
+      "ata": 1852,
+      "orgao": "CEUNES",
+      "data": "2024-03-25",
+      "pagina": 3,
+      "assunto": "PROCESSO_31773 - Solicita apreciação da inclusão de PESSOA_165251 como prestador de serviç"
+    },
+    {
+      "posicao": 15,
+      "item": "1734_PAUTA_3.16",
+      "ata": 1734,
+      "orgao": "CCHN",
+      "data": "2022-04-26",
+      "pagina": 5,
+      "assunto": "Processo digital nº PROCESSO_31220. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "posicao": 16,
+      "item": "1849_PAUTA_4",
+      "ata": 1849,
+      "orgao": "CEUNES",
+      "data": "2024-02-05",
+      "pagina": 2,
+      "assunto": "PROCESSO_59017 - Solicita apreciação de inclusão de PESSOA_299606 como prestadora de servi"
+    },
+    {
+      "posicao": 17,
+      "item": "1738_PAUTA_3.07",
+      "ata": 1738,
+      "orgao": "CCHN",
+      "data": "2023-03-14",
+      "pagina": 3,
+      "assunto": "Processo digital nº PROCESSO_31273. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "posicao": 18,
+      "item": "1852_INFORMES_1",
+      "ata": 1852,
+      "orgao": "CEUNES",
+      "data": "2024-03-25",
+      "pagina": 1,
+      "assunto": "O servidor PESSOA_165267, Presidente da comissão Paepe do Ceunes, informa que há muitos pr"
+    },
+    {
+      "posicao": 19,
+      "item": "1953_PAUTA_4",
+      "ata": 1953,
+      "orgao": "CCE",
+      "data": "2010-05-31",
+      "pagina": 2,
+      "assunto": "Remoção do professor PESSOA_166099 para o CEUNES – O professor PESSOA_166099 encaminhou ex"
+    },
+    {
+      "posicao": 20,
+      "item": "1859_PAUTA_6",
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1786_INFORMES_3",
+      "rotulo": "Ata CE_Colegiado_Pedagogia, 9ª reunião, 04/10/2021, informes, item 3, p. 1",
+      "pagina": 1,
+      "texto": "3. Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova proposta de funcionamento da Secretaria Integrada e sobre os ajustes na organização do setor nos últimos meses. Relatou sobre a situação de ausência da servidora PESSOA_164476, que interferiu no andamento de alguns encaminhamentos do setor. Mencionou que a situação já foi encaminhada para Direção do Centro de Educação e que o setor buscará orientação junto à PROGEP.",
+      "frases_grafo": [
+        "Centro: CE.",
+        "Data da reunião: 2021-10-04."
+      ],
+      "data_reuniao": "2021-10-04"
+    },
+    {
+      "numero": 2,
+      "item": "1812_PAUTA_4",
+      "rotulo": "Ata CEUNES_DCE, 6ª reunião ordinaria, 12/06/2024, pauta, item 4, p. 1 (minuta em aprovação)",
+      "pagina": 1,
+      "texto": "PAUTA 4: Documento avulso nº PROCESSO_31636 - Solicitação de apreciação de pedido de criação de disciplinas Optativas computação verde. O Prof. PESSOA_376621 esclareceram sobre a solicitação. Seguido de votação. Decisão: Aprovado(a) por unanimidade a inserção/criação da(s) disciplina(s) OPTATIVA(S) conforme tabela informada no Ofício n° 02/2023/CCEC/CEUNES e programa de disciplina de sequencial do referido documento avulso.",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Departamento: DCE.",
+        "Data da reunião: 2024-06-12.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: por unanimidade a inserção/criação da(s) disciplina(s) OPTATIVA(S) conforme tabela informada no Ofício n° 02/2023/CCEC/CEUNES e programa de disciplina de sequencial do referido documento avulso.."
+      ],
+      "data_reuniao": "2024-06-12"
+    },
+    {
+      "numero": 3,
+      "item": "1842_INFORMES_1",
+      "rotulo": "Ata CEUNES_DMA, 1ª reunião ordinaria, 30/01/2025, informes, item 1, p. 1 (minuta em aprovação)",
+      "pagina": 1,
+      "texto": "INFORME 1: Foi solicitado ao DGP autorização para abertura de processo seletivo para 2025/1. O processo foi tramitado dia de janeiro para a Direção do CEUNES e após autorizado pelo PESSOA_165194, foi encaminhado ao setor responsável para autorização.",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Departamento: DMA.",
+        "Data da reunião: 2025-01-30."
+      ],
+      "data_reuniao": "2025-01-30"
+    },
+    {
+      "numero": 4,
+      "item": "1850_PAUTA_2",
+      "rotulo": "Ata CEUNES, 3ª reunião ordinaria, 19/02/2024, pauta, item 2, p. 2",
+      "pagina": 2,
+      "texto": "PAUTA 2: PROCESSO_59021 - Solicita apreciação da inclusão de PESSOA_299615 como prestadora de serviço voluntário junto ao Departamento de Educação e Ciências Humanas (DECH/CEUNES/UFES), ministrando a disciplina ECH12015 — Gestão Escolar I para a turma de Pedagogia, durante o semestre 2024/1, com início em 11 de março e término em 12 de julho de 2024, com corresponsabilidade da docente PESSOA_164851. Relator(a): PESSOA_164503. Decisão: Aprovado(a) por unanimidade A Conselheira PESSOA_164851 se declara impedida de votar. Nada mais havendoa tratar, o(a) Senhor(a) Presidente agradeceu a presença e declarou encerrada a sessão, e eu, PESSOA_165250, secretário(a) do(a) Conselho Departamental do Centro Universitário Norte do Espírito Santo, lavrei a presente ata que, após lida e aprovada, vai devidamente assinada pelos presentes. São Mateus/ES, 19 de fevereiro de 2024. “ PESSOA_376628 PESSOA_299614 PESSOA_299613 (Presidente) PESSOA_299612 “PESSOA_164694 PESSOA_299611 PESSOA_299601 (representado(a) por PESSOA_165236) PESSOA_299610 (representado(a) por PESSOA_165362) PESSOA_164616 PESSOA_164940 (representado(a) por PESSOA_164625) PESSOA_164851 PESSOA_164850 PESSOA_164518 PESSOA_299609 PESSOA_299608 PESSOA_164954 PESSOA_165180 PESSOA_164509 PESSOA_164862 (representado(a) por PESSOA_164537) (representado(a) por PESSOA_164841) PESSOA_164503 PESSOA_164872 Emissão: 05/03/2024 10:14:25 Página 3/3 Rd UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO PROTOCOLO DE ASSINATURA DRE O! O documento acima foi assinado digitalmente com senha eletrônica através do Protocolo ER ri Web, conforme Portaria UFES nº 1.269 de 30/08/2018, por soe go PESSOA_165229 - MATRICULA_1113 mx E no Presidente - Conselho Departamental do CEUNES rede arE Em 05/03/2024 às 16:34 Para verificar as assinaturas e visualizar o documento original acesse o link: https://api.lepisma.ufes.br/arquivos-assinados/888088?tipoArquivo=O",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Data da reunião: 2024-02-19.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: por unanimidade A Conselheira PESSOA_164851 se declara impedida de votar.."
+      ],
+      "data_reuniao": "2024-02-19"
+    },
+    {
+      "numero": 5,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "rotulo": "Ata CCENS_DB, 9ª reunião ordinaria, 28/05/2025, ordem do dia, item 1.5, p. 3",
+      "pagina": 3,
+      "texto": "ir um comprometimento dos professores ministrarem determinadas disciplinas até que haja mudança nos projetos de curso ou uma possível necessidade de organização do Departamento, mantendo um padrão e facilitando as tomadas de decisões futuras. A professora PESSOA_8813, em resposta à menção do professor PESSOA_161875 sobre “a mudança do professor PESSOA_8801 para a área da Ecologia está registrado em Ata e que todos têm ciência que havia três (3) vagas”, informou que ainda não há, formalmente, uma definição do quantitativo de vagas por área registrado em Ata Acrescentou que, caso o Departamento entenda ser mais apropriada realocar as disciplinas entre docentes de uma determinada área, que isso seja registrado em Ata, especificando a responsabilidade de cada professor pelas disciplinas assumidas, até que haja a necessidade de uma nova revisão. O professor PESSOA_8802 manifestou-se favorável à migração da carga horária para a área na qual o docente ministra suas disciplinas, desde que essa transferência ocorra para a área em que o professor tenha a maior carga horária. Assim, a disciplina ministrada em outra área deve ser transferida para a área principal do professor. O professor PESSOA_162034 expôs que o Departamento precisa considerar o que já foi pactuado na criação dos cursos e do Departamento para conseguir vagas e assim, não desfalcar as áreas, pois o Departamento está com déficit de vagas. Acrescentou que seria pertinente revisar alguns pontos que foram apresentados na planilha. Por fim, falou que acha mais prudente optar por substituição para a vaga da professora PESSOA_161955. A professora PESSOA_162033 destacou a importância de que o chefe de departamento precisa ter pleno conhecimento sobre as disciplinas pelas quais cada docente é responsável. Ressaltou que tal controle é fundamental para garantir a previsibilidade do Departamento. Mencionou ainda que, mesmo sendo necessário alguns ajustes, é importante que o chefe tenha ciência, na hora da demanda, sobre quais professores irão assumir as disciplinas. A professora PESSOA_161964 sugeriu uma reorganização da planilha. Por fim, a professora PESSOA_8805 e a professora PESSOA_8813 explicaram e justificaram sobre as manifestações em relação ao preenchimento dos dados na planilha, ressaltando os problemas que o Departamento enfrenta, contudo, precisam da deliberação da Câmara Departamental para resolver o ponto apresentado para preencher a planilha e futuramente, que os membros apresentem novas propostas quanto à maneira de conduzir o surgimento de vagas, com sugestões de modificações, que julguem mais justas, para o preenchimento da planilha. O professor PESSOA_162032 mencionou sobre a necessidade de rever os PPCs. Com a palavra, a Chefe do Departamento falou que, diante de todas as manifestações, a proposta é reorganizar a planilha de 4 acordo com as demandas de cada professor migrando para a área que ele está com maior carga horária. Após, e em conformidade com a sugestão apresentada, a prof",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DB.",
+        "Data da reunião: 2025-05-28.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade."
+      ],
+      "data_reuniao": "2025-05-28"
+    }
+  ],
+  "prompt_usuario": "Evidências:\n{\"identificador\": 1, \"data_reuniao\": \"04/10/2021\", \"fonte\": \"Ata CE_Colegiado_Pedagogia, 9ª reunião, 04/10/2021, informes, item 3, p. 1\", \"trecho\": \"3. Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova proposta de funcionamento da Secretaria Integrada e sobre os ajustes na organização do setor nos últimos meses. Relatou sobre a situação de ausência da servidora PESSOA_164476, que interferiu no andamento de alguns encaminhamentos do setor. Mencionou que a situação já foi encaminhada para Direção do Centro de Educação e que o setor buscará orientação junto à PROGEP.\", \"relacoes\": [\"Centro: CE.\", \"Data da reunião: 2021-10-04.\"], \"item_anterior_nao_citavel\": \"Férias da coordenadora e subcoordenadora do curso de Pedagogia. Férias da coordenadora será no período de 20/10 a 02/11. Férias da subcoordenadora será no período de 10/10 a 25/10.\", \"item_posterior_nao_citavel\": \"Informe do professor PESSOA_164385, presidente do Núcleo Docente Estruturante do curso de Pedagogia. O professor PESSOA_164423, presidente do Núcleo Docente Estruturante do curso de Pedagogia, informou sobre a proposta de agendar uma reunião conjunta entre o Colegiado da Pedagogia e o Núcleo Docente Estruturante (NDE) e salientou a necessidade de dialogar sobre a extensão no âmbito do Centro de Educação. Propôs a UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE EDUCAÇÃO Colegiado do curso de Licenciatura em Pedagogia Campus Universitário Alaor de Queiroz Araújo Av. Fernando Ferrari, 514, Goiabeiras, Vitória-ES / CEP 29075-910 organização de uma semana de apresentação dos Trabalhos de Conclusão de Curso (TCC), na qual os estudantes poderiam realizar as apresentações dos projetos e das pesquisas para os demais alunos conhecerem os temas pesquisados. A professora PESSOA_164377 informou que ela e a professora PESSOA_164497, do Núcleo de Educação Infantil - NEDI, estão organizando uma proposta de um Seminário de Trabalhos de Conclusão de Curso, colocou-se à disposição para compartilhar o documento que está construindo com a professora PESSOA_164497, mencionou que a proposta do núcleo é especificamente sobre infância. A professora PESSOA_164368 sugeriu que o evento fosse ampliado para outros temas, não somente a infância. O professor PESSOA_164423 informou sobre a reunião do Núcleo Docente Estruturante (NDE) que acontecerá no dia 13/10/2021. As professoras PESSOA_376801 informaram que não poderão estar presentes, justificando as ausências.\"}\n{\"identificador\": 2, \"data_reuniao\": \"12/06/2024\", \"fonte\": \"Ata CEUNES_DCE, 6ª reunião ordinaria, 12/06/2024, pauta, item 4, p. 1 (minuta em aprovação)\", \"trecho\": \"PAUTA 4: Documento avulso nº PROCESSO_31636 - Solicitação de apreciação de pedido de criação de disciplinas Optativas computação verde. O Prof. PESSOA_376621 esclareceram sobre a solicitação. Seguido de votação. Decisão: Aprovado(a) por unanimidade a inserção/criação da(s) disciplina(s) OPTATIVA(S) conforme tabela informada no Ofício n° 02/2023/CCEC/CEUNES e programa de disciplina de sequencial do referido documento avulso.\", \"relacoes\": [\"Centro: CEUNES.\", \"Departamento: DCE.\", \"Data da reunião: 2024-06-12.\", \"Desfecho: Aprovado.\", \"Resultado da votação: por unanimidade a inserção/criação da(s) disciplina(s) OPTATIVA(S) conforme tabela informada no Ofício n° 02/2023/CCEC/CEUNES e programa de disciplina de sequencial do referido documento avulso..\"], \"item_anterior_nao_citavel\": \"Processo digital nº PROCESSO_31637 - Projeto de extensão. O prof. PESSOA_164705 leu o relato e parecer favorável da comissão de pesquisa e extensão do DCE seguido de esclarecimentos realizados pelo prof. PESSOA_164760. Em seguida passou-se a votação\", \"item_posterior_nao_citavel\": \"Processo digital nº PROCESSO_31635 - Apreciação do registro do projeto de extensão. O prof. PESSOA_164702 leu o parecer favorável da comissão de pesquisa e extensão do DCE a aprovação do registro, neste Emissão: 21/06/2024 07:49:15 Página 1/3 Documento assinado eletronicamente nos moldes do art. 10 da MP 2200/01 e Lei 14063/20 [PESSOA_164627] 82a78daff4426033c01b66c45e6e68acb3018caa3640f132d8de0f680634cd70 departamento, do Projeto de Pesquisa intitulado \\\"Aquisição de Sinais para Avaliação de Sensores\\\", sob coordenação do Prof. PESSOA_164718. De acordo com sequencial 1, o referido projeto ainda não possui número de registro na PRPPG, teve início em 01/08/2022 e possui prazo de vigência de meses., seguido de esclarecimentos e votação\"}\n{\"identificador\": 3, \"data_reuniao\": \"30/01/2025\", \"fonte\": \"Ata CEUNES_DMA, 1ª reunião ordinaria, 30/01/2025, informes, item 1, p. 1 (minuta em aprovação)\", \"trecho\": \"INFORME 1: Foi solicitado ao DGP autorização para abertura de processo seletivo para 2025/1. O processo foi tramitado dia de janeiro para a Direção do CEUNES e após autorizado pelo PESSOA_165194, foi encaminhado ao setor responsável para autorização.\", \"relacoes\": [\"Centro: CEUNES.\", \"Departamento: DMA.\", \"Data da reunião: 2025-01-30.\"], \"item_posterior_nao_citavel\": \"Intenção de saída para douturado - A professora PESSOA_165188 informou que tem a intenção de sair para pós graduação - doutorado no semestre de 2025/2\"}\n{\"identificador\": 4, \"data_reuniao\": \"19/02/2024\", \"fonte\": \"Ata CEUNES, 3ª reunião ordinaria, 19/02/2024, pauta, item 2, p. 2\", \"trecho\": \"PAUTA 2: PROCESSO_59021 - Solicita apreciação da inclusão de PESSOA_299615 como prestadora de serviço voluntário junto ao Departamento de Educação e Ciências Humanas (DECH/CEUNES/UFES), ministrando a disciplina ECH12015 — Gestão Escolar I para a turma de Pedagogia, durante o semestre 2024/1, com início em 11 de março e término em 12 de julho de 2024, com corresponsabilidade da docente PESSOA_164851. Relator(a): PESSOA_164503. Decisão: Aprovado(a) por unanimidade A Conselheira PESSOA_164851 se declara impedida de votar. Nada mais havendoa tratar, o(a) Senhor(a) Presidente agradeceu a presença e declarou encerrada a sessão, e eu, PESSOA_165250, secretário(a) do(a) Conselho Departamental do Centro Universitário Norte do Espírito Santo, lavrei a presente ata que, após lida e aprovada, vai devidamente assinada pelos presentes. São Mateus/ES, 19 de fevereiro de 2024. “ PESSOA_376628 PESSOA_299614 PESSOA_299613 (Presidente) PESSOA_299612 “PESSOA_164694 PESSOA_299611 PESSOA_299601 (representado(a) por PESSOA_165236) PESSOA_299610 (representado(a) por PESSOA_165362) PESSOA_164616 PESSOA_164940 (representado(a) por PESSOA_164625) PESSOA_164851 PESSOA_164850 PESSOA_164518 PESSOA_299609 PESSOA_299608 PESSOA_164954 PESSOA_165180 PESSOA_164509 PESSOA_164862 (representado(a) por PESSOA_164537) (representado(a) por PESSOA_164841) PESSOA_164503 PESSOA_164872 Emissão: 05/03/2024 10:14:25 Página 3/3 Rd UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO PROTOCOLO DE ASSINATURA DRE O! O documento acima foi assinado digitalmente com senha eletrônica através do Protocolo ER ri Web, conforme Portaria UFES nº 1.269 de 30/08/2018, por soe go PESSOA_165229 - MATRICULA_1113 mx E no Presidente - Conselho Departamental do CEUNES rede arE Em 05/03/2024 às 16:34 Para verificar as assinaturas e visualizar o documento original acesse o link: https://api.lepisma.ufes.br/arquivos-assinados/888088?tipoArquivo=O\", \"relacoes\": [\"Centro: CEUNES.\", \"Data da reunião: 2024-02-19.\", \"Desfecho: Aprovado.\", \"Resultado da votação: por unanimidade A Conselheira PESSOA_164851 se declara impedida de votar..\"], \"item_anterior_nao_citavel\": \"PROCESSO_59022 - Solicita aprovação do relatório referente à licença capacitação da professora PESSOA_299277 concedida pela PORTARIA DE PESSOAL Nº 2678, DE 25 DE JULHO DE 2023. Relator(a): PESSOA_164544\"}\n{\"identificador\": 5, \"data_reuniao\": \"28/05/2025\", \"fonte\": \"Ata CCENS_DB, 9ª reunião ordinaria, 28/05/2025, ordem do dia, item 1.5, p. 3\", \"trecho\": \"ir um comprometimento dos professores ministrarem determinadas disciplinas até que haja mudança nos projetos de curso ou uma possível necessidade de organização do Departamento, mantendo um padrão e facilitando as tomadas de decisões futuras. A professora PESSOA_8813, em resposta à menção do professor PESSOA_161875 sobre “a mudança do professor PESSOA_8801 para a área da Ecologia está registrado em Ata e que todos têm ciência que havia três (3) vagas”, informou que ainda não há, formalmente, uma definição do quantitativo de vagas por área registrado em Ata Acrescentou que, caso o Departamento entenda ser mais apropriada realocar as disciplinas entre docentes de uma determinada área, que isso seja registrado em Ata, especificando a responsabilidade de cada professor pelas disciplinas assumidas, até que haja a necessidade de uma nova revisão. O professor PESSOA_8802 manifestou-se favorável à migração da carga horária para a área na qual o docente ministra suas disciplinas, desde que essa transferência ocorra para a área em que o professor tenha a maior carga horária. Assim, a disciplina ministrada em outra área deve ser transferida para a área principal do professor. O professor PESSOA_162034 expôs que o Departamento precisa considerar o que já foi pactuado na criação dos cursos e do Departamento para conseguir vagas e assim, não desfalcar as áreas, pois o Departamento está com déficit de vagas. Acrescentou que seria pertinente revisar alguns pontos que foram apresentados na planilha. Por fim, falou que acha mais prudente optar por substituição para a vaga da professora PESSOA_161955. A professora PESSOA_162033 destacou a importância de que o chefe de departamento precisa ter pleno conhecimento sobre as disciplinas pelas quais cada docente é responsável. Ressaltou que tal controle é fundamental para garantir a previsibilidade do Departamento. Mencionou ainda que, mesmo sendo necessário alguns ajustes, é importante que o chefe tenha ciência, na hora da demanda, sobre quais professores irão assumir as disciplinas. A professora PESSOA_161964 sugeriu uma reorganização da planilha. Por fim, a professora PESSOA_8805 e a professora PESSOA_8813 explicaram e justificaram sobre as manifestações em relação ao preenchimento dos dados na planilha, ressaltando os problemas que o Departamento enfrenta, contudo, precisam da deliberação da Câmara Departamental para resolver o ponto apresentado para preencher a planilha e futuramente, que os membros apresentem novas propostas quanto à maneira de conduzir o surgimento de vagas, com sugestões de modificações, que julguem mais justas, para o preenchimento da planilha. O professor PESSOA_162032 mencionou sobre a necessidade de rever os PPCs. Com a palavra, a Chefe do Departamento falou que, diante de todas as manifestações, a proposta é reorganizar a planilha de 4 acordo com as demandas de cada professor migrando para a área que ele está com maior carga horária. Após, e em conformidade com a sugestão apresentada, a prof\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DB.\", \"Data da reunião: 2025-05-28.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\"], \"item_anterior_nao_citavel\": \"Decisão quanto à destinação da vaga (concurso ou redistribuição ou aproveitamento ou remoção), decorrente da anulação do Concurso de Provas e Títulos (Edital nº 43/2025-R) referente a área/subárea de Genética (2.02.00.00-5). A Chefe do Departamento apresentou o ponto de pauta e informou que o Concurso público regido pelo Edital nº 78/2024-R, publicado no Diário Oficial da União nº 226 em 25 de novembro de 2024 para preenchimento de 1 (uma) vaga no cargo de Professor do Magistério Superior do Quadro Permanente desta Universidade, na área/subárea de Genética (2.02.00.00- 5) / Genética Molecular e de Microorganismos (2.02.02.00-8), Genética Vegetal (2.02.03.00-4), Genética Animal (2.02.04.00-0) e Genética Humana e Médica (2.02.05.00-7), do Departamento de Biologia, foi oficialmente cancelado por meio do Edital nº 43 de 15 de maio de 2025, (retificado pelo EDITAL Nº 45, DE 22 DE MAIO DE 2025). A chefe do Departamento esclareceu que, diante do cancelamento do concurso, a vaga retornou para o Departamento e que cabe à Câmara Departamental deliberar sobre sua destinação. Portanto, solicitou posicionamento dos membros de como conduzir a destinação dessa vaga, tendo como opções a abertura de novo concurso ou redistribuição ou remoção ou aproveitamento. A chefe informou que, caso a Câmara Departamental opte pelo concurso, os custos para realização serão de responsabilidade do Departamento, pois, devido a falta de recurso financeiro, a Universidade poderá, possivelmente, ser responsabilizada pelo transporte, e com algumas particularidades. Informou que até o momento, para a área de Genética, recebeu uma solicitação de aproveitamento de concurso. No entanto, após consulta ao departamento responsável da Universidade Federal do Espírito Santo, foi esclarecido que tal aproveitamento não seria possível, uma vez que não está em conformidade com o Acórdão nº 569/2006 do Tribunal de Contas da União (TCU), que veda o aproveitamento de concurso público entre instituições distintas, salvo em hipóteses legalmente previstas, o que inviabiliza o atendimento da solicitação nos moldes apresentados. Após ampla discussão, entre sugestões e esclarecimentos, o professor PESSOA_162036 ressaltou que o Departamento possui autonomia para estabelecer critérios internos, dar a devida publicidade e realizar a seleção de candidatos. O professor PESSOA_162034 sugeriu a abertura de um Processo Seletivo para professor substituto, até tomar todas as providências necessárias para uma decisão definitiva do provimento. E o professor PESSOA_8912 propôs que a decisão sobre a ocupação da vaga não se restrinja a uma única forma de provimento, podendo ser redistribuição, remoção ou aproveitamento. Considerando as discussões e todas as manifestações apresentadas, a Chefe do Departamento, esclareceu que a deliberação, neste momento, seria apenas para decidir a destinação da vaga. Após a câmara deliberar pela não abertura de Concurso Público, a chefe colocou em apreciação a proposta de destinar a vaga decorrente da anulação do Concurso Público de Provas e Títulos referente a área/subárea de Genética para ser ocupada por redistribuição ou aproveitamento ou remoção. Em votação\"}\n\nPergunta: Quais registros e encaminhamentos constam sobre disciplina ECH15737 no setor CEUNES?",
+  "tokens_entrada": 5111,
+  "tokens_saida": 91,
+  "truncada": false,
+  "resposta_bruta": "{\"eventos\": [{\"evidencia\": 4, \"relevante\": false, \"descricao\": \"A ata registra a aprovação da inclusão de PESSOA_299615 como prestadora de serviço voluntário para ministrar a disciplina ECH12015 - Gestão Escolar I, mas não menciona a disciplina ECH15737.\"}]}",
+  "resposta_final": "Não encontrei nas atas disponíveis informação suficiente para responder a essa pergunta.",
+  "citados": []
+}

@@ -1,0 +1,482 @@
+{
+  "id_execucao": "5f285a0e1da6",
+  "quando": "2026-11-08T01:09:20",
+  "commit": "ab7ba7b",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Qual foi a decisão sobre planos de Atividades Docentes (PADs) do Departamento de Artes Visuais (DAV), referentes ao semestre de 2024/2 no setor CAR?",
+  "alvos": {},
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "301_PAUTA_11",
+      "score": 47.64527256025826,
+      "ata": 301,
+      "orgao": "CAR",
+      "data": "2025-02-05",
+      "pagina": 2,
+      "assunto": "Processo digital: PROCESSO_1566. Planos de Atividades Docentes (PADs) do Departamento de A"
+    },
+    {
+      "rank": 2,
+      "item": "1897_INFORMES_4.2",
+      "score": 27.290804265709276,
+      "ata": 1897,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-20",
+      "pagina": 1,
+      "assunto": "O presidente informou sobre o prazo para envio do PADs e dos Planos de Ensino do semestre "
+    },
+    {
+      "rank": 3,
+      "item": "1715_PAUTA_11",
+      "score": 22.22380471869189,
+      "ata": 1715,
+      "orgao": "CAR",
+      "data": "2025-07-15",
+      "pagina": 2,
+      "assunto": "Documento avulso n° 3068.027913/2025-51 trata de solicitação de apreciação dos Planos de a"
+    },
+    {
+      "rank": 4,
+      "item": "1827_PAUTA_9",
+      "score": 21.51861429814181,
+      "ata": 1827,
+      "orgao": "CEUNES_DECH",
+      "data": "2024-11-14",
+      "pagina": 3,
+      "assunto": "Documento avulso: nº PROCESSO_31690 - Solicitação de aprovação de planos de ensino 2024/2 "
+    },
+    {
+      "rank": 5,
+      "item": "301_PAUTA_10",
+      "score": 20.067191883860353,
+      "ata": 301,
+      "orgao": "CAR",
+      "data": "2025-02-05",
+      "pagina": 2,
+      "assunto": "Doc. avulso nº PROCESSO_1567 - RADs de 2024.2 - Departamento de Comunicação Social. Relato"
+    },
+    {
+      "rank": 6,
+      "item": "1744_EXPEDIENTE_03.06",
+      "score": 19.74953451689014,
+      "ata": 1744,
+      "orgao": "CE",
+      "data": "2025-02-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "rank": 7,
+      "item": "1744_EXPEDIENTE_03.05",
+      "score": 19.620384783022747,
+      "ata": 1744,
+      "orgao": "CE",
+      "data": "2025-02-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "rank": 8,
+      "item": "1745_ORDEM_DO_DIA_04.03",
+      "score": 19.620384783022747,
+      "ata": 1745,
+      "orgao": "CE",
+      "data": "2025-03-14",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31350. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "rank": 9,
+      "item": "1745_ORDEM_DO_DIA_04.02",
+      "score": 19.492929487922925,
+      "ata": 1745,
+      "orgao": "CE",
+      "data": "2025-03-14",
+      "pagina": 2,
+      "assunto": "Documento Avulso nº PROCESSO_31351. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "rank": 10,
+      "item": "1713_PAUTA_7",
+      "score": 19.02410224117995,
+      "ata": 1713,
+      "orgao": "CAR",
+      "data": "2025-03-11",
+      "pagina": 2,
+      "assunto": "Processo digital: PROCESSO_30978. Plano de Atividade Docente (PAD) para o semestre 2024/2 "
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "301_PAUTA_11",
+      "score": 0.8045527,
+      "ata": 301,
+      "orgao": "CAR",
+      "data": "2025-02-05",
+      "pagina": 2,
+      "assunto": "Processo digital: PROCESSO_1566. Planos de Atividades Docentes (PADs) do Departamento de A"
+    },
+    {
+      "rank": 2,
+      "item": "1713_PAUTA_7",
+      "score": 0.73495454,
+      "ata": 1713,
+      "orgao": "CAR",
+      "data": "2025-03-11",
+      "pagina": 2,
+      "assunto": "Processo digital: PROCESSO_30978. Plano de Atividade Docente (PAD) para o semestre 2024/2 "
+    },
+    {
+      "rank": 3,
+      "item": "1664_ORDEM_DO_DIA_3.1",
+      "score": 0.7314826,
+      "ata": 1664,
+      "orgao": "CCENS_DC",
+      "data": "2025-02-18",
+      "pagina": 1,
+      "assunto": "Apreciação dos PAADS 2025 do DC. O chefe do departamento apresentou o ponto e falou que os"
+    },
+    {
+      "rank": 4,
+      "item": "1715_PAUTA_12",
+      "score": 0.7177022,
+      "ata": 1715,
+      "orgao": "CAR",
+      "data": "2025-07-15",
+      "pagina": 2,
+      "assunto": "Documento avulso n°: PROCESSO_30999 trata de solicitação de apreciação dos Relatórios de A"
+    },
+    {
+      "rank": 5,
+      "item": "1905_PAUTA_3.1",
+      "score": 0.7161546,
+      "ata": 1905,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-03-17",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31116 - Apreciação dos PAD’s 2025/1. Foram apresentados para "
+    },
+    {
+      "rank": 6,
+      "item": "1907_APROVACAO_DE_ATA_1.1",
+      "score": 0.70641994,
+      "ata": 1907,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-08-18",
+      "pagina": 1,
+      "assunto": "Aprovação da Ata referente a 2ª Reunião Ordinária do mês de julho do ano de 2025 do DEAL/C"
+    },
+    {
+      "rank": 7,
+      "item": "1715_PAUTA_11",
+      "score": 0.693546,
+      "ata": 1715,
+      "orgao": "CAR",
+      "data": "2025-07-15",
+      "pagina": 2,
+      "assunto": "Documento avulso n° 3068.027913/2025-51 trata de solicitação de apreciação dos Planos de a"
+    },
+    {
+      "rank": 8,
+      "item": "303_PAUTA_22",
+      "score": 0.6923994,
+      "ata": 303,
+      "orgao": "CT",
+      "data": "2025-06-27",
+      "pagina": 6,
+      "assunto": "PROCESSO_1577 - Apreciação do Relatório de Atividades (RAD) de 2024 e Plano de Atividades "
+    },
+    {
+      "rank": 9,
+      "item": "1744_EXPEDIENTE_03.06",
+      "score": 0.69016683,
+      "ata": 1744,
+      "orgao": "CE",
+      "data": "2025-02-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "rank": 10,
+      "item": "1730_ORDEM_DO_DIA_3.4",
+      "score": 0.685353,
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31142 – Departamento de Ciências Florestais e da Madeira – En"
+    }
+  ],
+  "ancoras": [
+    "301_PAUTA_11",
+    "1897_INFORMES_4.2",
+    "1713_PAUTA_7",
+    "1715_PAUTA_11",
+    "1664_ORDEM_DO_DIA_3.1",
+    "1827_PAUTA_9",
+    "1715_PAUTA_12",
+    "301_PAUTA_10",
+    "1905_PAUTA_3.1",
+    "1744_EXPEDIENTE_03.06",
+    "1907_APROVACAO_DE_ATA_1.1",
+    "1744_EXPEDIENTE_03.05",
+    "1745_ORDEM_DO_DIA_04.03",
+    "303_PAUTA_22",
+    "1745_ORDEM_DO_DIA_04.02",
+    "1730_ORDEM_DO_DIA_3.4"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 5,
+      "item": "1726_ORDEM_DO_DIA_3.11",
+      "score": null,
+      "ata": 1726,
+      "orgao": "CCAE",
+      "data": "2025-04-25",
+      "pagina": 3,
+      "assunto": "Documento avulso nº PROCESSO_31116 – Departamento de .19. Engenharia de Alimentos – Encami"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "301_PAUTA_11",
+      "ata": 301,
+      "orgao": "CAR",
+      "data": "2025-02-05",
+      "pagina": 2,
+      "assunto": "Processo digital: PROCESSO_1566. Planos de Atividades Docentes (PADs) do Departamento de A"
+    },
+    {
+      "posicao": 2,
+      "item": "1715_PAUTA_11",
+      "ata": 1715,
+      "orgao": "CAR",
+      "data": "2025-07-15",
+      "pagina": 2,
+      "assunto": "Documento avulso n° 3068.027913/2025-51 trata de solicitação de apreciação dos Planos de a"
+    },
+    {
+      "posicao": 3,
+      "item": "1713_PAUTA_7",
+      "ata": 1713,
+      "orgao": "CAR",
+      "data": "2025-03-11",
+      "pagina": 2,
+      "assunto": "Processo digital: PROCESSO_30978. Plano de Atividade Docente (PAD) para o semestre 2024/2 "
+    },
+    {
+      "posicao": 4,
+      "item": "1744_EXPEDIENTE_03.06",
+      "ata": 1744,
+      "orgao": "CE",
+      "data": "2025-02-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "posicao": 5,
+      "item": "1897_INFORMES_4.2",
+      "ata": 1897,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-20",
+      "pagina": 1,
+      "assunto": "O presidente informou sobre o prazo para envio do PADs e dos Planos de Ensino do semestre "
+    },
+    {
+      "posicao": 6,
+      "item": "1664_ORDEM_DO_DIA_3.1",
+      "ata": 1664,
+      "orgao": "CCENS_DC",
+      "data": "2025-02-18",
+      "pagina": 1,
+      "assunto": "Apreciação dos PAADS 2025 do DC. O chefe do departamento apresentou o ponto e falou que os"
+    },
+    {
+      "posicao": 7,
+      "item": "1827_PAUTA_9",
+      "ata": 1827,
+      "orgao": "CEUNES_DECH",
+      "data": "2024-11-14",
+      "pagina": 3,
+      "assunto": "Documento avulso: nº PROCESSO_31690 - Solicitação de aprovação de planos de ensino 2024/2 "
+    },
+    {
+      "posicao": 8,
+      "item": "1715_PAUTA_12",
+      "ata": 1715,
+      "orgao": "CAR",
+      "data": "2025-07-15",
+      "pagina": 2,
+      "assunto": "Documento avulso n°: PROCESSO_30999 trata de solicitação de apreciação dos Relatórios de A"
+    },
+    {
+      "posicao": 9,
+      "item": "301_PAUTA_10",
+      "ata": 301,
+      "orgao": "CAR",
+      "data": "2025-02-05",
+      "pagina": 2,
+      "assunto": "Doc. avulso nº PROCESSO_1567 - RADs de 2024.2 - Departamento de Comunicação Social. Relato"
+    },
+    {
+      "posicao": 10,
+      "item": "1905_PAUTA_3.1",
+      "ata": 1905,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-03-17",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31116 - Apreciação dos PAD’s 2025/1. Foram apresentados para "
+    },
+    {
+      "posicao": 11,
+      "item": "1726_ORDEM_DO_DIA_3.11",
+      "ata": 1726,
+      "orgao": "CCAE",
+      "data": "2025-04-25",
+      "pagina": 3,
+      "assunto": "Documento avulso nº PROCESSO_31116 – Departamento de .19. Engenharia de Alimentos – Encami"
+    },
+    {
+      "posicao": 12,
+      "item": "1907_APROVACAO_DE_ATA_1.1",
+      "ata": 1907,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-08-18",
+      "pagina": 1,
+      "assunto": "Aprovação da Ata referente a 2ª Reunião Ordinária do mês de julho do ano de 2025 do DEAL/C"
+    },
+    {
+      "posicao": 13,
+      "item": "1744_EXPEDIENTE_03.05",
+      "ata": 1744,
+      "orgao": "CE",
+      "data": "2025-02-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "posicao": 14,
+      "item": "1745_ORDEM_DO_DIA_04.03",
+      "ata": 1745,
+      "orgao": "CE",
+      "data": "2025-03-14",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31350. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "posicao": 15,
+      "item": "303_PAUTA_22",
+      "ata": 303,
+      "orgao": "CT",
+      "data": "2025-06-27",
+      "pagina": 6,
+      "assunto": "PROCESSO_1577 - Apreciação do Relatório de Atividades (RAD) de 2024 e Plano de Atividades "
+    },
+    {
+      "posicao": 16,
+      "item": "1745_ORDEM_DO_DIA_04.02",
+      "ata": 1745,
+      "orgao": "CE",
+      "data": "2025-03-14",
+      "pagina": 2,
+      "assunto": "Documento Avulso nº PROCESSO_31351. Interessado: Departamento de Educação, Política e Soci"
+    },
+    {
+      "posicao": 17,
+      "item": "1730_ORDEM_DO_DIA_3.4",
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31142 – Departamento de Ciências Florestais e da Madeira – En"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "301_PAUTA_11",
+      "rotulo": "Ata CAR, 05/02/2025, pauta, item 11, p. 2",
+      "pagina": 2,
+      "texto": "11) Processo digital: PROCESSO_1566. Planos de Atividades Docentes (PADs) do Departamento de Artes Visuais (DAV), referentes ao semestre de 2024/2. Relatora: Conselheira PESSOA_8833. Procedida a leitura do relato seguido de parecer como segue: “……..: Considerando que o processo está instruído corretamente e apresenta todas as informações necessárias para a avaliação das atividades didáticas, de extensão, pesquisa e de administração do referido Departamento, somos de parecer favorável à sua aprovação.” Em discussão seguido de votação. Aprovado a unanimidade.",
+      "frases_grafo": [
+        "Centro: CAR.",
+        "Data da reunião: 2025-02-05.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado a unanimidade."
+      ],
+      "data_reuniao": "2025-02-05"
+    },
+    {
+      "numero": 2,
+      "item": "1715_PAUTA_11",
+      "rotulo": "Ata CAR, 15/07/2025, pauta, item 11, p. 2",
+      "pagina": 2,
+      "texto": "11) Documento avulso n° 3068.027913/2025-51 trata de solicitação de apreciação dos Planos de atividades docentes (PAD) referentes ao semestre letivo 2025/1, do Departamento Design. Relatora: Conselheira Profa. PESSOA_163184. Procedida a leitura do relato seguido de parecer colmo segue: ……………...Após análise documental, salvo melhor juízo, sou de parecer favorável aprovação integral dos PADs 2025/1 dos docentes do Departamento de Design.” Em discussão. Em votação. Aprovado a unanimidade.",
+      "frases_grafo": [
+        "Centro: CAR.",
+        "Data da reunião: 2025-07-15.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado a unanimidade."
+      ],
+      "data_reuniao": "2025-07-15"
+    },
+    {
+      "numero": 3,
+      "item": "1713_PAUTA_7",
+      "rotulo": "Ata CAR, 11/03/2025, pauta, item 7, p. 2",
+      "pagina": 2,
+      "texto": "7) Processo digital: PROCESSO_30978. Plano de Atividade Docente (PAD) para o semestre 2024/2 do Departamento de Design. Relatora: Conselheira PESSOA_163162. Procedida a leitura do relato seguido de parecer como segue: “………………...A solicitação, objeto deste processo, está fundamentada legalmente. As pendências foram atendidas, assim, salvo melhor juízo, sou de parecer favorável, a aprovação do PAD 2024/2 do Departamento de Design.’ Em discussão. Em votação. Aprovado a unanimidade.",
+      "frases_grafo": [
+        "Centro: CAR.",
+        "Data da reunião: 2025-03-11.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado a unanimidade."
+      ],
+      "data_reuniao": "2025-03-11"
+    },
+    {
+      "numero": 4,
+      "item": "1744_EXPEDIENTE_03.06",
+      "rotulo": "Ata CE, 3ª reunião ordinaria, 28/02/2025, expediente, item 03.06, p. 2",
+      "pagina": 2,
+      "texto": "03.06. Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Sociedade - DEPS/CE. Assunto: Aprovação dos PADs (Plano de Atividades Departamentais) 2023/1 e 2023/2. Solicitação aprovada na 5ª reunião ordinária 2024/2 do Departamento de Educação, Política e Sociedade, ocorrida no dia 24.02.2025. PARA HOMOLOGAÇÃO.",
+      "frases_grafo": [
+        "Centro: CE.",
+        "Data da reunião: 2025-02-28."
+      ],
+      "data_reuniao": "2025-02-28"
+    },
+    {
+      "numero": 5,
+      "item": "1897_INFORMES_4.2",
+      "rotulo": "Ata CCAE_DEAL, 2ª reunião, 20/08/2024, informes, item 4.2, p. 1",
+      "pagina": 1,
+      "texto": "4.2 – O presidente informou sobre o prazo para envio do PADs e dos Planos de Ensino do semestre 2024/2. Será enviado um e-mail com o seguinte cronograma: 02/09/2024 – envio dos PADs para a Presidente da Comissão de avaliação do trabalho docente; 12/09 – a Comissão encaminhará ao e-mail do Departamento os PADS avaliados, juntamento com o anexo IV de cada um; 17/09 – será a reunião ordinária para apreciação. Para os Planos de Ensino foi fixada a data de 12/09 para envio ao e-mail do Departamento.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DEAL.",
+        "Data da reunião: 2024-08-20."
+      ],
+      "data_reuniao": "2024-08-20"
+    }
+  ],
+  "prompt_usuario": "Evidências:\n{\"identificador\": 1, \"data_reuniao\": \"05/02/2025\", \"fonte\": \"Ata CAR, 05/02/2025, pauta, item 11, p. 2\", \"trecho\": \"11) Processo digital: PROCESSO_1566. Planos de Atividades Docentes (PADs) do Departamento de Artes Visuais (DAV), referentes ao semestre de 2024/2. Relatora: Conselheira PESSOA_8833. Procedida a leitura do relato seguido de parecer como segue: “……..: Considerando que o processo está instruído corretamente e apresenta todas as informações necessárias para a avaliação das atividades didáticas, de extensão, pesquisa e de administração do referido Departamento, somos de parecer favorável à sua aprovação.” Em discussão seguido de votação. Aprovado a unanimidade.\", \"relacoes\": [\"Centro: CAR.\", \"Data da reunião: 2025-02-05.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado a unanimidade.\"], \"item_anterior_nao_citavel\": \"Doc. avulso nº PROCESSO_1567 - RADs de 2024.2 - Departamento de Comunicação Social. Relatora: Conselheira PESSOA_8834. Procedida a leitura do relato seguido de parecer como segue: “……..: Considerando que os ajustes solicitados no sequencial 5 foram revistos eque os planos de atividade de todos os docentes estão devidamente preenchidos, sou, salvo maior juízo, de parecer favorável a aprovação dos PADs 2024/2 do Departamento de Comunicação Social”. Em discussão seguido de votação\", \"item_posterior_nao_citavel\": \"processo digital nº PROCESSO_1565, Professora PESSOA_8832 solicitando autorização para realização de visita técnica na Universidade de Lisboa, entre os dias 02 e 21 de Abril de 2025. Relator: Conselheiro PESSOA_8831. Procedida a leitura do relato seguido de parecer como segue: “……………..Por entender que o processo está corretamente instruído, sou favorável à sua aprovação.” Em discussão, seguido de votação\"}\n{\"identificador\": 2, \"data_reuniao\": \"15/07/2025\", \"fonte\": \"Ata CAR, 15/07/2025, pauta, item 11, p. 2\", \"trecho\": \"11) Documento avulso n° 3068.027913/2025-51 trata de solicitação de apreciação dos Planos de atividades docentes (PAD) referentes ao semestre letivo 2025/1, do Departamento Design. Relatora: Conselheira Profa. PESSOA_163184. Procedida a leitura do relato seguido de parecer colmo segue: ……………...Após análise documental, salvo melhor juízo, sou de parecer favorável aprovação integral dos PADs 2025/1 dos docentes do Departamento de Design.” Em discussão. Em votação. Aprovado a unanimidade.\", \"relacoes\": [\"Centro: CAR.\", \"Data da reunião: 2025-07-15.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado a unanimidade.\"], \"item_anterior_nao_citavel\": \"Processo digital nº PROCESSO_31000 - professor Dr. PESSOA_163189, solicitando Licença Capacitação, com duração de 90 dias, a partir de 22/09/2025. Relatora: Conselheira PESSOA_163184. Procedida e leitura do relato seguido de parecer como segue: “……………………..Considerando que o processo se encontra devidamente instruído, fortalece a área de atuação do professor PESSOA_163189 e a sua atividade docente, e conta com aprovação no âmbito do Departamento de Teoria da Arte e Música – DTAM/CAr, salvo melhor juízo, manifesto parecer favorável à aprovação do presente pedido de licença para capacitação.” E m discussão. Em votação\", \"item_posterior_nao_citavel\": \"Documento avulso n°: PROCESSO_30999 trata de solicitação de apreciação dos Relatórios de Atividades Docentes (RADA) dos períodos 2024/1 e 2024/2, do Departamento Design. Relatora: Conselheira Profa. PESSOA_163184. Procedida a leitura do relato seguido de parecer colmo segue: “……………...Após análise documental, salvo melhor juízo, manifesto parecer favorável à aprovação integral dos Relatórios de Atividades Docentes (RADs) referentes aos períodos 2024/1 e 2024/2 dos docentes do Departamento de Design.” Em discussão. Em votação\"}\n{\"identificador\": 3, \"data_reuniao\": \"11/03/2025\", \"fonte\": \"Ata CAR, 11/03/2025, pauta, item 7, p. 2\", \"trecho\": \"7) Processo digital: PROCESSO_30978. Plano de Atividade Docente (PAD) para o semestre 2024/2 do Departamento de Design. Relatora: Conselheira PESSOA_163162. Procedida a leitura do relato seguido de parecer como segue: “………………...A solicitação, objeto deste processo, está fundamentada legalmente. As pendências foram atendidas, assim, salvo melhor juízo, sou de parecer favorável, a aprovação do PAD 2024/2 do Departamento de Design.’ Em discussão. Em votação. Aprovado a unanimidade.\", \"relacoes\": [\"Centro: CAR.\", \"Data da reunião: 2025-03-11.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado a unanimidade.\"], \"item_anterior_nao_citavel\": \"Processo digital: PROCESSO_30979 . PESSOA_163163 encaminhando Relatório de atividades de voluntariado desenvolvido junto ao programa de Pós-Graduação em Comunicação e Territorialidade no período de 2023/2 à 2024/2 e de novo pedido de atividade voluntariada por um período de 1 ano (2025/1 e 2025/2), na condição de professor permanente do PósCom. Relatora: Conselheira PESSOA_163162. Procedida a leitura do relato seguido de parecer como segue: “ …………………...A solicitação, objeto deste processo, está fundamentada legalmente, de acordo com a Resolução nº26/1999 do CUn. Ressalto que não possui claramente definido no documento de pedido de voluntariado, o nome do corresponsável pela candidata. Assim sendo salvo melhor juízo sou de parecer favorável à aprovação do relatório de atividades desenvolvidas no período de 2023/2 e 2024/2 e ao novo pedido de voluntariado para os semestre 2025/1 e 2025/2.” Em discussão. Em votação\"}\n{\"identificador\": 4, \"data_reuniao\": \"28/02/2025\", \"fonte\": \"Ata CE, 3ª reunião ordinaria, 28/02/2025, expediente, item 03.06, p. 2\", \"trecho\": \"03.06. Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Sociedade - DEPS/CE. Assunto: Aprovação dos PADs (Plano de Atividades Departamentais) 2023/1 e 2023/2. Solicitação aprovada na 5ª reunião ordinária 2024/2 do Departamento de Educação, Política e Sociedade, ocorrida no dia 24.02.2025. PARA HOMOLOGAÇÃO.\", \"relacoes\": [\"Centro: CE.\", \"Data da reunião: 2025-02-28.\"], \"item_anterior_nao_citavel\": \"Documento avulso nº PROCESSO_31341. Interessado: Departamento de Educação, Política e Sociedade - DEPS/CE. Assunto: solicitam a aprovação dos PADs (Plano de Atividades Departamentais) 2022/1 e 2022/2. Solicitação aprovada na 5ª reunião ordinária 2024/2 do Departamento de Educação, Política e Sociedade, ocorrida no dia 24.02.2025. PARA HOMOLOGAÇÃO.\", \"item_posterior_nao_citavel\": \"Processo digital nº PROCESSO_31335. Interessado: PESSOA_163934. Assunto: Solicita aprovação como professora voluntária de Libras no semestre 2025/1\"}\n{\"identificador\": 5, \"data_reuniao\": \"20/08/2024\", \"fonte\": \"Ata CCAE_DEAL, 2ª reunião, 20/08/2024, informes, item 4.2, p. 1\", \"trecho\": \"4.2 – O presidente informou sobre o prazo para envio do PADs e dos Planos de Ensino do semestre 2024/2. Será enviado um e-mail com o seguinte cronograma: 02/09/2024 – envio dos PADs para a Presidente da Comissão de avaliação do trabalho docente; 12/09 – a Comissão encaminhará ao e-mail do Departamento os PADS avaliados, juntamento com o anexo IV de cada um; 17/09 – será a reunião ordinária para apreciação. Para os Planos de Ensino foi fixada a data de 12/09 para envio ao e-mail do Departamento.\", \"relacoes\": [\"Centro: CCAE.\", \"Departamento: DEAL.\", \"Data da reunião: 2024-08-20.\"], \"item_anterior_nao_citavel\": \"A Professora PESSOA_8881 informou que terá transporte regular matutino e vespertino para a Planta de Processamento de Alimentos, e a Direção do CCAE agendará uma reunião com os estudantes para explicar detalhes e regras.\", \"item_posterior_nao_citavel\": \"O Presidente relatou que conforme informado, o Departamento só emitirá certificado para monitores voluntários cadastrados previamente, caso não tenha o cadastro, o certificado poderá ser emitido e assinado pelo professor responsável. No caso de atividades de iniciação científica voluntárias, foi feita uma consulta a PRPPG, sobre a autonomia do Departamento em registrar e emitir estes certificados, porém a Pró-reitora respondeu informando que esta matéria não é da competência deles e sugeriu o encaminhamento a Procuradoria. Após discussões a Câmara Departamental decidiu por permanecer as certificações da forma como acontecem atualmente, sendo emitido por cada professor orientador.\"}\n\nPergunta: Qual foi a decisão sobre planos de Atividades Docentes (PADs) do Departamento de Artes Visuais (DAV), referentes ao semestre de 2024/2 no setor CAR?",
+  "tokens_entrada": 3212,
+  "tokens_saida": 62,
+  "truncada": false,
+  "resposta_bruta": "{\"eventos\": [{\"evidencia\": 1, \"relevante\": true, \"descricao\": \"Os PADs do Departamento de Artes Visuais (DAV) referentes ao semestre de 2024/2 foram aprovados a unanimidade.\"}]}",
+  "resposta_final": "A aprovação dos PADs do Departamento de Artes Visuais (DAV), referentes ao semestre de 2024/2, foi aprovada a unanimidade.\n\n05/02/2025: Os PADs do Departamento de Artes Visuais (DAV) referentes ao semestre de 2024/2 foram aprovados a unanimidade. [1]",
+  "citados": [
+    1
+  ]
+}

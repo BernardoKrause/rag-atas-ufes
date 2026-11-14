@@ -1,0 +1,635 @@
+{
+  "id_execucao": "2875242c98a8",
+  "quando": "2026-11-07T22:06:20",
+  "commit": "6da6076",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Qual foi a decisão sobre disciplina COM05207 no setor CCENS / DC?",
+  "alvos": {
+    "1667_ORDEM_DO_DIA_3.5": {
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 5,
+      "assunto": "Processo digital n.º PROCESSO_30862- Ofício n.º 004/2025: Solicitações Propostas pelo Rela",
+      "rank_lexico": 1,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 8
+    },
+    "1666_ORDEM_DO_DIA_3.2": {
+      "ata": 1666,
+      "orgao": "CCENS_DC",
+      "data": "2025-03-24",
+      "pagina": 2,
+      "assunto": "Aprovação dos Planos de Ensino 2025/1 - DC. O presidente apresentou os planos enviados par",
+      "rank_lexico": 22,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": null
+    },
+    "1672_ORDEM_DO_DIA_3.1": {
+      "ata": 1672,
+      "orgao": "CCENS_DC",
+      "data": "2025-07-22",
+      "pagina": 1,
+      "assunto": "Oferta de disciplinas do Departamento de Computação 2025/2. O chefe do Departamento aprese",
+      "rank_lexico": 9,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": null
+    }
+  },
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1667_ORDEM_DO_DIA_3.5",
+      "score": 0.043724913,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 5,
+      "assunto": "Processo digital n.º PROCESSO_30862- Ofício n.º 004/2025: Solicitações Propostas pelo Rela"
+    },
+    {
+      "rank": 2,
+      "item": "1667_ORDEM_DO_DIA_3.2_F2",
+      "score": 0.03787482,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "rank": 3,
+      "item": "1977_PAUTA_1",
+      "score": 0.03787482,
+      "ata": 1977,
+      "orgao": "CCE",
+      "data": "2013-02-26",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Prof. PESSOA_165942 informou que em reunião com o Re"
+    },
+    {
+      "rank": 4,
+      "item": "1668_ORDEM_DO_DIA_3.1",
+      "score": 0.036547996,
+      "ata": 1668,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-20",
+      "pagina": 1,
+      "assunto": "Concurso Público de Provas e Títulos do Departamento de Computação. Considerando que não h"
+    },
+    {
+      "rank": 5,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "score": 0.03562887,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 6,
+      "item": "1959_PAUTA_4_F1",
+      "score": 0.034738693,
+      "ata": 1959,
+      "orgao": "CCE",
+      "data": "2010-12-16",
+      "pagina": 2,
+      "assunto": "Recurso da Profa. PESSOA_166252 a decisão do Departamento de Estatística – O relator do pr"
+    },
+    {
+      "rank": 7,
+      "item": "1778_PAUTA_3.03",
+      "score": 0.03407528,
+      "ata": 1778,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-07-10",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "rank": 8,
+      "item": "1770_PAUTA_3.03",
+      "score": 0.03407528,
+      "ata": 1770,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2020-09-21",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "rank": 9,
+      "item": "1672_ORDEM_DO_DIA_3.1",
+      "score": 0.03377064,
+      "ata": 1672,
+      "orgao": "CCENS_DC",
+      "data": "2025-07-22",
+      "pagina": 1,
+      "assunto": "Oferta de disciplinas do Departamento de Computação 2025/2. O chefe do Departamento aprese"
+    },
+    {
+      "rank": 10,
+      "item": "1924_ORDEM_DO_DIA_2.5_F1",
+      "score": 0.03377064,
+      "ata": 1924,
+      "orgao": "CCAE_DPV",
+      "data": "2024-12-06",
+      "pagina": 3,
+      "assunto": "Solicitação de aprovação referente à disciplina cursada em mobilidade acadêmica. Processo "
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1799_PAUTA_7",
+      "score": 0.66946757,
+      "ata": 1799,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-04-23",
+      "pagina": 3,
+      "assunto": "PROCESSO_31579: Regimento da Comissão Interna de Pesquisa e Pós-graduação do DCN. A profes"
+    },
+    {
+      "rank": 2,
+      "item": "1964_PAUTA_9",
+      "score": 0.6679348,
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substi"
+    },
+    {
+      "rank": 3,
+      "item": "1951_PAUTA_10",
+      "score": 0.65790343,
+      "ata": 1951,
+      "orgao": "CCE",
+      "data": "2010-03-29",
+      "pagina": 3,
+      "assunto": "Critérios para Encargos Administrativos, Pesquisa e Extensão-CCE – A Comissão formada pelo"
+    },
+    {
+      "rank": 4,
+      "item": "1979_PAUTA_4",
+      "score": 0.65320945,
+      "ata": 1979,
+      "orgao": "CCE",
+      "data": "2013-04-30",
+      "pagina": 2,
+      "assunto": "Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Depart"
+    },
+    {
+      "rank": 5,
+      "item": "1724_ORDEM_DO_DIA_3.2",
+      "score": 0.65012056,
+      "ata": 1724,
+      "orgao": "CCAE",
+      "data": "2025-02-25",
+      "pagina": 2,
+      "assunto": "Processo digital nº PROCESSO_31083 – Departamento de Ciências Florestais e da Madeira – PE"
+    },
+    {
+      "rank": 6,
+      "item": "1983_PAUTA_1",
+      "score": 0.6490449,
+      "ata": 1983,
+      "orgao": "CCE",
+      "data": "2013-08-28",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Professor PESSOA_165942 deu ciência aos presentes qu"
+    },
+    {
+      "rank": 7,
+      "item": "1724_ORDEM_DO_DIA_3.3",
+      "score": 0.6440939,
+      "ata": 1724,
+      "orgao": "CCAE",
+      "data": "2025-02-25",
+      "pagina": 2,
+      "assunto": "Processo digital nº PROCESSO_31082 – Departamento de Ciências Florestais e da Madeira – PE"
+    },
+    {
+      "rank": 8,
+      "item": "1800_PAUTA_15",
+      "score": 0.64260006,
+      "ata": 1800,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-05-14",
+      "pagina": 3,
+      "assunto": "PROCESSO_31584: Aprovação dos planos de ensino 2025/1. A professora PESSOA_164521, preside"
+    },
+    {
+      "rank": 9,
+      "item": "1883_ORDEM_DO_DIA_3.1",
+      "score": 0.6360753,
+      "ata": 1883,
+      "orgao": "CCAE_DER",
+      "data": "2025-07-08",
+      "pagina": 1,
+      "assunto": "Processo digital PROCESSO_31867. Solicitação de prestação de serviço voluntário na discipl"
+    },
+    {
+      "rank": 10,
+      "item": "1988_PAUTA_5_D1",
+      "score": 0.6352633,
+      "ata": 1988,
+      "orgao": "CCE",
+      "data": "2014-01-31",
+      "pagina": 7,
+      "assunto": "Homologação do Proc. N PROCESSO_32208 - Projeto de Pesquisa – UFES x Petrobrás – “Métodos "
+    }
+  ],
+  "ancoras": [
+    "1667_ORDEM_DO_DIA_3.5",
+    "1799_PAUTA_7",
+    "1667_ORDEM_DO_DIA_3.2_F2",
+    "1964_PAUTA_9",
+    "1977_PAUTA_1",
+    "1951_PAUTA_10",
+    "1668_ORDEM_DO_DIA_3.1",
+    "1979_PAUTA_4",
+    "1662_ORDEM_DO_DIA_1.5",
+    "1724_ORDEM_DO_DIA_3.2",
+    "1959_PAUTA_4_F1",
+    "1983_PAUTA_1",
+    "1778_PAUTA_3.03",
+    "1724_ORDEM_DO_DIA_3.3",
+    "1770_PAUTA_3.03",
+    "1800_PAUTA_15",
+    "1672_ORDEM_DO_DIA_3.1",
+    "1883_ORDEM_DO_DIA_3.1",
+    "1924_ORDEM_DO_DIA_2.5_F1",
+    "1988_PAUTA_5_D1"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 1,
+      "item": "1800_PAUTA_3",
+      "score": null,
+      "ata": 1800,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-05-14",
+      "pagina": 1,
+      "assunto": "PROCESSO_31579: Criação de resolução do DCN. A professora PESSOA_164501 fez a leitura da s"
+    },
+    {
+      "rank": 2,
+      "item": "1667_ORDEM_DO_DIA_3.2_F4",
+      "score": null,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "rank": 2,
+      "item": "1667_ORDEM_DO_DIA_3.2_F3",
+      "score": null,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "rank": 2,
+      "item": "1667_ORDEM_DO_DIA_3.2_F1",
+      "score": null,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "rank": 2,
+      "item": "1667_ORDEM_DO_DIA_3.2",
+      "score": null,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "rank": 2,
+      "item": "1968_PAUTA_1",
+      "score": null,
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagen"
+    },
+    {
+      "rank": 3,
+      "item": "1977_PAUTA_1_F1",
+      "score": null,
+      "ata": 1977,
+      "orgao": "CCE",
+      "data": "2013-02-26",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Prof. PESSOA_165942 informou que em reunião com o Re"
+    },
+    {
+      "rank": 5,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 5,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 6,
+      "item": "1959_PAUTA_4_F2",
+      "score": null,
+      "ata": 1959,
+      "orgao": "CCE",
+      "data": "2010-12-16",
+      "pagina": 2,
+      "assunto": "Recurso da Profa. PESSOA_166252 a decisão do Departamento de Estatística – O relator do pr"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1924_ORDEM_DO_DIA_2.5",
+      "ata": 1924,
+      "orgao": "CCAE_DPV",
+      "data": "2024-12-06",
+      "pagina": 3,
+      "assunto": "Solicitação de aprovação referente à disciplina cursada em mobilidade acadêmica. Processo "
+    },
+    {
+      "posicao": 2,
+      "item": "1800_PAUTA_3",
+      "ata": 1800,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-05-14",
+      "pagina": 1,
+      "assunto": "PROCESSO_31579: Criação de resolução do DCN. A professora PESSOA_164501 fez a leitura da s"
+    },
+    {
+      "posicao": 3,
+      "item": "1667_ORDEM_DO_DIA_3.2_F1",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "posicao": 4,
+      "item": "1989_PAUTA_7",
+      "ata": 1989,
+      "orgao": "CCE",
+      "data": "2014-02-25",
+      "pagina": 3,
+      "assunto": "Homologação do Proc. Nº PROCESSO_32208 – Projeto de Pesquisa – UFES x Petrobrás – “Métodos"
+    },
+    {
+      "posicao": 5,
+      "item": "1959_PAUTA_4",
+      "ata": 1959,
+      "orgao": "CCE",
+      "data": "2010-12-16",
+      "pagina": 2,
+      "assunto": "Recurso da Profa. PESSOA_166252 a decisão do Departamento de Estatística – O relator do pr"
+    },
+    {
+      "posicao": 6,
+      "item": "1714_PAUTA_09",
+      "ata": 1714,
+      "orgao": "CAR",
+      "data": "2025-05-12",
+      "pagina": 1,
+      "assunto": "processo digital nº PROCESSO_30988. PESSOA_163174 – Mestrando do Programa de Pós Graduação"
+    },
+    {
+      "posicao": 7,
+      "item": "1798_PAUTA_6",
+      "ata": 1798,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-03-12",
+      "pagina": 2,
+      "assunto": "PROCESSO_31575: Manifesto do DCN sobre a situação das compras de 2024. A professora PESSOA"
+    },
+    {
+      "posicao": 8,
+      "item": "1667_ORDEM_DO_DIA_3.5",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 5,
+      "assunto": "Processo digital n.º PROCESSO_30862- Ofício n.º 004/2025: Solicitações Propostas pelo Rela"
+    },
+    {
+      "posicao": 9,
+      "item": "1799_PAUTA_7",
+      "ata": 1799,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-04-23",
+      "pagina": 3,
+      "assunto": "PROCESSO_31579: Regimento da Comissão Interna de Pesquisa e Pós-graduação do DCN. A profes"
+    },
+    {
+      "posicao": 10,
+      "item": "1667_ORDEM_DO_DIA_3.2_F2",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "posicao": 11,
+      "item": "1964_PAUTA_9",
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substi"
+    },
+    {
+      "posicao": 12,
+      "item": "1667_ORDEM_DO_DIA_3.2_F4",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "posicao": 13,
+      "item": "1667_ORDEM_DO_DIA_3.2_F3",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "posicao": 14,
+      "item": "1667_ORDEM_DO_DIA_3.2",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Deliberação para destinação da vaga do Departamento de Computação. O Professor PESSOA_1620"
+    },
+    {
+      "posicao": 15,
+      "item": "1968_PAUTA_1",
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagen"
+    },
+    {
+      "posicao": 16,
+      "item": "1977_PAUTA_1",
+      "ata": 1977,
+      "orgao": "CCE",
+      "data": "2013-02-26",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Prof. PESSOA_165942 informou que em reunião com o Re"
+    },
+    {
+      "posicao": 17,
+      "item": "1951_PAUTA_10",
+      "ata": 1951,
+      "orgao": "CCE",
+      "data": "2010-03-29",
+      "pagina": 3,
+      "assunto": "Critérios para Encargos Administrativos, Pesquisa e Extensão-CCE – A Comissão formada pelo"
+    },
+    {
+      "posicao": 18,
+      "item": "1977_PAUTA_1_F1",
+      "ata": 1977,
+      "orgao": "CCE",
+      "data": "2013-02-26",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Prof. PESSOA_165942 informou que em reunião com o Re"
+    },
+    {
+      "posicao": 19,
+      "item": "1668_ORDEM_DO_DIA_3.1",
+      "ata": 1668,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-20",
+      "pagina": 1,
+      "assunto": "Concurso Público de Provas e Títulos do Departamento de Computação. Considerando que não h"
+    },
+    {
+      "posicao": 20,
+      "item": "1979_PAUTA_4",
+      "ata": 1979,
+      "orgao": "CCE",
+      "data": "2013-04-30",
+      "pagina": 2,
+      "assunto": "Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Depart"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1924_ORDEM_DO_DIA_2.5",
+      "rotulo": "Ata CCAE_DPV, 9ª reunião extraordinaria, 06/12/2024, ordem do dia, item 2.5, p. 3",
+      "pagina": 3,
+      "texto": "2.5 Solicitação de aprovação referente à disciplina cursada em mobilidade acadêmica. Processo digital nº PROCESSO_31955. Interessado: PESSOA_165903. Em esclarecimento. PESSOA_8884. Informou que inicialmente a aluna solicitou a mobilidade acadêmica para cursar duas disciplinas em Instituição de Ensino Superior no estado do Paraná no período 2022/2, que foi aprovada pela Comissão de Ensino e pelo Colegiado à época. Porém, a estudante acabou cursando uma terceira disciplina no semestre 2023/1 na mesma Instituição, sem contudo ter tido a anuência prévia do PPG em Agronomia. Portanto, o orientador encaminhou agora um pedido de aprovação da disciplina cursada pela aluna no semestre 2023/1 (Fisiologia de Pós-Colheita de Produtos Hortícolas). Apontou, ainda, que a Comissão de Ensino anteriormente foi favorável ao aproveitamento somente das duas disciplinas que foram objeto de pedido de mobilidade e que a Coordenação entende que o orientador agora solicita a possibilidade de que a disciplina cursada no 2023/1 seja avaliada pela Comissão de Ensino no que tange ao aproveitamento de créditos. E, nesse caso, discute-se um possível precedente de comprometimento do artigo 13 do Regimento, no sentido de autorização de aproveitamento de disciplina de uma Instituição em que a aluna já havia cursado outras disciplinas com autorização prévia de mobilidade. Em discussão. PESSOA_165848. Acredita que a solicitação do orientador é para que o Colegiado já analise o aproveitamento de créditos e não para que volte para emissão de parecer pela Comissão de Ensino. PESSOA_8875. Assim como o Prof. PESSOA_162064, entende que o pedido é para que o Colegiado já decida sobre o aproveitamento da disciplina. Indagou se a decisão anterior seria revogada parcial ou integralmente, em caso de aprovação do presente pedido pelo Colegiado, afirmando que não pode haver duas decisões sobre o mesmo assunto. Por fim, disse que a negativa da Comissão de Ensino se deu em função da não observância do Regimento. PESSOA_165833. Entende que o pedido do orientador deve ser negado, pelo fato da não observância do que estabelece o Regimento. PESSOA_163315. Afirmou que o pedido feito pelo Prof. PESSOA_165910 é legítimo, pois as decisões das Comissões podem ser alvo de recurso perante o Colegiado, que verifica se deve ou não acatá-lo. Acredita que o pedido deve ser deferido, uma vez que a aluna já se encontrava no Paraná, onde cursou as duas primeiras disciplinas com a autorização de mobilidade e, posteriormente, surgiu a demanda de cursar uma terceira disciplina não ofertada pelo PPGAG e que, na prática, contribuiu para o trabalho da estudante. Frisou que, pesando-se na balança os prós e os contras, seria positivo acatar o aproveitamento da disciplina. PESSOA_163368. Quis saber em que medida essa terceira disciplina influenciaria na vida acadêmica da aluna, sobretudo em relação ao cumprimento dos créditos mínimos exigidos, tendo sido esclarecido que a aluna cumpriu 45 créditos até o momento, estando com",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DPV.",
+        "Data da reunião: 2024-12-06."
+      ]
+    },
+    {
+      "numero": 2,
+      "item": "1800_PAUTA_3",
+      "rotulo": "Ata CEUNES_DCN, 6ª reunião ordinaria, 14/05/2025, pauta, item 3, p. 1 (minuta em aprovação)",
+      "pagina": 1,
+      "texto": "PAUTA 3: PROCESSO_31579: Criação de resolução do DCN. A professora PESSOA_164501 fez a leitura da solicitação de aprovação da Resolução do DCN, que dispõe sobre a instrução processual de pedidos de ausência prevista em lei de docentes do Departamento de Ciências Naturais (DCN). A Comissão Interna de Pesquisa e Pós-graduação do DCN fez a leitura da resolução. Esclarecimentos. Em discussão: Após ampla deliberação, foram realizadas correções na referida Resolução. Em votação. Decisão: Aprovado(a) por maioria havendo 1 (uma) abstenção do professor PESSOA_164504.",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Departamento: DCN.",
+        "Data da reunião: 2025-05-14.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: por maioria havendo 1 (uma) abstenção do professor PESSOA_164504..",
+        "Trata do mesmo assunto que: 1799_PAUTA_7."
+      ]
+    },
+    {
+      "numero": 3,
+      "item": "1667_ORDEM_DO_DIA_3.2_F1",
+      "rotulo": "Ata CCENS_DC, 5ª reunião ordinaria, 24/04/2025, ordem do dia, item 3.2, p. 1",
+      "pagina": 1,
+      "texto": "ntes e dois cursos, sendo Ciência da Computação, nos turnos matutino e vespertino, e Sistemas de Informação, no turno noturno. Frisou, ainda, que a carga horária docente é bastante elevada e que os professores do Departamento têm planos de abrir um curso de pós-graduação. Ressaltou, ainda, que as disciplinas deste concurso são as disciplinas básicas dos cursos de graduação ofertadas pelo Departamento aos dois centros do Campus de Alegre e que todos os professores do DC ministram as disciplinas básicas. Por fim, concedeu a palavra aos membros da Câmara Departamental, caso quisessem complementar sua fala ou fazer perguntas ao que ninguém se manifestou. Agradeceu a presença da Professora PESSOA_162104 e disse que sua solicitação será avaliada e discutida no Departamento e que, posteriormente, será informada da decisão da Câmara Departamental. A Professora PESSOA_162104 agradeceu a oportunidade de participar da reunião e de sua solicitação ser analisada, disse que aguardará com a esperança de que tudo dê certo e se retirou da sala virtual. Em seguida, o Chefe do Departamento enviou o link da reunião para o Professor PESSOA_162103, deu-lhe as boas vindas, fez a apresentação de seu interesse e concedeu-lhe a 2 palavra, por 10 minutos. O Professor PESSOA_162103 agradeceu o espaço e a oportunidade de fazer esta fala e informou que é natural de Cachoeiro de Itapemirim e, atualmente, é Professor na Universidade Federal do Pará desde o ano de 2019. Disse, também, ser graduado em Sistemas de Informação, com mestrado e doutorado em Engenharia de Produção. Esclareceu que foi aprovado no cargo de Professor do Magistério Superior na Universidade Federal do Pará e que, à época, diante da proposta da Universidade em abrir um mestrado, e, por estar muito engajado na pós-graduação, trabalhou na proposta e submeteu-a, resultando na abertura de um curso de mestrado em Administração, que coordenou por 4 anos e meio, teve bons resultados com os alunos, conseguindo formar oito deles. Na graduação, participa como membro do curso de Administração, leciona disciplinas e no mestrado ministra duas disciplinas e tem projetos financiados na Universidade, além de se envolver muito com a pós-graduação e participar de avaliações de PAEPE e APCN nacionais. Justificou seu desejo de mudança por sua família ser da cidade de Cachoeiro de Itapemirim, sua esposa trabalhar no Banestes, ter uma filha e estar sozinho no Pará, não conseguindo vir para casa com frequência. Relatou que, no ano passado, esteve na UFES e percebeu que, para fazer a migração, o Campus de Alegre é o que fica mais próximo de Cachoeiro de Itapemirim e frisou que não tem intenção de sair do Espírito Santo, tendo planos de colaborar no desenvolvimento do Estado e, por isso, fez sua solicitação de redistribuição da UFPA para a UFES. Ressaltou que pode contribuir e amadurecer para trabalhar em conjunto e pode se desenvolver e aprender a trabalhar na graduação e desenvolver seu trabalho nesta área e colaborar com todos. P",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DC.",
+        "Data da reunião: 2025-04-24.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade."
+      ]
+    },
+    {
+      "numero": 4,
+      "item": "1989_PAUTA_7",
+      "rotulo": "Ata CCE, 2ª reunião ordinaria, 25/02/2014, pauta, item 7, p. 3",
+      "pagina": 3,
+      "texto": "Ponto 7 – Homologação do Proc. Nº PROCESSO_32208 – Projeto de Pesquisa – UFES x Petrobrás – “Métodos Analíticos de Avaliação Petróleo para utilização da Área Ambiental” – Coordenador: Prof. PESSOA_166299 – Termo de Cooperação: 0050.0085659.13.9 UFES x Petrobrás – O processo foi encaminhado ao Gabinete do Reitor, com o de acordo do Diretor do CCE e Ad Referendum do Conselho Departamental. Em votação, aprovado por unanimidade. .",
+      "frases_grafo": [
+        "Centro: CCE.",
+        "Data da reunião: 2014-02-25.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em votação, aprovado por unanimidade.",
+        "Trata do mesmo assunto que: 1988_PAUTA_5.",
+        "Trata do mesmo assunto que: 1988_PAUTA_5_D1."
+      ]
+    },
+    {
+      "numero": 5,
+      "item": "1959_PAUTA_4",
+      "rotulo": "Ata CCE, 9ª reunião ordinaria, 16/12/2010, pauta, item 4, p. 2",
+      "pagina": 2,
+      "texto": "Ponto 4 – Recurso da Profa. PESSOA_166252 a decisão do Departamento de Estatística – O relator do processo, Prof. PESSOA_165958 fez a leitura do parecer informando “Trata-se o presente de recurso encaminhado pela Professora PESSOA_166264 ao Conselho Departamental do CCE contra a decisão da Câmara Departamental do Departamento de Estatística que negou seu pedido de afastamento por um período de dois anos a partir de março de 2011 para concluir seu Doutorado no PPGE/UFES. A professora PESSOA_166251 é professora do DEST desde agosto de 1982, tendo desempenhado diversas funções no DEST até o presente momento. Em março de 2010 iniciou seu doutorado no PPGE/UFES na área de Educação Matemática com orientação da Professora Dra. PESSOA_166263. A professora PESSOA_166251 cursou diversas disciplinas até o momento e iniciou sua tese versando sobre a História da Estatística no Brasil, é importante ressaltar que durante esta primeira etapa a professora cursou o Doutorado sem afastamento de suas atividades no DEST. A professora PESSOA_166251 solicitou afastamento para cursar Doutorado a partir de março de 2011, tendo como justificativa a necessidade de várias viagens a partir do ano que vem para ter acesso a diferentes documentos históricos, que se encontram principalmente no Rio de Janeiro e Brasília. A partir deste ponto uma série de fatos ocorreu no DEST, que procuro resumir abaixo: 1. Outros dois professores também solicitaram afastamento a partir de 2011, professor PESSOA_166255 para cursar Doutorado em Engenharia Ambiental e professor PESSOA_166256. 2. Os pedidos foram encaminhados para uma comissão analisar e emitir parecer. 3. A referida comissão indicou o professor PESSOA_166257 para afastamento. 4. O DEST não possuía normas regulamentas para afastamentos de seus docentes para cursar Pós-Graduação. 5. Foi pedido vistas ao processo pelo Professor PESSOA_166262, justificando que o DEST não possui normas e critérios aprovados para afastamento dos seus docentes para Pós- Graduação de acordo com a resolução 09/2003 Art.14. 6. O DEST criou às pressas uma comissão para definir normas e critérios para os afastamentos. 7. As referidas normas foram aprovadas pelo DEST. 8. Neste momento o DEST aguarda a documentação dos professores solicitantes de afastamento para enviar para comissão para análise de acordo com as normas aprovadas. Com base no relatado acima fica claro que a professora PESSOA_166251 se precipitou ao encaminhar recurso ao Conselho do CCE, uma vez que não existe até o momento uma negação por parte do DEST com relação ao seu pedido. Desta maneira este conselheiro não se manifestará a respeito do recurso, devendo a professora esperar uma resposta final do DEST para tomar as medidas cabíveis. Contudo, este conselheiro acha importante se manifestar em relação a alguns pontos que julgo serem importantes para uma melhor condução do tema no DEST e CCE: 1. A elaboração das normas e critérios foi feita em curto espaço de tempo, sem que fosse verificado junt",
+      "frases_grafo": [
+        "Centro: CCE.",
+        "Data da reunião: 2010-12-16."
+      ]
+    }
+  ],
+  "prompt_usuario": "Evidências:\n\n[1] Ata CCAE_DPV, 9ª reunião extraordinaria, 06/12/2024, ordem do dia, item 2.5, p. 3\n2.5 Solicitação de aprovação referente à disciplina cursada em mobilidade acadêmica. Processo digital nº PROCESSO_31955. Interessado: PESSOA_165903. Em esclarecimento. PESSOA_8884. Informou que inicialmente a aluna solicitou a mobilidade acadêmica para cursar duas disciplinas em Instituição de Ensino Superior no estado do Paraná no período 2022/2, que foi aprovada pela Comissão de Ensino e pelo Colegiado à época. Porém, a estudante acabou cursando uma terceira disciplina no semestre 2023/1 na mesma Instituição, sem contudo ter tido a anuência prévia do PPG em Agronomia. Portanto, o orientador encaminhou agora um pedido de aprovação da disciplina cursada pela aluna no semestre 2023/1 (Fisiologia de Pós-Colheita de Produtos Hortícolas). Apontou, ainda, que a Comissão de Ensino anteriormente foi favorável ao aproveitamento somente das duas disciplinas que foram objeto de pedido de mobilidade e que a Coordenação entende que o orientador agora solicita a possibilidade de que a disciplina cursada no 2023/1 seja avaliada pela Comissão de Ensino no que tange ao aproveitamento de créditos. E, nesse caso, discute-se um possível precedente de comprometimento do artigo 13 do Regimento, no sentido de autorização de aproveitamento de disciplina de uma Instituição em que a aluna já havia cursado outras disciplinas com autorização prévia de mobilidade. Em discussão. PESSOA_165848. Acredita que a solicitação do orientador é para que o Colegiado já analise o aproveitamento de créditos e não para que volte para emissão de parecer pela Comissão de Ensino. PESSOA_8875. Assim como o Prof. PESSOA_162064, entende que o pedido é para que o Colegiado já decida sobre o aproveitamento da disciplina. Indagou se a decisão anterior seria revogada parcial ou integralmente, em caso de aprovação do presente pedido pelo Colegiado, afirmando que não pode haver duas decisões sobre o mesmo assunto. Por fim, disse que a negativa da Comissão de Ensino se deu em função da não observância do Regimento. PESSOA_165833. Entende que o pedido do orientador deve ser negado, pelo fato da não observância do que estabelece o Regimento. PESSOA_163315. Afirmou que o pedido feito pelo Prof. PESSOA_165910 é legítimo, pois as decisões das Comissões podem ser alvo de recurso perante o Colegiado, que verifica se deve ou não acatá-lo. Acredita que o pedido deve ser deferido, uma vez que a aluna já se encontrava no Paraná, onde cursou as duas primeiras disciplinas com a autorização de mobilidade e, posteriormente, surgiu a demanda de cursar uma terceira disciplina não ofertada pelo PPGAG e que, na prática, contribuiu para o trabalho da estudante. Frisou que, pesando-se na balança os prós e os contras, seria positivo acatar o aproveitamento da disciplina. PESSOA_163368. Quis saber em que medida essa terceira disciplina influenciaria na vida acadêmica da aluna, sobretudo em relação ao cumprimento dos créditos mínimos exigidos, tendo sido esclarecido que a aluna cumpriu 45 créditos até o momento, estando com\nCentro: CCAE.\nDepartamento: DPV.\nData da reunião: 2024-12-06.\n(Item anterior na mesma ata, não citável: Solicitação de prorrogação do prazo de defesa de tese (48 para 54 meses). Documento avulso nº PROCESSO_31956. Interessado: PESSOA_165873. Em esclarecimento. Em discussão)\n(Item posterior na mesma ata, não citável: ), bem como os pontos)\n\n[2] Ata CEUNES_DCN, 6ª reunião ordinaria, 14/05/2025, pauta, item 3, p. 1 (minuta em aprovação)\nPAUTA 3: PROCESSO_31579: Criação de resolução do DCN. A professora PESSOA_164501 fez a leitura da solicitação de aprovação da Resolução do DCN, que dispõe sobre a instrução processual de pedidos de ausência prevista em lei de docentes do Departamento de Ciências Naturais (DCN). A Comissão Interna de Pesquisa e Pós-graduação do DCN fez a leitura da resolução. Esclarecimentos. Em discussão: Após ampla deliberação, foram realizadas correções na referida Resolução. Em votação. Decisão: Aprovado(a) por maioria havendo 1 (uma) abstenção do professor PESSOA_164504.\nCentro: CEUNES.\nDepartamento: DCN.\nData da reunião: 2025-05-14.\nDesfecho: Aprovado.\nResultado da votação: por maioria havendo 1 (uma) abstenção do professor PESSOA_164504..\nTrata do mesmo assunto que: 1799_PAUTA_7.\n(Item anterior na mesma ata, não citável: Inclusões: Não houve. Exclusões: Não houve. Esclarecimentos. Em discussão. Em votação)\n(Item posterior na mesma ata, não citável: PROCESSO_31595: Solicitação de Liberação - PESSOA_164550. O professor PESSOA_164533, presidente da Comissão de Pesquisa e Pós-graduação do DCN, fez a leitura do parecer favorável à aprovação da liberação do professor PESSOA_164598 Emissão: 16/05/2025 00:33:45 Página 1/5 PESSOA_164597, entre os dias e de maio de 2025, para participar do Encontro de Outono da Sociedade Brasileira de Física – EOSBF2025, que ocorrerá em Belém - PA, onde apresentará, no formato de pôster, o trabalho científico intitulado \"Nanoscale Magnetic Phases in Brazilian Beach Sands: A Study of Composition and Magnetic Behavior\". Esclarecimentos. Em discussão. Em votação)\n\n[3] Ata CCENS_DC, 5ª reunião ordinaria, 24/04/2025, ordem do dia, item 3.2, p. 1\nntes e dois cursos, sendo Ciência da Computação, nos turnos matutino e vespertino, e Sistemas de Informação, no turno noturno. Frisou, ainda, que a carga horária docente é bastante elevada e que os professores do Departamento têm planos de abrir um curso de pós-graduação. Ressaltou, ainda, que as disciplinas deste concurso são as disciplinas básicas dos cursos de graduação ofertadas pelo Departamento aos dois centros do Campus de Alegre e que todos os professores do DC ministram as disciplinas básicas. Por fim, concedeu a palavra aos membros da Câmara Departamental, caso quisessem complementar sua fala ou fazer perguntas ao que ninguém se manifestou. Agradeceu a presença da Professora PESSOA_162104 e disse que sua solicitação será avaliada e discutida no Departamento e que, posteriormente, será informada da decisão da Câmara Departamental. A Professora PESSOA_162104 agradeceu a oportunidade de participar da reunião e de sua solicitação ser analisada, disse que aguardará com a esperança de que tudo dê certo e se retirou da sala virtual. Em seguida, o Chefe do Departamento enviou o link da reunião para o Professor PESSOA_162103, deu-lhe as boas vindas, fez a apresentação de seu interesse e concedeu-lhe a 2 palavra, por 10 minutos. O Professor PESSOA_162103 agradeceu o espaço e a oportunidade de fazer esta fala e informou que é natural de Cachoeiro de Itapemirim e, atualmente, é Professor na Universidade Federal do Pará desde o ano de 2019. Disse, também, ser graduado em Sistemas de Informação, com mestrado e doutorado em Engenharia de Produção. Esclareceu que foi aprovado no cargo de Professor do Magistério Superior na Universidade Federal do Pará e que, à época, diante da proposta da Universidade em abrir um mestrado, e, por estar muito engajado na pós-graduação, trabalhou na proposta e submeteu-a, resultando na abertura de um curso de mestrado em Administração, que coordenou por 4 anos e meio, teve bons resultados com os alunos, conseguindo formar oito deles. Na graduação, participa como membro do curso de Administração, leciona disciplinas e no mestrado ministra duas disciplinas e tem projetos financiados na Universidade, além de se envolver muito com a pós-graduação e participar de avaliações de PAEPE e APCN nacionais. Justificou seu desejo de mudança por sua família ser da cidade de Cachoeiro de Itapemirim, sua esposa trabalhar no Banestes, ter uma filha e estar sozinho no Pará, não conseguindo vir para casa com frequência. Relatou que, no ano passado, esteve na UFES e percebeu que, para fazer a migração, o Campus de Alegre é o que fica mais próximo de Cachoeiro de Itapemirim e frisou que não tem intenção de sair do Espírito Santo, tendo planos de colaborar no desenvolvimento do Estado e, por isso, fez sua solicitação de redistribuição da UFPA para a UFES. Ressaltou que pode contribuir e amadurecer para trabalhar em conjunto e pode se desenvolver e aprender a trabalhar na graduação e desenvolver seu trabalho nesta área e colaborar com todos. P\nCentro: CCENS.\nDepartamento: DC.\nData da reunião: 2025-04-24.\nDesfecho: Aprovado.\nResultado da votação: Aprovado por unanimidade.\n(Item anterior na mesma ata, não citável: Apreciação da Ata da 4ª Reunião de caráter ordinário do Departamento de Computação realizada no dia 24/03/2025. Por um lapso, o ponto de pauta não foi colocado em votação.)\n(Item posterior na mesma ata, não citável: Calendário de reuniões do Departamento de 4 Computação. O Chefe do Departamento projetou o calendário de reuniões do Departamento de Computação para o semestre letivo 2025/1, nos seguintes termos: maio: 16, às 10 horas e 28, às 10 horas; junho: 16, às 10 horas, e 27, às 10 horas; julho: 11, às 13 horas, e 22, às 8 horas; agosto: 14, às 8 horas, e 26, às 8 horas. Em votação)\n\n[4] Ata CCE, 2ª reunião ordinaria, 25/02/2014, pauta, item 7, p. 3\nPonto 7 – Homologação do Proc. Nº PROCESSO_32208 – Projeto de Pesquisa – UFES x Petrobrás – “Métodos Analíticos de Avaliação Petróleo para utilização da Área Ambiental” – Coordenador: Prof. PESSOA_166299 – Termo de Cooperação: 0050.0085659.13.9 UFES x Petrobrás – O processo foi encaminhado ao Gabinete do Reitor, com o de acordo do Diretor do CCE e Ad Referendum do Conselho Departamental. Em votação, aprovado por unanimidade. .\nCentro: CCE.\nData da reunião: 2014-02-25.\nDesfecho: Aprovado.\nResultado da votação: Em votação, aprovado por unanimidade.\nTrata do mesmo assunto que: 1988_PAUTA_5.\nTrata do mesmo assunto que: 1988_PAUTA_5_D1.\n(Item anterior na mesma ata, não citável: Prot. Nº PROCESSO_32213 – Alteração da carga horária da atividade complementar referente à Mostra de Física e Astronomia da UFES – O Coordenador do Colegiado de Física, Prof. PESSOA_166117 encaminhou à direção do Centro o Memorando Nº 07/2014-COLFIS/CCE solicitando“alteração da carga horária da atividade complementar referente à Mostra de Física e Astronomia da UFES”, que corresponde à atividade “ATV01271 - Atuação como apoio acadêmico em eventos promovidos pela UFES”. Explicou que a presente solicitação teve origem na representação discente do COLFIS e que consiste na elevação da carga horária da atividade ATV01271 de 20 horas por participação para 30 horas no máximo, sendo que o valor da carga horária a ser lançado no histórico escolar do aluno participante seja aquele registrado em seu certificado de participação. O Prof. PESSOA_166115 informou que a presente solicitação já foi aprovada na primeira reunião ordinária de 2014 do Colegiado de Física)\n(Item posterior na mesma ata, não citável: Projeto de Resolução que estabelece critérios para alocação de 26 vagas disponibilizadas para contratação de professores titulares – O Diretor do CCE, Prof. PESSOA_165942 deu ciência ao Conselho Departamental do Projeto de Resolução que estabelece critérios para alocação de 26 vagas disponibilizadas para contratação de Professores Titulares)\n\n[5] Ata CCE, 9ª reunião ordinaria, 16/12/2010, pauta, item 4, p. 2\nPonto 4 – Recurso da Profa. PESSOA_166252 a decisão do Departamento de Estatística – O relator do processo, Prof. PESSOA_165958 fez a leitura do parecer informando “Trata-se o presente de recurso encaminhado pela Professora PESSOA_166264 ao Conselho Departamental do CCE contra a decisão da Câmara Departamental do Departamento de Estatística que negou seu pedido de afastamento por um período de dois anos a partir de março de 2011 para concluir seu Doutorado no PPGE/UFES. A professora PESSOA_166251 é professora do DEST desde agosto de 1982, tendo desempenhado diversas funções no DEST até o presente momento. Em março de 2010 iniciou seu doutorado no PPGE/UFES na área de Educação Matemática com orientação da Professora Dra. PESSOA_166263. A professora PESSOA_166251 cursou diversas disciplinas até o momento e iniciou sua tese versando sobre a História da Estatística no Brasil, é importante ressaltar que durante esta primeira etapa a professora cursou o Doutorado sem afastamento de suas atividades no DEST. A professora PESSOA_166251 solicitou afastamento para cursar Doutorado a partir de março de 2011, tendo como justificativa a necessidade de várias viagens a partir do ano que vem para ter acesso a diferentes documentos históricos, que se encontram principalmente no Rio de Janeiro e Brasília. A partir deste ponto uma série de fatos ocorreu no DEST, que procuro resumir abaixo: 1. Outros dois professores também solicitaram afastamento a partir de 2011, professor PESSOA_166255 para cursar Doutorado em Engenharia Ambiental e professor PESSOA_166256. 2. Os pedidos foram encaminhados para uma comissão analisar e emitir parecer. 3. A referida comissão indicou o professor PESSOA_166257 para afastamento. 4. O DEST não possuía normas regulamentas para afastamentos de seus docentes para cursar Pós-Graduação. 5. Foi pedido vistas ao processo pelo Professor PESSOA_166262, justificando que o DEST não possui normas e critérios aprovados para afastamento dos seus docentes para Pós- Graduação de acordo com a resolução 09/2003 Art.14. 6. O DEST criou às pressas uma comissão para definir normas e critérios para os afastamentos. 7. As referidas normas foram aprovadas pelo DEST. 8. Neste momento o DEST aguarda a documentação dos professores solicitantes de afastamento para enviar para comissão para análise de acordo com as normas aprovadas. Com base no relatado acima fica claro que a professora PESSOA_166251 se precipitou ao encaminhar recurso ao Conselho do CCE, uma vez que não existe até o momento uma negação por parte do DEST com relação ao seu pedido. Desta maneira este conselheiro não se manifestará a respeito do recurso, devendo a professora esperar uma resposta final do DEST para tomar as medidas cabíveis. Contudo, este conselheiro acha importante se manifestar em relação a alguns pontos que julgo serem importantes para uma melhor condução do tema no DEST e CCE: 1. A elaboração das normas e critérios foi feita em curto espaço de tempo, sem que fosse verificado junt\nCentro: CCE.\nData da reunião: 2010-12-16.\n(Item anterior na mesma ata, não citável: Homologação das correções do resultado final do Concurso Público de Provas e Títulos para Professor Efetivo do DQUI – subárea Química Inorgânica – Edital nº 173/2010-R – O processo do Resultado final do Concurso Público de Provas e Títulos para Professor Efetivo do DQUI – subárea Química Inorgânica – Edital nº 173/2010-R foi devolvido pelo DRH/UFES para que fosse adequado a Resolução 52/2009-CEPE. De acordo com a Resolução 52/2009-CEPE, na prova de aptidão didática o candidato PESSOA_166218 obteve 90,0 (noventa vírgula zero) pontos, a candidata PESSOA_166064 obteve 85,0 (oitenta e cinco vírgula zero) pontos. Na Prova de Títulos o candidato PESSOA_166218 obteve 47,0 (quarenta e sete vírgula zero) pontos, PESSOA_166064 obteve 15,0 (quinze vírgula zero) pontos. Aplicando-se a normalização conforme orienta o artigo 38 da Resolução 52/2009, a nota do candidato PESSOA_166218 foi alterada para 100,0 (cem vírgula zero) pontos e da PESSOA_166064 alterada para 32,0 (trinta e dois vírgula zero) pontos. Na prova de Plano de Trabalho do Concurso Público de Provas e Títulos para Provimento de Emprego de Professor Adjunto na Área de Química, Subárea de Química Inorgânica do Departamento de Química do Centro de Ciências Exatas da Universidade Federal do Espírito Santo, o candidato PESSOA_166218 obteve 95,0 (noventa e cinco vírgula zero) pontos e PESSOA_166064 91,0 (noventa e um vírgula zero) pontos. No total geral o candidato PESSOA_166218 obteve 878 (oitocentos e setenta e oito) pontos, aprovado em primeiro lugar, e a candidata PESSOA_166064 obteve 718 (setecentos e dezoito) pontos, aprovada em segundo lugar)\n(Item posterior na mesma ata, não citável: na Reunião, a Chefia se manifestou dizendo que no Departamento é possível o afastamento, no momento, de somente mais um professor, visto que já se tem dois afastados e mencionou também a necessidade de se estabelecer critérios para determinar a ordem do afastamento. Não havendo manifestação por parte dos presentes à respeito da elaboração de critérios, os pontos 7 e 8 foram retirados de pauta com a concordância dos presentes. Foi então mencionado que também a solicitação da profa. PESSOA_166251 seria encaminhada a mesma Comissão para análise e parecer. Em 27/08/10, o prof. PESSOA_166255 também entregou ao Dest sua solicitação de afastamento para Doutorado em Engenharia Ambiental PPGEA/UFES. Esta solicitação , como as anteriores, também foi encaminhada à Comissão de Pesquisa para análise e parecer. Faz-se importante ressaltar que o prof. PESSOA_166256 por integrar a Comissão de Pesquisa do Dest foi substituído nesta Comissão no momento em que deu entrada na sua solicitação de afastamento. Sendo assim, todas as três solicitações foram encaminhadas para a Comissão de Pesquisa (PESSOA_166259 e PESSOA_166258) e substituindo o prof. PESSOA_166257, o prof. PESSOA_166110. Na reunião de 23/09/10 – 9ª. Ata/Dest (página 47 a 52 deste processo), a Comissão de Pesquisa leu o seu parecer à solicitação de afastamento dos professores (PESSOA_166256, PESSOA_166252 e PESSOA_166255) em bloco, conforme páginas 51 e 52 deste processo. Após a leitura do parecer da Comissão, que indicou o prof. PESSOA_166254 para afastamento a partir de 2011/1, o prof. PESSOA_166125 pediu vistas ao processo. Na reunião de 07/10/10 – 10ª. Ata/Dest (página 53 a 57 deste processo), o prof. PESSOA_166125 fez a leitura do seu pedido de vistas, que conforme transcrito do seu parecer (conforme página 53 deste processo) se baseou no “artigo 14 da resolução 09/2003, que fixa normas e condições de afastamento de Docentes para aperfeiçoamento em instituições nacionais e estrangeiras em nível de pós-graduação de natureza presencial: Art. 14. Os Departamentos deverão elaborar normas com critérios objetivos para a determinação da ordem de afastamento dos docentes para aperfeiçoamento. O artigo é claro quando diz que cabe ao Departamento a elaboração de normas com critérios para determinar a ordem de afastamento e, até o presente caso, tais normas não foram ainda elaboradas pelo Dest. “Daí em diante, várias reuniões ocorreram tentando elaborar as normas e critérios, porém muito difícil elaborar quando já se sabe a situação de cada candidato. Em Reunião Extraordinária de 14/10/10 – 4ª Ata Extraordinária/Dest , conforme página 58 deste processo, como único ponto de pauta: Apreciação de critérios para afastamento de docentes para Pós-Graduação – O Dest após ampla discussão decidiu estabelecer uma Comissão para elaboração de Normas e Critérios. Comissão aprovada: Professores PESSOA_165949, PESSOA_166125, PESSOA_166253, PESSOA_166063, PESSOA_166062 e PESSOA_166110. Na Reunião Extraordinária de 26/11/10/DEST, com a presença da Profa. PESSOA_166252 foi aprovada as Normas e Critérios elaborados pela Comissão para afastamento de docentes para Pós-Graduação. Assim, conforme mencionou o Relator do Processo, neste momento o Depto de Estatística aguarda a documentação dos professores solicitantes de afastamento, a fim de enviar a comissão de Pesquisa para análise, de acordo com as Normas e Critérios aprovados e assim estabelecer a ordem de afastamento dos professores. Gostaria ainda de esclarecer que a elaboração das normas e critérios utilizando como suporte as regras para professor Associado com algumas modificações aprovadas em reunião foi feita por se conhecer o perfil de cada candidato, procurando não beneficiar um ou outro. Também quando o relator mencionou que as demais solicitações de afastamento não estão relacionas à área de Estatística, a informação não procede. As solicitações dos demais professores estão muito bem fundamentadas na Estatística. Após discussão, foi votado o parecer do relator quanto à procedência do recurso da professora PESSOA_166251. A unanimidade os Conselheiros votaram pela não procedência do recurso. Em seguida, votaram a sugestão do relator de estabelecer uma Comissão no CCE para elaborar normas únicas de afastamento de docentes do CCE para cursar Pós-Graduação e Pós-Doutorado)\n\nPergunta: Qual foi a decisão sobre disciplina COM05207 no setor CCENS / DC?",
+  "tokens_entrada": 6692,
+  "tokens_saida": 18,
+  "truncada": false,
+  "resposta_bruta": "Não encontrei nas atas disponíveis informação suficiente para responder a essa pergunta.",
+  "resposta_final": "Não encontrei nas atas disponíveis informação suficiente para responder a essa pergunta.",
+  "citados": []
+}

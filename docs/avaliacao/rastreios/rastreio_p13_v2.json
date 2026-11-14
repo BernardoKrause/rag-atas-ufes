@@ -1,0 +1,641 @@
+{
+  "id_execucao": "1e20f229b4cd",
+  "quando": "2026-11-08T01:13:13",
+  "commit": "ab7ba7b",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Qual foi a decisão sobre disciplina COM10508 no setor CCENS / DC?",
+  "alvos": {
+    "1667_EXPEDIENTE_1.1": {
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "O Chefe do Departamento solicitou a inclusão do ponto de pauta referente à redução do núme",
+      "rank_lexico": 4,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 9
+    },
+    "1667_ORDEM_DO_DIA_3.6": {
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 6,
+      "assunto": "Redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de S",
+      "rank_lexico": 2,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 4
+    },
+    "1669_COMUNICACOES_4.2": {
+      "ata": 1669,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-29",
+      "pagina": 2,
+      "assunto": "O Prof. PESSOA_162063 comunicou à Câmara Departamental que, ao questionar os estudantes da",
+      "rank_lexico": 5,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 11
+    }
+  },
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1668_ORDEM_DO_DIA_3.1",
+      "score": 14.152941294056014,
+      "ata": 1668,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-20",
+      "pagina": 1,
+      "assunto": "Concurso Público de Provas e Títulos do Departamento de Computação. Considerando que não h"
+    },
+    {
+      "rank": 2,
+      "item": "1667_ORDEM_DO_DIA_3.6",
+      "score": 13.489194303894994,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 6,
+      "assunto": "Redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de S"
+    },
+    {
+      "rank": 3,
+      "item": "1664_ORDEM_DO_DIA_3.2",
+      "score": 12.284588624203419,
+      "ata": 1664,
+      "orgao": "CCENS_DC",
+      "data": "2025-02-18",
+      "pagina": 1,
+      "assunto": "Apreciação da oferta das disciplinas para o semestre de 2025/1. O Chefe apresentou o ponto"
+    },
+    {
+      "rank": 4,
+      "item": "1667_EXPEDIENTE_1.1",
+      "score": 12.002275039052789,
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "O Chefe do Departamento solicitou a inclusão do ponto de pauta referente à redução do núme"
+    },
+    {
+      "rank": 5,
+      "item": "1669_COMUNICACOES_4.2",
+      "score": 10.911287523336306,
+      "ata": 1669,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-29",
+      "pagina": 2,
+      "assunto": "O Prof. PESSOA_162063 comunicou à Câmara Departamental que, ao questionar os estudantes da"
+    },
+    {
+      "rank": 6,
+      "item": "1786_INFORMES_3",
+      "score": 9.963897029213022,
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    },
+    {
+      "rank": 7,
+      "item": "1701_COMUNICACOES_4.1",
+      "score": 9.815908450504514,
+      "ata": 1701,
+      "orgao": "CCENS_DMPA",
+      "data": "2024-07-08",
+      "pagina": 5,
+      "assunto": "A chefe do departamento comunicou que se alguém tiver interesse em solicitar móveis, manif"
+    },
+    {
+      "rank": 8,
+      "item": "1682_COMUNICACOES_4.5",
+      "score": 9.698469013218874,
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 7,
+      "assunto": "A Chefe do Departamento informou que ocorreu uma reunião entre as chefias dos Departamento"
+    },
+    {
+      "rank": 9,
+      "item": "1666_ORDEM_DO_DIA_3.2",
+      "score": 9.43485205255153,
+      "ata": 1666,
+      "orgao": "CCENS_DC",
+      "data": "2025-03-24",
+      "pagina": 2,
+      "assunto": "Aprovação dos Planos de Ensino 2025/1 - DC. O presidente apresentou os planos enviados par"
+    },
+    {
+      "rank": 10,
+      "item": "1682_COMUNICACOES_4.3",
+      "score": 9.423908364274935,
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 7,
+      "assunto": "A Chefe do Departamento informou sobre a Decisão 41/2025 do Conselho Departamental em que "
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1964_PAUTA_9",
+      "score": 0.66371703,
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substi"
+    },
+    {
+      "rank": 2,
+      "item": "1799_PAUTA_7",
+      "score": 0.65142566,
+      "ata": 1799,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-04-23",
+      "pagina": 3,
+      "assunto": "PROCESSO_31579: Regimento da Comissão Interna de Pesquisa e Pós-graduação do DCN. A profes"
+    },
+    {
+      "rank": 3,
+      "item": "1979_PAUTA_4",
+      "score": 0.64563894,
+      "ata": 1979,
+      "orgao": "CCE",
+      "data": "2013-04-30",
+      "pagina": 2,
+      "assunto": "Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Depart"
+    },
+    {
+      "rank": 4,
+      "item": "1983_PAUTA_1",
+      "score": 0.64466536,
+      "ata": 1983,
+      "orgao": "CCE",
+      "data": "2013-08-28",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Professor PESSOA_165942 deu ciência aos presentes qu"
+    },
+    {
+      "rank": 5,
+      "item": "1767_PAUTA_9",
+      "score": 0.64317036,
+      "ata": 1767,
+      "orgao": "CT",
+      "data": "2025-11-28",
+      "pagina": 2,
+      "assunto": "Processo digital nº PROCESSO_31533 - O discente PESSOA_164315, do curso de Engenharia Elét"
+    },
+    {
+      "rank": 6,
+      "item": "1951_PAUTA_10",
+      "score": 0.6415005,
+      "ata": 1951,
+      "orgao": "CCE",
+      "data": "2010-03-29",
+      "pagina": 3,
+      "assunto": "Critérios para Encargos Administrativos, Pesquisa e Extensão-CCE – A Comissão formada pelo"
+    },
+    {
+      "rank": 7,
+      "item": "1965_PAUTA_14",
+      "score": 0.6402985,
+      "ata": 1965,
+      "orgao": "CCE",
+      "data": "2011-07-13",
+      "pagina": 3,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "rank": 8,
+      "item": "1877_ORDEM_DO_DIA_3.6",
+      "score": 0.633482,
+      "ata": 1877,
+      "orgao": "CCAE_DER",
+      "data": "2024-05-24",
+      "pagina": 2,
+      "assunto": "Documento Avulso - PROCESSO_31851. Adequações bibliográficas de disciplinas ofertadas para"
+    },
+    {
+      "rank": 9,
+      "item": "1964_PAUTA_8",
+      "score": 0.6322218,
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "rank": 10,
+      "item": "1962_PAUTA_8",
+      "score": 0.6322218,
+      "ata": 1962,
+      "orgao": "CCE",
+      "data": "2011-04-25",
+      "pagina": 2,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    }
+  ],
+  "ancoras": [
+    "1668_ORDEM_DO_DIA_3.1",
+    "1964_PAUTA_9",
+    "1667_ORDEM_DO_DIA_3.6",
+    "1799_PAUTA_7",
+    "1664_ORDEM_DO_DIA_3.2",
+    "1979_PAUTA_4",
+    "1667_EXPEDIENTE_1.1",
+    "1983_PAUTA_1",
+    "1669_COMUNICACOES_4.2",
+    "1767_PAUTA_9",
+    "1786_INFORMES_3",
+    "1951_PAUTA_10",
+    "1701_COMUNICACOES_4.1",
+    "1965_PAUTA_14",
+    "1682_COMUNICACOES_4.5",
+    "1877_ORDEM_DO_DIA_3.6",
+    "1666_ORDEM_DO_DIA_3.2",
+    "1964_PAUTA_8",
+    "1682_COMUNICACOES_4.3",
+    "1962_PAUTA_8"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 1,
+      "item": "1968_PAUTA_1",
+      "score": null,
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagen"
+    },
+    {
+      "rank": 2,
+      "item": "1800_PAUTA_3",
+      "score": null,
+      "ata": 1800,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-05-14",
+      "pagina": 1,
+      "assunto": "PROCESSO_31579: Criação de resolução do DCN. A professora PESSOA_164501 fez a leitura da s"
+    },
+    {
+      "rank": 5,
+      "item": "1769_PAUTA_2",
+      "score": null,
+      "ata": 1769,
+      "orgao": "CT",
+      "data": "2025-12-03",
+      "pagina": 1,
+      "assunto": "Processo digital nº PROCESSO_31533 - O discente PESSOA_164315, do curso de Engenharia Elét"
+    },
+    {
+      "rank": 7,
+      "item": "1966_PAUTA_14",
+      "score": null,
+      "ata": 1966,
+      "orgao": "CCE",
+      "data": "2011-08-26",
+      "pagina": 5,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "rank": 7,
+      "item": "1963_PAUTA_09",
+      "score": null,
+      "ata": 1963,
+      "orgao": "CCE",
+      "data": "2011-05-30",
+      "pagina": 3,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "rank": 8,
+      "item": "1877_EXPEDIENTE_2.1",
+      "score": null,
+      "ata": 1877,
+      "orgao": "CCAE_DER",
+      "data": "2024-05-24",
+      "pagina": 1,
+      "assunto": "Documento Avulso PROCESSO_31851 - Adequações bibliográficas de disciplinas ofertadas para "
+    },
+    {
+      "rank": 8,
+      "item": "1875_ORDEM_DO_DIA_3.1_F4",
+      "score": null,
+      "ata": 1875,
+      "orgao": "CCAE_DER",
+      "data": "2024-06-21",
+      "pagina": 1,
+      "assunto": "Documento Avulso - PROCESSO_31851. Ofício 07-2024-DER: Adequação bibliográfica do curso de"
+    },
+    {
+      "rank": 8,
+      "item": "1875_ORDEM_DO_DIA_3.1_F3",
+      "score": null,
+      "ata": 1875,
+      "orgao": "CCAE_DER",
+      "data": "2024-06-21",
+      "pagina": 1,
+      "assunto": "Documento Avulso - PROCESSO_31851. Ofício 07-2024-DER: Adequação bibliográfica do curso de"
+    },
+    {
+      "rank": 8,
+      "item": "1875_ORDEM_DO_DIA_3.1_F2",
+      "score": null,
+      "ata": 1875,
+      "orgao": "CCAE_DER",
+      "data": "2024-06-21",
+      "pagina": 1,
+      "assunto": "Documento Avulso - PROCESSO_31851. Ofício 07-2024-DER: Adequação bibliográfica do curso de"
+    },
+    {
+      "rank": 8,
+      "item": "1875_ORDEM_DO_DIA_3.1_F1",
+      "score": null,
+      "ata": 1875,
+      "orgao": "CCAE_DER",
+      "data": "2024-06-21",
+      "pagina": 1,
+      "assunto": "Documento Avulso - PROCESSO_31851. Ofício 07-2024-DER: Adequação bibliográfica do curso de"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1668_ORDEM_DO_DIA_3.1",
+      "ata": 1668,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-20",
+      "pagina": 1,
+      "assunto": "Concurso Público de Provas e Títulos do Departamento de Computação. Considerando que não h"
+    },
+    {
+      "posicao": 2,
+      "item": "1964_PAUTA_9",
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substi"
+    },
+    {
+      "posicao": 3,
+      "item": "1968_PAUTA_1",
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagen"
+    },
+    {
+      "posicao": 4,
+      "item": "1667_ORDEM_DO_DIA_3.6",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 6,
+      "assunto": "Redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de S"
+    },
+    {
+      "posicao": 5,
+      "item": "1799_PAUTA_7",
+      "ata": 1799,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-04-23",
+      "pagina": 3,
+      "assunto": "PROCESSO_31579: Regimento da Comissão Interna de Pesquisa e Pós-graduação do DCN. A profes"
+    },
+    {
+      "posicao": 6,
+      "item": "1800_PAUTA_3",
+      "ata": 1800,
+      "orgao": "CEUNES_DCN",
+      "data": "2025-05-14",
+      "pagina": 1,
+      "assunto": "PROCESSO_31579: Criação de resolução do DCN. A professora PESSOA_164501 fez a leitura da s"
+    },
+    {
+      "posicao": 7,
+      "item": "1664_ORDEM_DO_DIA_3.2",
+      "ata": 1664,
+      "orgao": "CCENS_DC",
+      "data": "2025-02-18",
+      "pagina": 1,
+      "assunto": "Apreciação da oferta das disciplinas para o semestre de 2025/1. O Chefe apresentou o ponto"
+    },
+    {
+      "posicao": 8,
+      "item": "1979_PAUTA_4",
+      "ata": 1979,
+      "orgao": "CCE",
+      "data": "2013-04-30",
+      "pagina": 2,
+      "assunto": "Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Depart"
+    },
+    {
+      "posicao": 9,
+      "item": "1667_EXPEDIENTE_1.1",
+      "ata": 1667,
+      "orgao": "CCENS_DC",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "O Chefe do Departamento solicitou a inclusão do ponto de pauta referente à redução do núme"
+    },
+    {
+      "posicao": 10,
+      "item": "1983_PAUTA_1",
+      "ata": 1983,
+      "orgao": "CCE",
+      "data": "2013-08-28",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Professor PESSOA_165942 deu ciência aos presentes qu"
+    },
+    {
+      "posicao": 11,
+      "item": "1669_COMUNICACOES_4.2",
+      "ata": 1669,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-29",
+      "pagina": 2,
+      "assunto": "O Prof. PESSOA_162063 comunicou à Câmara Departamental que, ao questionar os estudantes da"
+    },
+    {
+      "posicao": 12,
+      "item": "1767_PAUTA_9",
+      "ata": 1767,
+      "orgao": "CT",
+      "data": "2025-11-28",
+      "pagina": 2,
+      "assunto": "Processo digital nº PROCESSO_31533 - O discente PESSOA_164315, do curso de Engenharia Elét"
+    },
+    {
+      "posicao": 13,
+      "item": "1769_PAUTA_2",
+      "ata": 1769,
+      "orgao": "CT",
+      "data": "2025-12-03",
+      "pagina": 1,
+      "assunto": "Processo digital nº PROCESSO_31533 - O discente PESSOA_164315, do curso de Engenharia Elét"
+    },
+    {
+      "posicao": 14,
+      "item": "1786_INFORMES_3",
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    },
+    {
+      "posicao": 15,
+      "item": "1951_PAUTA_10",
+      "ata": 1951,
+      "orgao": "CCE",
+      "data": "2010-03-29",
+      "pagina": 3,
+      "assunto": "Critérios para Encargos Administrativos, Pesquisa e Extensão-CCE – A Comissão formada pelo"
+    },
+    {
+      "posicao": 16,
+      "item": "1701_COMUNICACOES_4.1",
+      "ata": 1701,
+      "orgao": "CCENS_DMPA",
+      "data": "2024-07-08",
+      "pagina": 5,
+      "assunto": "A chefe do departamento comunicou que se alguém tiver interesse em solicitar móveis, manif"
+    },
+    {
+      "posicao": 17,
+      "item": "1965_PAUTA_14",
+      "ata": 1965,
+      "orgao": "CCE",
+      "data": "2011-07-13",
+      "pagina": 3,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "posicao": 18,
+      "item": "1966_PAUTA_14",
+      "ata": 1966,
+      "orgao": "CCE",
+      "data": "2011-08-26",
+      "pagina": 5,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "posicao": 19,
+      "item": "1963_PAUTA_09",
+      "ata": 1963,
+      "orgao": "CCE",
+      "data": "2011-05-30",
+      "pagina": 3,
+      "assunto": "Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –"
+    },
+    {
+      "posicao": 20,
+      "item": "1682_COMUNICACOES_4.5",
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 7,
+      "assunto": "A Chefe do Departamento informou que ocorreu uma reunião entre as chefias dos Departamento"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1668_ORDEM_DO_DIA_3.1",
+      "rotulo": "Ata CCENS_DC, 6ª reunião ordinaria, 20/05/2025, ordem do dia, item 3.1, p. 1",
+      "pagina": 1,
+      "texto": "3.1 Concurso Público de Provas e Títulos do Departamento de Computação. Considerando que não houve candidato aprovado no processo seletivo do Edital 78/2024-R/UFES, já homologado, no DOU n.º 88 de 13 de maio de 2025, o presidente colocou em discussão a abertura de um novo concurso, para suprir a vaga pela aposentadoria do professor PESSOA_162147. Consultando os pares, decidiram permanecer com a mesma composição da Banca e programa, a saber: COMISSÃO EXAMINADORA TITULARES: Prof. Dr. PESSOA_162043 (presidente - membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo – UFES; Prof. Dr. PESSOA_162047 (membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo - UFES; Prof. Dr. PESSOA_162146 (membro externo) Instituto Federal do Espírito Santo – IFES Campus de Alegre. COMISSÃO EXAMINADORA SUPLENTES: Prof. Dr. PESSOA_162044 (membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo – UFES; Prof. Dr. PESSOA_162048 (membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo – UFES; Prof. Dr. PESSOA_162145 (membro externo) Instituto Federal do Espírito Santo – IFES Campus Serra. Prof. Dr. 1 PESSOA_162144 (membro externo) Instituto Federal do Espírito Santo – IFES Campus de Serra. Prof. Dr. PESSOA_162143 (membro externo) Instituto Federal do Espírito Santo – IFES Campus de Serra. O Prof. PESSOA_162063 sugeriu dois encaminhamentos a respeito da Titulação Exigida para o concurso: deliberar sobre a graduação; deliberar sobre a pós-graduação. Deliberação sobre a graduação: PERFIL DO CANDIDATO: Graduação: Bacharelado em Ciência da Computação ou Sistemas de Informação ou Computação ou Informática ou Sistemas de Computação ou Engenharia da Computação. Após ampla discussão foi aprovado pela maioria. Pós-Graduação: Doutorado em Programa de pós-graduação avaliado na Área de Ciências Exatas e da Terra (Cód. CNPq 1.00.00.00-3) ou Engenharias (Cód. CNPq",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DC.",
+        "Data da reunião: 2025-05-20.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Após ampla discussão foi aprovado pela maioria."
+      ],
+      "data_reuniao": "2025-05-20"
+    },
+    {
+      "numero": 2,
+      "item": "1964_PAUTA_9",
+      "rotulo": "Ata CCE, 5ª reunião ordinaria, 27/06/2011, pauta, item 9, p. 2",
+      "pagina": 2,
+      "texto": "PONTO 9 – Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substituição da Professora PESSOA_166032 – DMAT - Leitura do parecer dado pelo Conselheiro PESSOA_376658 informando que “sinto dificuldade em dar algum parecer neste processo, nº PROCESSO_32050, em face de algumas considerações. Em primeiro lugar, o processo teve origem na solicitação da maioria dos alunos da disciplina MAT03586 (Matemática I), ofertada pelo Departamento de Matemática desta UFES no período 2010/1, para troca da Profa. PESSOA_166032. Estamos no período 2011/1, 2 semestres letivos após a solicitação e podemos fazer o que? Em segundo lugar, ao processo original foi apensado outros processos relativos à Profa. PESSOA_166040, um p.ex. oriundo de atividades no PPGMAT, e que, na opinião deste humilde relator, em nada contribuem para a análise do processo em tela, só complicando a análise. Em terceiro lugar, a Comissão de Ensino do DMAT encontrou solução acadêmica para os alunos reprovados na referida disciplina, e que implementada pela PROGRAD reduzindo o prejuízo dos alunos, se é que houve. Há noticia que demais alunos teriam cursado a disciplina no semestre seguinte, 2010/2, zerando a situação. Enfim, o senhor Chefe do DMAT encaminha ao CCE para o Diretor proceder adiante “no tocante à parte disciplinar, atendendo a indicação da Câmara e ao disposto no Art. 254/RG-UFES ...”(aspas minhas). Li o processo e, a menos que não o tenha observado com a devida retidão, não encontrei a parte em que a Câmara Departamental tenha sugerido alguma sanção disciplinar. Entretanto, deve-se dizer que ao Diretor do CCE compete aplicar as penas de advertência, repreensão ou suspensão até 15 dias, mas tão somente após respeitar-se o Art. 143 da Lei 8112 de 11/dez/1990, que diz: “Art 143. A autoridade que tiver ciência de irregularidade no serviço público é obrigada a promover a sua apuração imediata, mediante SINDICÂNCIA OU PROCESSO ADMINISTRATIVO DISCIPLINAR, assegurada ao acusado ampla defesa”. (PESSOA_166304). Neste caso, a autorização remete ao chefe imediato tal responsabilidade, o Sr. Chefe do DMAT. No início estava em dúvida do que fazer, mas após tais considerações, me convenci que o melhor a fazer é sugerir o simples e imediato arquivamento deste processo, salvo melhor juízo. Em 01/jun/2011”. Após a leitura, o parecer foi colocado em votação e rejeitado por unanimidade. Professor PESSOA_165958 fez uma proposta de criação de uma comissão específica para o referido processo, sendo aprovada a unanimidade. Para compor a Comissão foram indicados os nomes dos professores PESSOA_166303 (DQUI), PESSOA_166194 (DFIS), PESSOA_166302 (DMAT), PESSOA_166027 (DEST). Em votação os nomes para compor a Comissão, aprovados a unanimidade. .",
+      "frases_grafo": [
+        "Centro: CCE.",
+        "Data da reunião: 2011-06-27.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em votação os nomes para compor a Comissão, aprovados a unanimidade."
+      ],
+      "data_reuniao": "2011-06-27"
+    },
+    {
+      "numero": 3,
+      "item": "1968_PAUTA_1",
+      "rotulo": "Ata CCE, 10ª reunião ordinaria, 25/11/2011, pauta, item 1, p. 1",
+      "pagina": 1,
+      "texto": "Ponto 1 – Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagens e diárias, se não houver solicitação, será feito o cancelamento dos empenhos. 1.2 – Foi distribuída a planilha de professor Equivalente do CCE, disponibilizada pelo DRH. Houve ampla discussão e o assunto foi sugerido a ser incluído no ponto de pauta para a Oferta de Disciplina 2012/1. 1.3 – Com relação à Progressão Funcional, o prazo para o encaminhamento dos pedidos de progressões atrasadas é até o dia 31/12/2011, sem garantia das vantagens atrasadas. 1.4 – O Diretor do CCE informou que fez uma reunião administrativa com todos os chefes de Departamentos e Coordenadores de Colegiado, informando o término da bolsa PAD está prevista para o dia 31/12, que a Comissão Especial do Conselho Universitário está elaborando um Projeto de Resolução de Bolsa de Estágio para ser implementado para o ano de 2012, que corresponderá no máximo de 20% do total de servidores Técnico-administrativos do CCE. 1.5 – O Laboratório de Computação do CCE está providenciando todo o agendamento das salas do CCE e auditório on-line para o ano de 2012. 1.6 – Compensação da carga horária didática, de um período letivo para o próximo - Comunicado que em princípio, a flexibilidade ficaria a critério dos Departamentos. Dado o conjunto de questionamentos, resolveu-se encaminhar consulta à PGF/UFES. 1.7 – O CCE não tem sobra no banco de Professor Equivalente. Para a Oferta de disciplinas do período 2012/1, o Diretor orientou para quem tiver falta de professor, não ofertar disciplinas, desde que obedeça as Resoluções vigentes da UFES. Esse ponto foi muito discutido e proposto como ponto de pauta. 1.8 – Memorando Circular nº010/CEFD/2011 – Normas de utilização das quadras cobertas e do ginásio de esportes do CEFD/UFES. 1.9 – Professor PESSOA_165938 informou que no dia 28/11/11, sede da ADUFES, haverá um debate às dez horas com os representantes das duas chapas para Eleição da diretoria da ADUFES-2012/2013, e no dia 30/11 eleição. 1.10 – O Conselheiro PESSOA_166025 informou que o Departamento de Administração/UFES está transferindo suas funções de compra de material de laboratório, para os técnicos de Física/Química; informou, também que todos os técnicos irão ao Ministério Público devido aos processos parados de insalubridade. 1.11 – IV Escola Itinerante de Física Aplicada - 17/11/2011: visita a Usina Nuclear de Angra dos Reis, com a participação dos alunos e professor. 1.12 – Eleição de Representantes junto ao CUn, dia 30/11 – Chapa composta pelos Professores: PESSOA_166327/CT - (titular) e PESSOA_165937/CCE - (suplente).1.13 – Portaria 007/2011-CCE - designando os professores PESSOA_166020 (DFIS), PESSOA_166076 (DMAT) e PESSOA_166326 (DEST) para comporem a Comissão de Sindicância para apurar os fatos relacionados ao Protocolado nºPROCESSO_32050. .",
+      "frases_grafo": [
+        "Centro: CCE.",
+        "Data da reunião: 2011-11-25."
+      ],
+      "data_reuniao": "2011-11-25"
+    },
+    {
+      "numero": 4,
+      "item": "1667_ORDEM_DO_DIA_3.6",
+      "rotulo": "Ata CCENS_DC, 5ª reunião ordinaria, 24/04/2025, ordem do dia, item 3.6, p. 6",
+      "pagina": 6,
+      "texto": "3.6 Redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de Sistemas de Software. Interessado: Coordenação do Curso de Ciência da Computação. O Chefe do Departamento esclareceu que a redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de Sistemas de Software foi um pedido realizado pela Coordenação do Curso de Ciência da Computação e tem como objetivo garantir que o Coordenador do Curso consiga matricular os alunos em situação de desligamento. Em votação. Aprovado por maioria.",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DC.",
+        "Data da reunião: 2025-04-24.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por maioria."
+      ],
+      "data_reuniao": "2025-04-24"
+    },
+    {
+      "numero": 5,
+      "item": "1799_PAUTA_7",
+      "rotulo": "Ata CEUNES_DCN, 5ª reunião ordinaria, 23/04/2025, pauta, item 7, p. 3 (minuta em aprovação)",
+      "pagina": 3,
+      "texto": "PAUTA 7: PROCESSO_31579: Regimento da Comissão Interna de Pesquisa e Pós-graduação do DCN. A professora PESSOA_164501 fez a leitura da solicitação de aprovação da RESOLUÇÃO Nº 01/2025, de de abril de 2025 do DCN, que dispõe sobre os procedimentos de afastamento de docentes do DCN para participação em eventos e atividades de curta duração, no interesse da Administração. Esclarecimentos. Em discussão: Após ampla deliberação, a Presidente solicitou a retirada da pauta para análise complementar. Decisão: Retirado(a).",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Departamento: DCN.",
+        "Data da reunião: 2025-04-23.",
+        "Desfecho: Retirado.",
+        "Trata do mesmo assunto que: 1800_PAUTA_3."
+      ],
+      "data_reuniao": "2025-04-23"
+    }
+  ],
+  "prompt_usuario": "Evidências:\n{\"identificador\": 1, \"data_reuniao\": \"20/05/2025\", \"fonte\": \"Ata CCENS_DC, 6ª reunião ordinaria, 20/05/2025, ordem do dia, item 3.1, p. 1\", \"trecho\": \"3.1 Concurso Público de Provas e Títulos do Departamento de Computação. Considerando que não houve candidato aprovado no processo seletivo do Edital 78/2024-R/UFES, já homologado, no DOU n.º 88 de 13 de maio de 2025, o presidente colocou em discussão a abertura de um novo concurso, para suprir a vaga pela aposentadoria do professor PESSOA_162147. Consultando os pares, decidiram permanecer com a mesma composição da Banca e programa, a saber: COMISSÃO EXAMINADORA TITULARES: Prof. Dr. PESSOA_162043 (presidente - membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo – UFES; Prof. Dr. PESSOA_162047 (membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo - UFES; Prof. Dr. PESSOA_162146 (membro externo) Instituto Federal do Espírito Santo – IFES Campus de Alegre. COMISSÃO EXAMINADORA SUPLENTES: Prof. Dr. PESSOA_162044 (membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo – UFES; Prof. Dr. PESSOA_162048 (membro interno) Departamento de Computação - DC Centro de Ciências Exatas, Naturais e da Saúde - CCENS Universidade Federal do Espírito Santo – UFES; Prof. Dr. PESSOA_162145 (membro externo) Instituto Federal do Espírito Santo – IFES Campus Serra. Prof. Dr. 1 PESSOA_162144 (membro externo) Instituto Federal do Espírito Santo – IFES Campus de Serra. Prof. Dr. PESSOA_162143 (membro externo) Instituto Federal do Espírito Santo – IFES Campus de Serra. O Prof. PESSOA_162063 sugeriu dois encaminhamentos a respeito da Titulação Exigida para o concurso: deliberar sobre a graduação; deliberar sobre a pós-graduação. Deliberação sobre a graduação: PERFIL DO CANDIDATO: Graduação: Bacharelado em Ciência da Computação ou Sistemas de Informação ou Computação ou Informática ou Sistemas de Computação ou Engenharia da Computação. Após ampla discussão foi aprovado pela maioria. Pós-Graduação: Doutorado em Programa de pós-graduação avaliado na Área de Ciências Exatas e da Terra (Cód. CNPq 1.00.00.00-3) ou Engenharias (Cód. CNPq\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DC.\", \"Data da reunião: 2025-05-20.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Após ampla discussão foi aprovado pela maioria.\"], \"item_anterior_nao_citavel\": \"Apreciação da Ata da 5ª Reunião, de caráter ordinário, do Departamento de Computação realizada no dia 24/04/2025. O presidente apresentou o ponto, considerando que o documento foi enviado anteriormente por e-mail, a todos os membros da Câmara Departamental do DC. Sem esclarecimentos. Em votação. Sem esclarecimentos. Em votação\", \"item_posterior_nao_citavel\": \"00.00-9). Após, foi colocado em votação: Aprovado pela maioria. PROGRAMA E BIBLIOGRAFIA DO CONCURSO PARA PROVAS E TÍTULOS DO DEPARTAMENTO DE COMPUTAÇÃO DO CCENS/UFES 1. Traçado de curvas em dispositivos gráficos; 2. Transformações geométricas 2D e 3D; 3. Transformações de projeção; 4. Iluminação, textura e cores; 5. Transformadas de imagem; 6. Restauração e realce de imagens; 7. Listas, pilhas, Filas; 8. Árvores binárias e árvores balanceadas; 9. Algoritmo de busca em memória. 10. Algoritmos de ordenação em memória REFERÊNCIAS PESSOA_162142; PESSOA_162141; PESSOA_162140; PESSOA_162139; Algoritmos: teoria e prática. 3ed, Ed. Campus, Elsevier, 2012. ISBN 9788535236996. PESSOA_162138; Estrutura de Dados e Algoritmos em C++. Ed. Thomson, 2002. ISBN: 8522102953. PESSOA_162137. Projeto de algoritmos: com implementações em Pascal e C. 3ed. Ed. Cengage Learning, 2011. ISBN 9788522110506 PESSOA_162136; PESSOA_162135; PESSOA_162134; Introdução a Estruturas de Dados: com técnicas de programação em C. Rio de Janeiro: Campus, 2004. PESSOA_162133; PESSOA_162132; PESSOA_162131. Estruturas de dados usando C. São Paulo, SP: Pearson Makron Books, 2008. xx, 884 p. ISBN 9788534603485. PESSOA_162130; PESSOA_162129. Computação Gráfica: Teoria e prática. Elsevier, 2003. ISBN: 8535212533 PESSOA_162128; PESSOA_162127; Computer Graphics Using OpenGL. 3ed, Ed. Prentice Hall, 2006. ISBN: 9780131496705. PESSOA_162126; PESSOA_162125; PESSOA_162124; PESSOA_162123; Computer Graphics: Principles and Practice in C. 2ed, Ed. PESSOA_162122, 1995. ISBN: 9780201848403. PESSOA_162121; PESSOA_162120; Computer Graphics Using Java 2D and 3D. 1ed, Ed. Prentice Hall, 2007. ISBN: 9780130351180. PESSOA_162119; PESSOA_162118; PESSOA_162117; PESSOA_162116; et al. Fundamentals of Computer Graphics. 2ed, Ed. A K Peters, 2005. ISBN: 9781568812694. PESSOA_162115; Mathematics For 3D Game Programming & Computer Graphics. 2ed, Ed. Charles River Media, 2003. ISBN: 9781584502777. PESSOA_162114; PESSOA_162113, R. E.; Digital Image Processing. 3ed, Ed. Prentice Hall, 2007. ISBN: 9780131687288. PESSOA_162112; PESSOA_162111; Processamento Digital de Imagens. Ed. Brasport, 1999. ISBN: 8574520098. As provas serão em formato presencial, sendo todo o processo realizado no Centro de Ciências Exatas, Naturais e da Saúde - CCENS - Campus Alegre\"}\n{\"identificador\": 2, \"data_reuniao\": \"27/06/2011\", \"fonte\": \"Ata CCE, 5ª reunião ordinaria, 27/06/2011, pauta, item 9, p. 2\", \"trecho\": \"PONTO 9 – Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substituição da Professora PESSOA_166032 – DMAT - Leitura do parecer dado pelo Conselheiro PESSOA_376658 informando que “sinto dificuldade em dar algum parecer neste processo, nº PROCESSO_32050, em face de algumas considerações. Em primeiro lugar, o processo teve origem na solicitação da maioria dos alunos da disciplina MAT03586 (Matemática I), ofertada pelo Departamento de Matemática desta UFES no período 2010/1, para troca da Profa. PESSOA_166032. Estamos no período 2011/1, 2 semestres letivos após a solicitação e podemos fazer o que? Em segundo lugar, ao processo original foi apensado outros processos relativos à Profa. PESSOA_166040, um p.ex. oriundo de atividades no PPGMAT, e que, na opinião deste humilde relator, em nada contribuem para a análise do processo em tela, só complicando a análise. Em terceiro lugar, a Comissão de Ensino do DMAT encontrou solução acadêmica para os alunos reprovados na referida disciplina, e que implementada pela PROGRAD reduzindo o prejuízo dos alunos, se é que houve. Há noticia que demais alunos teriam cursado a disciplina no semestre seguinte, 2010/2, zerando a situação. Enfim, o senhor Chefe do DMAT encaminha ao CCE para o Diretor proceder adiante “no tocante à parte disciplinar, atendendo a indicação da Câmara e ao disposto no Art. 254/RG-UFES ...”(aspas minhas). Li o processo e, a menos que não o tenha observado com a devida retidão, não encontrei a parte em que a Câmara Departamental tenha sugerido alguma sanção disciplinar. Entretanto, deve-se dizer que ao Diretor do CCE compete aplicar as penas de advertência, repreensão ou suspensão até 15 dias, mas tão somente após respeitar-se o Art. 143 da Lei 8112 de 11/dez/1990, que diz: “Art 143. A autoridade que tiver ciência de irregularidade no serviço público é obrigada a promover a sua apuração imediata, mediante SINDICÂNCIA OU PROCESSO ADMINISTRATIVO DISCIPLINAR, assegurada ao acusado ampla defesa”. (PESSOA_166304). Neste caso, a autorização remete ao chefe imediato tal responsabilidade, o Sr. Chefe do DMAT. No início estava em dúvida do que fazer, mas após tais considerações, me convenci que o melhor a fazer é sugerir o simples e imediato arquivamento deste processo, salvo melhor juízo. Em 01/jun/2011”. Após a leitura, o parecer foi colocado em votação e rejeitado por unanimidade. Professor PESSOA_165958 fez uma proposta de criação de uma comissão específica para o referido processo, sendo aprovada a unanimidade. Para compor a Comissão foram indicados os nomes dos professores PESSOA_166303 (DQUI), PESSOA_166194 (DFIS), PESSOA_166302 (DMAT), PESSOA_166027 (DEST). Em votação os nomes para compor a Comissão, aprovados a unanimidade. .\", \"relacoes\": [\"Centro: CCE.\", \"Data da reunião: 2011-06-27.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Em votação os nomes para compor a Comissão, aprovados a unanimidade.\"], \"item_anterior_nao_citavel\": \"Apreciação da Normatização dos Critérios de Afastamentos para Aperfeiçoamento do CCE –\", \"item_posterior_nao_citavel\": \"Prot. Nº PROCESSO_32049 - Recurso do Prof. PESSOA_166125 contra Decisão do Conselho Departamental – DEST - Nesse recurso de Protocolado Nº PROCESSO_32049, o Professor PESSOA_166262 fez as seguintes solicitações: - que sejam lidas, na plenária do Conselho, as duas folhas do seu recurso; - seja desconsiderada ou anulada a decisão tomada no ponto Recurso da Professora PESSOA_166252 da reunião ordinária desse Conselho, realizada no dia 27 de maio de 2011; - e seja colocada para análise, discussão e votação a seguinte proposta: que o recurso da Professora PESSOA_166252 e processo de pedido de afastamento do Professor PESSOA_166301, sejam encaminhados ao DEST e lá arquivados, abrindo-se em seguida, processo onde constem as aprovações de afastamentos dos dois Professores independente da aplicação de normas e critérios. Após a leitura do recurso do Prof. PESSOA_166125, ficou decidido “não anular a Decisão tomada no ponto recurso da Profa. PESSOA_166252; - informar ao Prof. PESSOA_166125 que os processos de afastamentos dos Professores PESSOA_376682 foram separados e devolução deste recurso (Prot. Nº PROCESSO_32049) ao Professor PESSOA_166125 para verificação de existência de alguma pendência”\"}\n{\"identificador\": 3, \"data_reuniao\": \"25/11/2011\", \"fonte\": \"Ata CCE, 10ª reunião ordinaria, 25/11/2011, pauta, item 1, p. 1\", \"trecho\": \"Ponto 1 – Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagens e diárias, se não houver solicitação, será feito o cancelamento dos empenhos. 1.2 – Foi distribuída a planilha de professor Equivalente do CCE, disponibilizada pelo DRH. Houve ampla discussão e o assunto foi sugerido a ser incluído no ponto de pauta para a Oferta de Disciplina 2012/1. 1.3 – Com relação à Progressão Funcional, o prazo para o encaminhamento dos pedidos de progressões atrasadas é até o dia 31/12/2011, sem garantia das vantagens atrasadas. 1.4 – O Diretor do CCE informou que fez uma reunião administrativa com todos os chefes de Departamentos e Coordenadores de Colegiado, informando o término da bolsa PAD está prevista para o dia 31/12, que a Comissão Especial do Conselho Universitário está elaborando um Projeto de Resolução de Bolsa de Estágio para ser implementado para o ano de 2012, que corresponderá no máximo de 20% do total de servidores Técnico-administrativos do CCE. 1.5 – O Laboratório de Computação do CCE está providenciando todo o agendamento das salas do CCE e auditório on-line para o ano de 2012. 1.6 – Compensação da carga horária didática, de um período letivo para o próximo - Comunicado que em princípio, a flexibilidade ficaria a critério dos Departamentos. Dado o conjunto de questionamentos, resolveu-se encaminhar consulta à PGF/UFES. 1.7 – O CCE não tem sobra no banco de Professor Equivalente. Para a Oferta de disciplinas do período 2012/1, o Diretor orientou para quem tiver falta de professor, não ofertar disciplinas, desde que obedeça as Resoluções vigentes da UFES. Esse ponto foi muito discutido e proposto como ponto de pauta. 1.8 – Memorando Circular nº010/CEFD/2011 – Normas de utilização das quadras cobertas e do ginásio de esportes do CEFD/UFES. 1.9 – Professor PESSOA_165938 informou que no dia 28/11/11, sede da ADUFES, haverá um debate às dez horas com os representantes das duas chapas para Eleição da diretoria da ADUFES-2012/2013, e no dia 30/11 eleição. 1.10 – O Conselheiro PESSOA_166025 informou que o Departamento de Administração/UFES está transferindo suas funções de compra de material de laboratório, para os técnicos de Física/Química; informou, também que todos os técnicos irão ao Ministério Público devido aos processos parados de insalubridade. 1.11 – IV Escola Itinerante de Física Aplicada - 17/11/2011: visita a Usina Nuclear de Angra dos Reis, com a participação dos alunos e professor. 1.12 – Eleição de Representantes junto ao CUn, dia 30/11 – Chapa composta pelos Professores: PESSOA_166327/CT - (titular) e PESSOA_165937/CCE - (suplente).1.13 – Portaria 007/2011-CCE - designando os professores PESSOA_166020 (DFIS), PESSOA_166076 (DMAT) e PESSOA_166326 (DEST) para comporem a Comissão de Sindicância para apurar os fatos relacionados ao Protocolado nºPROCESSO_32050. .\", \"relacoes\": [\"Centro: CCE.\", \"Data da reunião: 2011-11-25.\"], \"item_posterior_nao_citavel\": \"Leitura e aprovação da Ata: 9ª. Ordinária/2011 – Leitura da 9ª\"}\n{\"identificador\": 4, \"data_reuniao\": \"24/04/2025\", \"fonte\": \"Ata CCENS_DC, 5ª reunião ordinaria, 24/04/2025, ordem do dia, item 3.6, p. 6\", \"trecho\": \"3.6 Redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de Sistemas de Software. Interessado: Coordenação do Curso de Ciência da Computação. O Chefe do Departamento esclareceu que a redução do número de vagas de 40 vagas para 35 vagas da disciplina COM10508 - Projeto de Sistemas de Software foi um pedido realizado pela Coordenação do Curso de Ciência da Computação e tem como objetivo garantir que o Coordenador do Curso consiga matricular os alunos em situação de desligamento. Em votação. Aprovado por maioria.\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DC.\", \"Data da reunião: 2025-04-24.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por maioria.\"], \"item_anterior_nao_citavel\": \"Processo digital n.º PROCESSO_30862- Ofício n.º 004/2025: Solicitações Propostas pelo Relatório Técnico da Prograd ao PPC do curso de Agronomia- Interessado: Departamento de Agronomia. Relator(a): Prof. PESSOA_162050. O Chefe do Departamento concedeu a palavra ao relator, Professor PESSOA_162099, que explicou que o Núcleo Docente Estruturante do curso de graduação em Agronomia/CCAE solicitou que fossem acrescidas duas referências bibliográficas complementares no programa da disciplina COM05207 Informática. Contudo, o relator verificou que já existem as duas referências bibliográficas no sistema, conforme o despacho sequencial 6, e anexou no processo, peça sequencial 5, o plano de ensino da disciplina COM05207 Informática, nos seguintes termos: “Disciplina: COM05207 INFORMÁTICA. Departamento: Computação. Período: 1°. Carga Horária Semestral: 45 horas. Distribuição T.E.L.X: 15-0-30-0. Pré-Requisitos: não há. Tipo: Obrigatória. Ementa: Fundamentos da informática; Funcionamento do computador; Softwares; Ambiente computacional; Sistemas operacionais; Editor de texto; Planilhas eletrônicas; Fundamentos de sistemas de informação; Sistemas de informação nas organizações; Conceitos de tecnologia da informação; Sistemas de processamento de transações; Sistemas de informações gerenciais; Sistemas de suporte à decisão; Inteligência artificial e sistemas especialistas; Tecnologias web e bi; Conceitos de bancos de dados. Objetivos: A disciplina Informática visa dotar os acadêmicos de conhecimentos de hardware e software, com aplicações básicas e direcionadas a área de ciências. Ao final do curso, os acadêmicos deverão ser capazes de conhecer e entender os principais conceitos sobre informática, compreender o funcionamento de um microcomputador, utilizar a WEB como ferramenta de trabalho em sua área, criar e editar textos, operar planilhas eletrônicas, montar apresentações multimídia e possuir uma visão geral sobre sistemas de informações, banco de dados e inteligência artificial. Bibliografia Básica: [1] PESSOA_162098. Informática: Conceitos Básicos. 7ed, Ed.Campus, 2004. ISBN: 9788535215366; [2] PESSOA_162097. Introdução à informática. 1ed, Ed. Makron Books, 1997. ISBN: 8534605157; [3] PESSOA_162096. Introdução à Internet. 6ed, Ed. Senac, 2006. ISBN: 8573591609. Bibliografia Complementar: [1] Capron, H. L.; PESSOA_162095 Introdução à Informática. Makron Books, 2004; [2] PESSOA_162094. Princípios de sistema de informação. Rio de Janeiro: LTC, 1998; [3] PESSOA_162093; PESSOA_162092. Introd. à Informática. Vitória: Fund. PESSOA_162091, 1995. [4] PESSOA_162090; PESSOA_162089; PESSOA_162088. Informática, organizações e sociedade no Brasil. São Paulo: Cortez, 2003. 254 p. ISBN 9788524909399 (broch.). [5] PESSOA_162087. Inglês instrumental para informática: módulo I. São Paulo: Ícone, 2008. 170 p. ISBN 9788527409742 (broch.)”. Em votação\", \"item_posterior_nao_citavel\": \"Ofício Circular 06 – I Fórum de Extensão de Alegre - Café com Extensão - Documento avulso nº PROCESSO_30861 (https://protocolo.ufes.br/#/documentos/5460980/). O Professor PESSOA_162053 comunicou que os que desejarem mais informações sobre o I Fórum de Extensão de Alegre - Café com Extensão, podem acessar o link disponibilizado.\"}\n{\"identificador\": 5, \"data_reuniao\": \"23/04/2025\", \"fonte\": \"Ata CEUNES_DCN, 5ª reunião ordinaria, 23/04/2025, pauta, item 7, p. 3 (minuta em aprovação)\", \"trecho\": \"PAUTA 7: PROCESSO_31579: Regimento da Comissão Interna de Pesquisa e Pós-graduação do DCN. A professora PESSOA_164501 fez a leitura da solicitação de aprovação da RESOLUÇÃO Nº 01/2025, de de abril de 2025 do DCN, que dispõe sobre os procedimentos de afastamento de docentes do DCN para participação em eventos e atividades de curta duração, no interesse da Administração. Esclarecimentos. Em discussão: Após ampla deliberação, a Presidente solicitou a retirada da pauta para análise complementar. Decisão: Retirado(a).\", \"relacoes\": [\"Centro: CEUNES.\", \"Departamento: DCN.\", \"Data da reunião: 2025-04-23.\", \"Desfecho: Retirado.\", \"Trata do mesmo assunto que: 1800_PAUTA_3.\"], \"item_anterior_nao_citavel\": \"PROCESSO_31580: Equivalência de disciplinas - Eng. de Petróleo. A professora PESSOA_164539, membro da Comissão de Ensino e Extensão, fez a leitura do parecer favorável as alterações solicitadas no Ofício n.º 013/2025 CCEPe, referentes à retificação da ata de equivalências para o novo PPC do Curso de Engenharia de Petróleo. As retificações em relação aos códigos das disciplinas existente no departamento seguem: Onde se lê: DCN-PROP-00095 - FUNDAMENTOS DA MECÂNICA CLÁSSICA; Leia-se: DCN16950 FUNDAMENTOS DA MECÂNICA CLÁSSICA; Onde se lê: DCNPROP-00094 - QUÍMICA GERAL I; Leia-se: DCN16946 QUÍMICA GERAL I; Onde se lê: DCN13620 - LABORATÓRIO DE QUÍMICA; Leia-se: SBAPROP-00046 LABORATÓRIO DE QUÍMICA; Onde se lê: DCN-PROP-00096 - ELETROMAGNETISMO; Leia-se: DCN16952 ELETROMAGNETISMO; Onde se lê: DCN-PROP-00097 - FÍSICA EXPERIMENTAL; Leia-se: DCN16953 FÍSICA EXPERIMENTAL I; Esclarecimentos. Em discussão. Em votação\"}\n\nPergunta: Qual foi a decisão sobre disciplina COM10508 no setor CCENS / DC?",
+  "tokens_entrada": 7176,
+  "tokens_saida": 67,
+  "truncada": false,
+  "resposta_bruta": "{\"eventos\": [{\"evidencia\": 4, \"relevante\": true, \"descricao\": \"Aprovado por maioria a redução do número de vagas de 40 para 35 da disciplina COM10508 - Projeto de Sistemas de Software.\"}]}",
+  "resposta_final": "A disciplina COM10508 - Projeto de Sistemas de Software teve seu número de vagas reduzido de 40 para 35, sendo essa redução aprovada por maioria no setor CCENS / DC.\n\n24/04/2025: Aprovado por maioria a redução do número de vagas de 40 para 35 da disciplina COM10508 - Projeto de Sistemas de Software. [4]",
+  "citados": [
+    4
+  ]
+}

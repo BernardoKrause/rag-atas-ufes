@@ -1,0 +1,611 @@
+{
+  "id_execucao": "138e27b7f504",
+  "quando": "2026-11-08T01:11:12",
+  "commit": "ab7ba7b",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Quem foi indicado para alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos no setor CCAE / DEAL?",
+  "alvos": {},
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1903_PAUTA_3.4",
+      "score": 37.44714923762627,
+      "ata": 1903,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-05-12",
+      "pagina": 2,
+      "assunto": "Alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos. A "
+    },
+    {
+      "rank": 2,
+      "item": "1725_EXPEDIENTE_2.1_F4",
+      "score": 29.097891588216985,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "rank": 3,
+      "item": "1725_EXPEDIENTE_2.1_F5",
+      "score": 20.058112081085444,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "rank": 4,
+      "item": "1895_INFORMES_4.3",
+      "score": 19.500714297325917,
+      "ata": 1895,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-12-09",
+      "pagina": 2,
+      "assunto": "O Presidente informou que indicou o Professor PESSOA_163399 para compor a Comissão Permane"
+    },
+    {
+      "rank": 5,
+      "item": "1897_INFORMES_4.1",
+      "score": 18.27045834071203,
+      "ata": 1897,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-20",
+      "pagina": 1,
+      "assunto": "A Professora PESSOA_8881 informou que terá transporte regular matutino e vespertino para a"
+    },
+    {
+      "rank": 6,
+      "item": "1905_INFORMES_4.1",
+      "score": 17.667326034071003,
+      "ata": 1905,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-03-17",
+      "pagina": 5,
+      "assunto": "O Presidente informou que ocorreu uma reunião com a direção do CCAE e a Subprefeitura, nas"
+    },
+    {
+      "rank": 7,
+      "item": "1894_INFORMES_4.5",
+      "score": 16.566121026323785,
+      "ata": 1894,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-05-08",
+      "pagina": 2,
+      "assunto": "O professor PESSOA_8892, incentivou e estimulou os professores a utilizarem a Planta de Pr"
+    },
+    {
+      "rank": 8,
+      "item": "1894_PAUTA_3.2",
+      "score": 15.461531385964127,
+      "ata": 1894,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-05-08",
+      "pagina": 1,
+      "assunto": "Criação da comissão que irá discutir a redistribuição de carga horária das disciplinas min"
+    },
+    {
+      "rank": 9,
+      "item": "1898_PALAVRA_LIVRE_5.1",
+      "score": 14.757582550719324,
+      "ata": 1898,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-06-28",
+      "pagina": 3,
+      "assunto": "A Professora PESSOA_163123 relatou que a Comissão que ela faz parte – Comunica CCAE – está"
+    },
+    {
+      "rank": 10,
+      "item": "1896_INFORMES_4.4",
+      "score": 13.979396509144703,
+      "ata": 1896,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-06-13",
+      "pagina": 6,
+      "assunto": "O Presidente informou que elaborou Normas gerais para os laboratórios do DEAL e neste prim"
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1903_PAUTA_3.4",
+      "score": 0.82345724,
+      "ata": 1903,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-05-12",
+      "pagina": 2,
+      "assunto": "Alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos. A "
+    },
+    {
+      "rank": 2,
+      "item": "1682_ORDEM_DO_DIA_3.1",
+      "score": 0.7235408,
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 1,
+      "assunto": "Aprovação de adendo à ata da 13ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE FARMÁCIA E NUTRIÇÃO,"
+    },
+    {
+      "rank": 3,
+      "item": "1725_EXPEDIENTE_2.1_F4",
+      "score": 0.69747996,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "rank": 4,
+      "item": "1730_EXPEDIENTE_2.4",
+      "score": 0.6973847,
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31136 – Coordenação do Curso de Engenharia de Alimentos – Enc"
+    },
+    {
+      "rank": 5,
+      "item": "1701_ORDEM_DO_DIA_3.2",
+      "score": 0.6940401,
+      "ata": 1701,
+      "orgao": "CCENS_DMPA",
+      "data": "2024-07-08",
+      "pagina": 2,
+      "assunto": "Documento avulso PROCESSO_30947. Oferta de disciplinas ao curso de Engenharia de Alimentos"
+    },
+    {
+      "rank": 6,
+      "item": "1897_INFORMES_4.1",
+      "score": 0.69001675,
+      "ata": 1897,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-20",
+      "pagina": 1,
+      "assunto": "A Professora PESSOA_8881 informou que terá transporte regular matutino e vespertino para a"
+    },
+    {
+      "rank": 7,
+      "item": "1901_INFORMES_4.4",
+      "score": 0.68576926,
+      "ata": 1901,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-10-06",
+      "pagina": 2,
+      "assunto": "Comunicou que a Professora PESSOA_163325, fez a apresentação do Projeto de Extensão: Plant"
+    },
+    {
+      "rank": 8,
+      "item": "1679_ORDEM_DO_DIA_3.4",
+      "score": 0.6851413,
+      "ata": 1679,
+      "orgao": "CCENS_DFN",
+      "data": "2025-03-28",
+      "pagina": 3,
+      "assunto": "Recomposição das comissões internas do DFN. A Chefe do Departamento apresentou o ponto de "
+    },
+    {
+      "rank": 9,
+      "item": "1900_PAUTA_3.2",
+      "score": 0.68319255,
+      "ata": 1900,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-06-06",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31889 - OFÍCIO N.º 14/2024/CCEA/CCAE - Oferta de disciplinas "
+    },
+    {
+      "rank": 10,
+      "item": "1890_INFORMES_4.1",
+      "score": 0.68318117,
+      "ata": 1890,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-04-01",
+      "pagina": 2,
+      "assunto": "O presidente informou que ainda são muitas as demandas da Planta de Processamento de Alime"
+    }
+  ],
+  "ancoras": [
+    "1903_PAUTA_3.4",
+    "1725_EXPEDIENTE_2.1_F4",
+    "1682_ORDEM_DO_DIA_3.1",
+    "1725_EXPEDIENTE_2.1_F5",
+    "1895_INFORMES_4.3",
+    "1730_EXPEDIENTE_2.4",
+    "1897_INFORMES_4.1",
+    "1701_ORDEM_DO_DIA_3.2",
+    "1905_INFORMES_4.1",
+    "1894_INFORMES_4.5",
+    "1901_INFORMES_4.4",
+    "1894_PAUTA_3.2",
+    "1679_ORDEM_DO_DIA_3.4",
+    "1898_PALAVRA_LIVRE_5.1",
+    "1900_PAUTA_3.2",
+    "1896_INFORMES_4.4",
+    "1890_INFORMES_4.1"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 2,
+      "item": "1909_PAUTA_1.2",
+      "score": null,
+      "ata": 1909,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-03-28",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31101 – Resultado final e Ata final da Comissão Examinadora d"
+    },
+    {
+      "rank": 2,
+      "item": "1889_ORDEM_DO_DIA_3.1",
+      "score": null,
+      "ata": 1889,
+      "orgao": "CCAE_DER",
+      "data": "2025-02-27",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31089. Licença para capacitação da Profª. PESSOA_163357, no pe"
+    },
+    {
+      "rank": 2,
+      "item": "1882_ORDEM_DO_DIA_3.2",
+      "score": null,
+      "ata": 1882,
+      "orgao": "CCAE_DER",
+      "data": "2025-03-07",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31087. Prof. PESSOA_163355 solicita anuência para realização d"
+    },
+    {
+      "rank": 2,
+      "item": "1882_ORDEM_DO_DIA_3.1",
+      "score": null,
+      "ata": 1882,
+      "orgao": "CCAE_DER",
+      "data": "2025-03-07",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31088. Prof. PESSOA_163363 solicita anuência para realização d"
+    },
+    {
+      "rank": 2,
+      "item": "1880_ORDEM_DO_DIA_3.3",
+      "score": null,
+      "ata": 1880,
+      "orgao": "CCAE_DER",
+      "data": "2025-08-01",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31089. Encaminha relatório de licença capacitação da Servidora"
+    },
+    {
+      "rank": 2,
+      "item": "1880_ORDEM_DO_DIA_3.2",
+      "score": null,
+      "ata": 1880,
+      "orgao": "CCAE_DER",
+      "data": "2025-08-01",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31090. Encaminha relatório de licença capacitação da Servidora"
+    },
+    {
+      "rank": 2,
+      "item": "1725_EXPEDIENTE_2.1_F3",
+      "score": null,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "rank": 2,
+      "item": "1725_EXPEDIENTE_2.1_F2",
+      "score": null,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "rank": 2,
+      "item": "1725_EXPEDIENTE_2.1_F1",
+      "score": null,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "rank": 2,
+      "item": "1725_EXPEDIENTE_2.1",
+      "score": null,
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1903_PAUTA_3.4",
+      "ata": 1903,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-05-12",
+      "pagina": 2,
+      "assunto": "Alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos. A "
+    },
+    {
+      "posicao": 2,
+      "item": "1725_EXPEDIENTE_2.1_F4",
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "posicao": 3,
+      "item": "1897_INFORMES_4.1",
+      "ata": 1897,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-20",
+      "pagina": 1,
+      "assunto": "A Professora PESSOA_8881 informou que terá transporte regular matutino e vespertino para a"
+    },
+    {
+      "posicao": 4,
+      "item": "1682_ORDEM_DO_DIA_3.1",
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 1,
+      "assunto": "Aprovação de adendo à ata da 13ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE FARMÁCIA E NUTRIÇÃO,"
+    },
+    {
+      "posicao": 5,
+      "item": "1909_PAUTA_1.2",
+      "ata": 1909,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-03-28",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31101 – Resultado final e Ata final da Comissão Examinadora d"
+    },
+    {
+      "posicao": 6,
+      "item": "1889_ORDEM_DO_DIA_3.1",
+      "ata": 1889,
+      "orgao": "CCAE_DER",
+      "data": "2025-02-27",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31089. Licença para capacitação da Profª. PESSOA_163357, no pe"
+    },
+    {
+      "posicao": 7,
+      "item": "1882_ORDEM_DO_DIA_3.2",
+      "ata": 1882,
+      "orgao": "CCAE_DER",
+      "data": "2025-03-07",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31087. Prof. PESSOA_163355 solicita anuência para realização d"
+    },
+    {
+      "posicao": 8,
+      "item": "1882_ORDEM_DO_DIA_3.1",
+      "ata": 1882,
+      "orgao": "CCAE_DER",
+      "data": "2025-03-07",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31088. Prof. PESSOA_163363 solicita anuência para realização d"
+    },
+    {
+      "posicao": 9,
+      "item": "1880_ORDEM_DO_DIA_3.3",
+      "ata": 1880,
+      "orgao": "CCAE_DER",
+      "data": "2025-08-01",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31089. Encaminha relatório de licença capacitação da Servidora"
+    },
+    {
+      "posicao": 10,
+      "item": "1880_ORDEM_DO_DIA_3.2",
+      "ata": 1880,
+      "orgao": "CCAE_DER",
+      "data": "2025-08-01",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31090. Encaminha relatório de licença capacitação da Servidora"
+    },
+    {
+      "posicao": 11,
+      "item": "1725_EXPEDIENTE_2.1_F3",
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "posicao": 12,
+      "item": "1725_EXPEDIENTE_2.1_F2",
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "posicao": 13,
+      "item": "1725_EXPEDIENTE_2.1_F1",
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "posicao": 14,
+      "item": "1725_EXPEDIENTE_2.1",
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "posicao": 15,
+      "item": "1725_EXPEDIENTE_2.1_F5",
+      "ata": 1725,
+      "orgao": "CCAE",
+      "data": "2025-03-19",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31085 – PESSOA_163353 – Encaminha, para apreciação, recurso c"
+    },
+    {
+      "posicao": 16,
+      "item": "1895_INFORMES_4.3",
+      "ata": 1895,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-12-09",
+      "pagina": 2,
+      "assunto": "O Presidente informou que indicou o Professor PESSOA_163399 para compor a Comissão Permane"
+    },
+    {
+      "posicao": 17,
+      "item": "1730_EXPEDIENTE_2.4",
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31136 – Coordenação do Curso de Engenharia de Alimentos – Enc"
+    },
+    {
+      "posicao": 18,
+      "item": "1701_ORDEM_DO_DIA_3.2",
+      "ata": 1701,
+      "orgao": "CCENS_DMPA",
+      "data": "2024-07-08",
+      "pagina": 2,
+      "assunto": "Documento avulso PROCESSO_30947. Oferta de disciplinas ao curso de Engenharia de Alimentos"
+    },
+    {
+      "posicao": 19,
+      "item": "1905_INFORMES_4.1",
+      "ata": 1905,
+      "orgao": "CCAE_DEAL",
+      "data": "2025-03-17",
+      "pagina": 5,
+      "assunto": "O Presidente informou que ocorreu uma reunião com a direção do CCAE e a Subprefeitura, nas"
+    },
+    {
+      "posicao": 20,
+      "item": "1894_INFORMES_4.5",
+      "ata": 1894,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-05-08",
+      "pagina": 2,
+      "assunto": "O professor PESSOA_8892, incentivou e estimulou os professores a utilizarem a Planta de Pr"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1903_PAUTA_3.4",
+      "rotulo": "Ata CCAE_DEAL, 1ª reunião, 12/05/2025, pauta, item 3.4, p. 2",
+      "pagina": 2,
+      "texto": "3.4 – Alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos. A presidente informou que em reunião com o Professor PESSOA_8892, entenderam que a Presidência desta Comissão deveria ser exercida pelo Chefe do Departamento. Assim, o Professor PESSOA_165698 permaneceria na Comissão como membro e a presidência seria exercida a partir de agora pela Professora PESSOA_163325. Em apreciação, em votação, aprovado por unanimidade dos presentes.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DEAL.",
+        "Data da reunião: 2025-05-12.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em apreciação, em votação, aprovado por unanimidade dos presentes."
+      ],
+      "data_reuniao": "2025-05-12"
+    },
+    {
+      "numero": 2,
+      "item": "1725_EXPEDIENTE_2.1_F4",
+      "rotulo": "Ata CCAE, 4ª reunião ordinaria, 19/03/2025, expediente, item 2.1, p. 1",
+      "pagina": 1,
+      "texto": " E NOVE BARRA DOIS MIL E VINTE E CINCO. 3.17 Documento avulso nº PROCESSO_31086 – Centro de Ciências Agrárias e Engenharias – Encaminha, para aprovação, o relatório de Gestão referente ao exercício de 2024. A Presidente fez a leitura do relatório. Na sequência, o Conselheiro PESSOA_8892, com a palavra, parabenizou a Direção do CCAE pelo relatório apresentado e disse que a última tabela constante no relatório o fez refletir a respeito de uma situação, a qual solicitou o registro em ata, como segue: Ressaltou que o Departamento de Engenharia de Alimentos tem uma Planta de Processamento de Alimentos, esclareceu que não são laboratórios e sim pequenas indústrias de alimentos em escala piloto, com o objetivo de ensinar o estudante (Engenharia de alimentos, Agronomia, Medicina Veterinária, Zootecnia, Nutrição e Ciências Biológicas) a processar alimentos utilizando equipamentos iguais aos industriais, porém, em uma escala menor. Disse que foi destinado um galpão para o funcionamento da Planta de Processamento de Alimentos, contudo, não atendia às normas sanitárias, motivo que impossibilitou a utilização da Planta durante anos e que, atualmente, não tem possibilitado sua utilização por completo. Informou que a Direção do CCAE tem ciência e que ao longo dos anos vem tentando fazer as adequações necessárias para que se tenha o mínimo de condições para processar os alimentos no local. Ressaltou também que a atual gestão do CCAE, quando assumiu, entendeu a situação e se comprometeu a trocar o telhado, em 2021/2022 foi feita a troca do telhado e desde então passaram a ter condições de utilizar a Planta Piloto para processar alimentos. Informou que todos os semestres estão tendo aulas no local e que são cinco unidades de processamento de alimentos, dessas, três estão em funcionamento e outras duas ainda estão paradas devido à falta de infraestrutura necessária e de alguns equipamentos. Disse que esbarram na questão orçamentária, que tem ciência da limitação do orçamento, que impossibilita evoluir da forma como gostaria para utilizar a planta por completo o quanto antes. Informou que a tabela constante no relatório de gestão chamou sua atenção, porque apesar da Planta de Processamento de Alimentos estar localizada na Área Experimental de Rive, da Área Experimental e do Hospital Veterinário terem destinação de recurso próprios, o único recurso destinado para a Planta de Processamento de Alimentos vem do Departamento de Engenharia de Alimentos, que é o Departamento do CCAE com menor destinação de recurso de custeio e capital. Explicou que esse recurso é insuficiente para atender aos seis laboratórios vinculados ao departamento e fazer as adequações e manter o funcionamento das cinco Unidades da Planta de Processamento de Alimentos. Portanto, a limitação orçamentária tem impedido a utilização da Planta na sua totalidade, disse que entende que o orçamento do Centro é insuficiente, mas que também é necessário um avanço nesse sentido. A Presidente esclareceu que a di",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Data da reunião: 2025-03-19.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade.",
+        "Ato emitido: DECISAO_18_2025.",
+        "Trata do mesmo assunto que: 1880_ORDEM_DO_DIA_3.2.",
+        "Trata do mesmo assunto que: 1882_ORDEM_DO_DIA_3.1.",
+        "Trata do mesmo assunto que: 1880_ORDEM_DO_DIA_3.3.",
+        "Trata do mesmo assunto que: 1889_ORDEM_DO_DIA_3.1.",
+        "Trata do mesmo assunto que: 1882_ORDEM_DO_DIA_3.2."
+      ],
+      "data_reuniao": "2025-03-19"
+    },
+    {
+      "numero": 3,
+      "item": "1897_INFORMES_4.1",
+      "rotulo": "Ata CCAE_DEAL, 2ª reunião, 20/08/2024, informes, item 4.1, p. 1",
+      "pagina": 1,
+      "texto": "4.1 – A Professora PESSOA_8881 informou que terá transporte regular matutino e vespertino para a Planta de Processamento de Alimentos, e a Direção do CCAE agendará uma reunião com os estudantes para explicar detalhes e regras.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DEAL.",
+        "Data da reunião: 2024-08-20."
+      ],
+      "data_reuniao": "2024-08-20"
+    },
+    {
+      "numero": 4,
+      "item": "1682_ORDEM_DO_DIA_3.1",
+      "rotulo": "Ata CCENS_DFN, 9ª reunião ordinaria, 30/05/2025, ordem do dia, item 3.1, p. 1",
+      "pagina": 1,
+      "texto": "3.1 Aprovação de adendo à ata da 13ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE FARMÁCIA E NUTRIÇÃO, do dia 23 de agosto de 2024, conforme solicitado no Documento avulso nº PROCESSO_30903- PPC_Consulta sobre oferta de disciplinas ao curso de Engenharia de Alimentos. Interessado: Coordenação do Curso de Engenharia de Alimentos CCEA/CCAE. A Chefe do Departamento apresentou o ponto de pauta e esclareceu que recebeu o documento avulso com o seguinte despacho: “Para retificação de ata, segundo marcações e comentários no documento presente no Seq. 9, a fim de atender exigências da DDP/PROGRAD para a alteração de PPC do Curso de Engenharia de Alimentos (Processo digital n.PROCESSO_30902). Atenciosamente. PESSOA_162325 - SIAPE_0388 Coordenador do Curso de Engenharia de Alimentos”. Inicialmente a Chefe do Departamento propôs elaborar um adendo à ata, porém, após ampla discussão e opiniões da Câmara decidiu-se por proceder uma retificação da ata. A Chefe do Departamento projetou a ata com as sugestões de retificações apresentadas pela Coordenação do Curso de Engenharia de Alimentos. Seguem os programas retificados, nos seguintes termos: “BIOQUÍMICA BÁSICA, (30+00+00); Ementa: Estudo das principais vias metabólicas e suas interrelações e controles metabólicos nas células. Metabolismo intermediário. Metabolismo dos carboidratos. Metabolismo dos lipídios. Metabolismo do nitrogênio. Fotossíntese. Objetivos: Compreender o metabolismo das biomoléculas, visando à compreensão da bioenergética envolvida em reações de degradação e biossíntese. Entender a integração das vias metabólicas celulares. Bibliografia Básica: 1. PESSOA_162324; PESSOA_162317; PESSOA_162316. Princípios de bioquímica de Lehninger. 6. ed. Porto Alegre, RS: Artmed, 2014. xxx, 1298 p.2. 2. 1 PESSOA_162307; PESSOA_162306 Bioquímica. 4. ed. Porto Alegre, 1 RS: Artmed, 2013. xxix, 1481 p3. 3. PESSOA_162315; PESSOA_162314 Bioquímica básica. 4.ed. Rio de Janeiro: Guanabara Koogan, 2015. 392p. Bibliografia Complementar: 1. PESSOA_162323; PESSOA_376490 PESSOA_376489 Bioquímica. 3. ed. São Paulo: Cengage Learning, 2016. lvi, 812 p. 2. PESSOA_162320; PESSOA_162313; PESSOA_162319 Bioquímica. 6. ed. Rio de Janeiro: Guanabara Koogan,2008. xxxix, 1114 p. 3. PESSOA_162312; PESSOA_162311; PESSOA_162318. Bioquímica Estrutural ilustrada. 5ª ed. Porto Alegre:Artmed, 2011. 4. PESSOA_162313 Bioquímica. 7ª ed. Rio de Janeiro: Guanabara Koogan, 2014. 5. PESSOA_162308. Bioquímica Estrutural Ilustrada de Harper. 29ª ed. São Paulo: Atheneu, 2013. DFN-PROP 00086 - BIOQUÍMICA EXPERIMENTAL (00+00+30) Ementa: Reconhecer as principais técnicas laboratoriais para caraterização química de substâncias. Compreender o princípio das técnicas utilizadas no setor de bioquímica em um laboratório, como dosagem colorimétrica e cinética. Objetivos: Competências e habilidades dos alunos de desenvolver boas práticas laboratoriais; reconhecer e aplicar conteúdo específicos de bioquímica para os estudantes interpretarem e aplicarem os principais co",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DFN.",
+        "Data da reunião: 2025-05-30.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade.",
+        "Trata do mesmo assunto que: 1711_ORDEM_DO_DIA_3.1.",
+        "Trata do mesmo assunto que: DECISAO_69_2025."
+      ],
+      "data_reuniao": "2025-05-30"
+    },
+    {
+      "numero": 5,
+      "item": "1909_PAUTA_1.2",
+      "rotulo": "Ata CCAE_DEAL, 1ª reunião extraordinaria, 28/03/2025, pauta, item 1.2, p. 1",
+      "pagina": 1,
+      "texto": "1.2 – Documento avulso nº PROCESSO_31101 – Resultado final e Ata final da Comissão Examinadora do Processo Seletivo Simplificado para contratação de 03 Professores Voluntários para o Departamento de Engenharia de Alimentos. Foi apresentado a Ata Final e o Resultado final do Processo Seletivo Simplificado para contratação de 03 Professores Voluntários para o Departamento de Engenharia de Alimentos, sendo: Vaga 1: Área de conhecimento: 5.00.00.00-4 Ciências Agrárias; Subárea de conhecimento: 5.07.00.00-6 Ciência e Tecnologia de Alimentos, 5.07.02.00-9 Tecnologia de Alimentos, 5.07.02.01-7 Tecnologia de Produtos de Origem Animal. Resultado final: PESSOA_163380 - 1° classificado e PESSOA_165827 - 2° classificado. Professora responsável pelo acompanhamento e supervisão na disciplina EAL 05294 – TECNOLOGIA DE ALIMENTOS: PESSOA_163325. Carga horária solicitada: 8 horas (teoria e prática). Vaga 2: Área de conhecimento: 5.00.00.00-4 - Ciências Agrárias; Subárea de conhecimento: 5.07.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DEAL.",
+        "Data da reunião: 2025-03-28."
+      ],
+      "data_reuniao": "2025-03-28"
+    }
+  ],
+  "prompt_usuario": "Evidências:\n{\"identificador\": 1, \"data_reuniao\": \"12/05/2025\", \"fonte\": \"Ata CCAE_DEAL, 1ª reunião, 12/05/2025, pauta, item 3.4, p. 2\", \"trecho\": \"3.4 – Alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos. A presidente informou que em reunião com o Professor PESSOA_8892, entenderam que a Presidência desta Comissão deveria ser exercida pelo Chefe do Departamento. Assim, o Professor PESSOA_165698 permaneceria na Comissão como membro e a presidência seria exercida a partir de agora pela Professora PESSOA_163325. Em apreciação, em votação, aprovado por unanimidade dos presentes.\", \"relacoes\": [\"Centro: CCAE.\", \"Departamento: DEAL.\", \"Data da reunião: 2025-05-12.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Em apreciação, em votação, aprovado por unanimidade dos presentes.\"], \"item_anterior_nao_citavel\": \"Recomposição do Núcleo Docente Estruturante do Curso de Engenharia de Alimentos. Os seguintes professores manifestaram interesse em compor o Núcleo Docente Estruturante do Curso de Engenharia de Alimentos: PESSOA_163123, PESSOA_8881 (Coordenadora do Curso de Engenharia de Alimentos), PESSOA_163376 (Subcoordenadora do curso de Engenharia de Alimentos), PESSOA_163330, PESSOA_163396, PESSOA_165688 e PESSOA_8892\", \"item_posterior_nao_citavel\": \"Processo digital nº PROCESSO_31144. Interessado: PESSOA_163376. Solicita concessão de Licença para Capacitação por 75 dias a partir de 23/06/2025. A Presidente fez a leitura do parecer emitido pelo Professor PESSOA_8892, sendo este favorável à concessão de licença para capacitação à Prof.ª Dra. PESSOA_163376\"}\n{\"identificador\": 2, \"data_reuniao\": \"19/03/2025\", \"fonte\": \"Ata CCAE, 4ª reunião ordinaria, 19/03/2025, expediente, item 2.1, p. 1\", \"trecho\": \" E NOVE BARRA DOIS MIL E VINTE E CINCO. 3.17 Documento avulso nº PROCESSO_31086 – Centro de Ciências Agrárias e Engenharias – Encaminha, para aprovação, o relatório de Gestão referente ao exercício de 2024. A Presidente fez a leitura do relatório. Na sequência, o Conselheiro PESSOA_8892, com a palavra, parabenizou a Direção do CCAE pelo relatório apresentado e disse que a última tabela constante no relatório o fez refletir a respeito de uma situação, a qual solicitou o registro em ata, como segue: Ressaltou que o Departamento de Engenharia de Alimentos tem uma Planta de Processamento de Alimentos, esclareceu que não são laboratórios e sim pequenas indústrias de alimentos em escala piloto, com o objetivo de ensinar o estudante (Engenharia de alimentos, Agronomia, Medicina Veterinária, Zootecnia, Nutrição e Ciências Biológicas) a processar alimentos utilizando equipamentos iguais aos industriais, porém, em uma escala menor. Disse que foi destinado um galpão para o funcionamento da Planta de Processamento de Alimentos, contudo, não atendia às normas sanitárias, motivo que impossibilitou a utilização da Planta durante anos e que, atualmente, não tem possibilitado sua utilização por completo. Informou que a Direção do CCAE tem ciência e que ao longo dos anos vem tentando fazer as adequações necessárias para que se tenha o mínimo de condições para processar os alimentos no local. Ressaltou também que a atual gestão do CCAE, quando assumiu, entendeu a situação e se comprometeu a trocar o telhado, em 2021/2022 foi feita a troca do telhado e desde então passaram a ter condições de utilizar a Planta Piloto para processar alimentos. Informou que todos os semestres estão tendo aulas no local e que são cinco unidades de processamento de alimentos, dessas, três estão em funcionamento e outras duas ainda estão paradas devido à falta de infraestrutura necessária e de alguns equipamentos. Disse que esbarram na questão orçamentária, que tem ciência da limitação do orçamento, que impossibilita evoluir da forma como gostaria para utilizar a planta por completo o quanto antes. Informou que a tabela constante no relatório de gestão chamou sua atenção, porque apesar da Planta de Processamento de Alimentos estar localizada na Área Experimental de Rive, da Área Experimental e do Hospital Veterinário terem destinação de recurso próprios, o único recurso destinado para a Planta de Processamento de Alimentos vem do Departamento de Engenharia de Alimentos, que é o Departamento do CCAE com menor destinação de recurso de custeio e capital. Explicou que esse recurso é insuficiente para atender aos seis laboratórios vinculados ao departamento e fazer as adequações e manter o funcionamento das cinco Unidades da Planta de Processamento de Alimentos. Portanto, a limitação orçamentária tem impedido a utilização da Planta na sua totalidade, disse que entende que o orçamento do Centro é insuficiente, mas que também é necessário um avanço nesse sentido. A Presidente esclareceu que a di\", \"relacoes\": [\"Centro: CCAE.\", \"Data da reunião: 2025-03-19.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\", \"Ato emitido: DECISAO_18_2025.\", \"Trata do mesmo assunto que: 1880_ORDEM_DO_DIA_3.2.\", \"Trata do mesmo assunto que: 1882_ORDEM_DO_DIA_3.1.\", \"Trata do mesmo assunto que: 1880_ORDEM_DO_DIA_3.3.\", \"Trata do mesmo assunto que: 1889_ORDEM_DO_DIA_3.1.\", \"Trata do mesmo assunto que: 1882_ORDEM_DO_DIA_3.2.\"], \"item_anterior_nao_citavel\": \"Ata da Sessão Ordinária do Conselho Departamental, realizada em 25 de fevereiro de 2025\"}\n{\"identificador\": 3, \"data_reuniao\": \"20/08/2024\", \"fonte\": \"Ata CCAE_DEAL, 2ª reunião, 20/08/2024, informes, item 4.1, p. 1\", \"trecho\": \"4.1 – A Professora PESSOA_8881 informou que terá transporte regular matutino e vespertino para a Planta de Processamento de Alimentos, e a Direção do CCAE agendará uma reunião com os estudantes para explicar detalhes e regras.\", \"relacoes\": [\"Centro: CCAE.\", \"Departamento: DEAL.\", \"Data da reunião: 2024-08-20.\"], \"item_anterior_nao_citavel\": \"Oferta de disciplinas do Departamento de Engenharia de Alimentos para o semestre 2024/2. Após apresentação da planilha contendo todas as demandas recebidas, seguida de análise e discussão, a Câmara Departamental aprovou por unanimidade a planilha de oferta de disciplinas do Departamento de Engenharia de Alimentos para o semestre 2024/2.\", \"item_posterior_nao_citavel\": \"O presidente informou sobre o prazo para envio do PADs e dos Planos de Ensino do semestre 2024/2. Será enviado um e-mail com o seguinte cronograma: 02/09/2024 – envio dos PADs para a Presidente da Comissão de avaliação do trabalho docente; 12/09 – a Comissão encaminhará ao e-mail do Departamento os PADS avaliados, juntamento com o anexo IV de cada um; 17/09 – será a reunião ordinária para apreciação. Para os Planos de Ensino foi fixada a data de 12/09 para envio ao e-mail do Departamento.\"}\n{\"identificador\": 4, \"data_reuniao\": \"30/05/2025\", \"fonte\": \"Ata CCENS_DFN, 9ª reunião ordinaria, 30/05/2025, ordem do dia, item 3.1, p. 1\", \"trecho\": \"3.1 Aprovação de adendo à ata da 13ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE FARMÁCIA E NUTRIÇÃO, do dia 23 de agosto de 2024, conforme solicitado no Documento avulso nº PROCESSO_30903- PPC_Consulta sobre oferta de disciplinas ao curso de Engenharia de Alimentos. Interessado: Coordenação do Curso de Engenharia de Alimentos CCEA/CCAE. A Chefe do Departamento apresentou o ponto de pauta e esclareceu que recebeu o documento avulso com o seguinte despacho: “Para retificação de ata, segundo marcações e comentários no documento presente no Seq. 9, a fim de atender exigências da DDP/PROGRAD para a alteração de PPC do Curso de Engenharia de Alimentos (Processo digital n.PROCESSO_30902). Atenciosamente. PESSOA_162325 - SIAPE_0388 Coordenador do Curso de Engenharia de Alimentos”. Inicialmente a Chefe do Departamento propôs elaborar um adendo à ata, porém, após ampla discussão e opiniões da Câmara decidiu-se por proceder uma retificação da ata. A Chefe do Departamento projetou a ata com as sugestões de retificações apresentadas pela Coordenação do Curso de Engenharia de Alimentos. Seguem os programas retificados, nos seguintes termos: “BIOQUÍMICA BÁSICA, (30+00+00); Ementa: Estudo das principais vias metabólicas e suas interrelações e controles metabólicos nas células. Metabolismo intermediário. Metabolismo dos carboidratos. Metabolismo dos lipídios. Metabolismo do nitrogênio. Fotossíntese. Objetivos: Compreender o metabolismo das biomoléculas, visando à compreensão da bioenergética envolvida em reações de degradação e biossíntese. Entender a integração das vias metabólicas celulares. Bibliografia Básica: 1. PESSOA_162324; PESSOA_162317; PESSOA_162316. Princípios de bioquímica de Lehninger. 6. ed. Porto Alegre, RS: Artmed, 2014. xxx, 1298 p.2. 2. 1 PESSOA_162307; PESSOA_162306 Bioquímica. 4. ed. Porto Alegre, 1 RS: Artmed, 2013. xxix, 1481 p3. 3. PESSOA_162315; PESSOA_162314 Bioquímica básica. 4.ed. Rio de Janeiro: Guanabara Koogan, 2015. 392p. Bibliografia Complementar: 1. PESSOA_162323; PESSOA_376490 PESSOA_376489 Bioquímica. 3. ed. São Paulo: Cengage Learning, 2016. lvi, 812 p. 2. PESSOA_162320; PESSOA_162313; PESSOA_162319 Bioquímica. 6. ed. Rio de Janeiro: Guanabara Koogan,2008. xxxix, 1114 p. 3. PESSOA_162312; PESSOA_162311; PESSOA_162318. Bioquímica Estrutural ilustrada. 5ª ed. Porto Alegre:Artmed, 2011. 4. PESSOA_162313 Bioquímica. 7ª ed. Rio de Janeiro: Guanabara Koogan, 2014. 5. PESSOA_162308. Bioquímica Estrutural Ilustrada de Harper. 29ª ed. São Paulo: Atheneu, 2013. DFN-PROP 00086 - BIOQUÍMICA EXPERIMENTAL (00+00+30) Ementa: Reconhecer as principais técnicas laboratoriais para caraterização química de substâncias. Compreender o princípio das técnicas utilizadas no setor de bioquímica em um laboratório, como dosagem colorimétrica e cinética. Objetivos: Competências e habilidades dos alunos de desenvolver boas práticas laboratoriais; reconhecer e aplicar conteúdo específicos de bioquímica para os estudantes interpretarem e aplicarem os principais co\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DFN.\", \"Data da reunião: 2025-05-30.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\", \"Trata do mesmo assunto que: 1711_ORDEM_DO_DIA_3.1.\", \"Trata do mesmo assunto que: DECISAO_69_2025.\"], \"item_anterior_nao_citavel\": \"Aprovação da Ata da 8ª Reunião, de caráter ordinário, realizada no dia 12 de maio de 2025. A Chefe do Departamento apresentou o ponto de pauta e perguntou se haviam sugestões de alterações na ata, ao que ninguém se manifestou. Em votação\", \"item_posterior_nao_citavel\": \"Homologação do resultado do Processo Seletivo Simplificado que trata o Edital 137/2024 Publicado no Diário Oficial da União número 180, de 16 de setembro de 2024, na Área/Subárea: Farmácia (4.03.00.00-5), Bioquímica (2.08.00.00-2), Análise e Controle de Medicamentos (4.03.04.00-0). A Chefe do Departamento apresentou o ponto de pauta e disse que as Servidoras da Secretaria Unificada de Departamentos lembraram que o resultado do Processo Seletivo Simplificado (PSS) que trata o Edital 137/2024, publicado no Diário Oficial da União número 180, de 16 de setembro de 2024, na Área/Subárea: Farmácia (4.03.00.00-5), Bioquímica (2.08.00.00-2), Análise e Controle de Medicamentos (4.03.04.00-0), não havia sido homologado por esta Câmara Departamental. A Professora PESSOA_162169, Chefe do DFN à época da realização do referido PSS, disse que a homologação não ocorreu por um lapso. Segue o resultado final do Processo Seletivo Simplificado Professor Substituto, EDITAL 137/2024 Publicado no D.O.U. nº 180, de 16 de setembro de 202, Área/Subárea Área/Subárea: Farmácia (4.03.00.00-5), Bioquímica (2.08.00.00-2), Análise e Controle de Medicamentos (4.03.04.00-0), nos seguintes termos: “1. Classificação PCD (Pessoa com Deficiência) - Não houve candidatos. 2.​Classificação PPP (Pessoas Pretas ou Pardas) - Não houve candidatos. 3. Classificação AC (Ampla Concorrência) - Candidatas: PESSOA_162279 (Prova de Aptidão Didática - 90,7 / Prova de Títulos (Nota Única) - 70,2) com a soma dos pontos igual a 160,90 (cento e sessenta pontos e nove décimos), classificada em primeiro lugar, e PESSOA_162278 (Prova de Aptidão Didática - 82,7 / Prova de Títulos ( Nota Única) - 59,3) com a soma dos pontos igual a 142,0 (cento e quarenta e dois pontos), classificada em segundo lugar. Comissão Examinadora composta pelos Professores PESSOA_162165, PESSOA_162171 e PESSOA_162277. Em esclarecimento. Em votação\"}\n{\"identificador\": 5, \"data_reuniao\": \"28/03/2025\", \"fonte\": \"Ata CCAE_DEAL, 1ª reunião extraordinaria, 28/03/2025, pauta, item 1.2, p. 1\", \"trecho\": \"1.2 – Documento avulso nº PROCESSO_31101 – Resultado final e Ata final da Comissão Examinadora do Processo Seletivo Simplificado para contratação de 03 Professores Voluntários para o Departamento de Engenharia de Alimentos. Foi apresentado a Ata Final e o Resultado final do Processo Seletivo Simplificado para contratação de 03 Professores Voluntários para o Departamento de Engenharia de Alimentos, sendo: Vaga 1: Área de conhecimento: 5.00.00.00-4 Ciências Agrárias; Subárea de conhecimento: 5.07.00.00-6 Ciência e Tecnologia de Alimentos, 5.07.02.00-9 Tecnologia de Alimentos, 5.07.02.01-7 Tecnologia de Produtos de Origem Animal. Resultado final: PESSOA_163380 - 1° classificado e PESSOA_165827 - 2° classificado. Professora responsável pelo acompanhamento e supervisão na disciplina EAL 05294 – TECNOLOGIA DE ALIMENTOS: PESSOA_163325. Carga horária solicitada: 8 horas (teoria e prática). Vaga 2: Área de conhecimento: 5.00.00.00-4 - Ciências Agrárias; Subárea de conhecimento: 5.07.\", \"relacoes\": [\"Centro: CCAE.\", \"Departamento: DEAL.\", \"Data da reunião: 2025-03-28.\"], \"item_anterior_nao_citavel\": \"Processo digital nº PROCESSO_31108– Interessada: Professora PESSOA_163123. Solicitação de afastamento para visita técnica à Universidade da Flórida, Gainessville, EUA, no período de 09 a 20 de junho de 2025. Constou no processo o parecer do Professor PESSOA_163396, favorável à aprovação. Em votação\", \"item_posterior_nao_citavel\": \"9 - Química, Física, Físico-Química e Bioquímica dos Alimentos e das Matérias primas Alimentares. Resultado final: PESSOA_165802 - 1° classificado, PESSOA_165830 - 2° classificado, PESSOA_165829 - 3° classificado, PESSOA_165828 – 4° classificado, PESSOA_165827 – 5° classificado. Professor responsável pelo acompanhamento e supervisão na disciplina EAL 05972- BROMATOLOGIA: PESSOA_163397. Carga horária solicitada: 6 horas (prática). Professora responsável pelo acompanhamento e supervisão na disciplina EAL 05289 – QUÍMICA DE ALIMENTOS II: PESSOA_165688. Carga horária solicitada: 2 horas (prática). Vaga 3: Área de conhecimento: 5.00.00.00-4 Ciências Agrárias; Subárea de conhecimento: 5.07.00.00-6 - Ciência e Tecnologia de Alimentos, 5.07.03.00-5 - Engenharia de Alimentos, 5.07.03.01-3 Instalações Industriais de Produção de Alimentos. Resultado final: PESSOA_165802 - 1° classificado, PESSOA_165826 - 2° classificado e PESSOA_165825 - 3° classificado. Professora responsável pelo acompanhamento e supervisão na disciplina DEA14015 - PROJETOS AGROINDUSTRIAIS II: PESSOA_8881. Carga horária solicitada: 5 horas (teórica e exercícios). O resultado final do processo seletivo foi publicado no sítio eletrônico do DEAL-CCAE-UFES(https://engenhariadealimentos.alegre.ufes.br/processo-seletivo-professor- voluntario-2025). Em votação\"}\n\nPergunta: Quem foi indicado para alteração da constituição da Comissão para funcionamento da Planta Piloto de Alimentos no setor CCAE / DEAL?",
+  "tokens_entrada": 5782,
+  "tokens_saida": 83,
+  "truncada": false,
+  "resposta_bruta": "{\"eventos\": [{\"evidencia\": 1, \"relevante\": true, \"descricao\": \"A presidência da Comissão para funcionamento da Planta Piloto de Alimentos foi exercida pela Professora PESSOA_163325, enquanto o Professor PESSOA_165688 permaneceria como membro.\"}]}",
+  "resposta_final": "A presidência da Comissão para funcionamento da Planta Piloto de Alimentos foi alterada para a Professora PESSOA_163325.\n\n12/05/2025: A presidência da Comissão para funcionamento da Planta Piloto de Alimentos foi exercida pela Professora PESSOA_163325, enquanto o Professor PESSOA_165688 permaneceria como membro. [1]",
+  "citados": [
+    1
+  ]
+}
