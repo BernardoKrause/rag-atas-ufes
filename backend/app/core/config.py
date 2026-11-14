@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     llm_timeout: float = 120.0
     llm_max_tokens: int = 4096
     llm_num_ctx: int = 16384
+    llm_esforco: str | None = None
     anthropic_api_key: SecretStr | None = None
     cors_origens: list[str] = ["http://localhost:5173"]
 

@@ -34,6 +34,15 @@ class Resposta:
 class SaidaLLM:
     texto: str
     truncada: bool
+    tokens_entrada: int | None = None
+    tokens_saida: int | None = None
+
+
+@dataclass(frozen=True)
+class RespostaDetalhada:
+    resposta: Resposta
+    evidencias: list[EvidenciaNumerada]
+    saida_llm: SaidaLLM | None
 
 
 class ErroGeracao(Exception):

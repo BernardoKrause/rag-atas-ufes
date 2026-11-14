@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 K_PADRAO = 5
 TOP_N_ANCORA_PADRAO = 10
+CAMADAS_TODAS = frozenset({"lexico", "vetorial", "grafo"})
 
 
 def recuperar(
@@ -27,12 +28,22 @@ def recuperar(
     driver: Driver,
     k: int = K_PADRAO,
     top_n_ancora: int = TOP_N_ANCORA_PADRAO,
+    camadas: frozenset[str] = CAMADAS_TODAS,
 ) -> list[Evidencia]:
-    hits_lexico = _com_degradacao("lexico", buscar_lexico, pergunta, sessao, sessao=sessao) or []
-    hits_vetorial = _com_degradacao("vetorial", buscar_vetorial, pergunta, cliente_qdrant) or []
+    if camadas - CAMADAS_TODAS or not camadas & {"lexico", "vetorial"}:
+        raise ValueError(f"camadas inválidas: {sorted(camadas)}")
 
-    ancoras = ancorar(hits_lexico, hits_vetorial, top_n=top_n_ancora)
-    hits_grafo = _com_degradacao("expansao_grafo", expandir_grafo, ancoras, driver) or []
+    hits_lexico = []
+    if "lexico" in camadas:
+        hits_lexico = _com_degradacao("lexico", buscar_lexico, pergunta, sessao, sessao=sessao) or []
+    hits_vetorial = []
+    if "vetorial" in camadas:
+        hits_vetorial = _com_degradacao("vetorial", buscar_vetorial, pergunta, cliente_qdrant) or []
+
+    hits_grafo = []
+    if "grafo" in camadas:
+        ancoras = ancorar(hits_lexico, hits_vetorial, top_n=top_n_ancora)
+        hits_grafo = _com_degradacao("expansao_grafo", expandir_grafo, ancoras, driver) or []
 
     ids_finais = fundir_rrf(hits_lexico, hits_vetorial, hits_grafo, k=k)
     if not ids_finais:
@@ -46,9 +57,11 @@ def recuperar(
     score_grafo = {hit.item_id_canonico: hit.score for hit in hits_grafo}
 
     itens_encontrados = [item_id for item_id in ids_finais if item_id in itens_por_id]
-    contextos_grafo = (
-        _com_degradacao("contexto_grafo", obter_contextos_grafo, itens_encontrados, driver) or {}
-    )
+    contextos_grafo = {}
+    if "grafo" in camadas:
+        contextos_grafo = (
+            _com_degradacao("contexto_grafo", obter_contextos_grafo, itens_encontrados, driver) or {}
+        )
 
     evidencias = []
     for rank, item_id in enumerate(itens_encontrados, start=1):
