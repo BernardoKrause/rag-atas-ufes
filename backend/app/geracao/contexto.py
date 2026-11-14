@@ -32,7 +32,7 @@ ROTULOS_RELACAO = {
 
 def frases_grafo(contexto_grafo: dict) -> list[str]:
     frases = [
-        f"{rotulo}: {contexto_grafo[chave]}."
+        f"{rotulo}: {str(contexto_grafo[chave]).rstrip('. ')}."
         for chave, rotulo in ROTULOS_GRAFO
         if contexto_grafo.get(chave) is not None
     ]

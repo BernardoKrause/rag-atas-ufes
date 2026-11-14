@@ -40,6 +40,11 @@ def test_frases_grafo_inclui_relacoes_entre_deliberacoes():
     assert frases_grafo(contexto) == ["Revoga: RESOLUCAO_3_2020.", "Alterado por: y_pauta_2."]
 
 
+def test_frases_grafo_nao_duplica_o_ponto_final():
+    contexto = _contexto_vazio(resultado_votacao="por unanimidade.")
+    assert frases_grafo(contexto) == ["Resultado da votação: por unanimidade."]
+
+
 def test_frases_grafo_vazio_devolve_lista_vazia():
     assert frases_grafo({}) == []
 
