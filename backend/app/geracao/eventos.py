@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date
 from difflib import SequenceMatcher
@@ -9,6 +10,12 @@ from difflib import SequenceMatcher
 RE_MARCADOR = re.compile(r"\s*\[\s*\d+(?:\s*,\s*\d+)*\s*\]")
 LIMIAR_REPETICAO = 0.8
 PREFIXOS_DESFECHO = ("Resultado da votação:", "Ato emitido:")
+RE_TERMO_ESPECIFICO = re.compile(
+    r"\b(?:[A-Z]{2,}[A-Z0-9_]*"
+    r"|\w*\d\w*(?:[./-]\w+)*"
+    r"|[A-ZÀ-Ú][a-zà-ú]+(?:\s+(?:de|do|da|dos|das|e)?\s*[A-ZÀ-Ú][a-zà-ú]+)+)\b"
+)
+RE_SEPARADOR_NUMERICO = re.compile(r"(?<=\d)[.-](?=\d)")
 
 
 @dataclass(frozen=True)
@@ -115,3 +122,17 @@ def montar_texto(
         for e in eventos
     )
     return f"{resposta_direta}\n\n{linhas}" if resposta_direta else linhas
+
+
+def _normalizar_termo(texto: str) -> str:
+    sem_acento = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode()
+    return RE_SEPARADOR_NUMERICO.sub("/", sem_acento).lower()
+
+
+def termos_sem_apoio(descricao: str, pergunta: str, fonte: str) -> list[str]:
+    na_pergunta, na_fonte = _normalizar_termo(pergunta), _normalizar_termo(fonte)
+    termos = {t.strip() for t in RE_TERMO_ESPECIFICO.findall(descricao)}
+    return sorted(
+        t for t in termos
+        if len(t) >= 2 and _normalizar_termo(t) in na_pergunta and _normalizar_termo(t) not in na_fonte
+    )

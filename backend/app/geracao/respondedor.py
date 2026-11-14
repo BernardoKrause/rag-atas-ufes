@@ -14,6 +14,7 @@ from app.geracao.eventos import (
     interpretar_eventos,
     ler_resposta_direta,
     montar_texto,
+    termos_sem_apoio,
 )
 from app.geracao.llm import ClienteLLM
 from app.geracao.prompt import (
@@ -50,7 +51,7 @@ def responder_detalhado(
     for evidencia in numeradas:
         saida = _avaliar(pergunta, evidencia, cliente_llm)
         saidas.append(saida)
-        eventos += _eventos(saida, evidencia)
+        eventos += _eventos_apoiados(pergunta, _eventos(saida, evidencia), evidencia)
     if not eventos:
         return RespostaDetalhada(_abstencao(), numeradas, saidas)
 
@@ -84,6 +85,18 @@ def _eventos(saida: SaidaLLM, evidencia: EvidenciaNumerada) -> list[Evento]:
         logger.warning("resposta do LLM não é um JSON de eventos válido")
         return []
     return eventos
+
+
+def _eventos_apoiados(pergunta: str, eventos: list[Evento], evidencia: EvidenciaNumerada) -> list[Evento]:
+    fonte = f"{evidencia.texto} {evidencia.fonte.rotulo}"
+    apoiados = []
+    for evento in eventos:
+        sem_apoio = termos_sem_apoio(evento.descricao, pergunta, fonte)
+        if sem_apoio:
+            logger.info("evento da evidência %d descartado: %s fora do trecho", evento.evidencia, sem_apoio)
+        else:
+            apoiados.append(evento)
+    return apoiados
 
 
 def responder(
