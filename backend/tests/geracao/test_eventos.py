@@ -1,6 +1,12 @@
 from datetime import date
 
-from app.geracao.eventos import Evento, interpretar_eventos, ler_resposta_direta, montar_texto
+from app.geracao.eventos import (
+    Evento,
+    desfecho_registrado,
+    interpretar_eventos,
+    ler_resposta_direta,
+    montar_texto,
+)
 
 DATAS = {1: date(2025, 5, 28), 2: date(2024, 8, 1), 3: date(2025, 5, 13)}
 
@@ -82,11 +88,61 @@ def test_resposta_direta_vem_antes_dos_eventos():
     )
 
 
-def test_le_resposta_direta_sem_marcadores():
-    assert ler_resposta_direta('{"resposta": "DCC [1]."}') == "DCC."
+def test_desfecho_registrado_junta_votacao_e_ato_e_ignora_o_resto():
+    frases = [
+        "Centro: CCAE.", "Desfecho: Aprovado.", "Resultado da votação: Aprovado por unanimidade.",
+        "Ato emitido: DECISAO_73_2025.", "Trata do mesmo assunto que: x.",
+    ]
+    assert desfecho_registrado(frases) == "Resultado da votação: Aprovado por unanimidade. Ato emitido: DECISAO_73_2025."
+
+
+def test_desfecho_registrado_sem_frases_e_vazio():
+    assert desfecho_registrado(["Centro: CCAE.", "Desfecho: Aprovado."]) == ""
+    assert desfecho_registrado([]) == ""
+
+
+def test_texto_anexa_o_desfecho_registrado_antes_do_marcador():
+    eventos = [Evento(3, "Excluiu da pauta."), Evento(1, "Aprovou o regimento.")]
+    desfechos = {1: "Resultado da votação: Aprovado por unanimidade."}
+
+    assert montar_texto(eventos, DATAS, desfechos=desfechos) == (
+        "13/05/2025: Excluiu da pauta. [3]\n"
+        "28/05/2025: Aprovou o regimento. Resultado da votação: Aprovado por unanimidade. [1]"
+    )
+
+
+EVENTOS = [Evento(3, "Excluiu da pauta."), Evento(1, "Aprovou o regimento.")]
+
+
+def test_resposta_direta_mantem_marcadores_dos_eventos():
+    assert ler_resposta_direta('{"resposta": "Foi lotado no DCC [1]."}', EVENTOS) == "Foi lotado no DCC [1]."
+
+
+def test_resposta_direta_sem_marcador_e_descartada_quando_ha_varios_eventos():
+    assert ler_resposta_direta('{"resposta": "Foi lotado no DCC."}', EVENTOS) == ""
+
+
+def test_resposta_direta_sem_marcador_recebe_o_do_unico_evento():
+    eventos = [Evento(1, "Aprovou o regimento.")]
+    assert ler_resposta_direta('{"resposta": "Foi lotado no DCC."}', eventos) == "Foi lotado no DCC [1]."
+
+
+def test_resposta_direta_com_marcador_fora_dos_eventos_e_descartada():
+    assert ler_resposta_direta('{"resposta": "Excluído [3] e aprovado [2]."}', EVENTOS) == ""
+    assert ler_resposta_direta('{"resposta": "Aprovado [1, 2]."}', EVENTOS) == ""
+
+
+def test_resposta_direta_que_repete_um_evento_e_descartada():
+    assert ler_resposta_direta('{"resposta": "Aprovou o regimento [1]."}', EVENTOS) == ""
+
+
+def test_resposta_direta_com_chaves_ou_quebra_de_linha_e_descartada():
+    assert ler_resposta_direta('{"resposta": "{\\"x\\": 1} [1]"}', EVENTOS) == ""
+    assert ler_resposta_direta('{"resposta": "Aprovado [1].\\nExcluído [3]."}', EVENTOS) == ""
 
 
 def test_resposta_direta_invalida_ou_ausente_vira_vazio():
-    assert ler_resposta_direta("DCC") == ""
-    assert ler_resposta_direta('{"eventos": []}') == ""
-    assert ler_resposta_direta('{"resposta": 3}') == ""
+    assert ler_resposta_direta("DCC [1]", EVENTOS) == ""
+    assert ler_resposta_direta('{"eventos": []}', EVENTOS) == ""
+    assert ler_resposta_direta('{"resposta": 3}', EVENTOS) == ""
+    assert ler_resposta_direta('{"resposta": "  "}', EVENTOS) == ""

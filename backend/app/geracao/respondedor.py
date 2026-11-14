@@ -8,16 +8,22 @@ from qdrant_client import QdrantClient
 from sqlalchemy.orm import Session
 
 from app.geracao.contexto import montar_contexto
-from app.geracao.eventos import interpretar_eventos, ler_resposta_direta, montar_texto
+from app.geracao.eventos import (
+    Evento,
+    desfecho_registrado,
+    interpretar_eventos,
+    ler_resposta_direta,
+    montar_texto,
+)
 from app.geracao.llm import ClienteLLM
 from app.geracao.prompt import (
     ESQUEMA_EVENTOS,
     ESQUEMA_RESPOSTA,
     FRASE_ABSTENCAO,
-    SISTEMA_RESPOSTA,
     montar_prompt,
+    montar_prompt_resposta,
 )
-from app.geracao.tipos import Resposta, RespostaDetalhada
+from app.geracao.tipos import EvidenciaNumerada, Resposta, RespostaDetalhada, SaidaLLM
 from app.recuperacao.orquestrador import CAMADAS_TODAS, recuperar
 
 logger = logging.getLogger(__name__)
@@ -38,31 +44,46 @@ def responder_detalhado(
     evidencias = recuperar(pergunta, sessao, cliente_qdrant, driver, camadas=camadas)
     numeradas = montar_contexto(evidencias, sessao) if evidencias else []
     if not numeradas:
-        return RespostaDetalhada(_abstencao(), [], None)
+        return RespostaDetalhada(_abstencao(), [], [])
 
-    sistema, usuario = montar_prompt(pergunta, numeradas)
+    eventos, saidas = [], []
+    for evidencia in numeradas:
+        saida = _avaliar(pergunta, evidencia, cliente_llm)
+        saidas.append(saida)
+        eventos += _eventos(saida, evidencia)
+    if not eventos:
+        return RespostaDetalhada(_abstencao(), numeradas, saidas)
+
+    datas = {e.numero: e.data_reuniao or date.min for e in numeradas}
+    eventos.sort(key=lambda evento: datas[evento.evidencia])
+    sistema_resposta, usuario_resposta = montar_prompt_resposta(pergunta, eventos, numeradas)
+    saida_resposta = cliente_llm.gerar(sistema_resposta, usuario_resposta, esquema=ESQUEMA_RESPOSTA)
+    if saida_resposta.truncada:
+        logger.warning("resposta direta do LLM truncada por max_tokens")
+    citados = {evento.evidencia for evento in eventos}
+    fontes = [e.fonte for e in numeradas if e.numero in citados]
+    desfechos = {e.numero: desfecho_registrado(e.frases_grafo) for e in numeradas}
+    texto = montar_texto(eventos, datas, ler_resposta_direta(saida_resposta.texto, eventos), desfechos)
+    resposta = Resposta(texto=texto, fontes=fontes, abstencao=False)
+    return RespostaDetalhada(resposta, numeradas, saidas, saida_resposta)
+
+
+def _avaliar(pergunta: str, evidencia: EvidenciaNumerada, cliente_llm: ClienteLLM) -> SaidaLLM:
+    sistema, usuario = montar_prompt(pergunta, [evidencia])
     saida = cliente_llm.gerar(sistema, usuario, esquema=ESQUEMA_EVENTOS)
     if saida.truncada:
         logger.warning("resposta do LLM truncada por max_tokens")
-    if FRASE_ABSTENCAO.rstrip(".") in saida.texto:
-        return RespostaDetalhada(_abstencao(), numeradas, saida)
+    return saida
 
-    datas = {e.numero: e.data_reuniao or date.min for e in numeradas}
-    eventos = interpretar_eventos(saida.texto, datas)
+
+def _eventos(saida: SaidaLLM, evidencia: EvidenciaNumerada) -> list[Evento]:
+    if FRASE_ABSTENCAO.rstrip(".") in saida.texto:
+        return []
+    eventos = interpretar_eventos(saida.texto, {evidencia.numero: evidencia.data_reuniao or date.min})
     if eventos is None:
         logger.warning("resposta do LLM não é um JSON de eventos válido")
-        return RespostaDetalhada(_abstencao(), numeradas, saida)
-    if not eventos:
-        return RespostaDetalhada(_abstencao(), numeradas, saida)
-    citados = {evento.evidencia for evento in eventos}
-    _, usuario_resposta = montar_prompt(pergunta, [e for e in numeradas if e.numero in citados])
-    saida_resposta = cliente_llm.gerar(SISTEMA_RESPOSTA, usuario_resposta, esquema=ESQUEMA_RESPOSTA)
-    if saida_resposta.truncada:
-        logger.warning("resposta direta do LLM truncada por max_tokens")
-    fontes = [e.fonte for e in numeradas if e.numero in citados]
-    texto = montar_texto(eventos, datas, ler_resposta_direta(saida_resposta.texto))
-    resposta = Resposta(texto=texto, fontes=fontes, abstencao=False)
-    return RespostaDetalhada(resposta, numeradas, saida, saida_resposta)
+        return []
+    return eventos
 
 
 def responder(
