@@ -125,7 +125,11 @@ def _limites_da_frase(texto: str, posicao: int) -> tuple[int, int]:
 
 
 RE_ENCAMINHAMENTO_DOIS_PONTOS = re.compile(r"\bencaminhamento\b[^.:,\n]{0,80}:(?!\d)\s*", re.IGNORECASE)
-RE_ENCAMINHAMENTO_DESTINO = re.compile(r"\bencaminhamento\s+(?:[àa]s?|ao|aos|para)\s+(?!(?:a\s+)?vota)", re.IGNORECASE)
+RE_ENCAMINHAMENTO_DESTINO = re.compile(
+    r"\b(?:prop[ôo]s|prop[õo]e|coloc(?:ou|a)|f[ae]z|suger(?:iu|e))\s+(?:(?:como|o|no)\s+)?"
+    r"(?P<inicio>encaminhamento)\s+(?:[àa]s?|ao|aos|para)\s+(?!(?:a\s+)?vota)",
+    re.IGNORECASE,
+)
 
 
 def extrair_encaminhamento(corpo: str) -> str | None:
@@ -134,7 +138,7 @@ def extrair_encaminhamento(corpo: str) -> str | None:
         if not match:
             continue
         fim = _limites_da_frase(corpo, match.end())[1]
-        inicio = match.end() if padrao is RE_ENCAMINHAMENTO_DOIS_PONTOS else match.start()
+        inicio = match.end() if padrao is RE_ENCAMINHAMENTO_DOIS_PONTOS else match.start("inicio")
         return corpo[inicio:fim].strip(" .") or None
     return None
 

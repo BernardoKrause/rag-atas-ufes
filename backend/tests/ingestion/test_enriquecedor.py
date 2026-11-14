@@ -642,16 +642,48 @@ def test_encaminhamento_apos_dois_pontos():
     ) == "que a subcoordenação de curso assuma a coordenação de estágio"
 
 
-def test_encaminhamento_com_destino():
+@pytest.mark.parametrize("corpo,esperado", [
+    (
+        "A Professora PESSOA_162209 propôs como encaminhamento a criação de uma nova aba na planilha. "
+        "Aprovado.",
+        "encaminhamento a criação de uma nova aba na planilha",
+    ),
+    (
+        "Após ampla discussão, o subchefe do Departamento fez o encaminhamento para o Departamento "
+        "oferecer a Semana Acadêmica de Matemática no semestre de 2025/1. Aprovado.",
+        "encaminhamento para o Departamento oferecer a Semana Acadêmica de Matemática no semestre de 2025/1",
+    ),
+    (
+        "O Diretor colocou no encaminhamento a Jornada Ininterrupta no CCE. Aprovada.",
+        "encaminhamento a Jornada Ininterrupta no CCE",
+    ),
+])
+def test_encaminhamento_com_destino_proposto_na_reuniao(corpo, esperado):
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(corpo) == esperado
+
+
+@pytest.mark.parametrize("corpo", [
+    "Recomendo a aprovação do relatório e do pedido de renovação e solicito encaminhamento "
+    "às instâncias competentes.” Em votação. Aprovado por unanimidade.",
+    "Sou, portanto, favorável à sua aprovação e encaminhamento para registro junto à "
+    "Pró-Reitoria de Extensão. Em votação, aprovado por unanimidade.",
+    "O Chefe encaminhou o Memorando à direção do CCE, solicitando o encaminhamento à PRPPG do "
+    "pedido de contratação. Aprovado.",
+    "A SID só deverá ser acionada em caso de encaminhamento para um docente específico.” "
+    "As diretrizes foram aprovadas.",
+])
+def test_encaminhamento_pedido_ou_citado_nao_e_registro_da_reuniao(corpo):
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(corpo) is None
+
+
+def test_encaminhamento_no_texto_do_artigo_alterado_nao_e_da_deliberacao():
     from app.ingestion.enriquecedor import extrair_encaminhamento
     assert extrair_encaminhamento(
-        "Recomendo a aprovação do relatório e do pedido de renovação e solicito encaminhamento "
-        "às instâncias competentes."
-    ) == "encaminhamento às instâncias competentes"
-    assert extrair_encaminhamento(
-        "Sou, portanto, favorável à sua aprovação e encaminhamento para registro junto à "
-        "Pró-Reitoria de Extensão."
-    ) == "encaminhamento para registro junto à Pró-Reitoria de Extensão"
+        "XVI) Alterar a redação do Art. 27 para “Os casos omissos serão submetidos à Comissão, com "
+        "encaminhamento às Direções dos Centros de Ensino. Em votação. Aprovado por unanimidade."
+    ) is None
 
 
 @pytest.mark.parametrize("corpo", [
@@ -671,11 +703,11 @@ def test_encaminhamento_rejeita_casos_genericos_e_procedimentais(corpo):
 def test_extrair_generico_preenche_encaminhamento_somente_com_desfecho():
     from app.ingestion.enriquecedor import extrair_generico
     com = extrair_generico(
-        "PAUTA 1: Parecer. Sou favorável à sua aprovação e encaminhamento para registro junto à "
-        "Pró-Reitoria de Extensão. Em votação, aprovado por unanimidade.", date(2025, 1, 1),
+        "PAUTA 1: Parecer. A Coordenadora propôs este encaminhamento: realizar uma reunião com os "
+        "secretários. Em votação, aprovado por unanimidade.", date(2025, 1, 1),
     )
     assert com.tipo_desfecho == "Aprovado"
-    assert com.encaminhamento == "encaminhamento para registro junto à Pró-Reitoria de Extensão"
+    assert com.encaminhamento == "realizar uma reunião com os secretários"
 
     sem = extrair_generico(
         "PAUTA 1: Informe. Relatou sobre a ausência da servidora, que interferiu no andamento de "
