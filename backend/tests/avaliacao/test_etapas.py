@@ -114,6 +114,22 @@ def test_geracao_truncada_grava_erro_truncada_e_mantem_o_resto(tmp_path):
     assert registro["texto"] == "resp [1]"
 
 
+def test_geracao_soma_tokens_das_duas_chamadas_e_marca_truncada_da_segunda(tmp_path):
+    saida = tmp_path / "geracao.jsonl"
+    detalhada = _detalhada()
+    detalhada = RespostaDetalhada(
+        detalhada.resposta, detalhada.evidencias, detalhada.saida_llm,
+        SaidaLLM('{"resposta": "r"}', True, 30, 4),
+    )
+
+    etapa_geracao([_pergunta("q1")], lambda p, c: detalhada, MAPA, saida, "m")
+
+    registro = ler_jsonl(saida)[0]
+    assert (registro["tokens_entrada"], registro["tokens_saida"]) == (130, 24)
+    assert registro["truncada"] is True
+    assert registro["erro"] == "truncada"
+
+
 def test_geracao_retoma_sem_repetir(tmp_path):
     saida = tmp_path / "geracao.jsonl"
     anexar_jsonl(saida, {"pergunta_id": "q1", "config": "A"})

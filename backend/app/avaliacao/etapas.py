@@ -48,12 +48,21 @@ def etapa_recuperacao(
     return total
 
 
+def _saidas(detalhada: RespostaDetalhada) -> list:
+    return [saida for saida in (detalhada.saida_llm, detalhada.saida_resposta) if saida]
+
+
+def _somar(saidas: list, campo: str) -> int | None:
+    valores = [getattr(saida, campo) for saida in saidas if getattr(saida, campo) is not None]
+    return sum(valores) if valores else None
+
+
 def _registro_geracao(
     pergunta_id: str, config: str, modelo: str, detalhada: RespostaDetalhada,
     mapa_logico: dict[str, str],
 ) -> dict:
     fontes = [fonte.item_id_canonico for fonte in detalhada.resposta.fontes]
-    saida_llm = detalhada.saida_llm
+    saidas = _saidas(detalhada)
     return {
         "pergunta_id": pergunta_id,
         "config": config,
@@ -66,9 +75,9 @@ def _registro_geracao(
             "\n".join([evidencia.fonte.rotulo, evidencia.texto, *evidencia.frases_grafo])
             for evidencia in detalhada.evidencias
         ],
-        "tokens_entrada": saida_llm.tokens_entrada if saida_llm else None,
-        "tokens_saida": saida_llm.tokens_saida if saida_llm else None,
-        "truncada": saida_llm.truncada if saida_llm else False,
+        "tokens_entrada": _somar(saidas, "tokens_entrada"),
+        "tokens_saida": _somar(saidas, "tokens_saida"),
+        "truncada": any(saida.truncada for saida in saidas),
         "erro": None,
     }
 
@@ -97,7 +106,7 @@ def etapa_geracao(
             try:
                 detalhada = responder_fn(pergunta.pergunta, CONFIGURACOES[config])
                 registro = _registro_geracao(pergunta.id, config, modelo, detalhada, mapa_logico)
-                if detalhada.saida_llm and detalhada.saida_llm.truncada:
+                if any(saida.truncada for saida in _saidas(detalhada)):
                     registro["erro"] = "truncada"
             except ErroGeracao as erro:
                 if isinstance(erro.__cause__, (anthropic.APIError, httpx.HTTPError)):

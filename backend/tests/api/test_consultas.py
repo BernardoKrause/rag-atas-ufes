@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from app.geracao.prompt import FRASE_ABSTENCAO
@@ -33,14 +34,14 @@ def test_consulta_devolve_resposta_com_fonte_completa(
     cliente_api, llm_falso, perguntas_recebidas
 ):
     recebidas, item = perguntas_recebidas
-    llm_falso.texto = "O calendário foi aprovado [1]."
+    llm_falso.texto = json.dumps({"eventos": [{"evidencia": 1, "relevante": True, "descricao": "O calendário foi aprovado."}]})
 
     resposta = cliente_api.post("/consultas", json={"pergunta": "  O calendário foi aprovado?  "})
 
     assert resposta.status_code == 200
     assert recebidas == ["O calendário foi aprovado?"]
     assert resposta.json() == {
-        "texto": "O calendário foi aprovado [1].",
+        "texto": "01/01/2025: O calendário foi aprovado. [1]",
         "abstencao": False,
         "fontes": [
             {

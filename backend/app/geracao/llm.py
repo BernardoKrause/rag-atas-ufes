@@ -11,7 +11,7 @@ from app.geracao.tipos import ErroGeracao, SaidaLLM
 
 
 class ClienteLLM(Protocol):
-    def gerar(self, sistema: str, usuario: str) -> SaidaLLM: ...
+    def gerar(self, sistema: str, usuario: str, esquema: dict | None = None) -> SaidaLLM: ...
 
 
 class ClienteOllama:
@@ -29,24 +29,24 @@ class ClienteOllama:
         self._max_tokens = max_tokens
         self._num_ctx = num_ctx
 
-    def gerar(self, sistema: str, usuario: str) -> SaidaLLM:
+    def gerar(self, sistema: str, usuario: str, esquema: dict | None = None) -> SaidaLLM:
+        corpo_pedido = {
+            "model": self._modelo,
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": sistema},
+                {"role": "user", "content": usuario},
+            ],
+            "options": {
+                "temperature": 0,
+                "num_predict": self._max_tokens,
+                "num_ctx": self._num_ctx,
+            },
+        }
+        if esquema is not None:
+            corpo_pedido["format"] = esquema
         try:
-            resposta = self._cliente.post(
-                "/api/chat",
-                json={
-                    "model": self._modelo,
-                    "stream": False,
-                    "messages": [
-                        {"role": "system", "content": sistema},
-                        {"role": "user", "content": usuario},
-                    ],
-                    "options": {
-                        "temperature": 0,
-                        "num_predict": self._max_tokens,
-                        "num_ctx": self._num_ctx,
-                    },
-                },
-            )
+            resposta = self._cliente.post("/api/chat", json=corpo_pedido)
             resposta.raise_for_status()
         except httpx.HTTPError as erro:
             raise ErroGeracao(f"falha ao chamar o Ollama: {erro}") from erro
@@ -77,7 +77,7 @@ class ClienteAnthropic:
         self._max_tokens = max_tokens
         self._esforco = esforco
 
-    def gerar(self, sistema: str, usuario: str) -> SaidaLLM:
+    def gerar(self, sistema: str, usuario: str, esquema: dict | None = None) -> SaidaLLM:
         extras = {"output_config": {"effort": self._esforco}} if self._esforco else {}
         try:
             mensagem = self._cliente.messages.create(

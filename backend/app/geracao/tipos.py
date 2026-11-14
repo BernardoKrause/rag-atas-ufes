@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,7 @@ class EvidenciaNumerada:
     frases_grafo: list[str]
     assunto_anterior: str | None
     assunto_posterior: str | None
+    data_reuniao: date | None = None
 
 
 @dataclass(frozen=True)
@@ -43,6 +45,7 @@ class RespostaDetalhada:
     resposta: Resposta
     evidencias: list[EvidenciaNumerada]
     saida_llm: SaidaLLM | None
+    saida_resposta: SaidaLLM | None = None
 
 
 class ErroGeracao(Exception):
