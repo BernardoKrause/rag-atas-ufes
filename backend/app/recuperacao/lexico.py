@@ -39,6 +39,11 @@ CONSULTA_BM25 = text(
     FROM ocorrencias o
     JOIN frequencia f USING (lexeme)
     CROSS JOIN colecao c
+    WHERE CAST(:orgao AS text) IS NULL OR o.item_id_canonico IN (
+        SELECT i.item_id_canonico FROM itens_pauta i
+        JOIN documentos d ON d.id_documento = i.documento_id
+        WHERE d.orgao = :orgao
+    )
     GROUP BY o.item_id_canonico
     ORDER BY score DESC, o.item_id_canonico
     LIMIT :limite
@@ -46,12 +51,14 @@ CONSULTA_BM25 = text(
 )
 
 
-def buscar_lexico(pergunta: str, sessao: Session, limite: int = LIMITE_PADRAO) -> list[Hit]:
+def buscar_lexico(
+    pergunta: str, sessao: Session, limite: int = LIMITE_PADRAO, orgao: str | None = None
+) -> list[Hit]:
     if not pergunta.strip():
         return []
 
     linhas = sessao.execute(
-        CONSULTA_BM25, {"pergunta": pergunta, "k1": K1, "b": B, "limite": limite}
+        CONSULTA_BM25, {"pergunta": pergunta, "k1": K1, "b": B, "limite": limite, "orgao": orgao}
     ).all()
     return [
         Hit(item_id_canonico=linha.item_id_canonico, rank=indice + 1, score=float(linha.score))

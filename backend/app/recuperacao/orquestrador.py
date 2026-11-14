@@ -7,11 +7,13 @@ from qdrant_client import QdrantClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 from app.recuperacao.fusao import ancorar, fundir_rrf
 from app.recuperacao.grafo import expandir_grafo, obter_contextos_grafo
 from app.recuperacao.lexico import buscar_lexico
-from app.recuperacao.tipos import Evidencia
+from app.recuperacao.setor import documentos_do_orgao, identificar_orgao
+from app.recuperacao.tipos import Evidencia, Hit
 from app.recuperacao.vetorial import buscar_vetorial
 
 logger = logging.getLogger(__name__)
@@ -33,17 +35,26 @@ def recuperar(
     if camadas - CAMADAS_TODAS or not camadas & {"lexico", "vetorial"}:
         raise ValueError(f"camadas inválidas: {sorted(camadas)}")
 
+    orgao = identificar_orgao(pergunta, sessao)
+    documentos = documentos_do_orgao(orgao, sessao) if orgao else None
+
     hits_lexico = []
     if "lexico" in camadas:
-        hits_lexico = _com_degradacao("lexico", buscar_lexico, pergunta, sessao, sessao=sessao) or []
+        hits_lexico = (
+            _com_degradacao("lexico", buscar_lexico, pergunta, sessao, orgao=orgao, sessao=sessao) or []
+        )
     hits_vetorial = []
     if "vetorial" in camadas:
-        hits_vetorial = _com_degradacao("vetorial", buscar_vetorial, pergunta, cliente_qdrant) or []
+        hits_vetorial = (
+            _com_degradacao("vetorial", buscar_vetorial, pergunta, cliente_qdrant, documentos=documentos) or []
+        )
 
     hits_grafo = []
     if "grafo" in camadas:
         ancoras = ancorar(hits_lexico, hits_vetorial, top_n=top_n_ancora)
         hits_grafo = _com_degradacao("expansao_grafo", expandir_grafo, ancoras, driver) or []
+        if orgao:
+            hits_grafo = _so_do_orgao(hits_grafo, orgao, sessao)
 
     ids_finais = fundir_rrf(hits_lexico, hits_vetorial, hits_grafo, k=k)
     if not ids_finais:
@@ -91,17 +102,28 @@ def _buscar_itens_por_id(sessao: Session, ids_finais: list[str]) -> dict[str, It
     }
 
 
-def _com_degradacao(nome_camada, funcao, *args, sessao=None):
+def _com_degradacao(nome_camada, funcao, *args, sessao=None, **kwargs):
     try:
         if sessao is None:
-            return funcao(*args)
+            return funcao(*args, **kwargs)
         # savepoint: um erro real de SQL (nao so o RuntimeError sintetico dos
         # testes) deixa a transacao da sessao abortada; sem isolar num
         # savepoint, a proxima chamada que toca a mesma sessao (ex.
         # hidratacao final) falha em cascata mesmo com as outras camadas
         # saudaveis.
         with sessao.begin_nested():
-            return funcao(*args)
+            return funcao(*args, **kwargs)
     except Exception:
         logger.warning("camada %s falhou, seguindo sem ela", nome_camada, exc_info=True)
         return None
+
+
+def _so_do_orgao(hits: list[Hit], orgao: str, sessao: Session) -> list[Hit]:
+    if not hits:
+        return []
+    permitidos = set(sessao.execute(
+        select(ItemPauta.item_id_canonico)
+        .join(Documento, ItemPauta.documento_id == Documento.id_documento)
+        .where(Documento.orgao == orgao, ItemPauta.item_id_canonico.in_([hit.item_id_canonico for hit in hits]))
+    ).scalars())
+    return [hit for hit in hits if hit.item_id_canonico in permitidos]
