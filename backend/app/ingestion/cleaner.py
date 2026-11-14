@@ -11,7 +11,7 @@ from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 from transformers import pipeline
 
-from app.models.documento import EntidadeAnonimizada, TipoEntidade
+from app.models.documento import EntidadeAnonimizada, NumeroProcesso, TipoEntidade
 
 # formato geral de protocolo NNNNN.NNNNNN/NNNN-NN — cobre SIPAC-UFES
 # (prefixo 23068.) e outros orgaos com o mesmo padrao (ex.: achado (f),
@@ -385,6 +385,8 @@ def anonimizar_texto(
     substituicoes: list[tuple[int, int]] = []
     for inicio, fim, tipo in ocorrencias:
         token = _obter_ou_criar_token(sessao, secret_key, tipo, texto[inicio:fim])
+        if tipo is TipoEntidade.PROCESSO:
+            sessao.merge(NumeroProcesso(token=token, numero=_normalizar_entidade(tipo, texto[inicio:fim])))
         resultado = resultado[:inicio] + token + resultado[fim:]
         substituicoes.append((inicio, len(token) - (fim - inicio)))
 
