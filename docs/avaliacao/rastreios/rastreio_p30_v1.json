@@ -1,0 +1,628 @@
+{
+  "id_execucao": "92f018da8563",
+  "quando": "2026-11-07T22:08:36",
+  "commit": "6da6076",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Quais registros e encaminhamentos constam sobre disciplina ECH15737 no setor CEUNES?",
+  "alvos": {
+    "1849_PAUTA_4": {
+      "ata": 1849,
+      "orgao": "CEUNES",
+      "data": "2024-02-05",
+      "pagina": 2,
+      "assunto": "PROCESSO_59017 - Solicita apreciação de inclusão de PESSOA_299606 como prestadora de servi",
+      "rank_lexico": null,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": null
+    },
+    "1852_PAUTA_9": {
+      "ata": 1852,
+      "orgao": "CEUNES",
+      "data": "2024-03-25",
+      "pagina": 3,
+      "assunto": "PROCESSO_31773 - Solicita apreciação da inclusão de PESSOA_165251 como prestador de serviç",
+      "rank_lexico": null,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": null
+    }
+  },
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1859_PAUTA_6",
+      "score": 0.038781624,
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    },
+    {
+      "rank": 2,
+      "item": "1982_PAUTA_11",
+      "score": 0.037901625,
+      "ata": 1982,
+      "orgao": "CCE",
+      "data": "2013-07-31",
+      "pagina": 3,
+      "assunto": "Proc. Nº PROCESSO_32162 - Nova Oferta do Curso de Licenciatura em Física/EAD – Leitura do "
+    },
+    {
+      "rank": 3,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "score": 0.037735514,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 4,
+      "item": "1790_INFORMES_6",
+      "score": 0.035462417,
+      "ata": 1790,
+      "orgao": "CEUNES_DCAB",
+      "data": "2025-03-12",
+      "pagina": 2,
+      "assunto": "O professor PESSOA_165362 informou que precisou cancelar a aula RCE TqErES ESA prática de "
+    },
+    {
+      "rank": 5,
+      "item": "1779_INFORMES_2.4_F1",
+      "score": 0.035462413,
+      "ata": 1779,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2003-05-03",
+      "pagina": 1,
+      "assunto": "INSTRUÇÃO NORMATIVA 04, DE 19 DE OUTUBRO DE 2021. Estabelece orientações sobre os critério"
+    },
+    {
+      "rank": 6,
+      "item": "1991_PAUTA_4",
+      "score": 0.03470063,
+      "ata": 1991,
+      "orgao": "CCE",
+      "data": "2014-04-23",
+      "pagina": 4,
+      "assunto": "Proc. Nº PROCESSO_32225 - Afastamento para Pós-Doutorado: Prof. PESSOA_166502/DMAT, períod"
+    },
+    {
+      "rank": 7,
+      "item": "1684_APROVACAO_DE_ATA_2.1_F1",
+      "score": 0.034336623,
+      "ata": 1684,
+      "orgao": "CCENS_DG",
+      "data": "2024-04-01",
+      "pagina": 1,
+      "assunto": "Ata da 01ª reunião de caráter Ordinário do Departamento de Geologia, realizada no dia 11 d"
+    },
+    {
+      "rank": 8,
+      "item": "1785_PAUTA_3.3",
+      "score": 0.032319583,
+      "ata": 1785,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-09-06",
+      "pagina": 1,
+      "assunto": "Apreciação Resolução Nº XX/2021-PROGRAD. A coordenadora PESSOA_164368 apresentou a propost"
+    },
+    {
+      "rank": 9,
+      "item": "1844_PAUTA_1",
+      "score": 0.031146884,
+      "ata": 1844,
+      "orgao": "CEUNES_DMA",
+      "data": "2025-03-13",
+      "pagina": 1,
+      "assunto": "Apreciação de ata - O Presidente apresentou aos membros Ata da segunda Sessão Ordinária de"
+    },
+    {
+      "rank": 10,
+      "item": "1779_INFORMES_2.4_F2",
+      "score": 0.03114688,
+      "ata": 1779,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2003-05-03",
+      "pagina": 1,
+      "assunto": "INSTRUÇÃO NORMATIVA 04, DE 19 DE OUTUBRO DE 2021. Estabelece orientações sobre os critério"
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1812_PAUTA_4",
+      "score": 0.67503893,
+      "ata": 1812,
+      "orgao": "CEUNES_DCE",
+      "data": "2024-06-12",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31636 - Solicitação de apreciação de pedido de criação de dis"
+    },
+    {
+      "rank": 2,
+      "item": "1850_PAUTA_2",
+      "score": 0.66939,
+      "ata": 1850,
+      "orgao": "CEUNES",
+      "data": "2024-02-19",
+      "pagina": 2,
+      "assunto": "PROCESSO_59021 - Solicita apreciação da inclusão de PESSOA_299615 como prestadora de servi"
+    },
+    {
+      "rank": 3,
+      "item": "1856_PAUTA_7",
+      "score": 0.669344,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31802 - O Conselheiro PESSOA_164954 fez relato e parecer favorável ao pr"
+    },
+    {
+      "rank": 4,
+      "item": "1856_PAUTA_8",
+      "score": 0.6649158,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "PALAVRA LIVRE: Foi informado que o gabinete da reitoria virá nos dias e 05/06, porém, como"
+    },
+    {
+      "rank": 5,
+      "item": "1734_PAUTA_3.16",
+      "score": 0.6576793,
+      "ata": 1734,
+      "orgao": "CCHN",
+      "data": "2022-04-26",
+      "pagina": 5,
+      "assunto": "Processo digital nº PROCESSO_31220. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "rank": 6,
+      "item": "1738_PAUTA_3.07",
+      "score": 0.65455043,
+      "ata": 1738,
+      "orgao": "CCHN",
+      "data": "2023-03-14",
+      "pagina": 3,
+      "assunto": "Processo digital nº PROCESSO_31273. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "rank": 7,
+      "item": "1953_PAUTA_4",
+      "score": 0.6543689,
+      "ata": 1953,
+      "orgao": "CCE",
+      "data": "2010-05-31",
+      "pagina": 2,
+      "assunto": "Remoção do professor PESSOA_166099 para o CEUNES – O professor PESSOA_166099 encaminhou ex"
+    },
+    {
+      "rank": 8,
+      "item": "1736_PAUTA_3.07",
+      "score": 0.65271854,
+      "ata": 1736,
+      "orgao": "CCHN",
+      "data": "2023-01-31",
+      "pagina": 5,
+      "assunto": "Processo digital nº PROCESSO_31246. Formação de Comissão Especial (CES) para promoção para"
+    },
+    {
+      "rank": 9,
+      "item": "1974_PAUTA_6",
+      "score": 0.6436102,
+      "ata": 1974,
+      "orgao": "CCE",
+      "data": "2012-05-29",
+      "pagina": 2,
+      "assunto": "Apreciação da solicitação do Colegiado de Estatística de inserção das Disciplinas Optativa"
+    },
+    {
+      "rank": 10,
+      "item": "1879_ORDEM_DO_DIA_3.3",
+      "score": 0.6412157,
+      "ata": 1879,
+      "orgao": "CCAE_DER",
+      "data": "2024-04-11",
+      "pagina": 1,
+      "assunto": "Documento avulso PROCESSO_31859. Retificação de Ata da 1ª Sessão Ordinária de Abril de 202"
+    }
+  ],
+  "ancoras": [
+    "1859_PAUTA_6",
+    "1812_PAUTA_4",
+    "1982_PAUTA_11",
+    "1850_PAUTA_2",
+    "1662_ORDEM_DO_DIA_1.5_F1",
+    "1856_PAUTA_7",
+    "1790_INFORMES_6",
+    "1856_PAUTA_8",
+    "1779_INFORMES_2.4_F1",
+    "1734_PAUTA_3.16",
+    "1991_PAUTA_4",
+    "1738_PAUTA_3.07",
+    "1684_APROVACAO_DE_ATA_2.1_F1",
+    "1953_PAUTA_4",
+    "1785_PAUTA_3.3",
+    "1736_PAUTA_3.07",
+    "1844_PAUTA_1",
+    "1974_PAUTA_6",
+    "1779_INFORMES_2.4_F2",
+    "1879_ORDEM_DO_DIA_3.3"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 1,
+      "item": "1859_PAUTA_6_F1",
+      "score": null,
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    },
+    {
+      "rank": 3,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 3,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 3,
+      "item": "1858_PAUTA_10",
+      "score": null,
+      "ata": 1858,
+      "orgao": "CEUNES",
+      "data": "2024-07-01",
+      "pagina": 3,
+      "assunto": "Documento avulso nº PROCESSO_31802 - Solicita autorização para que o Sr. PESSOA_165321 uti"
+    },
+    {
+      "rank": 3,
+      "item": "1856_PAUTA_6",
+      "score": null,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31803 - O Conselheiro PESSOA_164691 fez a leitura do relato e parecer fa"
+    },
+    {
+      "rank": 3,
+      "item": "1856_PAUTA_1",
+      "score": null,
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Expediente - Não houve exclusões e foram solicitadas pelos Conselheiros PESSOA_164691 e PE"
+    },
+    {
+      "rank": 4,
+      "item": "1790_INFORMES_6_F1",
+      "score": null,
+      "ata": 1790,
+      "orgao": "CEUNES_DCAB",
+      "data": "2025-03-12",
+      "pagina": 2,
+      "assunto": "O professor PESSOA_165362 informou que precisou cancelar a aula RCE TqErES ESA prática de "
+    },
+    {
+      "rank": 5,
+      "item": "1779_INFORMES_2.4",
+      "score": null,
+      "ata": 1779,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2003-05-03",
+      "pagina": 1,
+      "assunto": "INSTRUÇÃO NORMATIVA 04, DE 19 DE OUTUBRO DE 2021. Estabelece orientações sobre os critério"
+    },
+    {
+      "rank": 7,
+      "item": "1684_APROVACAO_DE_ATA_2.1_F2",
+      "score": null,
+      "ata": 1684,
+      "orgao": "CCENS_DG",
+      "data": "2024-04-01",
+      "pagina": 1,
+      "assunto": "Ata da 01ª reunião de caráter Ordinário do Departamento de Geologia, realizada no dia 11 d"
+    },
+    {
+      "rank": 7,
+      "item": "1684_APROVACAO_DE_ATA_2.1",
+      "score": null,
+      "ata": 1684,
+      "orgao": "CCENS_DG",
+      "data": "2024-04-01",
+      "pagina": 1,
+      "assunto": "Ata da 01ª reunião de caráter Ordinário do Departamento de Geologia, realizada no dia 11 d"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1684_APROVACAO_DE_ATA_2.1_F2",
+      "ata": 1684,
+      "orgao": "CCENS_DG",
+      "data": "2024-04-01",
+      "pagina": 1,
+      "assunto": "Ata da 01ª reunião de caráter Ordinário do Departamento de Geologia, realizada no dia 11 d"
+    },
+    {
+      "posicao": 2,
+      "item": "1859_PAUTA_6_F1",
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    },
+    {
+      "posicao": 3,
+      "item": "1790_INFORMES_6_F1",
+      "ata": 1790,
+      "orgao": "CEUNES_DCAB",
+      "data": "2025-03-12",
+      "pagina": 2,
+      "assunto": "O professor PESSOA_165362 informou que precisou cancelar a aula RCE TqErES ESA prática de "
+    },
+    {
+      "posicao": 4,
+      "item": "1869_ORDEM_DO_DIA_3.1",
+      "ata": 1869,
+      "orgao": "CCAE_DER",
+      "data": "2024-06-10",
+      "pagina": 1,
+      "assunto": "Processo Digital - PROCESSO_31846. Consulta sobre inclusão de horas de extensão em discipl"
+    },
+    {
+      "posicao": 5,
+      "item": "1770_PAUTA_3.03",
+      "ata": 1770,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2020-09-21",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "posicao": 6,
+      "item": "1778_PAUTA_3.03",
+      "ata": 1778,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-07-10",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "posicao": 7,
+      "item": "1827_INFORMES_1",
+      "ata": 1827,
+      "orgao": "CEUNES_DECH",
+      "data": "2024-11-14",
+      "pagina": 1,
+      "assunto": "Oficio 24/2024 da Secretaria de Ações Afirmativas – SAAD - A professora PESSOA_164914 info"
+    },
+    {
+      "posicao": 8,
+      "item": "1859_PAUTA_6",
+      "ata": 1859,
+      "orgao": "CEUNES",
+      "data": "2025-11-03",
+      "pagina": 3,
+      "assunto": "Solicitação de funções gratificadas e cargos de Direção. O Presidente PESSOA_165229 afirma"
+    },
+    {
+      "posicao": 9,
+      "item": "1812_PAUTA_4",
+      "ata": 1812,
+      "orgao": "CEUNES_DCE",
+      "data": "2024-06-12",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31636 - Solicitação de apreciação de pedido de criação de dis"
+    },
+    {
+      "posicao": 10,
+      "item": "1982_PAUTA_11",
+      "ata": 1982,
+      "orgao": "CCE",
+      "data": "2013-07-31",
+      "pagina": 3,
+      "assunto": "Proc. Nº PROCESSO_32162 - Nova Oferta do Curso de Licenciatura em Física/EAD – Leitura do "
+    },
+    {
+      "posicao": 11,
+      "item": "1850_PAUTA_2",
+      "ata": 1850,
+      "orgao": "CEUNES",
+      "data": "2024-02-19",
+      "pagina": 2,
+      "assunto": "PROCESSO_59021 - Solicita apreciação da inclusão de PESSOA_299615 como prestadora de servi"
+    },
+    {
+      "posicao": 12,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 13,
+      "item": "1856_PAUTA_7",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31802 - O Conselheiro PESSOA_164954 fez relato e parecer favorável ao pr"
+    },
+    {
+      "posicao": 14,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 15,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 16,
+      "item": "1858_PAUTA_10",
+      "ata": 1858,
+      "orgao": "CEUNES",
+      "data": "2024-07-01",
+      "pagina": 3,
+      "assunto": "Documento avulso nº PROCESSO_31802 - Solicita autorização para que o Sr. PESSOA_165321 uti"
+    },
+    {
+      "posicao": 17,
+      "item": "1856_PAUTA_6",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Processo PROCESSO_31803 - O Conselheiro PESSOA_164691 fez a leitura do relato e parecer fa"
+    },
+    {
+      "posicao": 18,
+      "item": "1856_PAUTA_1",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "Expediente - Não houve exclusões e foram solicitadas pelos Conselheiros PESSOA_164691 e PE"
+    },
+    {
+      "posicao": 19,
+      "item": "1790_INFORMES_6",
+      "ata": 1790,
+      "orgao": "CEUNES_DCAB",
+      "data": "2025-03-12",
+      "pagina": 2,
+      "assunto": "O professor PESSOA_165362 informou que precisou cancelar a aula RCE TqErES ESA prática de "
+    },
+    {
+      "posicao": 20,
+      "item": "1856_PAUTA_8",
+      "ata": 1856,
+      "orgao": "CEUNES",
+      "data": "2024-06-03",
+      "pagina": 2,
+      "assunto": "PALAVRA LIVRE: Foi informado que o gabinete da reitoria virá nos dias e 05/06, porém, como"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1684_APROVACAO_DE_ATA_2.1_F2",
+      "rotulo": "Ata CCENS_DG, 2ª reunião ordinaria, 01/04/2024, aprovação de ata, item 2.1, p. 1",
+      "pagina": 1,
+      "texto": "ETALHAMENTO DO PROJETO: Registrado no Sistema de Gestão da Extensão (SIGEX) com o número 4359, o projeto visa divulgar e disseminar as informações obtidas durante a realização das atividades de campo das disciplinas de mapeamento geológico da comunidade em geral. O projeto teve início em 12/03/2024 (com justificativa pelo cadastro/envio da ação ter sido realizado em prazo inferior ao estabelecido pela Instrução Normativa nº 02/2016) e previsão de conclusão em 12/03/2026. Tem como meta alcançar cerca de 1000 pessoas, abrangendo o público geral (interno e externo). O objetivo principal é comunicar e disseminar os conhecimentos geológicos compilados pelos estudantes das disciplinas de mapeamento geológico. O método adotado para a realização do projeto compreende: a) diálogos com a comunidade local e turistas; b) exposição dos mapas geológicos produzidos; c) exposição de fotografias ilustrativas das litologias e feições geológicas de interesse; d) coleta e doação de amostras específicas a museus, pousadas e ao Departamento de Geologia; e) interação com as secretarias de meio ambiente e turismo das prefeituras dos municípios nos quais as atividade de mapeamento são realizadas; f) caminhadas geológicas educativas; e g) debate com a comunidade sobre curiosidades geológicas, como monumentos geológicos e formações geológicas específicas. A equipe é formada por 3 professores do magistério superior (PESSOA_162336, PESSOA_162340 e PESSOA_162337). PARECER: Considerando que o processo está devidamente instruído conforme a Resolução CEPE/UFES nº 28/2022, devidamente registrado no Sistema de Gestão da Extensão (SIGEX) sob o número 4359, e tendo em vista a relevância do projeto para o público interno e externo, manifesto parecer favorável ao registro do projeto pela Câmara Departamental”. Em seguida, o Chefe abriu a palavra para os membros da Câmara Departamental, o professor PESSOA_162336 informou que há atribuição de 2 horas para cada professor (PESSOA_162336, PESSOA_162340 e PESSOA_162337). O Chefe colocou o relato e parecer e a atribuição de 2 horas para cada professor, em apreciação. Em votação. Aprovado por unanimidade. Por solicitação do professor PESSOA_162337 seu voto é declarado.",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DG.",
+        "Data da reunião: 2024-04-01.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade.",
+        "Encaminhamento: Que os favoráveis votem: SIM no chat e os contrários votem: NÃO no chat.",
+        "Trata do mesmo assunto que: 1684_EXPEDIENTE_1.1_D1."
+      ]
+    },
+    {
+      "numero": 2,
+      "item": "1859_PAUTA_6_F1",
+      "rotulo": "Ata CEUNES, 18ª reunião ordinaria, 03/11/2025, pauta, item 6, p. 3",
+      "pagina": 3,
+      "texto": " São Mateus. O Conselheiro PESSOA_165335 afirma que entende a necessidade da CD, mas recomenda que é preciso ter cuidado sobre como será isso, destaca que deve ficar claro como colocarão para não atropelar. O Presidente PESSOA_165296 apresenta sua sugestão de encaminhamento: um pedido de criação da diretoria acadêmica. Sugere constar na nossa ata que a qualquer tempo o conselho pode rever a destinação, entretanto, não sugere colocar isso no documento para o Reitor. O Conselheiro PESSOA_165334 afirma que podem perder uma grande oportunidade. Destaca que a solicitação que for feita, será para atender a estrutura atual, se a CD vier, depois eles podem rever. O Presidente PESSOA_165296 pede licença para se retirar desta sessão, pois possui outro compromisso e afirma que a Vice-Diretora, professora PESSOA_164872 assumirá a presidência para continuação. O Presidente PESSOA_165229 se retira da sala de reuniões. O Conselheiro PESSOA_165231 pede que as preocupações apontadas por alguns conselheiros (quanto aos assuntos para que não sejam atravessados) sejam registradas em ata, ou seja, para que essa solicitação não interfira na solicitação de reestruturação, que ainda deve ser amplamente discutida. A Conselheira PESSOA_164872, na presidência deste Conselho, coloca em votação se a solicitação de funções será feita tendo o embasamento direcionado. Todos concordam. Pergunta se os membros deste Conselho estão de acordo com a solicitação de uma FG para o RU. Todos concordam. Pergunta se todos estão de acordo com a Emissão: 18/11/2025 16:42:28 Página 4/6 regularização da FG da Supgrad, solicitando uma FG para a Supgrad e se podem colocar a FG 02, oriunda da Supgrad, para o Jardim Botânico. PESSOA_165333 sugere que discutam depois. Os demais conselheiros sugerem determinar ao Jardim Botânico. Todos estão de acordo. A Conselheira PESSOA_164872 pergunta se alguém discorda da solicitação da CD destinada à criação da diretoria acadêmica. Ninguém se manifesta contrário. Decisão: Aprovado(a) por unanimidade.",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Data da reunião: 2025-11-03.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: por unanimidade..",
+        "Encaminhamento: um pedido de criação da diretoria acadêmica."
+      ]
+    },
+    {
+      "numero": 3,
+      "item": "1790_INFORMES_6_F1",
+      "rotulo": "Ata CEUNES_DCAB, 4ª reunião ordinaria, 12/03/2025, informes, item 6, p. 2",
+      "pagina": 2,
+      "texto": "sos, além ; de ter perdido a autonomia em vários setores. À professora PESSOA_299444 lamentou a qualidade do ensino e usou o exemplo do filho deum empresário |A de São Mateus, que entrou na UFES, fez engenharia, mas depois foi para uma Ao universidade em Curitiba, alegando que a UFES era \"uma porcaria”. Ela ressaltou que essa questão é cultural, e que as pessoas brigam porque sabem o que é importante, mas o que falta é o brio em algumas delas. O discente PESSOA_299443 | concordou com o professor PESSOA_299442 sobre o problema de autonomia em todos os níveis AT da UFES — administrativo, docente e discente. Relatou que, em uma reunião com a gestão, foram convidados a listar os problemas enfrentados devido à falha da administração. No entanto, ao buscar resolver os problemas em determinados setores, os A servidores alegaram que a solução deveria vir de Vitória, o que“B a situação . Emissão: 25/01/2025 14:02:04 VEZ E VA |Ka AS ; firm: qro MU p- para os discentes. PESSOA_299441 ainda apontou que, nem mesmo um simples remédio, como dipirona, a universidade tem para fornecer aos estudantes, e por isso se posicionou a favor da desvinculação de Vitória, oferecendo-se para ajudar na causa e na redação de uma carta de relatos. A professora PESSOA_165280 esclareceu que, na reunião do conselho, foi informado que está sendo encaminhado um pedido de desvinculação, e que esse assunto precisa ser debatido na Direção, pois é lá que as decisões devem ser tomadas. Ela ressaltou que todas as insatisfações devem ser registradas em ata, já que O departamento sozinho não tem poder para resolver tais questões. O professor PESSOA_299440 fez uma cobrança aos discentes, ressaltando que eles têm voz ativa c acesso à Direção, mas não fazem uso dessa oportunidade. O discente PESSOA_299439 esclareceu que estavam movimentando-se para inserir discentes nessa discussão, mas enfrentaram problemas burocráticos que impediram a / | realização da votação. O professor PESSOA_299397 sugeriu que a melhor Ro | alternativa seria captar recursos através de um projeto para a compra de um gerador de + energia, de modo a suprir as necessidades do prédio. O professor PESSOA_165295 | afirmou que isso é possível, mas será necessário solicitar a autorização da pró-reitoria c | justificar que o equipamento é fundamental para atender ao fundo de amparo à pesquisa. | |",
+      "frases_grafo": [
+        "Centro: CEUNES.",
+        "Departamento: DCAB.",
+        "Data da reunião: 2025-03-12."
+      ]
+    },
+    {
+      "numero": 4,
+      "item": "1869_ORDEM_DO_DIA_3.1",
+      "rotulo": "Ata CCAE_DER, 1ª reunião ordinaria, 10/06/2024, ordem do dia, item 3.1, p. 1",
+      "pagina": 1,
+      "texto": "3.1 Processo Digital - PROCESSO_31846. Consulta sobre inclusão de horas de extensão em disciplinas oferecidas ao Curso de Zootecnia. O Presidente apresentou e explicou a solicitação. Foi proposto o encaminhamento de resposta em ofício conforme texto abaixo. UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL. Ofício Nº 08/2024 – DER/CCAE/UFES. Alegre, 10 de junho de 2024. A Professora PESSOA_376639 do NDE do Curso de Zootecnia. Assunto: Disciplinas do departamento de Engenharia Rural a serem ofertadas no novo PPC do curso de Zootecnia. Prezada professora, Recebemos o documento avulso PROCESSO_31846, no qual consta o ofício n.º 01-2024, solicitando a aprovação de ofertas de disciplinas como também a distribuição TELX, ementa, objetivos, bibliografia básica e complementar. Nesse sentido, segue a resposta deste departamento à demanda apresentada. CÓDIGO ATIVIDADE CURRICULAR DISCIPLINA ENG05502 Obrigatório Álgebra Linear para Ciências Agrárias Alto Universitário, s/nº, Alegre - ES, CEP 29500-000 | Telefone +55 (28) 3552-8603| www.engenhariarural.alegre.ufes.br UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL ENG05604 Obrigatório Cálculo Diferencial e Integral ENG05236 Obrigatório Desenho Técnico ENG13991 Obrigatório Estatística Básica ENG14007 Obrigatório Estatística Experimental ENG05211 Obrigatório Motores e Tratores Agrícolas ENG05259 Obrigatório Construções Rurais ENG05208 Obrigatório Máquinas Zootécnicas ENG-PROP-00001 Optativa Geomática I ENG-PROP-00004 Optativa Geomática II A distribuição TELX, ementa, objetivos, bibliografia básica e complementar das disciplinas são as seguintes: ENG05502 Álgebra Linear para Ciências Agrárias (Equivalente a STA-PROP-00072) Pré-requisito não possui, créditos 3, 60 horas, T.E.L. 30/30/00, Objetivos: Operar com números reais e matrizes, utilizar corretamente a linguagem, a simbologia e as notações matemáticas. Reconhecer um sistema linear, bem como dominar as técnicas algébricas para a resolução do mesmo. Operar com vetores no plano, bem como, resolver problemas geométricos com as técnicas da álgebra vetorial. Ementa: Matrizes. Determinantes. Sistema de equações lineares. Geometria Analítica. Vetores em Rn. Espaços vetoriais e subespaços. Transformações lineares. Bibliografia Básica: 1) PESSOA_162888; PESSOA_162887. Álgebra linear com aplicações. 10. ed. Porto Alegre: Bookman, 2012. xv, 768 p. 2) PESSOA_162879 Álgebra linear com aplicações. 8. ed. Rio de Janeiro, RJ: LTC, 2011. xi, Alto Universitário, s/nº, Alegre - ES, CEP 29500-000 | Telefone +55 (28) 3552-8603| www.engenhariarural.alegre.ufes.br UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL 451 p. 3) PESSOA_162886; PESSOA_162885 Álgebra linear com aplicações. 9. ed. Rio de Janeiro, RJ: LTC, 2013. xvi, 607 p. 4) PESSOA_162883. Álgebra linear. 3. ed.ampl.e rev. São Paul",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DER.",
+        "Data da reunião: 2024-06-10.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade."
+      ]
+    },
+    {
+      "numero": 5,
+      "item": "1770_PAUTA_3.03",
+      "rotulo": "Ata CCHN_CamaraLocal_Graduacao, 2ª reunião ordinaria, 21/09/2020, pauta, item 3.03, p. 2",
+      "pagina": 2,
+      "texto": "3.03 Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PESSOA_164333 informou sobre a consulta à Prograd (Documento Avulso nº PROCESSO_31562) na qual a Pró-Reitora em exercício manifestou concordância com a aplicação da Resolução nº 23/1997 Cepe em detrimento do previsto no Artigo nº 138 do Regimento Geral da Ufes, podendo inclusive estabelecer norma interna a ser votada no Conselho Departamental. Adicionalmente, a Pró-Reitora acolheu a proposta de revisão do Artigo nº 138 do Regimento Geral da Ufes de modo a atribuir ao Colegiado de Curso, e não ao Departamento, a competência de apreciar os pedidos de aproveitamento de curso, conforme já define a resolução 23/1997 CEPE/UFES. Após a apresentação do ponto, a direção apresentou proposta de Resolução interna. Colocado em discussão, foram feitas alterações e o texto final ficou conforme segue: “Diretrizes sobre os processos de Aproveitamento de estudos no âmbito do CCHN. De acordo com a Resolução 23/97 do CEPE e com as orientações da Prograd acerca dos Processos de Aproveitamento de Estudos, e considerando a integração das Secretarias do CCHN, o que demanda a padronização de procedimentos, estabelecem-se as seguintes diretrizes no âmbito dos Colegiados de Cursos vinculados ao CCHN, no que tange aos pedidos de aproveitamentos de estudos. 1) Conforme artigo 2º da Resolução 23/97 CEPE, que rege a matéria, compete aos Colegiados de Curso a avaliação e decisão sobre o aproveitamento de estudos. Logo, as solicitações deverão ser protocoladas junto à Secretaria do Colegiado e por esta serão encaminhadas ao Coordenador do Colegiado do Curso ao qual a solicitação se dirige. 2) Conforme parágrafo único do artigo 3º da mesma Resolução, o Colegiado de Curso é a instância que avalia e decide acerca da solicitação, ponderando inclusive os prejuízos causados à formação do estudante, mas também aqueles causados por repetições desnecessárias. Assim, é o Coordenador de Curso a instância primeira a avaliar e decidir acerca dessas solicitações. Se houver necessidade, o Coordenador poderá designar um membro do Colegiado de Curso para auxiliá-lo nesta decisão. 3) Em caso de dúvidas acerca de componentes curriculares específicos, que estejam para além da capacidade avaliativa do coordenador e de todos os demais membros do Colegiado de Curso, o Coordenador poderá usar da prerrogativa de consulta pontual a docente da área em questão. O resultado da consulta deve ser aprovado pelo Colegiado ou pelo Coordenador. Quando o Coordenador não souber qual o professor que responde pela disciplina, poderá encaminhar a consulta ao Departamento responsável pela oferta da disciplina. A SID não tem como parte de suas funções a realização deste tipo de solicitação e, portanto, só deverá ser acionada em caso de encaminhamento para um docente específico. Para todas as demais demandas relacionadas aos pedidos de aproveitamentos de estudos, a Secretaria do Colegiado deverá fornecer apoio ao Colegiado de Cur",
+      "frases_grafo": [
+        "Centro: CCHN.",
+        "Data da reunião: 2020-09-21.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: As diretrizes foram aprovadas por unanimidade.",
+        "Encaminhamento: encaminhamento para um docente específico.",
+        "Trata do mesmo assunto que: 1778_PAUTA_3.03."
+      ]
+    }
+  ],
+  "prompt_usuario": "Evidências:\n\n[1] Ata CCENS_DG, 2ª reunião ordinaria, 01/04/2024, aprovação de ata, item 2.1, p. 1\nETALHAMENTO DO PROJETO: Registrado no Sistema de Gestão da Extensão (SIGEX) com o número 4359, o projeto visa divulgar e disseminar as informações obtidas durante a realização das atividades de campo das disciplinas de mapeamento geológico da comunidade em geral. O projeto teve início em 12/03/2024 (com justificativa pelo cadastro/envio da ação ter sido realizado em prazo inferior ao estabelecido pela Instrução Normativa nº 02/2016) e previsão de conclusão em 12/03/2026. Tem como meta alcançar cerca de 1000 pessoas, abrangendo o público geral (interno e externo). O objetivo principal é comunicar e disseminar os conhecimentos geológicos compilados pelos estudantes das disciplinas de mapeamento geológico. O método adotado para a realização do projeto compreende: a) diálogos com a comunidade local e turistas; b) exposição dos mapas geológicos produzidos; c) exposição de fotografias ilustrativas das litologias e feições geológicas de interesse; d) coleta e doação de amostras específicas a museus, pousadas e ao Departamento de Geologia; e) interação com as secretarias de meio ambiente e turismo das prefeituras dos municípios nos quais as atividade de mapeamento são realizadas; f) caminhadas geológicas educativas; e g) debate com a comunidade sobre curiosidades geológicas, como monumentos geológicos e formações geológicas específicas. A equipe é formada por 3 professores do magistério superior (PESSOA_162336, PESSOA_162340 e PESSOA_162337). PARECER: Considerando que o processo está devidamente instruído conforme a Resolução CEPE/UFES nº 28/2022, devidamente registrado no Sistema de Gestão da Extensão (SIGEX) sob o número 4359, e tendo em vista a relevância do projeto para o público interno e externo, manifesto parecer favorável ao registro do projeto pela Câmara Departamental”. Em seguida, o Chefe abriu a palavra para os membros da Câmara Departamental, o professor PESSOA_162336 informou que há atribuição de 2 horas para cada professor (PESSOA_162336, PESSOA_162340 e PESSOA_162337). O Chefe colocou o relato e parecer e a atribuição de 2 horas para cada professor, em apreciação. Em votação. Aprovado por unanimidade. Por solicitação do professor PESSOA_162337 seu voto é declarado.\nCentro: CCENS.\nDepartamento: DG.\nData da reunião: 2024-04-01.\nDesfecho: Aprovado.\nResultado da votação: Aprovado por unanimidade.\nEncaminhamento: Que os favoráveis votem: SIM no chat e os contrários votem: NÃO no chat.\nTrata do mesmo assunto que: 1684_EXPEDIENTE_1.1_D1.\n(Item anterior na mesma ata, não citável: Processo digital n° PROCESSO_30908 - Registro de Projeto de Extensão \"Diálogos geológicos: passado, presente e futuro\" Sigex: 4359. Interessado: PESSOA_162336. Relatora: PESSOA_162335. O Chefe colocou em apreciação a inclusão. Em votação)\n(Item posterior na mesma ata, não citável: O Chefe comunica que foram feitas algumas alterações na Oferta de disciplinas 2024/1. Seguem: aumento de 3 vagas na turma GE2 de Mineralogia 1; TECTÔNICA CENOZÓICA: GE1: 20 vagas; PALEONTOLOGIA: Abertura de mais 2 vagas em cada turma (total de 12 vagas cada turma); SEMINÁRIO DE GRADUAÇÃO EM GEOLOGIA: Abertura de mais 15 vagas (total 45 vagas); GEOQUÍMICA: Abertura de mais 20 vagas (total 40 vagas); PETROLOGIA 3 METAMÓRFICA: GE2 mais duas 2 vagas (total 12 vagas); GEOCONSERVAÇÃO E GEOTURISMO: GE2: 20 vagas, qua 16-20h Sala 2 PG; GEOFÍSICA DO PETRÓLEO:GE2: 40 vagas - ter 16-20h - Chiu Chiu/ Lab 1; RISCOS GEOLÓGICOS: GE2: 10 vagas - Seg 7-8h – P, Laboratório de Geologia de Engenharia Ter 16-18h - T, Sala 1 Geologia - Qua 7-8h – P, Laboratório de Geologia de Engenharia; GEOLOGIA DO ESTADO DO ESPÍRITO SANTO: GE2: 20 vagas - Sex 8-10h - T Sala 1 PG, Sab 18-20h - P (campo); GEOLOGIA DO QUATERNÁRIO: GE2: 20 vagas - qua 14h - 16h T, seg 12-14h P (campo), Sala: Laboratórios de Macro e Micro; LAVRA E BENEFICIAMENTO DE MINÉRIO: GE2 30 vagas - Qui 18-20h - T - Sala 1 PG, Sex 16-18h - P (campo); e GEOLOGIA DO ESTADO DO ESPÍRITO SANTO, total de 30 vagas.)\n\n[2] Ata CEUNES, 18ª reunião ordinaria, 03/11/2025, pauta, item 6, p. 3\n São Mateus. O Conselheiro PESSOA_165335 afirma que entende a necessidade da CD, mas recomenda que é preciso ter cuidado sobre como será isso, destaca que deve ficar claro como colocarão para não atropelar. O Presidente PESSOA_165296 apresenta sua sugestão de encaminhamento: um pedido de criação da diretoria acadêmica. Sugere constar na nossa ata que a qualquer tempo o conselho pode rever a destinação, entretanto, não sugere colocar isso no documento para o Reitor. O Conselheiro PESSOA_165334 afirma que podem perder uma grande oportunidade. Destaca que a solicitação que for feita, será para atender a estrutura atual, se a CD vier, depois eles podem rever. O Presidente PESSOA_165296 pede licença para se retirar desta sessão, pois possui outro compromisso e afirma que a Vice-Diretora, professora PESSOA_164872 assumirá a presidência para continuação. O Presidente PESSOA_165229 se retira da sala de reuniões. O Conselheiro PESSOA_165231 pede que as preocupações apontadas por alguns conselheiros (quanto aos assuntos para que não sejam atravessados) sejam registradas em ata, ou seja, para que essa solicitação não interfira na solicitação de reestruturação, que ainda deve ser amplamente discutida. A Conselheira PESSOA_164872, na presidência deste Conselho, coloca em votação se a solicitação de funções será feita tendo o embasamento direcionado. Todos concordam. Pergunta se os membros deste Conselho estão de acordo com a solicitação de uma FG para o RU. Todos concordam. Pergunta se todos estão de acordo com a Emissão: 18/11/2025 16:42:28 Página 4/6 regularização da FG da Supgrad, solicitando uma FG para a Supgrad e se podem colocar a FG 02, oriunda da Supgrad, para o Jardim Botânico. PESSOA_165333 sugere que discutam depois. Os demais conselheiros sugerem determinar ao Jardim Botânico. Todos estão de acordo. A Conselheira PESSOA_164872 pergunta se alguém discorda da solicitação da CD destinada à criação da diretoria acadêmica. Ninguém se manifesta contrário. Decisão: Aprovado(a) por unanimidade.\nCentro: CEUNES.\nData da reunião: 2025-11-03.\nDesfecho: Aprovado.\nResultado da votação: por unanimidade..\nEncaminhamento: um pedido de criação da diretoria acadêmica.\n(Item anterior na mesma ata, não citável: PROCESSO_31820 - Solicita homologação dos representantes discentes junto ao Conselho Departamental do Ceunes, para mandato de um ano, a partir desta data, conforme segue: PESSOA_165352 (titular) e PESSOA_165351 (suplente); PESSOA_165350 (titular) e PESSOA_165349 (suplente); PESSOA_164519 (titular) e PESSOA_165348 (suplente); PESSOA_165347 (titular) e PESSOA_165346 (suplente); PESSOA_164765 (titular) e PESSOA_165345 (suplente); PESSOA_165344 (titular) e PESSOA_165343 (suplente); PESSOA_165342 (titular) e PESSOA_165341 (suplente); PESSOA_165340 (titular) e PESSOA_165339 (suplente). Relator(a): PESSOA_165235)\n\n[3] Ata CEUNES_DCAB, 4ª reunião ordinaria, 12/03/2025, informes, item 6, p. 2\nsos, além ; de ter perdido a autonomia em vários setores. À professora PESSOA_299444 lamentou a qualidade do ensino e usou o exemplo do filho deum empresário |A de São Mateus, que entrou na UFES, fez engenharia, mas depois foi para uma Ao universidade em Curitiba, alegando que a UFES era \"uma porcaria”. Ela ressaltou que essa questão é cultural, e que as pessoas brigam porque sabem o que é importante, mas o que falta é o brio em algumas delas. O discente PESSOA_299443 | concordou com o professor PESSOA_299442 sobre o problema de autonomia em todos os níveis AT da UFES — administrativo, docente e discente. Relatou que, em uma reunião com a gestão, foram convidados a listar os problemas enfrentados devido à falha da administração. No entanto, ao buscar resolver os problemas em determinados setores, os A servidores alegaram que a solução deveria vir de Vitória, o que“B a situação . Emissão: 25/01/2025 14:02:04 VEZ E VA |Ka AS ; firm: qro MU p- para os discentes. PESSOA_299441 ainda apontou que, nem mesmo um simples remédio, como dipirona, a universidade tem para fornecer aos estudantes, e por isso se posicionou a favor da desvinculação de Vitória, oferecendo-se para ajudar na causa e na redação de uma carta de relatos. A professora PESSOA_165280 esclareceu que, na reunião do conselho, foi informado que está sendo encaminhado um pedido de desvinculação, e que esse assunto precisa ser debatido na Direção, pois é lá que as decisões devem ser tomadas. Ela ressaltou que todas as insatisfações devem ser registradas em ata, já que O departamento sozinho não tem poder para resolver tais questões. O professor PESSOA_299440 fez uma cobrança aos discentes, ressaltando que eles têm voz ativa c acesso à Direção, mas não fazem uso dessa oportunidade. O discente PESSOA_299439 esclareceu que estavam movimentando-se para inserir discentes nessa discussão, mas enfrentaram problemas burocráticos que impediram a / | realização da votação. O professor PESSOA_299397 sugeriu que a melhor Ro | alternativa seria captar recursos através de um projeto para a compra de um gerador de + energia, de modo a suprir as necessidades do prédio. O professor PESSOA_165295 | afirmou que isso é possível, mas será necessário solicitar a autorização da pró-reitoria c | justificar que o equipamento é fundamental para atender ao fundo de amparo à pesquisa. | |\nCentro: CEUNES.\nDepartamento: DCAB.\nData da reunião: 2025-03-12.\n(Item anterior na mesma ata, não citável: O professor PESSOA_165271 comunicou Lo que o processo de transferência do projeto da Fest está em andamento, es ele tem 4 Min Emissão: 25/03/2025 14:02:04 0) 1) 2 PESSOA_299455 7] (GAFf add: algumas dúvidas e gostaria da contribuição do departamento para decidir como proceder com os equipamentos. Ele precisa entregar os equipamentos à nova coordenação para que o projeto continue, mas não tem orientação sobre como fazer isso. O projeto foi iniciado no Departamento de Ciências Agrárias c Biológicas (DCAB) e Já está em andamento há três anos. Os equipamentos são importantes, estão patrimoniados pela UFES e sob a responsabilidade do departamento. O professor PESSOA_165295 informou que, geralmente, após o material ser tombado como patrimônio da UFES, o financiador perde a autoridade sobre ele. A professora PESSOA_299454 | mencionou que, neste caso, a coordenação do projeto está sendo transferida para outro ad departamento. Atualmente, os equipamentos estão sob a custódia do DCAB ce, normalmente, quando o contrato com a empresa financiadora chega ao fim, ocorre a doação dos equipamentos. O que o professor PESSOA_165271 está propondo sy vai além disso: o material já é da UFES, mas até o término do contrato, ele ficará sob a g tutela do Departamento de Engenharia e Tecnologia (DET). O professor PESSOA_162744 busca A. um acordo, pois considera que houve anos de dedicação da coordenação anterior ao | projeto. Ele gostaria que, após o encerramento do contrato, todo o material adquirido durante sua coordenação fosse transferido para o DCAB, e perguntou aos professores se O cles concordam com essa abordagem. O professor PESSOA_165232 + afirmou que os equipamentos são patrimônio da UFES ce não do projeto, pois estão sob N a guarda do departamento. O processo interno para transferi-los é simples e envolve apenas a formalização da transferência patrimonial. O professor PESSOA_299453 sugeriu que seria viável fechar um acordo no qual o material seria emprestado ao novo pi departamento e, após a conclusão do processo, seria devolvido ao departamento original. A professora PESSOA_299452 opinou que, antes de levar a Td questão à reunião do departamento, deveria ter ocorrido uma conversa prévia entre o E\" ex-coordenador e o atual coordenador do projeto. O professor PESSOA_299451 esclareceu que ele já vem conversando com a atual coordenadora, que está NU ciente de todas as informações compartilhadas na reunião. A professora PESSOA_299450 concordou com a necessidade de não entregar os equipamentos à nova coordenação sem (PR precauções. Ela enfatizou que, embora o compromisso tenha sido assumido pelo ) departamento, não se pode abrir mão dos recursos adquiridos com muito esforço, como (np à bolsas e equipamentos, que foram conquistados para a universidade. A FEST já [Y patrimoniou esses equipamentos e os documentos pertinentes estão no departamento. | Esses equipamentos não precisam, necessariamente, estar com o departamento à responsável pela execução do projeto, pois vários departamentos participam do projeto, a embora estejam alocados no DCAB. O professor PESSOA_299449 concordou que os / N equipamentos estão sob a responsabilidade do DCAB, e que é necessário formalizar o empréstimo dos mesmos para o novo departamento. O professor PESSOA_299448 também apoiou essa posição, sugerindo que o material fosse transferido para VÁ o outro departamento sob a condição de que, após a conclusão do processo, ele retornasse ao DCAB. Ele destacou que a conquista desses recursos foi resultado do trabalho e da construção intelectual do professor PESSOA_165271. I)\n(Item posterior na mesma ata, não citável: A professora PESSOA_299332 informou que em dois mil e vinte À ; | | (2023) o colegiado de Bacharelado participou de um edital do Carrefour com uma bolsa s | & permanente para estudante negro e agora foi bencficiado com outra bolsa e que já está Ná NY preparando a documentação, que se tornou bem mais burocrático)\n\n[4] Ata CCAE_DER, 1ª reunião ordinaria, 10/06/2024, ordem do dia, item 3.1, p. 1\n3.1 Processo Digital - PROCESSO_31846. Consulta sobre inclusão de horas de extensão em disciplinas oferecidas ao Curso de Zootecnia. O Presidente apresentou e explicou a solicitação. Foi proposto o encaminhamento de resposta em ofício conforme texto abaixo. UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL. Ofício Nº 08/2024 – DER/CCAE/UFES. Alegre, 10 de junho de 2024. A Professora PESSOA_376639 do NDE do Curso de Zootecnia. Assunto: Disciplinas do departamento de Engenharia Rural a serem ofertadas no novo PPC do curso de Zootecnia. Prezada professora, Recebemos o documento avulso PROCESSO_31846, no qual consta o ofício n.º 01-2024, solicitando a aprovação de ofertas de disciplinas como também a distribuição TELX, ementa, objetivos, bibliografia básica e complementar. Nesse sentido, segue a resposta deste departamento à demanda apresentada. CÓDIGO ATIVIDADE CURRICULAR DISCIPLINA ENG05502 Obrigatório Álgebra Linear para Ciências Agrárias Alto Universitário, s/nº, Alegre - ES, CEP 29500-000 | Telefone +55 (28) 3552-8603| www.engenhariarural.alegre.ufes.br UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL ENG05604 Obrigatório Cálculo Diferencial e Integral ENG05236 Obrigatório Desenho Técnico ENG13991 Obrigatório Estatística Básica ENG14007 Obrigatório Estatística Experimental ENG05211 Obrigatório Motores e Tratores Agrícolas ENG05259 Obrigatório Construções Rurais ENG05208 Obrigatório Máquinas Zootécnicas ENG-PROP-00001 Optativa Geomática I ENG-PROP-00004 Optativa Geomática II A distribuição TELX, ementa, objetivos, bibliografia básica e complementar das disciplinas são as seguintes: ENG05502 Álgebra Linear para Ciências Agrárias (Equivalente a STA-PROP-00072) Pré-requisito não possui, créditos 3, 60 horas, T.E.L. 30/30/00, Objetivos: Operar com números reais e matrizes, utilizar corretamente a linguagem, a simbologia e as notações matemáticas. Reconhecer um sistema linear, bem como dominar as técnicas algébricas para a resolução do mesmo. Operar com vetores no plano, bem como, resolver problemas geométricos com as técnicas da álgebra vetorial. Ementa: Matrizes. Determinantes. Sistema de equações lineares. Geometria Analítica. Vetores em Rn. Espaços vetoriais e subespaços. Transformações lineares. Bibliografia Básica: 1) PESSOA_162888; PESSOA_162887. Álgebra linear com aplicações. 10. ed. Porto Alegre: Bookman, 2012. xv, 768 p. 2) PESSOA_162879 Álgebra linear com aplicações. 8. ed. Rio de Janeiro, RJ: LTC, 2011. xi, Alto Universitário, s/nº, Alegre - ES, CEP 29500-000 | Telefone +55 (28) 3552-8603| www.engenhariarural.alegre.ufes.br UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL 451 p. 3) PESSOA_162886; PESSOA_162885 Álgebra linear com aplicações. 9. ed. Rio de Janeiro, RJ: LTC, 2013. xvi, 607 p. 4) PESSOA_162883. Álgebra linear. 3. ed.ampl.e rev. São Paul\nCentro: CCAE.\nDepartamento: DER.\nData da reunião: 2024-06-10.\nDesfecho: Aprovado.\nResultado da votação: Aprovado por unanimidade.\n(Item posterior na mesma ata, não citável: Pedido de redistribuição de PESSOA_165539 - UNIFESPA. O Presidente apresentou o modelo de resposta ao solicitante, informando que no momento o DER não tem condições de atender tal pedido. Orientou a resposta com base na Lei nº Alto Universitário, s/nº, Alegre - ES, CEP 29500-000 | Telefone +55 (28) 3552-8603| www.engenhariarural.alegre.ufes.br UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS AGRÁRIAS E ENGENHARIAS DEPARTAMENTO DE ENGENHARIA RURAL 8.112/1990 e Instrução Normativa 06/21 PROGEP/UFES. Em esclarecimento. Em discussão. Em votação)\n\n[5] Ata CCHN_CamaraLocal_Graduacao, 2ª reunião ordinaria, 21/09/2020, pauta, item 3.03, p. 2\n3.03 Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PESSOA_164333 informou sobre a consulta à Prograd (Documento Avulso nº PROCESSO_31562) na qual a Pró-Reitora em exercício manifestou concordância com a aplicação da Resolução nº 23/1997 Cepe em detrimento do previsto no Artigo nº 138 do Regimento Geral da Ufes, podendo inclusive estabelecer norma interna a ser votada no Conselho Departamental. Adicionalmente, a Pró-Reitora acolheu a proposta de revisão do Artigo nº 138 do Regimento Geral da Ufes de modo a atribuir ao Colegiado de Curso, e não ao Departamento, a competência de apreciar os pedidos de aproveitamento de curso, conforme já define a resolução 23/1997 CEPE/UFES. Após a apresentação do ponto, a direção apresentou proposta de Resolução interna. Colocado em discussão, foram feitas alterações e o texto final ficou conforme segue: “Diretrizes sobre os processos de Aproveitamento de estudos no âmbito do CCHN. De acordo com a Resolução 23/97 do CEPE e com as orientações da Prograd acerca dos Processos de Aproveitamento de Estudos, e considerando a integração das Secretarias do CCHN, o que demanda a padronização de procedimentos, estabelecem-se as seguintes diretrizes no âmbito dos Colegiados de Cursos vinculados ao CCHN, no que tange aos pedidos de aproveitamentos de estudos. 1) Conforme artigo 2º da Resolução 23/97 CEPE, que rege a matéria, compete aos Colegiados de Curso a avaliação e decisão sobre o aproveitamento de estudos. Logo, as solicitações deverão ser protocoladas junto à Secretaria do Colegiado e por esta serão encaminhadas ao Coordenador do Colegiado do Curso ao qual a solicitação se dirige. 2) Conforme parágrafo único do artigo 3º da mesma Resolução, o Colegiado de Curso é a instância que avalia e decide acerca da solicitação, ponderando inclusive os prejuízos causados à formação do estudante, mas também aqueles causados por repetições desnecessárias. Assim, é o Coordenador de Curso a instância primeira a avaliar e decidir acerca dessas solicitações. Se houver necessidade, o Coordenador poderá designar um membro do Colegiado de Curso para auxiliá-lo nesta decisão. 3) Em caso de dúvidas acerca de componentes curriculares específicos, que estejam para além da capacidade avaliativa do coordenador e de todos os demais membros do Colegiado de Curso, o Coordenador poderá usar da prerrogativa de consulta pontual a docente da área em questão. O resultado da consulta deve ser aprovado pelo Colegiado ou pelo Coordenador. Quando o Coordenador não souber qual o professor que responde pela disciplina, poderá encaminhar a consulta ao Departamento responsável pela oferta da disciplina. A SID não tem como parte de suas funções a realização deste tipo de solicitação e, portanto, só deverá ser acionada em caso de encaminhamento para um docente específico. Para todas as demais demandas relacionadas aos pedidos de aproveitamentos de estudos, a Secretaria do Colegiado deverá fornecer apoio ao Colegiado de Cur\nCentro: CCHN.\nData da reunião: 2020-09-21.\nDesfecho: Aprovado.\nResultado da votação: As diretrizes foram aprovadas por unanimidade.\nEncaminhamento: encaminhamento para um docente específico.\nTrata do mesmo assunto que: 1778_PAUTA_3.03.\n(Item anterior na mesma ata, não citável: Terceira Etapa de Matrículas 2020/1 Especial. A representante da SIC, PESSOA_164332, informou que o novo calendário acadêmico prevê um prazo para solicitação de 3ª etapa de 8 a 16 de outubro para os alunos, e até 6 de novembro para efetuar as correções de matrícula. A partir desse cronograma, a semana de 19 a 23/10 será para resposta pelo Departamento e docentes de aceitação de matrícula, e de 26/10 a 06/11 será o prazo para o Colegiado processar os pedidos. A proposta de informatização dos pedidos de 3ª etapa ainda não foi aprovada na Ufes e teve um revés com a aposentadoria da PESSOA_164335, do DRCA. A SIC já havia informatizado esse trabalho há alguns anos e vai divulgar novamente o procedimento e o cronograma para os colegiados e departamentos. PESSOA_164334 convidou o Colegiado do Curso de Ciências Biológicas a aderir ao sistema da SIC. A coordenadora disse que não entrará neste momento, mas que pode aderir no semestre 2020/2. A secretária PESSOA_163695 lembrou aos coordenadores da necessidade de solicitar à Prograd a equivalência das disciplinas entre os currículos antigos e os novos e convidou os coordenadores dos cursos ABI para uma reunião sobre os procedimentos de equivalência de disciplinas.)\n(Item posterior na mesma ata, não citável: EARTE. PESSOA_164332 informou que a SIC tem recebido muitas demandas de estudantes nesse início do semestre, em especial dos estudantes que não conseguiram matrícula na 1ª Etapa. O sistema do EARTE não previa uma possibilidade do aluno conseguir entrar nas salas sem estar matriculado. O coordenador da Oceanografia confirmou que os docentes de seu curso estão tendo essa dificuldade também. PESSOA_164331 informou que fez um levantamento dos e-mails de todos os professores da oferta de Letras Inglês para reduzir esse excesso de e-mails e trabalho. O Departamento de Ciências Sociais publicou em sua página uma lista com os links das salas virtuais das disciplinas e e-mails de contato dos docentes e foi sugerido que esse procedimento seja feito por todos os Departamentos.)\n\nPergunta: Quais registros e encaminhamentos constam sobre disciplina ECH15737 no setor CEUNES?",
+  "tokens_entrada": 7612,
+  "tokens_saida": 18,
+  "truncada": false,
+  "resposta_bruta": "Não encontrei nas atas disponíveis informação suficiente para responder a essa pergunta.",
+  "resposta_final": "Não encontrei nas atas disponíveis informação suficiente para responder a essa pergunta.",
+  "citados": []
+}

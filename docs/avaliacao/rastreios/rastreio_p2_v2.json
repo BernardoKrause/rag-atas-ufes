@@ -1,0 +1,618 @@
+{
+  "id_execucao": "12da84d90c3c",
+  "quando": "2026-11-08T01:10:26",
+  "commit": "ab7ba7b",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Quais registros e encaminhamentos constam sobre reorganização dos espaços do CEU no setor CCAE?",
+  "alvos": {
+    "1730_ORDEM_DO_DIA_3.15": {
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha",
+      "rank_lexico": 2,
+      "rank_vetorial": 1,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 1
+    },
+    "1730_ORDEM_DO_DIA_3.15_F1": {
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha",
+      "rank_lexico": 15,
+      "rank_vetorial": null,
+      "rank_grafo": 1,
+      "posicao_fusao_top20": 4
+    }
+  },
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1728_EXPEDIENTE_2.1",
+      "score": 23.765712384313115,
+      "ata": 1728,
+      "orgao": "CCAE",
+      "data": "2025-05-13",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "rank": 2,
+      "item": "1730_ORDEM_DO_DIA_3.15",
+      "score": 18.498767021201594,
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "rank": 3,
+      "item": "1891_PAUTA_3.4",
+      "score": 16.251421152062058,
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "rank": 4,
+      "item": "1731_PAUTA_3.19",
+      "score": 15.776932520906051,
+      "ata": 1731,
+      "orgao": "CCHN",
+      "data": "2022-02-01",
+      "pagina": 7,
+      "assunto": "Implantação da Portaria Normativa nº 04 de 28 de janeiro de 2022. Foi realizada a leitura "
+    },
+    {
+      "rank": 5,
+      "item": "1669_ORDEM_DO_DIA_3.2",
+      "score": 13.95870840610961,
+      "ata": 1669,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-29",
+      "pagina": 2,
+      "assunto": "Documento avulso n.º PROCESSO_30866. Solicitação de ocupação do depósito para fins técnico"
+    },
+    {
+      "rank": 6,
+      "item": "1773_COMUNICACOES_1.02",
+      "score": 13.5237815431844,
+      "ata": 1773,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-02-08",
+      "pagina": 1,
+      "assunto": "Reestruturação dos setores administrativos do CCHN. Desde março de 2020, a Direção do CCHN"
+    },
+    {
+      "rank": 7,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "score": 13.460857989639834,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 8,
+      "item": "1896_INFORMES_4.4",
+      "score": 12.881554814304309,
+      "ata": 1896,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-06-13",
+      "pagina": 6,
+      "assunto": "O Presidente informou que elaborou Normas gerais para os laboratórios do DEAL e neste prim"
+    },
+    {
+      "rank": 9,
+      "item": "1734_COMUNICACOES_1.03",
+      "score": 12.607106280968074,
+      "ata": 1734,
+      "orgao": "CCHN",
+      "data": "2022-04-26",
+      "pagina": 1,
+      "assunto": "Reorganização do Lieg. A diretoria do CCHN informou que as atividades do Laboratório de In"
+    },
+    {
+      "rank": 10,
+      "item": "1786_INFORMES_3",
+      "score": 12.58006650563701,
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1730_ORDEM_DO_DIA_3.15",
+      "score": 0.7411026,
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "rank": 2,
+      "item": "1891_PAUTA_3.4",
+      "score": 0.69237506,
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "rank": 3,
+      "item": "2003_PAUTA_1",
+      "score": 0.6864989,
+      "ata": 2003,
+      "orgao": "CCE",
+      "data": "2015-06-24",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 - Instrução Normativa Nº 001/2015/CCE – O Diretor do CCE informou que de"
+    },
+    {
+      "rank": 4,
+      "item": "1742_COMUNICACOES_02.03",
+      "score": 0.6802782,
+      "ata": 1742,
+      "orgao": "CE",
+      "data": "2025-01-31",
+      "pagina": 1,
+      "assunto": "Foi aprovada a proposta para uma exposição comemorativa dos 50 anos do CE, a ser realizada"
+    },
+    {
+      "rank": 5,
+      "item": "1953_PAUTA_23",
+      "score": 0.67934763,
+      "ata": 1953,
+      "orgao": "CCE",
+      "data": "2010-05-31",
+      "pagina": 9,
+      "assunto": "Eleição de Representante do CEPE - O Diretor do Departamento de Administração dos Órgãos C"
+    },
+    {
+      "rank": 6,
+      "item": "1778_PAUTA_3.03",
+      "score": 0.67580384,
+      "ata": 1778,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-07-10",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "rank": 7,
+      "item": "1770_PAUTA_3.03",
+      "score": 0.67580384,
+      "ata": 1770,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2020-09-21",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "rank": 8,
+      "item": "1953_PAUTA_22",
+      "score": 0.6726521,
+      "ata": 1953,
+      "orgao": "CCE",
+      "data": "2010-05-31",
+      "pagina": 8,
+      "assunto": "Sistema de Rodízio no CEPE – Leitura do Memorando n. 044/2010- DMAT/CCE, pelo chefe do Dep"
+    },
+    {
+      "rank": 9,
+      "item": "1970_PAUTA_11",
+      "score": 0.6721269,
+      "ata": 1970,
+      "orgao": "CCE",
+      "data": "2012-02-27",
+      "pagina": 2,
+      "assunto": "Apreciação do Organograma do CCE – O Diretor do CCE informou que devido a desatualização d"
+    },
+    {
+      "rank": 10,
+      "item": "1977_PAUTA_1_F1",
+      "score": 0.67188334,
+      "ata": 1977,
+      "orgao": "CCE",
+      "data": "2013-02-26",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Prof. PESSOA_165942 informou que em reunião com o Re"
+    }
+  ],
+  "ancoras": [
+    "1728_EXPEDIENTE_2.1",
+    "1730_ORDEM_DO_DIA_3.15",
+    "1891_PAUTA_3.4",
+    "2003_PAUTA_1",
+    "1731_PAUTA_3.19",
+    "1742_COMUNICACOES_02.03",
+    "1669_ORDEM_DO_DIA_3.2",
+    "1953_PAUTA_23",
+    "1773_COMUNICACOES_1.02",
+    "1778_PAUTA_3.03",
+    "1662_ORDEM_DO_DIA_1.5_F1",
+    "1770_PAUTA_3.03",
+    "1896_INFORMES_4.4",
+    "1953_PAUTA_22",
+    "1734_COMUNICACOES_1.03",
+    "1970_PAUTA_11",
+    "1786_INFORMES_3",
+    "1977_PAUTA_1_F1"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 1,
+      "item": "1730_ORDEM_DO_DIA_3.15_F1",
+      "score": null,
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "rank": 2,
+      "item": "1891_PAUTA_3.4_F2",
+      "score": null,
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "rank": 2,
+      "item": "1891_PAUTA_3.4_F1",
+      "score": null,
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "rank": 6,
+      "item": "1778_PAUTA_3.03_F1",
+      "score": null,
+      "ata": 1778,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-07-10",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "rank": 6,
+      "item": "1770_PAUTA_3.03_F1",
+      "score": null,
+      "ata": 1770,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2020-09-21",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "rank": 7,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 7,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "score": null,
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "rank": 10,
+      "item": "1977_PAUTA_1",
+      "score": null,
+      "ata": 1977,
+      "orgao": "CCE",
+      "data": "2013-02-26",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – O Diretor do CCE, Prof. PESSOA_165942 informou que em reunião com o Re"
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1730_ORDEM_DO_DIA_3.15",
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "posicao": 2,
+      "item": "1891_PAUTA_3.4",
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "posicao": 3,
+      "item": "1728_EXPEDIENTE_2.1",
+      "ata": 1728,
+      "orgao": "CCAE",
+      "data": "2025-05-13",
+      "pagina": 2,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "posicao": 4,
+      "item": "1730_ORDEM_DO_DIA_3.15_F1",
+      "ata": 1730,
+      "orgao": "CCAE",
+      "data": "2025-05-28",
+      "pagina": 4,
+      "assunto": "Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha"
+    },
+    {
+      "posicao": 5,
+      "item": "1891_PAUTA_3.4_F2",
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "posicao": 6,
+      "item": "1891_PAUTA_3.4_F1",
+      "ata": 1891,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-08-01",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganiza"
+    },
+    {
+      "posicao": 7,
+      "item": "2003_PAUTA_1",
+      "ata": 2003,
+      "orgao": "CCE",
+      "data": "2015-06-24",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 - Instrução Normativa Nº 001/2015/CCE – O Diretor do CCE informou que de"
+    },
+    {
+      "posicao": 8,
+      "item": "1731_PAUTA_3.19",
+      "ata": 1731,
+      "orgao": "CCHN",
+      "data": "2022-02-01",
+      "pagina": 7,
+      "assunto": "Implantação da Portaria Normativa nº 04 de 28 de janeiro de 2022. Foi realizada a leitura "
+    },
+    {
+      "posicao": 9,
+      "item": "1742_COMUNICACOES_02.03",
+      "ata": 1742,
+      "orgao": "CE",
+      "data": "2025-01-31",
+      "pagina": 1,
+      "assunto": "Foi aprovada a proposta para uma exposição comemorativa dos 50 anos do CE, a ser realizada"
+    },
+    {
+      "posicao": 10,
+      "item": "1669_ORDEM_DO_DIA_3.2",
+      "ata": 1669,
+      "orgao": "CCENS_DC",
+      "data": "2025-05-29",
+      "pagina": 2,
+      "assunto": "Documento avulso n.º PROCESSO_30866. Solicitação de ocupação do depósito para fins técnico"
+    },
+    {
+      "posicao": 11,
+      "item": "1953_PAUTA_23",
+      "ata": 1953,
+      "orgao": "CCE",
+      "data": "2010-05-31",
+      "pagina": 9,
+      "assunto": "Eleição de Representante do CEPE - O Diretor do Departamento de Administração dos Órgãos C"
+    },
+    {
+      "posicao": 12,
+      "item": "1773_COMUNICACOES_1.02",
+      "ata": 1773,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-02-08",
+      "pagina": 1,
+      "assunto": "Reestruturação dos setores administrativos do CCHN. Desde março de 2020, a Direção do CCHN"
+    },
+    {
+      "posicao": 13,
+      "item": "1778_PAUTA_3.03",
+      "ata": 1778,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-07-10",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "posicao": 14,
+      "item": "1778_PAUTA_3.03_F1",
+      "ata": 1778,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2021-07-10",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "posicao": 15,
+      "item": "1770_PAUTA_3.03_F1",
+      "ata": 1770,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2020-09-21",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "posicao": 16,
+      "item": "1662_ORDEM_DO_DIA_1.5_F1",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 17,
+      "item": "1770_PAUTA_3.03",
+      "ata": 1770,
+      "orgao": "CCHN_CamaraLocal_Graduacao",
+      "data": "2020-09-21",
+      "pagina": 2,
+      "assunto": "Diretrizes sobre Processos de Aproveitamento de Estudos no âmbito do CCHN. O secretário PE"
+    },
+    {
+      "posicao": 18,
+      "item": "1662_ORDEM_DO_DIA_1.5_F2",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 19,
+      "item": "1662_ORDEM_DO_DIA_1.5",
+      "ata": 1662,
+      "orgao": "CCENS_DB",
+      "data": "2025-05-28",
+      "pagina": 3,
+      "assunto": "Decisão quanto a área de concurso público referente a vaga devido a exoneração da Profa. P"
+    },
+    {
+      "posicao": 20,
+      "item": "1896_INFORMES_4.4",
+      "ata": 1896,
+      "orgao": "CCAE_DEAL",
+      "data": "2024-06-13",
+      "pagina": 6,
+      "assunto": "O Presidente informou que elaborou Normas gerais para os laboratórios do DEAL e neste prim"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1730_ORDEM_DO_DIA_3.15",
+      "rotulo": "Ata CCAE, 9ª reunião ordinaria, 28/05/2025, ordem do dia, item 3.15, p. 4",
+      "pagina": 4,
+      "texto": "3.15 Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha, para apreciação, o relatório conclusivo e a proposta de Regimento Geral do Centro de Encontro Universitário – CEU elaborados pela comissão para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva da Ufes Campus de Alegre, designada pela Portaria Conjunta de Pessoal CCAE-CCENS/UFES nº 001, de 23 de janeiro de 2023, bem como a representação gráfica tridimensional (amostragem) e a planilha orçamentária intitulada \"Estimativa de custo para adequação do CEU\" elaboradas pela Diretoria de Infraestrutura - Setorial Sul. A Presidente fez a leitura da minuta do Regimento Geral proposta pela comissão e .34. da minuta aprovada pelo Conselho Departamental do Centro de Ciências Exatas, Naturais e da Saúde. Na sequência, foram elencadas as seguintes alterações: I) Alterar a redação do parágrafo único, do Art. 4º, para a seguinte: “Os usuários assumem responsabilidade integral pelos danos materiais e pessoais ocorridos durante as atividades realizadas nos escritórios compartilhados. Cabe aos usuários dos escritórios compartilhados informar à comissão sobre eventuais problemas na infraestrutura ou de qualquer natureza.”; II) Alterar o § 1º, do Art. 5º, para “Escritório compartilhado 1 – destinado ao CCENS, com uma estação de trabalho por curso, para atendimento aos Centros Acadêmicos dos cursos do CCENS.”; III) Alterar o § 2º, do Art. 5º, para “Escritório compartilhado 2 – destinado ao CCAE, com uma estação de trabalho por curso, para atendimento aos Centros Acadêmicos dos cursos do CCAE.”; IV) Excluir o parágrafo único, do Art. 5º, e incluir o seu texto como um novo artigo ao final da minuta, antes do Art. 27; V) Incluir como § 3º, no Art. 5º, a seguinte redação (proveniente da junção do Art. 6º e parágrafo único do Art. 6º): “Os espaços serão compartilhados e cada centro acadêmico deverá, em comum acordo com os demais usuários, reservar um horário semanal para utilização. Deverá ser acordada entre as partes que utilizam o espaço a elaboração de um calendário de reuniões e reservas do espaço físico, para momentos específicos, como reuniões e outras atividades que demandem exclusividade de uso.”; VI) Excluir o Art. 6º e os seus parágrafos; VII) No Art. 14 foi aprovado o texto da proposta da comissão, a saber: “As duas salas localizadas do lado direito dos escritórios compartilhados serão utilizadas para monitorias, projetos PIAA e de ensino, para atendimento aos dois Centos de Ensino, sem exclusividade de uso para um determinado curso.”; VIII) No Art. 15 foi aprovado o texto da proposta da comissão, a saber: “A reserva dos espaços será de no máximo 4 horas por atividade, seja ela monitoria ou projetos, após consulta da disponibilidade de horários, e deverá ser feita pelo site www.alegre.ufes.br, que verificará a disponibilidade para agendamento e reserva.”; IX) Alterar a redação do § 3º, do Art. 15, para “O prazo para a reserva do esp",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Data da reunião: 2025-05-28.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade.",
+        "Ato emitido: DECISAO_73_2025.",
+        "Encaminhamento: encaminhamento às Direções dos Centros de Ensino.",
+        "Trata do mesmo assunto que: 1728_EXPEDIENTE_2.1."
+      ],
+      "data_reuniao": "2025-05-28"
+    },
+    {
+      "numero": 2,
+      "item": "1891_PAUTA_3.4",
+      "rotulo": "Ata CCAE_DEAL, 1ª reunião, 01/08/2024, pauta, item 3.4, p. 1",
+      "pagina": 1,
+      "texto": "3.4 - Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganização quanto à distribuição de salas. O Presidente fez leitura do ofício encaminhado pela Direção, onde consta a seguinte proposta de reorganização: 1) Que os servidores PESSOA_379803, secretários do Departamento de Engenharia Rural e do Departamento de Engenharia de Alimentos, respectivamente, possam compartilhar a sala hoje ocupada pela Secretaria do Departamento de Engenharia Rural, localizada no Prédio Multidepartamental I, uma vez que apenas utilizarão o espaço simultaneamente nas quartas-feiras à tarde, considerando a adesão ao Programa de Gestão e Desempenho, na modalidade de teletrabalho, pelas Secretarias de Departamentos; 2) que a sala atualmente ocupada pela Secretaria do Departamento de Engenharia de Alimentos seja utilizada pelos professores PESSOA_8892 e PESSOA_8881; 3) Que a sala anexa ao LTA, hoje ocupada pelos professores PESSOA_376833, seja otimizada para a guarda de equipamentos do referido Laboratório, permitindo maior espaço para as aulas de graduação e pós- graduação. O Presidente explicou que após o processo ser direcionado ao Departamento de Engenharia Rural, o mesmo foi tramitado ao DEAL com o seguinte ofício: “Em atenção do OFÍCIO CIRCULAR Nº 002/2024/GD/CCAE/UFES segue o posicionamento da Chefia do Departamento de Engenharia Rural. A proposta desta chefia é que a sala atualmente ocupada pela secretaria do departamento de Engenharia Rural seja ocupada pela professora PESSOA_163357, com a possibilidade de que a mesma seja dividida com um docente que venha a assumir futuramente um código de vaga do CCAE, ou seja, que o espaço seja integralmente do CCAE, e que a secretaria do departamento seja deslocada para a sala atualmente ocupada pela professora PESSOA_165700, sendo compartilhada com a secretaria do departamento de Engenharia de Alimentos, atualmente ocupada pela servidora PESSOA_165687. Deve-se salientar também o seguinte: a) o espaço ocupado atualmente pela secretaria é um espaço do departamento de Engenharia Rural. No caso de uma necessidade futura de espaço físico pelo departamento, tal espaço que passaria a ser compartilhado seria requisitado para tal; b) o servidor PESSOA_165364 possui hiperidrose, sendo necessário o uso constante de ar condicionado. Dessa forma, como o servidor passaria a compartilhar espaço físico, faz-se necessária a ciência e a concordância da servidora PESSOA_165687 de tal condição para o compartilhamento do espaço físico, uma vez que, embora ambos estejam em PGD momentaneamente, o que geraria compartilhamento do espaço físico apenas em alguns turnos, tal condição de trabalho pode ser futuramente revogada, daí ambos estariam presentes no mesmo espaço durante todo o expediente, o que poderia causar um desconforto diante da necessidade de uso permanente do ar condicionado pelo servidor PESSOA_165364.” O presidente disse que ao tomar conhecimento do posicionamento do DERU, marcou uma reunião com a Diret",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DEAL.",
+        "Data da reunião: 2024-08-01.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em discussão, em votação, aprovado por unanimidade dos presentes."
+      ],
+      "data_reuniao": "2024-08-01"
+    },
+    {
+      "numero": 3,
+      "item": "1728_EXPEDIENTE_2.1",
+      "rotulo": "Ata CCAE, 7ª reunião ordinaria, 13/05/2025, expediente, item 2.1, p. 2",
+      "pagina": 2,
+      "texto": "2.1 Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha, para apreciação, o relatório conclusivo da comissão para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva da Ufes Campus de Alegre, designada pela Portaria Conjunta de Pessoal CCAE-CCENS/UFES nº 001, de 23 de janeiro de 2023, bem como a representação gráfica tridimensional (amostragem) e a planilha orçamentária intitulada \"Estimativa de custo para adequação do CEU\" elaborados pela Diretoria de Infraestrutura - Setorial Sul. Em votação, foi aprovada por unanimidade a exclusão do processo da pauta.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Data da reunião: 2025-05-13.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em votação, foi aprovada por unanimidade a exclusão do processo da pauta.",
+        "Trata do mesmo assunto que: DECISAO_73_2025."
+      ],
+      "data_reuniao": "2025-05-13"
+    },
+    {
+      "numero": 4,
+      "item": "1730_ORDEM_DO_DIA_3.15_F1",
+      "rotulo": "Ata CCAE, 9ª reunião ordinaria, 28/05/2025, ordem do dia, item 3.15, p. 4",
+      "pagina": 4,
+      "texto": "o máximo 4 horas por atividade, seja ela monitoria ou projetos, após consulta da disponibilidade de horários, e deverá ser feita pelo site www.alegre.ufes.br, que verificará a disponibilidade para agendamento e reserva.”; IX) Alterar a redação do § 3º, do Art. 15, para “O prazo para a reserva do espaço será de no mínimo 24 horas de antecedência referente ao horário solicitado.”; X) Alterar o Art. 16 para o final da minuta, antes do Art. 27; XI) Alterar a redação do Art. 23 para “Tanto os materiais esportivos, quanto os alocados no depósito, podem ser emprestados via solicitação no site www.alegre.ufes.br.”; XII) Alterar a redação do Art. 24 para “Em caso de constatação de depredação aos materiais, patrimônio ou às instalações do CEU, o(s) responsável(eis) deve(m) indicar o(s) usuário(s) que causou(ram) o(s) dano(s).”; XIII) Excluir o §2º do Art.24; XIV) Excluir o Anexo I da minuta; XV) No inciso III, do Art. 2º, foi aprovado o texto da proposta da comissão, a saber: “duas salas para utilização de monitorias, PIAA e demais projetos de ensino de ambos os centros”; XVI) Alterar a redação do Art. 27 para “Os casos omissos ao presente Regimento serão submetidos à Comissão Permanente de Gestão do Centro de Encontro Universitário – CEU, com encaminhamento às Direções dos Centros de Ensino. Em esclarecimento. Em discussão. Em votação. Aprovado por unanimidade. Baixada a DECISÃO NÚMERO SETENTA E TRÊS BARRA DOIS MIL E VINTE E CINCO.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Data da reunião: 2025-05-28.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade.",
+        "Ato emitido: DECISAO_73_2025.",
+        "Encaminhamento: encaminhamento às Direções dos Centros de Ensino.",
+        "Trata do mesmo assunto que: 1728_EXPEDIENTE_2.1."
+      ],
+      "data_reuniao": "2025-05-28"
+    },
+    {
+      "numero": 5,
+      "item": "1891_PAUTA_3.4_F2",
+      "rotulo": "Ata CCAE_DEAL, 1ª reunião, 01/08/2024, pauta, item 3.4, p. 1",
+      "pagina": 1,
+      "texto": "de PGD e os Docentes não e como ela e PESSOA_165698 cumprem 40h semanais presenciais, que seria mais plausível eles serem localizados na sala e prédio com melhor infraestrutura, visto que o tempo que a secretária passará na sala é menor que o deles. Relatou também que para Ela e PESSOA_165698 só faz sentido sair da sala onde estão localizados atualmente, se for para se deslocarem para perto dos demais Professores do Departamento e que eles possuem a vontade de permanecerem juntos dividindo a mesma sala, já que não existe espaço para cada um ter a sua sala individual. O Professor PESSOA_165698 sugeriu que o Departamento reduzisse a carga horária presencial da servidora PESSOA_165696, diminuindo para o mínimo necessário a ser cumprido, que hoje se encontra em 20%. A servidora PESSOA_165696 relatou que hoje a demanda presencial é mínima e o Presidente endossou dizendo que de parte da Chefia a demanda presencial é praticamente zero. Disse ainda que, se for necessário e a PESSOA_165697 estiver de acordo, poderá transferir o frigobar que hoje ele e PESSOA_165697 utilizam na atual sala, assim como o ar condicionado e as persianas. Informou também que a direção mencionou que poderá fazer as reformas que a sala precisa antes da transição. A servidora PESSOA_165696 também relatou que o servidor PESSOA_165695, secretário da Engenharia Rural, se dispôs também a trazer a secretaria da Engenharia Rural para a sala que hoje funciona a secretaria da Engenharia de Alimentos. Após as falas, o Presidente perguntou qual seria o encaminhamento, e a Câmara Departamental assim deliberou: Enviar neste primeiro momento, um ofício a Direção sendo favorável a proposta de reorganização dos espaços sugerida pela Direção do CCAE, desde que o Departamento de Engenharia de Alimentos receba o novo espaço para a Secretaria do Departamento de Engenharia de Alimentos de forma definitiva, sendo utilizado definitivamente pela servidora do DEAL. E sendo a proposta da Engenharia Rural outra, provavelmente seria marcado uma reunião das duas Chefias com a Direção para tentar chegar a um consenso e, neste momento, o Departamento aceitaria levar a secretaria para o prédio central, desde que o novo espaço fosse transferido em definitivo para o Departamento de Engenharia de Alimentos. Em contrapartida a Engenharia Rural traria a Professora PESSOA_165694 para o prédio Multidepartamental I. Em discussão, em votação, aprovado por unanimidade dos presentes. O Presidente solicitou prorrogação da reunião em 30 minutos, o que foi aprovado por todos.",
+      "frases_grafo": [
+        "Centro: CCAE.",
+        "Departamento: DEAL.",
+        "Data da reunião: 2024-08-01.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em discussão, em votação, aprovado por unanimidade dos presentes."
+      ],
+      "data_reuniao": "2024-08-01"
+    }
+  ],
+  "prompt_usuario": "Evidências:\n{\"identificador\": 1, \"data_reuniao\": \"28/05/2025\", \"fonte\": \"Ata CCAE, 9ª reunião ordinaria, 28/05/2025, ordem do dia, item 3.15, p. 4\", \"trecho\": \"3.15 Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha, para apreciação, o relatório conclusivo e a proposta de Regimento Geral do Centro de Encontro Universitário – CEU elaborados pela comissão para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva da Ufes Campus de Alegre, designada pela Portaria Conjunta de Pessoal CCAE-CCENS/UFES nº 001, de 23 de janeiro de 2023, bem como a representação gráfica tridimensional (amostragem) e a planilha orçamentária intitulada \\\"Estimativa de custo para adequação do CEU\\\" elaboradas pela Diretoria de Infraestrutura - Setorial Sul. A Presidente fez a leitura da minuta do Regimento Geral proposta pela comissão e .34. da minuta aprovada pelo Conselho Departamental do Centro de Ciências Exatas, Naturais e da Saúde. Na sequência, foram elencadas as seguintes alterações: I) Alterar a redação do parágrafo único, do Art. 4º, para a seguinte: “Os usuários assumem responsabilidade integral pelos danos materiais e pessoais ocorridos durante as atividades realizadas nos escritórios compartilhados. Cabe aos usuários dos escritórios compartilhados informar à comissão sobre eventuais problemas na infraestrutura ou de qualquer natureza.”; II) Alterar o § 1º, do Art. 5º, para “Escritório compartilhado 1 – destinado ao CCENS, com uma estação de trabalho por curso, para atendimento aos Centros Acadêmicos dos cursos do CCENS.”; III) Alterar o § 2º, do Art. 5º, para “Escritório compartilhado 2 – destinado ao CCAE, com uma estação de trabalho por curso, para atendimento aos Centros Acadêmicos dos cursos do CCAE.”; IV) Excluir o parágrafo único, do Art. 5º, e incluir o seu texto como um novo artigo ao final da minuta, antes do Art. 27; V) Incluir como § 3º, no Art. 5º, a seguinte redação (proveniente da junção do Art. 6º e parágrafo único do Art. 6º): “Os espaços serão compartilhados e cada centro acadêmico deverá, em comum acordo com os demais usuários, reservar um horário semanal para utilização. Deverá ser acordada entre as partes que utilizam o espaço a elaboração de um calendário de reuniões e reservas do espaço físico, para momentos específicos, como reuniões e outras atividades que demandem exclusividade de uso.”; VI) Excluir o Art. 6º e os seus parágrafos; VII) No Art. 14 foi aprovado o texto da proposta da comissão, a saber: “As duas salas localizadas do lado direito dos escritórios compartilhados serão utilizadas para monitorias, projetos PIAA e de ensino, para atendimento aos dois Centos de Ensino, sem exclusividade de uso para um determinado curso.”; VIII) No Art. 15 foi aprovado o texto da proposta da comissão, a saber: “A reserva dos espaços será de no máximo 4 horas por atividade, seja ela monitoria ou projetos, após consulta da disponibilidade de horários, e deverá ser feita pelo site www.alegre.ufes.br, que verificará a disponibilidade para agendamento e reserva.”; IX) Alterar a redação do § 3º, do Art. 15, para “O prazo para a reserva do esp\", \"relacoes\": [\"Centro: CCAE.\", \"Data da reunião: 2025-05-28.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\", \"Ato emitido: DECISAO_73_2025.\", \"Encaminhamento: encaminhamento às Direções dos Centros de Ensino.\", \"Trata do mesmo assunto que: 1728_EXPEDIENTE_2.1.\"], \"item_anterior_nao_citavel\": \"Processo digital nº PROCESSO_31132 – PESSOA_163291 – Encaminha, para aprovação, remoção a pedido para o Departamento de Patologia, vinculado ao Centro de Ciências da Saúde, tendo como contrapartida o código de vaga proveniente da aposentadoria do professor PESSOA_163430. O Conselheiro PESSOA_8889, com a palavra, fez a leitura do parecer da Comissão de Legislação e Normas, do qual a Conselheira PESSOA_8886 foi relatora, favorável à aprovação, desde que o Departamento de Medicina Veterinária possa ocupar o código de vaga, oferecido como contrapartida, imediatamente após a publicação da portaria de remoção, para que a oferta de disciplinas não seja prejudicada. Em esclarecimento. Em discussão. Em votação\"}\n{\"identificador\": 2, \"data_reuniao\": \"01/08/2024\", \"fonte\": \"Ata CCAE_DEAL, 1ª reunião, 01/08/2024, pauta, item 3.4, p. 1\", \"trecho\": \"3.4 - Documento avulso nº PROCESSO_31879 - Ofício Circular Nº 002/2024/GD/CCAE/UFES - Reorganização quanto à distribuição de salas. O Presidente fez leitura do ofício encaminhado pela Direção, onde consta a seguinte proposta de reorganização: 1) Que os servidores PESSOA_379803, secretários do Departamento de Engenharia Rural e do Departamento de Engenharia de Alimentos, respectivamente, possam compartilhar a sala hoje ocupada pela Secretaria do Departamento de Engenharia Rural, localizada no Prédio Multidepartamental I, uma vez que apenas utilizarão o espaço simultaneamente nas quartas-feiras à tarde, considerando a adesão ao Programa de Gestão e Desempenho, na modalidade de teletrabalho, pelas Secretarias de Departamentos; 2) que a sala atualmente ocupada pela Secretaria do Departamento de Engenharia de Alimentos seja utilizada pelos professores PESSOA_8892 e PESSOA_8881; 3) Que a sala anexa ao LTA, hoje ocupada pelos professores PESSOA_376833, seja otimizada para a guarda de equipamentos do referido Laboratório, permitindo maior espaço para as aulas de graduação e pós- graduação. O Presidente explicou que após o processo ser direcionado ao Departamento de Engenharia Rural, o mesmo foi tramitado ao DEAL com o seguinte ofício: “Em atenção do OFÍCIO CIRCULAR Nº 002/2024/GD/CCAE/UFES segue o posicionamento da Chefia do Departamento de Engenharia Rural. A proposta desta chefia é que a sala atualmente ocupada pela secretaria do departamento de Engenharia Rural seja ocupada pela professora PESSOA_163357, com a possibilidade de que a mesma seja dividida com um docente que venha a assumir futuramente um código de vaga do CCAE, ou seja, que o espaço seja integralmente do CCAE, e que a secretaria do departamento seja deslocada para a sala atualmente ocupada pela professora PESSOA_165700, sendo compartilhada com a secretaria do departamento de Engenharia de Alimentos, atualmente ocupada pela servidora PESSOA_165687. Deve-se salientar também o seguinte: a) o espaço ocupado atualmente pela secretaria é um espaço do departamento de Engenharia Rural. No caso de uma necessidade futura de espaço físico pelo departamento, tal espaço que passaria a ser compartilhado seria requisitado para tal; b) o servidor PESSOA_165364 possui hiperidrose, sendo necessário o uso constante de ar condicionado. Dessa forma, como o servidor passaria a compartilhar espaço físico, faz-se necessária a ciência e a concordância da servidora PESSOA_165687 de tal condição para o compartilhamento do espaço físico, uma vez que, embora ambos estejam em PGD momentaneamente, o que geraria compartilhamento do espaço físico apenas em alguns turnos, tal condição de trabalho pode ser futuramente revogada, daí ambos estariam presentes no mesmo espaço durante todo o expediente, o que poderia causar um desconforto diante da necessidade de uso permanente do ar condicionado pelo servidor PESSOA_165364.” O presidente disse que ao tomar conhecimento do posicionamento do DERU, marcou uma reunião com a Diret\", \"relacoes\": [\"Centro: CCAE.\", \"Departamento: DEAL.\", \"Data da reunião: 2024-08-01.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Em discussão, em votação, aprovado por unanimidade dos presentes.\"], \"item_anterior_nao_citavel\": \"Regulamento Geral dos laboratórios do Departamento de Engenharia de Alimentos\", \"item_posterior_nao_citavel\": \"Homologação de Registro de Projeto de Pesquisa (nº 003/2024 DEAL) - Interessado: PESSOA_165688\"}\n{\"identificador\": 3, \"data_reuniao\": \"13/05/2025\", \"fonte\": \"Ata CCAE, 7ª reunião ordinaria, 13/05/2025, expediente, item 2.1, p. 2\", \"trecho\": \"2.1 Documento avulso nº PROCESSO_31130 – Centro de Ciências Agrárias e Engenharias – Encaminha, para apreciação, o relatório conclusivo da comissão para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva da Ufes Campus de Alegre, designada pela Portaria Conjunta de Pessoal CCAE-CCENS/UFES nº 001, de 23 de janeiro de 2023, bem como a representação gráfica tridimensional (amostragem) e a planilha orçamentária intitulada \\\"Estimativa de custo para adequação do CEU\\\" elaborados pela Diretoria de Infraestrutura - Setorial Sul. Em votação, foi aprovada por unanimidade a exclusão do processo da pauta.\", \"relacoes\": [\"Centro: CCAE.\", \"Data da reunião: 2025-05-13.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Em votação, foi aprovada por unanimidade a exclusão do processo da pauta.\", \"Trata do mesmo assunto que: DECISAO_73_2025.\"], \"item_posterior_nao_citavel\": \"Documento avulso nº PROCESSO_31129 – PESSOA_163426 – Encaminha, para homologação, nova composição do Centro Acadêmico de Engenharia de Alimentos (Calim), como segue: Coordenadoria Geral: PESSOA_163425 (presidente) e PESSOA_163424 (vice-presidente); Coordenadoria de Comunicação: PESSOA_163423, PESSOA_163422 e PESSOA_163421; Coordenadoria de Eventos: PESSOA_163420, PESSOA_163419 e PESSOA_163418; Coordenadoria de Finanças: PESSOA_163417 e PESSOA_163416. Em esclarecimento. Em discussão. Em votação\"}\n{\"identificador\": 4, \"data_reuniao\": \"28/05/2025\", \"fonte\": \"Ata CCAE, 9ª reunião ordinaria, 28/05/2025, ordem do dia, item 3.15, p. 4\", \"trecho\": \"o máximo 4 horas por atividade, seja ela monitoria ou projetos, após consulta da disponibilidade de horários, e deverá ser feita pelo site www.alegre.ufes.br, que verificará a disponibilidade para agendamento e reserva.”; IX) Alterar a redação do § 3º, do Art. 15, para “O prazo para a reserva do espaço será de no mínimo 24 horas de antecedência referente ao horário solicitado.”; X) Alterar o Art. 16 para o final da minuta, antes do Art. 27; XI) Alterar a redação do Art. 23 para “Tanto os materiais esportivos, quanto os alocados no depósito, podem ser emprestados via solicitação no site www.alegre.ufes.br.”; XII) Alterar a redação do Art. 24 para “Em caso de constatação de depredação aos materiais, patrimônio ou às instalações do CEU, o(s) responsável(eis) deve(m) indicar o(s) usuário(s) que causou(ram) o(s) dano(s).”; XIII) Excluir o §2º do Art.24; XIV) Excluir o Anexo I da minuta; XV) No inciso III, do Art. 2º, foi aprovado o texto da proposta da comissão, a saber: “duas salas para utilização de monitorias, PIAA e demais projetos de ensino de ambos os centros”; XVI) Alterar a redação do Art. 27 para “Os casos omissos ao presente Regimento serão submetidos à Comissão Permanente de Gestão do Centro de Encontro Universitário – CEU, com encaminhamento às Direções dos Centros de Ensino. Em esclarecimento. Em discussão. Em votação. Aprovado por unanimidade. Baixada a DECISÃO NÚMERO SETENTA E TRÊS BARRA DOIS MIL E VINTE E CINCO.\", \"relacoes\": [\"Centro: CCAE.\", \"Data da reunião: 2025-05-28.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\", \"Ato emitido: DECISAO_73_2025.\", \"Encaminhamento: encaminhamento às Direções dos Centros de Ensino.\", \"Trata do mesmo assunto que: 1728_EXPEDIENTE_2.1.\"], \"item_anterior_nao_citavel\": \"Processo digital nº PROCESSO_31132 – PESSOA_163291 – Encaminha, para aprovação, remoção a pedido para o Departamento de Patologia, vinculado ao Centro de Ciências da Saúde, tendo como contrapartida o código de vaga proveniente da aposentadoria do professor PESSOA_163430. O Conselheiro PESSOA_8889, com a palavra, fez a leitura do parecer da Comissão de Legislação e Normas, do qual a Conselheira PESSOA_8886 foi relatora, favorável à aprovação, desde que o Departamento de Medicina Veterinária possa ocupar o código de vaga, oferecido como contrapartida, imediatamente após a publicação da portaria de remoção, para que a oferta de disciplinas não seja prejudicada. Em esclarecimento. Em discussão. Em votação\"}\n{\"identificador\": 5, \"data_reuniao\": \"01/08/2024\", \"fonte\": \"Ata CCAE_DEAL, 1ª reunião, 01/08/2024, pauta, item 3.4, p. 1\", \"trecho\": \"de PGD e os Docentes não e como ela e PESSOA_165698 cumprem 40h semanais presenciais, que seria mais plausível eles serem localizados na sala e prédio com melhor infraestrutura, visto que o tempo que a secretária passará na sala é menor que o deles. Relatou também que para Ela e PESSOA_165698 só faz sentido sair da sala onde estão localizados atualmente, se for para se deslocarem para perto dos demais Professores do Departamento e que eles possuem a vontade de permanecerem juntos dividindo a mesma sala, já que não existe espaço para cada um ter a sua sala individual. O Professor PESSOA_165698 sugeriu que o Departamento reduzisse a carga horária presencial da servidora PESSOA_165696, diminuindo para o mínimo necessário a ser cumprido, que hoje se encontra em 20%. A servidora PESSOA_165696 relatou que hoje a demanda presencial é mínima e o Presidente endossou dizendo que de parte da Chefia a demanda presencial é praticamente zero. Disse ainda que, se for necessário e a PESSOA_165697 estiver de acordo, poderá transferir o frigobar que hoje ele e PESSOA_165697 utilizam na atual sala, assim como o ar condicionado e as persianas. Informou também que a direção mencionou que poderá fazer as reformas que a sala precisa antes da transição. A servidora PESSOA_165696 também relatou que o servidor PESSOA_165695, secretário da Engenharia Rural, se dispôs também a trazer a secretaria da Engenharia Rural para a sala que hoje funciona a secretaria da Engenharia de Alimentos. Após as falas, o Presidente perguntou qual seria o encaminhamento, e a Câmara Departamental assim deliberou: Enviar neste primeiro momento, um ofício a Direção sendo favorável a proposta de reorganização dos espaços sugerida pela Direção do CCAE, desde que o Departamento de Engenharia de Alimentos receba o novo espaço para a Secretaria do Departamento de Engenharia de Alimentos de forma definitiva, sendo utilizado definitivamente pela servidora do DEAL. E sendo a proposta da Engenharia Rural outra, provavelmente seria marcado uma reunião das duas Chefias com a Direção para tentar chegar a um consenso e, neste momento, o Departamento aceitaria levar a secretaria para o prédio central, desde que o novo espaço fosse transferido em definitivo para o Departamento de Engenharia de Alimentos. Em contrapartida a Engenharia Rural traria a Professora PESSOA_165694 para o prédio Multidepartamental I. Em discussão, em votação, aprovado por unanimidade dos presentes. O Presidente solicitou prorrogação da reunião em 30 minutos, o que foi aprovado por todos.\", \"relacoes\": [\"Centro: CCAE.\", \"Departamento: DEAL.\", \"Data da reunião: 2024-08-01.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Em discussão, em votação, aprovado por unanimidade dos presentes.\"], \"item_anterior_nao_citavel\": \"Regulamento Geral dos laboratórios do Departamento de Engenharia de Alimentos\", \"item_posterior_nao_citavel\": \"Homologação de Registro de Projeto de Pesquisa (nº 003/2024 DEAL) - Interessado: PESSOA_165688\"}\n\nPergunta: Quais registros e encaminhamentos constam sobre reorganização dos espaços do CEU no setor CCAE?",
+  "tokens_entrada": 5176,
+  "tokens_saida": 198,
+  "truncada": false,
+  "resposta_bruta": "{\"eventos\": [{\"evidencia\": 1, \"relevante\": true, \"descricao\": \"Aprovou a minuta do Regimento Geral do Centro de Encontro Universitário (CEU) para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva do Campus de Alegre, com várias alterações propostas.\"}, {\"evidencia\": 3, \"relevante\": true, \"descricao\": \"Excluiu o processo da pauta, após a apreciação do relatório conclusivo da comissão para reorganização de espaços físicos do CEU.\"}, {\"evidencia\": 4, \"relevante\": true, \"descricao\": \"Aprovou a minuta do Regimento Geral do CEU com mais alterações, incluindo a reorganização de espaços físicos do CEU.\"}]}",
+  "resposta_final": "O documento avulso nº PROCESSO_31130 encaminhou para apreciação o relatório conclusivo e a proposta de Regimento Geral do Centro de Encontro Universitário (CEU) para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva do Campus de Alegre, designada pela Portaria Conjunta de Pessoal CCAE-CCENS/UFES nº 001, de 23 de janeiro de 2023. As alterações propostas incluíram mudanças em artigos e parágrafos do Regimento Geral, além de aprovação de um novo artigo. O documento foi encaminhado às Direções dos Centros de Ensino.\n\n13/05/2025: Excluiu o processo da pauta, após a apreciação do relatório conclusivo da comissão para reorganização de espaços físicos do CEU. [3]\n28/05/2025: Aprovou a minuta do Regimento Geral do Centro de Encontro Universitário (CEU) para reorganização de espaços físicos localizados na área posterior à quadra poliesportiva do Campus de Alegre, com várias alterações propostas. [1]\n28/05/2025: Aprovou a minuta do Regimento Geral do CEU com mais alterações, incluindo a reorganização de espaços físicos do CEU. [4]",
+  "citados": [
+    1,
+    3,
+    4
+  ]
+}

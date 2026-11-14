@@ -1,0 +1,654 @@
+{
+  "id_execucao": "343fc61a9e4b",
+  "quando": "2026-11-08T01:14:26",
+  "commit": "ab7ba7b",
+  "config": {
+    "k": 5,
+    "top_n_ancora": 10,
+    "camadas": "lexico+vetorial+grafo",
+    "modelo": "qwen2.5:7b",
+    "num_ctx": 16384,
+    "temperatura": 0
+  },
+  "pergunta": "Qual foi a decisão sobre disciplina DQF05566 no setor CCENS / DQF?",
+  "alvos": {
+    "1711_ORDEM_DO_DIA_3.1": {
+      "ata": 1711,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-22",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_30969. Retificação da Ata da 10ª Reunião Ordinária do DQF rea",
+      "rank_lexico": 9,
+      "rank_vetorial": null,
+      "rank_grafo": null,
+      "posicao_fusao_top20": null
+    },
+    "1709_ORDEM_DO_DIA_3.1_F6": {
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao ",
+      "rank_lexico": null,
+      "rank_vetorial": null,
+      "rank_grafo": 4,
+      "posicao_fusao_top20": 15
+    },
+    "1709_ORDEM_DO_DIA_3.4_F3": {
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun",
+      "rank_lexico": 15,
+      "rank_vetorial": null,
+      "rank_grafo": 2,
+      "posicao_fusao_top20": 7
+    },
+    "1708_ORDEM_DO_DIA_3.1": {
+      "ata": 1708,
+      "orgao": "CCENS_DQF",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Documento avulso n° PROCESSO_30958. Ofício n.º 006/2025: Solicitações Propostas pelo Relat",
+      "rank_lexico": 1,
+      "rank_vetorial": 1,
+      "rank_grafo": null,
+      "posicao_fusao_top20": 1
+    }
+  },
+  "lexico_top10": [
+    {
+      "rank": 1,
+      "item": "1708_ORDEM_DO_DIA_3.1",
+      "score": 16.705151233376917,
+      "ata": 1708,
+      "orgao": "CCENS_DQF",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Documento avulso n° PROCESSO_30958. Ofício n.º 006/2025: Solicitações Propostas pelo Relat"
+    },
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4",
+      "score": 12.044196129110405,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 3,
+      "item": "1711_COMUNICACOES_4.1",
+      "score": 11.346169537100291,
+      "ata": 1711,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-22",
+      "pagina": 4,
+      "assunto": "O Professor PESSOA_163017 comunicou que se faz necessária a indicação de um representante "
+    },
+    {
+      "rank": 4,
+      "item": "1709_ORDEM_DO_DIA_3.1",
+      "score": 10.686518360970089,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "rank": 5,
+      "item": "1786_INFORMES_3",
+      "score": 9.963897029213022,
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    },
+    {
+      "rank": 6,
+      "item": "1701_COMUNICACOES_4.1",
+      "score": 9.815908450504514,
+      "ata": 1701,
+      "orgao": "CCENS_DMPA",
+      "data": "2024-07-08",
+      "pagina": 5,
+      "assunto": "A chefe do departamento comunicou que se alguém tiver interesse em solicitar móveis, manif"
+    },
+    {
+      "rank": 7,
+      "item": "1707_COMUNICACOES_4.7",
+      "score": 9.797377750308355,
+      "ata": 1707,
+      "orgao": "CCENS_DQF",
+      "data": "2025-03-27",
+      "pagina": 2,
+      "assunto": "O chefe informou que todos receberam um e-mail sobre editais de fomento e que há vários ed"
+    },
+    {
+      "rank": 8,
+      "item": "1682_COMUNICACOES_4.5",
+      "score": 9.698469013218874,
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 7,
+      "assunto": "A Chefe do Departamento informou que ocorreu uma reunião entre as chefias dos Departamento"
+    },
+    {
+      "rank": 9,
+      "item": "1711_ORDEM_DO_DIA_3.1",
+      "score": 9.423949526884094,
+      "ata": 1711,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-22",
+      "pagina": 1,
+      "assunto": "Documento avulso nº PROCESSO_30969. Retificação da Ata da 10ª Reunião Ordinária do DQF rea"
+    },
+    {
+      "rank": 10,
+      "item": "1682_COMUNICACOES_4.3",
+      "score": 9.423908364274935,
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 7,
+      "assunto": "A Chefe do Departamento informou sobre a Decisão 41/2025 do Conselho Departamental em que "
+    }
+  ],
+  "vetorial_top10": [
+    {
+      "rank": 1,
+      "item": "1708_ORDEM_DO_DIA_3.1",
+      "score": 0.69622236,
+      "ata": 1708,
+      "orgao": "CCENS_DQF",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Documento avulso n° PROCESSO_30958. Ofício n.º 006/2025: Solicitações Propostas pelo Relat"
+    },
+    {
+      "rank": 2,
+      "item": "1979_PAUTA_4",
+      "score": 0.6861309,
+      "ata": 1979,
+      "orgao": "CCE",
+      "data": "2013-04-30",
+      "pagina": 2,
+      "assunto": "Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Depart"
+    },
+    {
+      "rank": 3,
+      "item": "1964_PAUTA_9",
+      "score": 0.6768961,
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substi"
+    },
+    {
+      "rank": 4,
+      "item": "1983_PAUTA_6",
+      "score": 0.6740648,
+      "ata": 1983,
+      "orgao": "CCE",
+      "data": "2013-08-28",
+      "pagina": 3,
+      "assunto": "Licença Capacitação – 6.1 – Proc. NºPROCESSO_32181 – Prof. PESSOA_166013 – Departamento de"
+    },
+    {
+      "rank": 5,
+      "item": "1968_PAUTA_4",
+      "score": 0.6698744,
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 2,
+      "assunto": "Proc. N. PROCESSO_32088 - Homologação da solicitação de contratação de Professor Visitante"
+    },
+    {
+      "rank": 6,
+      "item": "1976_PAUTA_4_D1",
+      "score": 0.6684282,
+      "ata": 1976,
+      "orgao": "CCE",
+      "data": "2012-08-27",
+      "pagina": 4,
+      "assunto": "Afastamentos: 4.2 – Proc. Nº PROCESSO_32127 – Prof. PESSOA_166107/DQUI – Apresentação de t"
+    },
+    {
+      "rank": 7,
+      "item": "1988_PAUTA_4",
+      "score": 0.66479796,
+      "ata": 1988,
+      "orgao": "CCE",
+      "data": "2014-01-31",
+      "pagina": 2,
+      "assunto": "Afastamentos: 4.1 – Proc. N4.2 – Proc. Nº PROCESSO_32209 – Servidora Técnica PESSOA_166484"
+    },
+    {
+      "rank": 8,
+      "item": "1682_COMUNICACOES_4.1",
+      "score": 0.6607767,
+      "ata": 1682,
+      "orgao": "CCENS_DFN",
+      "data": "2025-05-30",
+      "pagina": 6,
+      "assunto": "A Chefe do Departamento, com relação ao Documento avulso nº PROCESSO_30895 em que o DFN ha"
+    },
+    {
+      "rank": 9,
+      "item": "1983_PAUTA_5",
+      "score": 0.6588245,
+      "ata": 1983,
+      "orgao": "CCE",
+      "data": "2013-08-28",
+      "pagina": 2,
+      "assunto": "Afastamento para Pós-Doutorado: 5.1 – Proc. Nº PROCESSO_32184 – Prof. PESSOA_166402/DFIS –"
+    },
+    {
+      "rank": 10,
+      "item": "1678_ORDEM_DO_DIA_3.1",
+      "score": 0.65819526,
+      "ata": 1678,
+      "orgao": "CCENS_DFN",
+      "data": "2025-03-21",
+      "pagina": 1,
+      "assunto": "Processo digital nº PROCESSO_30889. Solicitação de prestação de serviços voluntários. Inte"
+    }
+  ],
+  "ancoras": [
+    "1708_ORDEM_DO_DIA_3.1",
+    "1709_ORDEM_DO_DIA_3.4",
+    "1979_PAUTA_4",
+    "1711_COMUNICACOES_4.1",
+    "1964_PAUTA_9",
+    "1709_ORDEM_DO_DIA_3.1",
+    "1983_PAUTA_6",
+    "1786_INFORMES_3",
+    "1968_PAUTA_4",
+    "1701_COMUNICACOES_4.1",
+    "1976_PAUTA_4_D1",
+    "1707_COMUNICACOES_4.7",
+    "1988_PAUTA_4",
+    "1682_COMUNICACOES_4.5",
+    "1682_COMUNICACOES_4.1",
+    "1711_ORDEM_DO_DIA_3.1",
+    "1983_PAUTA_5",
+    "1682_COMUNICACOES_4.3",
+    "1678_ORDEM_DO_DIA_3.1"
+  ],
+  "grafo_top10": [
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4_F6",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4_F5",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4_F4",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4_F3",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4_F2",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4_F1",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "rank": 3,
+      "item": "1968_PAUTA_1",
+      "score": null,
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagen"
+    },
+    {
+      "rank": 4,
+      "item": "1709_ORDEM_DO_DIA_3.1_F6",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "rank": 4,
+      "item": "1709_ORDEM_DO_DIA_3.1_F5",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "rank": 4,
+      "item": "1709_ORDEM_DO_DIA_3.1_F4",
+      "score": null,
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    }
+  ],
+  "fusao_top20": [
+    {
+      "posicao": 1,
+      "item": "1708_ORDEM_DO_DIA_3.1",
+      "ata": 1708,
+      "orgao": "CCENS_DQF",
+      "data": "2025-04-24",
+      "pagina": 1,
+      "assunto": "Documento avulso n° PROCESSO_30958. Ofício n.º 006/2025: Solicitações Propostas pelo Relat"
+    },
+    {
+      "posicao": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 3,
+      "item": "1979_PAUTA_4",
+      "ata": 1979,
+      "orgao": "CCE",
+      "data": "2013-04-30",
+      "pagina": 2,
+      "assunto": "Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Depart"
+    },
+    {
+      "posicao": 4,
+      "item": "1709_ORDEM_DO_DIA_3.4_F6",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 5,
+      "item": "1709_ORDEM_DO_DIA_3.4_F5",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 6,
+      "item": "1709_ORDEM_DO_DIA_3.4_F4",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 7,
+      "item": "1709_ORDEM_DO_DIA_3.4_F3",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 8,
+      "item": "1709_ORDEM_DO_DIA_3.4_F2",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 9,
+      "item": "1709_ORDEM_DO_DIA_3.4_F1",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 9,
+      "assunto": "Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF jun"
+    },
+    {
+      "posicao": 10,
+      "item": "1711_COMUNICACOES_4.1",
+      "ata": 1711,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-22",
+      "pagina": 4,
+      "assunto": "O Professor PESSOA_163017 comunicou que se faz necessária a indicação de um representante "
+    },
+    {
+      "posicao": 11,
+      "item": "1964_PAUTA_9",
+      "ata": 1964,
+      "orgao": "CCE",
+      "data": "2011-06-27",
+      "pagina": 2,
+      "assunto": "Prot. Nº PROCESSO_32050 - Solicitação dos alunos de Arquitetura, período 2010/1, de substi"
+    },
+    {
+      "posicao": 12,
+      "item": "1968_PAUTA_1",
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 1,
+      "assunto": "Comunicações: 1.1 – SCDP (passagens e diárias) – dia 30/11, último dia para pedir passagen"
+    },
+    {
+      "posicao": 13,
+      "item": "1709_ORDEM_DO_DIA_3.1",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "posicao": 14,
+      "item": "1983_PAUTA_6",
+      "ata": 1983,
+      "orgao": "CCE",
+      "data": "2013-08-28",
+      "pagina": 3,
+      "assunto": "Licença Capacitação – 6.1 – Proc. NºPROCESSO_32181 – Prof. PESSOA_166013 – Departamento de"
+    },
+    {
+      "posicao": 15,
+      "item": "1709_ORDEM_DO_DIA_3.1_F6",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "posicao": 16,
+      "item": "1709_ORDEM_DO_DIA_3.1_F5",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "posicao": 17,
+      "item": "1709_ORDEM_DO_DIA_3.1_F4",
+      "ata": 1709,
+      "orgao": "CCENS_DQF",
+      "data": "2025-05-05",
+      "pagina": 4,
+      "assunto": "Documento Avulso PROCESSO_30963. Encaminha a relação de disciplinas ofertadas pelo DQF ao "
+    },
+    {
+      "posicao": 18,
+      "item": "1786_INFORMES_3",
+      "ata": 1786,
+      "orgao": "CE_Colegiado_Pedagogia",
+      "data": "2021-10-04",
+      "pagina": 1,
+      "assunto": "Funcionamento da Secretaria Integrada. A professora PESSOA_164383 informou sobre a nova pr"
+    },
+    {
+      "posicao": 19,
+      "item": "1968_PAUTA_4",
+      "ata": 1968,
+      "orgao": "CCE",
+      "data": "2011-11-25",
+      "pagina": 2,
+      "assunto": "Proc. N. PROCESSO_32088 - Homologação da solicitação de contratação de Professor Visitante"
+    },
+    {
+      "posicao": 20,
+      "item": "1701_COMUNICACOES_4.1",
+      "ata": 1701,
+      "orgao": "CCENS_DMPA",
+      "data": "2024-07-08",
+      "pagina": 5,
+      "assunto": "A chefe do departamento comunicou que se alguém tiver interesse em solicitar móveis, manif"
+    }
+  ],
+  "contexto_enviado": [
+    {
+      "numero": 1,
+      "item": "1708_ORDEM_DO_DIA_3.1",
+      "rotulo": "Ata CCENS_DQF, 7ª reunião ordinaria, 24/04/2025, ordem do dia, item 3.1, p. 1",
+      "pagina": 1,
+      "texto": "3.1. Documento avulso n° PROCESSO_30958. Ofício n.º 006/2025: Solicitações Propostas pelo Relatório Técnico da Prograd ao PPC do curso de Agronomia. Interessado: Departamento de Agronomia. O chefe do Departamento projetou e procedeu a leitura do Ofício/Nº006/2025 encaminhado pelo Departamento de Agronomia, nos seguintes termos: “Ofício /Nº006/2025 Alegre, 13 de março de 2025. Ao Chefe do Departamento de Química e Física DQF-CCENS Prof. PESSOA_376543: SOLICITAÇÕES PROPOSTAS PELO RELATÓRIO TÉCNICO DA PROGRAD AO PPC DE AGRONOMIA Trata-se da resposta ao PROCESSO DIGITAL Nº: PROCESSO_30957 DIRETORIA DE DESENVOLVIMENTO PEDAGÓGICO – DDP/PROGRAD quanto a alterações sugeridas que necessitam de aprovação neste Departamento quanto a disciplinas ofertadas pelo mesmo à nova proposta de PPC do curso de Agronomia CCAE/UFES. Sendo assim, pedimos que nos encaminhem a aprovação com as observações feitas pelo DDP/PROGRAD com as informações listadas abaixo: • DQF05566 QUÍMICA ORGÂNICA: não consta no documento comprobatório o programa da disciplina. Na ata que foi encaminhada com as disciplinas a serem ofertadas para a nova proposta de PPC do curso de Agronomia consta a oferta da disciplina química orgânica, porém não consta o programa da mesma. Assim, pedimos 1 que seja feita uma retificação da ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, REALIZADA ÀS DEZESSEIS HORAS E DEZ MINUTOS (16h10min) DO DIA QUINZE DE DEZEMBRO DO ANO DE DOIS MIL E VINTE E DOIS (15/12/2022), incluindo o programa da disciplina DQF05566 QUÍMICA ORGÂNICA, que segue em anexo nesse documento. Sem mais para o momento, agradecemos desde já. Atenciosamente, PESSOA_163042 Presidente do NDE de Agronomia.” Após leitura, foi projetada a ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, REALIZADA NO DIA 15/12/2022, verificando que não consta o plano de ensino da disciplina DQF05566 QUÍMICA ORGÂNICA, serão feitas as considerações e inclusão do plano de ensino na ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, conforme solicitada. O chefe do departamento colocou em votação a retificação da Ata para inclusão do programa da disciplina DQF05566 QUÍMICA ORGÂNICA. Em votação. Aprovada por unanimidade.",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DQF.",
+        "Data da reunião: 2025-04-24.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovada por unanimidade."
+      ],
+      "data_reuniao": "2025-04-24"
+    },
+    {
+      "numero": 2,
+      "item": "1709_ORDEM_DO_DIA_3.4",
+      "rotulo": "Ata CCENS_DQF, 8ª reunião extraordinaria, 05/05/2025, ordem do dia, item 3.4, p. 9",
+      "pagina": 9,
+      "texto": "3.4 Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF junto ao PPC do curso de Engenharia Florestal e solicita apreciação sobre as mesmas, quanto à oferta ao referido curso: o Chefe do Departamento projetou o Projeto Pedagógico do Curso, demonstrou as disciplinas a serem ofertadas pelo Departamento de Química e Física (DQF) e concedeu a palavra aos Grupos de Trabalho das áreas de Física e Química do DQF. O Professor PESSOA_163002 procedeu à leitura do parecer do Grupo de Trabalho (GT) da Área de Física nos seguintes termos: “Alegre, 15 de dezembro de 2022. Ao chefe de departamento de Química e Física Prof. Dr. PESSOA_376545: Nova proposta do Projeto Pedagógico do Curso (PPC) do curso de Engenharia Florestal do CCAE-UFES O processo digital PROCESSO_30960 trata de uma nova proposta do Projeto Pedagógico do Curso (PPC) do curso de Engenharia Florestal do CCAE-UFES. Em virtude de mudanças incontornáveis na demanda dos docentes de UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS EXATAS, NATURAIS E DA SAÚDE DEPARTAMENTO DE QUÍMICA E FÍSICA DQF/CCENS/UFES 7 de 12 Física deste departamento, a disciplina de DQF05605 - Física Básica não poderá ser ofertada no novo Projeto pedagógico do curso de Engenharia Florestal. Tal entendimento se estende aos cursos de Agronomia e Zootecnia. O departamento por meio de uma comissão em conjunto com os colegiados e NDEs dos cursos que fazem a atual Física Básica, está buscando soluções, seja ao desenhar uma nova disciplina ou propor a utilização de disciplinas já existentes. Como sugestão a disciplina DQF14483 - FUNDAMENTOS DA FÍSICA - 45h Teoria ou uma nova disciplina proposta DQF-prop - Física Básica - 30h Teoria ambas em anexo. Dessa forma esta comissão é de parecer contrário à aprovação da disciplina DQF05605- FÍSICA BÁSICA no Projeto pedagógico do curso de Engenharia Florestal e propõe a oferta de uma das duas disciplinas em anexo DQF14483 - FUNDAMENTOS DA FÍSICA - 45h Teoria ou DQF-prop - Física Básica - 30h Teoria. Comissão Departamento de Química e Física / CCENS / UFES. DQF14483 - FUNDAMENTOS DA FÍSICA - 45h Teoria. Pré Requisito: Cálculo diferencial e integral elementar ou equivalente. A título de exemplo, as ciências biológicas fazem uma disciplina de Matemática de 45h, que só chega ao básico de integrais. Departamento Responsável: Departamento de Química e Física. Objetivos da Disciplina: Identificar e compreender os fenômenos físicos relacionados à biologia animal, como os sistemas biomecânicos e a óptica da visão. Reconhecer a importância da construção de modelos físico-matemáticos para a compreensão dos mais diversos fenômenos da natureza e suas aplicações nas atividades humanas ligadas à natureza. Ementa da Disciplina: Conceitos fundamentais para a biomecânica: leis de Newton, torques e condições de equilíbrio estático, energia e sua conservação; Fenômenos ondulatórios e ondas sonoras, princípios fundamentais da fluidodinâmica, óptica geométrica. Bibliografia ",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DQF.",
+        "Data da reunião: 2025-05-05.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade."
+      ],
+      "data_reuniao": "2025-05-05"
+    },
+    {
+      "numero": 3,
+      "item": "1979_PAUTA_4",
+      "rotulo": "Ata CCE, 3ª reunião ordinaria, 30/04/2013, pauta, item 4, p. 2",
+      "pagina": 2,
+      "texto": "Ponto 4. – Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Departamento de Estatística – Leitura do parecer dado pelo Conselheiro Prof. PESSOA_165958 informando que “- Considerando o disposto no artigo 22 da Resolução 31/2012 do CEPE; - Considerando que a Resolução Normativa 01/2013 do DEST foi aprovada pela sua Câmara Departamental; - Considerando a especificidade de cada Departamento do CCE; Sou, s.m.j., favorável a homologação da referida norma por este Conselho. Em votação, aprovado por unanimidade. 4.2 - Prot. Nº PROCESSO_32145 - Departamento de Química – Leitura do parecer dado pela Conselheira Profa. PESSOA_165985 informando que “trata o presente da Resolução Normativa DQUI 01/2013 que fixa normas, critérios e ordem para Afastamentos de Docentes do Departamento de Química para Pós-Graduação de Natureza Presencial, atendendo ao disposto no Artigo 22 da Resolução 31/2012 CEPE/UFES. Tal Resolução Normativa traz em seu Artigo 2ª. que a ordem de prioridade de afastamento obedecerá ao critério de Antiguidade, sendo este calculado considerando o tempo de contratação e o tempo de afastamento anterior. Em seu Artigo 3ª. estabelece prazo aos docentes para protocolar no Departamento uma carta de intenção de afastamento. Em seu Artigo 4ª. estabelece prazo de três meses de antecedência para submeter pedido de afastamento ao Departamento e documentação necessária, concluindo que a autorização de afastamento ficará condicionada à aprovação da Câmara Departamental, do Conselho Departamental do CCE e deferimento pelo Reitor. Os artigos seguintes (5ª. ao 9ª.) estão em conformidade com a Resolução 31/2012 CEPE/UFES. Em seu Artigo 10ª. menciona que o afastamento somente será deferido se comprovada a ausência de prejuízo didático para os cursos que incorporem disciplinas do Departamento; acrescentam-se as diversas Áreas da Química e como proceder quanto aos afastamentos nas Áreas. Finalizando, em seu Artigo 12ª. menciona que os casos omissos serão resolvidos pela Câmara Departamental. É apresentado Extrato de Ata da Segunda Reunião Ordinária do DQUI, realizada dia 05/abril/2013, na qual esta Resolução Normativa foi aprovada, havendo um voto contrário. Diante do relato, esta Conselheira recomenda a aprovação da Resolução Normativa DQUI 01/2013”. Em votação o parecer, aprovado por unanimidade. 4.3 – Prot. Nº PROCESSO_32144 – Departamento de Matemática – Leitura do parecer dado pelo Conselheiro Prof. PESSOA_165971 informando que “- Considerando o disposto no Artigo 22 da Resolução 31/2012 do CEPE/UFES; - Considerando que as normas para afastamento de docentes para doutorado e Pós-doutorado do DMAT foi aprovada pela sua Câmara Departamental na 7ª. Reunião Ordinária; - Considerando a especificidade de cada Departamento do CCE; Sou, S.M.J., favorável a homologação da referida norma por este Conselho”. Em votação, aprovado por unanimidade. .",
+      "frases_grafo": [
+        "Centro: CCE.",
+        "Data da reunião: 2013-04-30.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Em votação, aprovado por unanimidade."
+      ],
+      "data_reuniao": "2013-04-30"
+    },
+    {
+      "numero": 4,
+      "item": "1709_ORDEM_DO_DIA_3.4_F6",
+      "rotulo": "Ata CCENS_DQF, 8ª reunião extraordinaria, 05/05/2025, ordem do dia, item 3.4, p. 9",
+      "pagina": 9,
+      "texto": "ória. C.H.Semestral, T.E.L.: 45h, 45+0+0. Créditos: 03. Pré Requisito: não há. Departamento responsável: Departamento de Química e Física. Objetivos: A disciplina tem como objetivo o ensinamento teórico, visando capacitar os acadêmicos dos referidos cursos a compreender os principais conceitos da química orgânica, através do estudo das propriedades, métodos para obtenção e principais reações químicas com mecanismos das funções orgânicas. Ementa: Introdução à Química Orgânica. Identificação, Funções Orgânicas, Nomenclatura, Estereoquímica, Acidez e Basicidade. Carboidratos, Lipídios e Proteínas, e Polímeros Sintéticos. Bibliografia Básica: 1 - PESSOA_163082. Introdução a Química Orgânica. 2ª ed. São Paulo: Pearson Prentice Hall, 2004, 311p. 2- PESSOA_163081. Química orgânica. 4. ed. São Paulo: Pearson Education do Brasil, 2012. 3 - PESSOA_163080. Química Orgânica. 9ªed. Trad. Rio de Janeiro: Livros Técnicos e Científicos, 2009. 1048p. Bibliografia Complementar: 1 - PESSOA_163079; PESSOA_163078; PESSOA_163077. Guia prático de química orgânica. Rio de Janeiro: Interciência, 2008. 2 - PESSOA_163076; PESSOA_163075. Química Orgânica. 7ªed.Trad. Lisboa: Fundação Calouste Gulbekian, 1981. 1498p. 3 - PESSOA_163074; PESSOA_163073; PESSOA_163072; PESSOA_163071 Organic chemistry, Oxford UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS EXATAS, NATURAIS E DA SAÚDE DEPARTAMENTO DE QUÍMICA E FÍSICA DQF/CCENS/UFES 11 de 12 University Press, Oxford, 2ª ed. 2012. 1234p. 4 – PESSOA_162315; PESSOA_162314 Bioquímica Básica. 2ªed.Guanabara/Koogan. 1999. 360p. 5 - PESSOA_163070; PESSOA_163069; PESSOA_163068;Princípios de Bioquímica. 4ªed.Savier, 2006. Após ampla discussão, o Chefe do Departamento colocou em votação o parecer da Professora PESSOA_162998. Em apreciação. Em votação. Aprovado por unanimidade.",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DQF.",
+        "Data da reunião: 2025-05-05.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade."
+      ],
+      "data_reuniao": "2025-05-05"
+    },
+    {
+      "numero": 5,
+      "item": "1709_ORDEM_DO_DIA_3.4_F5",
+      "rotulo": "Ata CCENS_DQF, 8ª reunião extraordinaria, 05/05/2025, ordem do dia, item 3.4, p. 9",
+      "pagina": 9,
+      "texto": "096 PESSOA_163098, PESSOA_163096 PESSOA_163097, “Fundamentos de Química Analítica”, 8. ed., São Paulo: Thomson Learning, 2007. 2 PESSOA_163096 PESSOA_163095, “Análise química quantitativa”, 6. ed., Rio de Janeiro: LTC, 2005. 3. PESSOA_163094 PESSOA_163099, “Analise química quantitativa”, 5. ed., Rio de Janeiro: LTC, 1992. Bibliografia Complementar: 1. PESSOA_163084 PESSOA_163092 e PESSOA_163091 PESSOA_163090, \"Química Geral\", 2. ed., Rio de Janeiro : Livros técnicos e científicos, 1986. 2. PESSOA_163089, \"Fundamentos de Química\", São Paulo: Harper & Row, 1977. 3. PESSOA_163088 PESSOA_163087, \"Forças intermoleculares, sólidos, soluções\", Belo Horizonte: UFMG, 1993. 4. PESSOA_163086 e PESSOA_163085, “Princípios de Química: Questionando a vida moderna e o meio ambiente”, 1. ed., Porto Alegre: Bookman, 2001. 5. PESSOA_163084 PESSOA_163083, \"Química Geral\", 2. ed., São Paulo: Makron Books, 1994. Disciplina: DQF13984 Química Instrumental Experimental. Classe: obrigatória. C.H.Semestral, T.E.L.: 30h, 0+0+30. Créditos: 01. Pré Requisito: Química Básica. Departamento responsável: Departamento de Química e Física. Objetivo: Este componente curricular tem como objetivo fornecer ao aluno conhecimentos em Química Básica, pela abordagem de métodos e técnicas, destacando-se as potencialidades e as aplicações ao cotidiano profissional. Desenvolver o espírito crítico e de associação que auxiliem os alunos nas aplicações práticas da Química. Ementa: Preparo de amostras; Extração Líquido – Líquido; Cromatografia em Coluna; Cromatografia em papel e camada delgada; Espectrometria UV/Vis; Padronização e Calibração; Espectrofotometria IV; Fotometria de Chama; Potenciometria; Condutimetria. Bibliografia: 1. PESSOA_163096 PESSOA_163098, PESSOA_163096 PESSOA_163097, “Fundamentos de Química Analítica”, 8. ed., São Paulo: Thomson Learning, 2007. 2 PESSOA_163096 PESSOA_163095, “Análise química quantitativa”, 6. ed., Rio de Janeiro: LTC, 2005. 3. PESSOA_163094 PESSOA_163093 et PESSOA_162393., “Analise química quantitativa”, 5. ed., Rio de Janeiro: LTC, 1992. Bibliografia Complementar: 1. PESSOA_163084 PESSOA_163092 e PESSOA_163091 PESSOA_163090, \"Química Geral\", 2. ed., Rio de Janeiro : Livros técnicos e científicos, 1986. 2. PESSOA_163089, \"Fundamentos de Química\", São Paulo: Harper & Row, 1977. 3. PESSOA_163088 PESSOA_163087, \"Forças intermoleculares, sólidos, soluções\", Belo Horizonte: UFMG, 1993. 4. PESSOA_163086 e PESSOA_163085, “Princípios de Química: Questionando a vida moderna e o meio ambiente”, 1. ed., Porto Alegre: Bookman, 2001. 5. PESSOA_163084 PESSOA_163083, \"Química Geral\", 2. ed., São Paulo: Makron Books, 1994. Disciplina: DQF 05566 Química orgânica. Classe: obrigatória. C.H.Semestral, T.E.L.: 45h, 45+0+0. Créditos: 03. Pré Requisito: não há. Departamento responsável: Departamento de Química e Física. Objetivos: A disciplina tem como objetivo o ensinamento teórico, visando capacitar os acadêmicos dos referidos cursos a compreender os principais conceitos da qu",
+      "frases_grafo": [
+        "Centro: CCENS.",
+        "Departamento: DQF.",
+        "Data da reunião: 2025-05-05.",
+        "Desfecho: Aprovado.",
+        "Resultado da votação: Aprovado por unanimidade."
+      ],
+      "data_reuniao": "2025-05-05"
+    }
+  ],
+  "prompt_usuario": "Evidências:\n{\"identificador\": 1, \"data_reuniao\": \"24/04/2025\", \"fonte\": \"Ata CCENS_DQF, 7ª reunião ordinaria, 24/04/2025, ordem do dia, item 3.1, p. 1\", \"trecho\": \"3.1. Documento avulso n° PROCESSO_30958. Ofício n.º 006/2025: Solicitações Propostas pelo Relatório Técnico da Prograd ao PPC do curso de Agronomia. Interessado: Departamento de Agronomia. O chefe do Departamento projetou e procedeu a leitura do Ofício/Nº006/2025 encaminhado pelo Departamento de Agronomia, nos seguintes termos: “Ofício /Nº006/2025 Alegre, 13 de março de 2025. Ao Chefe do Departamento de Química e Física DQF-CCENS Prof. PESSOA_376543: SOLICITAÇÕES PROPOSTAS PELO RELATÓRIO TÉCNICO DA PROGRAD AO PPC DE AGRONOMIA Trata-se da resposta ao PROCESSO DIGITAL Nº: PROCESSO_30957 DIRETORIA DE DESENVOLVIMENTO PEDAGÓGICO – DDP/PROGRAD quanto a alterações sugeridas que necessitam de aprovação neste Departamento quanto a disciplinas ofertadas pelo mesmo à nova proposta de PPC do curso de Agronomia CCAE/UFES. Sendo assim, pedimos que nos encaminhem a aprovação com as observações feitas pelo DDP/PROGRAD com as informações listadas abaixo: • DQF05566 QUÍMICA ORGÂNICA: não consta no documento comprobatório o programa da disciplina. Na ata que foi encaminhada com as disciplinas a serem ofertadas para a nova proposta de PPC do curso de Agronomia consta a oferta da disciplina química orgânica, porém não consta o programa da mesma. Assim, pedimos 1 que seja feita uma retificação da ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, REALIZADA ÀS DEZESSEIS HORAS E DEZ MINUTOS (16h10min) DO DIA QUINZE DE DEZEMBRO DO ANO DE DOIS MIL E VINTE E DOIS (15/12/2022), incluindo o programa da disciplina DQF05566 QUÍMICA ORGÂNICA, que segue em anexo nesse documento. Sem mais para o momento, agradecemos desde já. Atenciosamente, PESSOA_163042 Presidente do NDE de Agronomia.” Após leitura, foi projetada a ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, REALIZADA NO DIA 15/12/2022, verificando que não consta o plano de ensino da disciplina DQF05566 QUÍMICA ORGÂNICA, serão feitas as considerações e inclusão do plano de ensino na ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, conforme solicitada. O chefe do departamento colocou em votação a retificação da Ata para inclusão do programa da disciplina DQF05566 QUÍMICA ORGÂNICA. Em votação. Aprovada por unanimidade.\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DQF.\", \"Data da reunião: 2025-04-24.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovada por unanimidade.\"], \"item_anterior_nao_citavel\": \"Aprovação da Ata da 06ª reunião, de caráter ordinário, realizada no dia 27/03/2025. O chefe do Departamento apresentou o ponto de pauta e perguntou se havia alguma sugestão de alteração na ata. Sem manifestações. Em votação\", \"item_posterior_nao_citavel\": \"Documento avulso nº PROCESSO_30956. OFÍCIO N. 10/2025/CCG/CCENS: Indicação de membro docente para compor a Coordenação do Curso de Geologia (CCG). Interessado: Coordenação do Curso de Geologia - CCG/CCENS. O chefe do Departamento projetou e procedeu a leitura do OFÍCIO N.º 10/2025/CCG/CCENS, nos seguintes termos: “OFÍCIO N.º 10/2025/CCG/CCENS Alegre, 17 de abril de 2025. Ao Senhor PESSOA_382641 do Departamento de Química e Física Assunto: Indicação de membro docente para compor a Coordenação do Curso de Geologia (CCG) Prezado(a) Senhor(a), Em primeiro lugar, externamos nosso profundo pesar pelo falecimento do professor PESSOA_163041. Neste momento difícil, reiteramos nossa solidariedade à família e colegas. Considerando a vacância deixada pelo professor PESSOA_163020 na Coordenação do Curso de Geologia, e em conformidade com Resolução n.º 59/2023-CEPE solicitamos que este Departamento indique um(a) docente para compor a referida Coordenação. Atenciosamente, PESSOA_162343, Coordenador(a) do Curso de Geologia (CCG)/CCENS.” Após a leitura, foi passada para manifestações dos docentes do grupo da Física, e o Professor PESSOA_163028 se interessou em assumir a representação do DQF no Colegiado de Geologia. Em votação\"}\n{\"identificador\": 2, \"data_reuniao\": \"05/05/2025\", \"fonte\": \"Ata CCENS_DQF, 8ª reunião extraordinaria, 05/05/2025, ordem do dia, item 3.4, p. 9\", \"trecho\": \"3.4 Processo Digital PROCESSO_30960. Encaminha a relação de disciplinas ofertadas pelo DQF junto ao PPC do curso de Engenharia Florestal e solicita apreciação sobre as mesmas, quanto à oferta ao referido curso: o Chefe do Departamento projetou o Projeto Pedagógico do Curso, demonstrou as disciplinas a serem ofertadas pelo Departamento de Química e Física (DQF) e concedeu a palavra aos Grupos de Trabalho das áreas de Física e Química do DQF. O Professor PESSOA_163002 procedeu à leitura do parecer do Grupo de Trabalho (GT) da Área de Física nos seguintes termos: “Alegre, 15 de dezembro de 2022. Ao chefe de departamento de Química e Física Prof. Dr. PESSOA_376545: Nova proposta do Projeto Pedagógico do Curso (PPC) do curso de Engenharia Florestal do CCAE-UFES O processo digital PROCESSO_30960 trata de uma nova proposta do Projeto Pedagógico do Curso (PPC) do curso de Engenharia Florestal do CCAE-UFES. Em virtude de mudanças incontornáveis na demanda dos docentes de UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS EXATAS, NATURAIS E DA SAÚDE DEPARTAMENTO DE QUÍMICA E FÍSICA DQF/CCENS/UFES 7 de 12 Física deste departamento, a disciplina de DQF05605 - Física Básica não poderá ser ofertada no novo Projeto pedagógico do curso de Engenharia Florestal. Tal entendimento se estende aos cursos de Agronomia e Zootecnia. O departamento por meio de uma comissão em conjunto com os colegiados e NDEs dos cursos que fazem a atual Física Básica, está buscando soluções, seja ao desenhar uma nova disciplina ou propor a utilização de disciplinas já existentes. Como sugestão a disciplina DQF14483 - FUNDAMENTOS DA FÍSICA - 45h Teoria ou uma nova disciplina proposta DQF-prop - Física Básica - 30h Teoria ambas em anexo. Dessa forma esta comissão é de parecer contrário à aprovação da disciplina DQF05605- FÍSICA BÁSICA no Projeto pedagógico do curso de Engenharia Florestal e propõe a oferta de uma das duas disciplinas em anexo DQF14483 - FUNDAMENTOS DA FÍSICA - 45h Teoria ou DQF-prop - Física Básica - 30h Teoria. Comissão Departamento de Química e Física / CCENS / UFES. DQF14483 - FUNDAMENTOS DA FÍSICA - 45h Teoria. Pré Requisito: Cálculo diferencial e integral elementar ou equivalente. A título de exemplo, as ciências biológicas fazem uma disciplina de Matemática de 45h, que só chega ao básico de integrais. Departamento Responsável: Departamento de Química e Física. Objetivos da Disciplina: Identificar e compreender os fenômenos físicos relacionados à biologia animal, como os sistemas biomecânicos e a óptica da visão. Reconhecer a importância da construção de modelos físico-matemáticos para a compreensão dos mais diversos fenômenos da natureza e suas aplicações nas atividades humanas ligadas à natureza. Ementa da Disciplina: Conceitos fundamentais para a biomecânica: leis de Newton, torques e condições de equilíbrio estático, energia e sua conservação; Fenômenos ondulatórios e ondas sonoras, princípios fundamentais da fluidodinâmica, óptica geométrica. Bibliografia \", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DQF.\", \"Data da reunião: 2025-05-05.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\"], \"item_anterior_nao_citavel\": \"Documento Avulso nº PROCESSO_30961. Indicação de membro para compor o colegiado do curso de Engenharia de Alimentos em resposta ao OFÍCIO Nº 08/2022/CCEAL/UFES: o Chefe do Departamento projetou o Ofício e procedeu a leitura nos seguintes termos: “OFÍCIO Nº 08/2022/CCEAL/UFES Alegre, 08 de Dezembro de 2022. Ao senhor PESSOA_163018. Chefe do Departamento de Química e Física. Assunto: Indicação de membro para compor o colegiado do curso de Engenharia de Alimentos. O colegiado do curso de Engenharia de Alimentos solicita a indicação de um professor do Departamento de Química e Física para compor o colegiado em virtude do fim do mandato do atual membro em fevereiro de 2023. Atenciosamente, Profa. PESSOA_376546 de Curso de Engenharia de Alimentos”. O Professor PESSOA_163018 concedeu a palavra ao Professor PESSOA_163010 que informou que faz parte atualmente do Colegiado de Engenharia de Alimentos e gostaria de continuar. O Chefe do Departamento colocou em votação a recondução do Professor PESSOA_163010 como representante do Departamento de Química e Física na Coordenação do Curso de Engenharia de Alimentos\", \"item_posterior_nao_citavel\": \"Eleição da chefia e subchefia do Departamento de Química e Física para o Biênio 2023/2024: o chefe do departamento disse que marcou a eleição para hoje, pois seu mandato encerra-se em março/2023 e há a necessidade de iniciar o processo com antecedência de 60 (sessenta) dias para a Diretoria de Gestão de Pessoas ter tempo hábil para publicar as portarias de nomeação chefia/subchefia, e, além disso, haverá nos próximos dias recessos e férias dos membros da câmara departamental, o que inviabilizaria deixar para o retorno das atividades acadêmicas. Os Professores PESSOA_376544 se interessam em compor a chapa como chefe e subchefe do Departamento de Química e Física, respectivamente. O Professor PESSOA_163018 perguntou se havia alguma outra chapa. Não havendo manifestação, colocou em votação\"}\n{\"identificador\": 3, \"data_reuniao\": \"30/04/2013\", \"fonte\": \"Ata CCE, 3ª reunião ordinaria, 30/04/2013, pauta, item 4, p. 2\", \"trecho\": \"Ponto 4. – Normas de afastamento de docentes para Pós-Graduação. 4.1 – Proc. Nº PROCESSO_32146 Departamento de Estatística – Leitura do parecer dado pelo Conselheiro Prof. PESSOA_165958 informando que “- Considerando o disposto no artigo 22 da Resolução 31/2012 do CEPE; - Considerando que a Resolução Normativa 01/2013 do DEST foi aprovada pela sua Câmara Departamental; - Considerando a especificidade de cada Departamento do CCE; Sou, s.m.j., favorável a homologação da referida norma por este Conselho. Em votação, aprovado por unanimidade. 4.2 - Prot. Nº PROCESSO_32145 - Departamento de Química – Leitura do parecer dado pela Conselheira Profa. PESSOA_165985 informando que “trata o presente da Resolução Normativa DQUI 01/2013 que fixa normas, critérios e ordem para Afastamentos de Docentes do Departamento de Química para Pós-Graduação de Natureza Presencial, atendendo ao disposto no Artigo 22 da Resolução 31/2012 CEPE/UFES. Tal Resolução Normativa traz em seu Artigo 2ª. que a ordem de prioridade de afastamento obedecerá ao critério de Antiguidade, sendo este calculado considerando o tempo de contratação e o tempo de afastamento anterior. Em seu Artigo 3ª. estabelece prazo aos docentes para protocolar no Departamento uma carta de intenção de afastamento. Em seu Artigo 4ª. estabelece prazo de três meses de antecedência para submeter pedido de afastamento ao Departamento e documentação necessária, concluindo que a autorização de afastamento ficará condicionada à aprovação da Câmara Departamental, do Conselho Departamental do CCE e deferimento pelo Reitor. Os artigos seguintes (5ª. ao 9ª.) estão em conformidade com a Resolução 31/2012 CEPE/UFES. Em seu Artigo 10ª. menciona que o afastamento somente será deferido se comprovada a ausência de prejuízo didático para os cursos que incorporem disciplinas do Departamento; acrescentam-se as diversas Áreas da Química e como proceder quanto aos afastamentos nas Áreas. Finalizando, em seu Artigo 12ª. menciona que os casos omissos serão resolvidos pela Câmara Departamental. É apresentado Extrato de Ata da Segunda Reunião Ordinária do DQUI, realizada dia 05/abril/2013, na qual esta Resolução Normativa foi aprovada, havendo um voto contrário. Diante do relato, esta Conselheira recomenda a aprovação da Resolução Normativa DQUI 01/2013”. Em votação o parecer, aprovado por unanimidade. 4.3 – Prot. Nº PROCESSO_32144 – Departamento de Matemática – Leitura do parecer dado pelo Conselheiro Prof. PESSOA_165971 informando que “- Considerando o disposto no Artigo 22 da Resolução 31/2012 do CEPE/UFES; - Considerando que as normas para afastamento de docentes para doutorado e Pós-doutorado do DMAT foi aprovada pela sua Câmara Departamental na 7ª. Reunião Ordinária; - Considerando a especificidade de cada Departamento do CCE; Sou, S.M.J., favorável a homologação da referida norma por este Conselho”. Em votação, aprovado por unanimidade. .\", \"relacoes\": [\"Centro: CCE.\", \"Data da reunião: 2013-04-30.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Em votação, aprovado por unanimidade.\"], \"item_anterior_nao_citavel\": \"Homologação dos afastamentos – 3.1 – Proc. Nº PROCESSO_32149 – Prof. PESSOA_165937/DQUI – Participação no Petrophase 2013, em Rueli-Malmaison/França – de 08 a 16/06/2013 – com apresentação de trabalho. Em votação, aprovado por unanimidade. 3.2 – Proc. Nº PROCESSO_32148 – Prof. PESSOA_166170/DFIS – Visita científica no Observatoire de La Côte d´Azur – Nice/França – de 24 a 05 de maio de 2013. Em votação, aprovado por unanimidade. 3.3 – Proc. Nº PROCESSO_32147 – PESSOA_166110/DEST – Visita de pesquisa no Departamento de Matemática da AgroParis Tech/França – de 16/05 a 31/05\", \"item_posterior_nao_citavel\": \"Proc. Nº PROCESSO_32143 – Afastamento do Prof. PESSOA_166084 para Pós-Doutorado no Instituto de Pesquisa Canadense National Resource Council em Ottawa – Canadá – julho/2013 – Leitura do parecer dado pelo Conselheiro Prof. PESSOA_165953 informando que “trata-se da solicitação de afastamento do Prof. Dr. PESSOA_376704 do CCE para realização de pós-doutorado na cidade de Ottawa, Canadá, no período de 01 de julho de 2013 a 30 de junho de 2014. Considerando que o pedido do professor PESSOA_166406 foi aprovado pelo Departamento de Química do CCE e está de acordo com a Resolução 31/2012 do CEPE da UFES, sou favorável ao seu afastamento para realização de pós-doutorado no Institute for National Measurement Standards na cidade Ottawa no Canadá”\"}\n{\"identificador\": 4, \"data_reuniao\": \"05/05/2025\", \"fonte\": \"Ata CCENS_DQF, 8ª reunião extraordinaria, 05/05/2025, ordem do dia, item 3.4, p. 9\", \"trecho\": \"ória. C.H.Semestral, T.E.L.: 45h, 45+0+0. Créditos: 03. Pré Requisito: não há. Departamento responsável: Departamento de Química e Física. Objetivos: A disciplina tem como objetivo o ensinamento teórico, visando capacitar os acadêmicos dos referidos cursos a compreender os principais conceitos da química orgânica, através do estudo das propriedades, métodos para obtenção e principais reações químicas com mecanismos das funções orgânicas. Ementa: Introdução à Química Orgânica. Identificação, Funções Orgânicas, Nomenclatura, Estereoquímica, Acidez e Basicidade. Carboidratos, Lipídios e Proteínas, e Polímeros Sintéticos. Bibliografia Básica: 1 - PESSOA_163082. Introdução a Química Orgânica. 2ª ed. São Paulo: Pearson Prentice Hall, 2004, 311p. 2- PESSOA_163081. Química orgânica. 4. ed. São Paulo: Pearson Education do Brasil, 2012. 3 - PESSOA_163080. Química Orgânica. 9ªed. Trad. Rio de Janeiro: Livros Técnicos e Científicos, 2009. 1048p. Bibliografia Complementar: 1 - PESSOA_163079; PESSOA_163078; PESSOA_163077. Guia prático de química orgânica. Rio de Janeiro: Interciência, 2008. 2 - PESSOA_163076; PESSOA_163075. Química Orgânica. 7ªed.Trad. Lisboa: Fundação Calouste Gulbekian, 1981. 1498p. 3 - PESSOA_163074; PESSOA_163073; PESSOA_163072; PESSOA_163071 Organic chemistry, Oxford UNIVERSIDADE FEDERAL DO ESPÍRITO SANTO CENTRO DE CIÊNCIAS EXATAS, NATURAIS E DA SAÚDE DEPARTAMENTO DE QUÍMICA E FÍSICA DQF/CCENS/UFES 11 de 12 University Press, Oxford, 2ª ed. 2012. 1234p. 4 – PESSOA_162315; PESSOA_162314 Bioquímica Básica. 2ªed.Guanabara/Koogan. 1999. 360p. 5 - PESSOA_163070; PESSOA_163069; PESSOA_163068;Princípios de Bioquímica. 4ªed.Savier, 2006. Após ampla discussão, o Chefe do Departamento colocou em votação o parecer da Professora PESSOA_162998. Em apreciação. Em votação. Aprovado por unanimidade.\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DQF.\", \"Data da reunião: 2025-05-05.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\"], \"item_anterior_nao_citavel\": \"Documento Avulso nº PROCESSO_30961. Indicação de membro para compor o colegiado do curso de Engenharia de Alimentos em resposta ao OFÍCIO Nº 08/2022/CCEAL/UFES: o Chefe do Departamento projetou o Ofício e procedeu a leitura nos seguintes termos: “OFÍCIO Nº 08/2022/CCEAL/UFES Alegre, 08 de Dezembro de 2022. Ao senhor PESSOA_163018. Chefe do Departamento de Química e Física. Assunto: Indicação de membro para compor o colegiado do curso de Engenharia de Alimentos. O colegiado do curso de Engenharia de Alimentos solicita a indicação de um professor do Departamento de Química e Física para compor o colegiado em virtude do fim do mandato do atual membro em fevereiro de 2023. Atenciosamente, Profa. PESSOA_376546 de Curso de Engenharia de Alimentos”. O Professor PESSOA_163018 concedeu a palavra ao Professor PESSOA_163010 que informou que faz parte atualmente do Colegiado de Engenharia de Alimentos e gostaria de continuar. O Chefe do Departamento colocou em votação a recondução do Professor PESSOA_163010 como representante do Departamento de Química e Física na Coordenação do Curso de Engenharia de Alimentos\", \"item_posterior_nao_citavel\": \"Eleição da chefia e subchefia do Departamento de Química e Física para o Biênio 2023/2024: o chefe do departamento disse que marcou a eleição para hoje, pois seu mandato encerra-se em março/2023 e há a necessidade de iniciar o processo com antecedência de 60 (sessenta) dias para a Diretoria de Gestão de Pessoas ter tempo hábil para publicar as portarias de nomeação chefia/subchefia, e, além disso, haverá nos próximos dias recessos e férias dos membros da câmara departamental, o que inviabilizaria deixar para o retorno das atividades acadêmicas. Os Professores PESSOA_376544 se interessam em compor a chapa como chefe e subchefe do Departamento de Química e Física, respectivamente. O Professor PESSOA_163018 perguntou se havia alguma outra chapa. Não havendo manifestação, colocou em votação\"}\n{\"identificador\": 5, \"data_reuniao\": \"05/05/2025\", \"fonte\": \"Ata CCENS_DQF, 8ª reunião extraordinaria, 05/05/2025, ordem do dia, item 3.4, p. 9\", \"trecho\": \"096 PESSOA_163098, PESSOA_163096 PESSOA_163097, “Fundamentos de Química Analítica”, 8. ed., São Paulo: Thomson Learning, 2007. 2 PESSOA_163096 PESSOA_163095, “Análise química quantitativa”, 6. ed., Rio de Janeiro: LTC, 2005. 3. PESSOA_163094 PESSOA_163099, “Analise química quantitativa”, 5. ed., Rio de Janeiro: LTC, 1992. Bibliografia Complementar: 1. PESSOA_163084 PESSOA_163092 e PESSOA_163091 PESSOA_163090, \\\"Química Geral\\\", 2. ed., Rio de Janeiro : Livros técnicos e científicos, 1986. 2. PESSOA_163089, \\\"Fundamentos de Química\\\", São Paulo: Harper & Row, 1977. 3. PESSOA_163088 PESSOA_163087, \\\"Forças intermoleculares, sólidos, soluções\\\", Belo Horizonte: UFMG, 1993. 4. PESSOA_163086 e PESSOA_163085, “Princípios de Química: Questionando a vida moderna e o meio ambiente”, 1. ed., Porto Alegre: Bookman, 2001. 5. PESSOA_163084 PESSOA_163083, \\\"Química Geral\\\", 2. ed., São Paulo: Makron Books, 1994. Disciplina: DQF13984 Química Instrumental Experimental. Classe: obrigatória. C.H.Semestral, T.E.L.: 30h, 0+0+30. Créditos: 01. Pré Requisito: Química Básica. Departamento responsável: Departamento de Química e Física. Objetivo: Este componente curricular tem como objetivo fornecer ao aluno conhecimentos em Química Básica, pela abordagem de métodos e técnicas, destacando-se as potencialidades e as aplicações ao cotidiano profissional. Desenvolver o espírito crítico e de associação que auxiliem os alunos nas aplicações práticas da Química. Ementa: Preparo de amostras; Extração Líquido – Líquido; Cromatografia em Coluna; Cromatografia em papel e camada delgada; Espectrometria UV/Vis; Padronização e Calibração; Espectrofotometria IV; Fotometria de Chama; Potenciometria; Condutimetria. Bibliografia: 1. PESSOA_163096 PESSOA_163098, PESSOA_163096 PESSOA_163097, “Fundamentos de Química Analítica”, 8. ed., São Paulo: Thomson Learning, 2007. 2 PESSOA_163096 PESSOA_163095, “Análise química quantitativa”, 6. ed., Rio de Janeiro: LTC, 2005. 3. PESSOA_163094 PESSOA_163093 et PESSOA_162393., “Analise química quantitativa”, 5. ed., Rio de Janeiro: LTC, 1992. Bibliografia Complementar: 1. PESSOA_163084 PESSOA_163092 e PESSOA_163091 PESSOA_163090, \\\"Química Geral\\\", 2. ed., Rio de Janeiro : Livros técnicos e científicos, 1986. 2. PESSOA_163089, \\\"Fundamentos de Química\\\", São Paulo: Harper & Row, 1977. 3. PESSOA_163088 PESSOA_163087, \\\"Forças intermoleculares, sólidos, soluções\\\", Belo Horizonte: UFMG, 1993. 4. PESSOA_163086 e PESSOA_163085, “Princípios de Química: Questionando a vida moderna e o meio ambiente”, 1. ed., Porto Alegre: Bookman, 2001. 5. PESSOA_163084 PESSOA_163083, \\\"Química Geral\\\", 2. ed., São Paulo: Makron Books, 1994. Disciplina: DQF 05566 Química orgânica. Classe: obrigatória. C.H.Semestral, T.E.L.: 45h, 45+0+0. Créditos: 03. Pré Requisito: não há. Departamento responsável: Departamento de Química e Física. Objetivos: A disciplina tem como objetivo o ensinamento teórico, visando capacitar os acadêmicos dos referidos cursos a compreender os principais conceitos da qu\", \"relacoes\": [\"Centro: CCENS.\", \"Departamento: DQF.\", \"Data da reunião: 2025-05-05.\", \"Desfecho: Aprovado.\", \"Resultado da votação: Aprovado por unanimidade.\"], \"item_anterior_nao_citavel\": \"Documento Avulso nº PROCESSO_30961. Indicação de membro para compor o colegiado do curso de Engenharia de Alimentos em resposta ao OFÍCIO Nº 08/2022/CCEAL/UFES: o Chefe do Departamento projetou o Ofício e procedeu a leitura nos seguintes termos: “OFÍCIO Nº 08/2022/CCEAL/UFES Alegre, 08 de Dezembro de 2022. Ao senhor PESSOA_163018. Chefe do Departamento de Química e Física. Assunto: Indicação de membro para compor o colegiado do curso de Engenharia de Alimentos. O colegiado do curso de Engenharia de Alimentos solicita a indicação de um professor do Departamento de Química e Física para compor o colegiado em virtude do fim do mandato do atual membro em fevereiro de 2023. Atenciosamente, Profa. PESSOA_376546 de Curso de Engenharia de Alimentos”. O Professor PESSOA_163018 concedeu a palavra ao Professor PESSOA_163010 que informou que faz parte atualmente do Colegiado de Engenharia de Alimentos e gostaria de continuar. O Chefe do Departamento colocou em votação a recondução do Professor PESSOA_163010 como representante do Departamento de Química e Física na Coordenação do Curso de Engenharia de Alimentos\", \"item_posterior_nao_citavel\": \"Eleição da chefia e subchefia do Departamento de Química e Física para o Biênio 2023/2024: o chefe do departamento disse que marcou a eleição para hoje, pois seu mandato encerra-se em março/2023 e há a necessidade de iniciar o processo com antecedência de 60 (sessenta) dias para a Diretoria de Gestão de Pessoas ter tempo hábil para publicar as portarias de nomeação chefia/subchefia, e, além disso, haverá nos próximos dias recessos e férias dos membros da câmara departamental, o que inviabilizaria deixar para o retorno das atividades acadêmicas. Os Professores PESSOA_376544 se interessam em compor a chapa como chefe e subchefe do Departamento de Química e Física, respectivamente. O Professor PESSOA_163018 perguntou se havia alguma outra chapa. Não havendo manifestação, colocou em votação\"}\n\nPergunta: Qual foi a decisão sobre disciplina DQF05566 no setor CCENS / DQF?",
+  "tokens_entrada": 8740,
+  "tokens_saida": 62,
+  "truncada": false,
+  "resposta_bruta": "{\"eventos\": [{\"evidencia\": 1, \"relevante\": true, \"descricao\": \"Aprovada por unanimidade a retificação da ata para inclusão do programa da disciplina DQF05566 QUÍMICA ORGÂNICA.\"}]}",
+  "resposta_final": "A disciplina DQF05566 QUÍMICA ORGÂNICA teve seu programa incluído na ata da 21ª REUNIÃO ORDINÁRIA DO DEPARTAMENTO DE QUÍMICA E FÍSICA, REALIZADA ÀS DEZESSEIS HORAS E DEZ MINUTOS (16h10min) DO DIA QUINZE DE DEZEMBRO DO ANO DE DOIS MIL E VINTE E DOIS (15/12/2022), após aprovação por unanimidade.\n\n24/04/2025: Aprovada por unanimidade a retificação da ata para inclusão do programa da disciplina DQF05566 QUÍMICA ORGÂNICA. [1]",
+  "citados": [
+    1
+  ]
+}

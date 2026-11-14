@@ -1,0 +1,16 @@
+Assunto 3047
+Ata 357
+Centro 9
+Data 283
+Deliberação 2410
+Departamento 16
+Encaminhamento 32
+ItemPauta 3582
+Processo 1588
+CONTEM 3582
+GERA 2638
+MENCIONA 1870
+PERTENCE_A 553
+POSSUI 357
+TRATA_DE 3567
+trata_do_mesmo_assunto 362
