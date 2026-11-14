@@ -267,7 +267,7 @@ Achados que valem para o texto do TCC (padrões de erro, limitações, casos cur
 2. O usuário revisa os casos parciais, incorretos e duvidosos, mais uma amostra sorteada das corretas (semente 20261112), para medir a concordância com a classificação do assistente.
 3. P1 e P2 foram vistas pelo usuário no frontend.
 
-Para o texto do TCC: a classificação da v3 é do assistente, com revisão humana por amostragem. A avaliação humana independente continua sendo a do orientador no portal.
+Para o texto do TCC: a classificação da v3 é do assistente, com revisão humana por amostragem. Não há avaliação humana independente das respostas do RAG: o portal do orientador confere o gabarito dele contra as atas, não a resposta do sistema (ver "Portal do orientador" no início deste arquivo).
 
 **Resultado:** 33 corretas, 4 parciais e 3 incorretas, sem abstenção. Por tipo: B 26 corretas e 1 parcial; C 4 corretas, 2 parciais e 2 incorretas; D 3 corretas, 1 parcial e 1 incorreta. A P13 saiu de correta para incorreta em 2026-11-14, depois da etapa (c) (ver abaixo); antes eram 34 corretas e 2 incorretas.
 
