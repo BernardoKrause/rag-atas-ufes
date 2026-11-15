@@ -377,3 +377,52 @@ A P@5 tem teto pelo tamanho do gabarito: uma pergunta B tem 1 item relevante, en
   - Ruído: P15 traz linhas vizinhas que o juiz marcou sem apoio, mas que a classificação manual tratou como ruído.
 
 Para o texto do TCC, a fidelidade sozinha não separa as classes. A média das incorretas (0,794) fica abaixo da das corretas (0,930), mas há corretas com 0,50 (P40) e 0,667 (P8, P32), e a P37, parcial, tem 1,00. Ela serve como sinal complementar, e cada afirmação marcada precisa ser conferida na ata, como pede o art. 18 da Portaria UFES 310/2026.
+
+## Complementos da avaliação (2026-11-14 e 15)
+
+Decididos pelo usuário em 2026-11-14, para cobrir o que o TCC1 promete e a v3 não tinha medido: as outras 3 métricas do RAGAS, a geração sem grafo (configuração B) e as duas categorias de pergunta que faltavam. Juiz `qwen2.5:14b`, sem nenhum erro nem tempo esgotado nas 40 perguntas das duas configurações. Scripts e saídas em `rastreios/v3/metricas/`.
+
+### RAGAS completo
+
+A resposta de referência do gabarito foi pseudonimizada com o próprio `cleaner` e a mesma chave da ingestão (`referencias_40.jsonl`), numa sessão revertida, para usar os mesmos tokens dos contextos.
+
+| Recorte | n | Fidelidade | Relev. resposta | Precisão contexto | Revocação contexto |
+|---|---|---|---|---|---|
+| Tipo B | 27 | 0,920 | 0,748 | 0,828 | 0,953 |
+| Tipo C | 8 | 0,934 | 0,710 | 0,618 | 0,863 |
+| Tipo D | 5 | 0,867 | 0,681 | 0,827 | 0,850 |
+| Todas (A) | 40 | 0,916 | 0,732 | 0,786 | 0,922 |
+| Classe correta | 33 | 0,930 | 0,734 | 0,788 | 0,965 |
+| Classe parcial | 4 | 0,897 | 0,663 | 0,777 | 0,673 |
+| Classe incorreta | 3 | 0,794 | 0,799 | 0,775 | 0,778 |
+
+A revocação do contexto é a que mais acompanha a classe; a precisão do contexto é mais baixa nas C, em que o top 5 traz ocorrências do tema fora do gabarito.
+
+### Configuração B (sem grafo)
+
+Os itens recuperados são os mesmos de A. O que muda é o contexto: em A, cada trecho recebe linhas do grafo (centro, departamento, data, desfecho, resultado da votação, "trata do mesmo assunto que", encaminhamento, ato emitido). Classificação em `teste_manual_config_b_v3.csv`, com a mesma rubrica.
+
+| Medida | A | B |
+|---|---|---|
+| Corretas / parciais / incorretas | 33 / 4 / 3 | 30 / 6 / 4 |
+| Fidelidade | 0,916 | 0,931 |
+| Relevância da resposta | 0,732 | 0,712 |
+| Precisão do contexto | 0,786 | 0,817 |
+| Revocação do contexto | 0,922 | 0,927 |
+
+Na fidelidade, B foi maior em 13 perguntas, menor em 8 e igual em 19. Mudaram de classe (P14 e P17 confirmadas pelo usuário em 2026-11-15):
+
+- **P14:** correta → parcial. O trecho não traz a votação; em A, o desfecho do grafo ("Aprovado por unanimidade") supre. É a única mudança que se explica pelo conteúdo do grafo.
+- **P4:** correta → incorreta. "Junto com outro professor" sem apoio: a ata diz que nenhum outro docente se manifestou.
+- **P17:** correta → incorreta. Atribui a aprovação a uma "Comissão Colegiada"; o trecho diz Câmara Departamental.
+- **P20:** incorreta → parcial. Sem a expansão inventada de CCHN, mas ainda com 1 de 3 atas.
+
+As afirmações erradas de P4 e P17 não tratam do que o grafo acrescenta: a diferença parece ser variação do gerador quando o contexto muda. Na P23 (A), o resultado da votação anexado diz o certo e a resposta erra mesmo assim.
+
+### Categorias que faltavam
+
+10 perguntas do autor, preparadas pelo assistente (`perguntas_novas.py`, `teste_manual_categorias_extra_v3.csv`):
+
+- **Intra-ata reformulada (R4, R14, R28, R31, R32):** P4, P14, P28, P31 e P32 reescritas sem os termos exatos, com o gabarito da original. 4 corretas e 1 parcial (R32, reclassificada pelo usuário em 2026-11-15). Recuperação: A, B e C com R@5 = 1,00 (MRR 0,77 em A e B, 1,00 em C); D com R@5 = 0,60 e MRR = 0,50 (perde R28 e R32).
+- **Sem evidência (S1–S5):** temas com zero ocorrência nas atas do setor. As 5 receberam a frase de abstenção, sem fontes.
+- **RAGAS das reformuladas (configuração A, referência da pergunta de origem):** fidelidade 0,917, relevância 0,712, precisão do contexto 0,767, revocação do contexto 1,00, sem erro. As duas fidelidades abaixo de 1 foram conferidas no trecho: R28 (0,833) tem todas as afirmações apoiadas, e o "aprovada" resume a aprovação do parecer; R32 (0,75) diz que o projeto foi aprovado ad referendum da chefia, o que está no trecho, mas não diz que o departamento referendou, que é o que a pergunta reformulada pede (o usuário confirmou a R32 como parcial em 2026-11-15).
