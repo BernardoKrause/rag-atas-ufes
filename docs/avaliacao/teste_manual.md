@@ -269,7 +269,7 @@ Achados que valem para o texto do TCC (padrões de erro, limitações, casos cur
 
 Para o texto do TCC: a classificação da v3 é do assistente, com revisão humana por amostragem. Não há avaliação humana independente das respostas do RAG: o portal do orientador confere o gabarito dele contra as atas, não a resposta do sistema (ver "Portal do orientador" no início deste arquivo).
 
-**Resultado:** 33 corretas, 4 parciais e 3 incorretas, sem abstenção. Por tipo: B 26 corretas e 1 parcial; C 4 corretas, 2 parciais e 2 incorretas; D 3 corretas, 1 parcial e 1 incorreta. A P13 saiu de correta para incorreta em 2026-11-14, depois da etapa (c) (ver abaixo); antes eram 34 corretas e 2 incorretas.
+**Resultado:** 33 corretas, 3 parciais e 4 incorretas, sem abstenção. Por tipo: B 26 corretas e 1 parcial; C 4 corretas, 1 parcial e 3 incorretas; D 3 corretas, 1 parcial e 1 incorreta. A P13 saiu de correta para incorreta em 2026-11-14, depois da etapa (c), e a P9 de parcial para incorreta em 2026-11-15 (ver abaixo); antes eram 34 corretas, 4 parciais e 2 incorretas.
 
 | Classe | Perguntas | Motivo |
 |---|---|---|
@@ -295,6 +295,10 @@ Para o texto do TCC: a classificação da v3 é do assistente, com revisão huma
 Concordância entre assistente e usuário: 14 de 14 na classe final, ou 12 de 14 na primeira leitura. As observações estão na coluna `observacao_usuario` do CSV.
 
 **Reclassificação da P13 (2026-11-14):** a fidelidade do RAGAS (etapa c) marcou a linha [3] da P13, que diz que a redução de vagas foi aprovada por unanimidade. Conferida no trecho, a frase troca a aprovação da inclusão do ponto na pauta (expediente 1.1) pela aprovação da redução, que foi por maioria. É o mesmo tipo de erro da P23, e o usuário reclassificou a P13 como incorreta. A P13 não estava entre as 14 revisadas. A classificação final passa a 33 corretas, 4 parciais e 3 incorretas.
+
+**Conferência das demais corretas (2026-11-15):** o usuário conferiu no trecho das fontes as 24 respostas corretas que ainda não tinha revisto (P1–P4, P7, P8, P10, P14–P17, P19, P22, P24, P26–P31, P33, P35, P36 e P38), numa página local com pergunta, gabarito, resposta e trechos, e confirmou as 24. Com as 14 de 2026-11-13 e as decisões sobre P13, P9 e P6, as 40 respostas da configuração A passaram pela conferência do usuário (art. 18 da Portaria UFES 310/2026).
+
+**Reclassificação da P9 (2026-11-15):** na revisão do texto do TCC, a afirmação que a fidelidade marcou na P9 (0,923) foi conferida no trecho [2]. A linha de 27/05/2015 diz que o afastamento do item 3.1 (Forum Brasil JINR, Rússia) teve financiamento da Capes; o item 3.1 não diz isso, e a Capes é do afastamento de outro docente, em outro subitem do mesmo trecho (Barcelona). É afirmação sem apoio, e o usuário reclassificou a P9 como incorreta, pela rubrica (como P20 e P17 de B). A classificação final passa a 33 corretas, 3 parciais e 4 incorretas; nas 50 perguntas, 42 / 4 / 4. A P9 não constava da conferência da fidelidade abaixo.
 
 **Limitação do k = 5:** quando o gabarito tem mais atas do que o sistema devolve de trechos (P9 e P21, com 7), a resposta nunca sai completa, por melhor que seja a ordenação.
 
@@ -364,7 +368,8 @@ A P@5 tem teto pelo tamanho do gabarito: uma pergunta B tem 1 item relevante, en
   - P40 (0,50): o juiz notou que a linha de 12/12/2025 é do curso noturno, a mesma ressalva da justificativa.
 - **Erro real que a classificação manual não pegou:**
   - P13 (0,667): a linha [3] diz que a redução de vagas foi aprovada por unanimidade. No expediente 1.1, o que foi aprovado por unanimidade foi a inclusão do ponto na pauta, e a redução foi aprovada por maioria, como diz a linha [1]. A resposta se contradiz no mesmo dia. Reclassificada como incorreta pelo usuário em 2026-11-14, como a P23.
-  - P6 (0,938): "o ponto foi retirado da pauta" não está no trecho, que diz só que o ponto volta a ser discutido. É um acréscimo pequeno e não muda o desfecho.
+  - P9 (0,923): a linha de 27/05/2015 atribui o financiamento da Capes ao afastamento do item 3.1, dado de outro subitem do trecho. Acrescentada em 2026-11-15, na revisão do TCC, e reclassificada como incorreta pelo usuário.
+  - P6 (0,938): "o ponto foi retirado da pauta" não está no trecho, que diz só que o ponto volta a ser discutido. É um acréscimo pequeno e não muda o desfecho. Levada ao usuário em 2026-11-15, na revisão do TCC: mantida como correta (paráfrase do desfecho, sem fato trocado).
 - **Erro do juiz:**
   - P20: o juiz leu o afastamento como sendo em março, mas o trecho diz "maior de 2023", erro de digitação da ata para maio. A resposta está certa nesse ponto.
   - P25: a aprovação de 30/05/2025 está no trecho [4].
@@ -404,7 +409,7 @@ Os itens recuperados são os mesmos de A. O que muda é o contexto: em A, cada t
 
 | Medida | A | B |
 |---|---|---|
-| Corretas / parciais / incorretas | 33 / 4 / 3 | 30 / 6 / 4 |
+| Corretas / parciais / incorretas | 33 / 3 / 4 | 30 / 6 / 4 |
 | Fidelidade | 0,916 | 0,931 |
 | Relevância da resposta | 0,732 | 0,712 |
 | Precisão do contexto | 0,786 | 0,817 |
@@ -416,8 +421,9 @@ Na fidelidade, B foi maior em 13 perguntas, menor em 8 e igual em 19. Mudaram de
 - **P4:** correta → incorreta. "Junto com outro professor" sem apoio: a ata diz que nenhum outro docente se manifestou.
 - **P17:** correta → incorreta. Atribui a aprovação a uma "Comissão Colegiada"; o trecho diz Câmara Departamental.
 - **P20:** incorreta → parcial. Sem a expansão inventada de CCHN, mas ainda com 1 de 3 atas.
+- **P9:** incorreta → parcial (desde a reclassificação de A em 2026-11-15). B não atribui a Capes ao afastamento errado e continua com 4 de 7 atas.
 
-As afirmações erradas de P4 e P17 não tratam do que o grafo acrescenta: a diferença parece ser variação do gerador quando o contexto muda. Na P23 (A), o resultado da votação anexado diz o certo e a resposta erra mesmo assim.
+As afirmações erradas de P4 e P17 (em B) e de P9 e P20 (em A) não tratam do que o grafo acrescenta: a diferença parece ser variação do gerador quando o contexto muda. Na P23 (A), o resultado da votação anexado diz o certo e a resposta erra mesmo assim.
 
 ### Categorias que faltavam
 
