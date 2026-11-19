@@ -187,13 +187,24 @@ def referencias_anonimizadas(referencias: list[dict], saida: Path, sessao) -> di
     return prontas
 
 
+def entrada_ragas(pergunta: str, registro: dict, referencia: str) -> str:
+    return manifesto.sha256_texto(json.dumps(
+        [pergunta, registro["texto"], registro["abstencao"], registro["contextos"], referencia], ensure_ascii=False
+    ))
+
+
+def reaproveitavel(avaliado: dict) -> bool:
+    return not avaliado["erros"] and "reaproveitado_de" not in avaliado
+
+
 def etapa_ragas(referencias: list[dict], saida: Path, geracao: Path, condicoes: list[str], sessao) -> int:
     from app.avaliacao.ragas_avaliacao import MODELO_JUIZ, EmbeddingsSerafim, JuizOllama, _pontuar, criar_metricas
 
     textos = referencias_anonimizadas(referencias, saida, sessao)
     por_id = {r["identificador"]: r for r in referencias}
     arquivo = saida / "ragas.jsonl"
-    feitos = {(r["pergunta_id"], r["condicao"]) for r in ler_jsonl(arquivo)}
+    feitos = {(r["pergunta_id"], r["condicao"]): r for r in ler_jsonl(arquivo)}
+    avaliados_por_entrada: dict[str, dict] = {}
     juiz = JuizOllama(settings.ollama_base_url, timeout=TEMPO_LIMITE_JUIZ, guardar_saidas=True)
     metricas = criar_metricas(juiz, EmbeddingsSerafim())
     total = 0
@@ -201,9 +212,24 @@ def etapa_ragas(referencias: list[dict], saida: Path, geracao: Path, condicoes: 
         for registro in ler_jsonl(geracao):
             referencia = por_id.get(registro["pergunta_id"])
             chave = (registro["pergunta_id"], registro["condicao"])
-            if referencia is None or sem_evidencia(referencia) or registro["condicao"] not in condicoes or chave in feitos:
+            if referencia is None or sem_evidencia(referencia) or registro["condicao"] not in condicoes:
                 continue
             pergunta = referencia["enunciado"]
+            entrada = entrada_ragas(pergunta, registro, textos[registro["pergunta_id"]])
+            if chave in feitos:
+                if reaproveitavel(feitos[chave]):
+                    avaliados_por_entrada.setdefault(entrada, feitos[chave])
+                continue
+            original = avaliados_por_entrada.get(entrada)
+            if original:
+                anexar_jsonl(arquivo, {
+                    **original, "condicao": registro["condicao"], "repeticao": registro["repeticao"],
+                    "segundos": {}, "saidas_juiz": {}, "entrada_sha256": entrada,
+                    "reaproveitado_de": original["condicao"],
+                })
+                total += 1
+                print(registro["pergunta_id"], registro["condicao"], "reaproveitado de", original["condicao"], flush=True)
+                continue
             chamadas = {}
             if not registro["abstencao"]:
                 chamadas["faithfulness"] = dict(
@@ -227,11 +253,14 @@ def etapa_ragas(referencias: list[dict], saida: Path, geracao: Path, condicoes: 
                 saidas[nome] = juiz.saidas[antes:]
                 if erro:
                     erros[nome] = erro
-            anexar_jsonl(arquivo, {
+            avaliado = {
                 "pergunta_id": registro["pergunta_id"], "condicao": registro["condicao"],
                 "repeticao": registro["repeticao"], "modelo_juiz": MODELO_JUIZ, **valores,
-                "erros": erros, "segundos": segundos, "saidas_juiz": saidas,
-            })
+                "erros": erros, "segundos": segundos, "saidas_juiz": saidas, "entrada_sha256": entrada,
+            }
+            anexar_jsonl(arquivo, avaliado)
+            if reaproveitavel(avaliado):
+                avaliados_por_entrada.setdefault(entrada, avaliado)
             total += 1
             print(registro["pergunta_id"], registro["condicao"], valores, erros or "", flush=True)
     return total
@@ -425,6 +454,7 @@ def _resumo_ragas(linhas: list[dict], metrica: str) -> dict:
         "n": len(valores),
         "media": sum(valores) / len(valores) if valores else None,
         "erros": sum(1 for r in linhas if metrica in r["erros"]),
+        "reaproveitados": sum(1 for r in linhas if r.get("reaproveitado_de") and r[metrica] is not None),
     }
 
 
