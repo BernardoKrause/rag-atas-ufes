@@ -190,8 +190,11 @@ def test_recuperar_rank_final_e_contiguo_quando_item_do_meio_nao_e_encontrado(
         _indexar_e_construir_grafo(qdrant_cliente, grafo_driver, documento, [item_a, item_c])
 
         monkeypatch.setattr(
-            "app.recuperacao.orquestrador.fundir_rrf",
-            lambda *args, **kwargs: ["orq_rank_a", "orq_rank_b", "orq_rank_c"],
+            "app.recuperacao.orquestrador.pontuar_rrf",
+            lambda *args, **kwargs: [
+                {"item_id_canonico": i, "pontuacao": 0.0, "posicoes": {}}
+                for i in ["orq_rank_a", "orq_rank_b", "orq_rank_c"]
+            ],
         )
         monkeypatch.setattr(
             "app.recuperacao.orquestrador._buscar_itens_por_id",

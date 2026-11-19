@@ -66,3 +66,22 @@ def test_fundir_rrf_com_grafo_vazio_ainda_funciona():
     resultado = fundir_rrf(hits_lexico, hits_vetorial, [], k=5)
 
     assert resultado == ["a"]
+
+
+def test_pontuar_rrf_soma_contribuicoes_e_guarda_posicoes():
+    from app.recuperacao.fusao import pontuar_rrf
+
+    pontuados = pontuar_rrf([Hit("a", 1), Hit("b", 2)], [Hit("b", 1)], [Hit("c", 1)], rrf_k=60)
+
+    assert [linha["item_id_canonico"] for linha in pontuados] == ["b", "a", "c"]
+    assert pontuados[0]["pontuacao"] == 1 / 62 + 1 / 61
+    assert pontuados[0]["posicoes"] == {"lexico": 2, "vetorial": 1}
+    assert fundir_rrf([Hit("a", 1), Hit("b", 2)], [Hit("b", 1)], [Hit("c", 1)], k=2) == ["b", "a"]
+
+
+def test_pontuar_rrf_empate_mantem_ordem_lexico_vetorial_grafo():
+    from app.recuperacao.fusao import pontuar_rrf
+
+    pontuados = pontuar_rrf([Hit("a", 1)], [Hit("b", 1)], [Hit("c", 1)])
+
+    assert [linha["item_id_canonico"] for linha in pontuados] == ["a", "b", "c"]

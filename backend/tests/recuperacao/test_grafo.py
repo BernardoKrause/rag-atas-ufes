@@ -206,3 +206,28 @@ def test_obter_contextos_grafo_isola_contexto_por_item_numa_unica_chamada(grafo_
     assert contextos["998009_PAUTA_1"]["departamento"] == "DCC"
     assert contextos["998009_PAUTA_2"]["departamento"] == "DCC"
     assert contextos["nao_existe_no_grafo"]["departamento"] is None
+
+
+def test_rastrear_expansao_mostra_cada_ancora_que_chega_ao_item(grafo_driver):
+    from app.recuperacao.grafo import rastrear_expansao
+
+    documento = _documento(998101)
+    itens = [
+        ItemPauta(
+            item_id_canonico=f"998101_PAUTA_{n}", documento_id=998101, secao="PAUTA", numero_item=str(n),
+            texto=f"texto {n}.", assunto="Calendário de provas do semestre",
+        )
+        for n in (1, 2, 3)
+    ]
+    construir_grafo([(documento, itens)], grafo_driver)
+    ancoras = [Hit("998101_PAUTA_1", rank=1), Hit("998101_PAUTA_2", rank=4)]
+
+    caminhos = rastrear_expansao(ancoras, grafo_driver)
+    expandidos = expandir_grafo(ancoras, grafo_driver)
+
+    ate_o_terceiro = [c for c in caminhos if c["item_id_canonico"] == "998101_PAUTA_3"]
+    assert [(c["ancora"], c["rank_ancora"], c["relacao"]) for c in ate_o_terceiro] == [
+        ("998101_PAUTA_1", 1, "TRATA_DE"), ("998101_PAUTA_2", 4, "TRATA_DE"),
+    ]
+    assert all(c["via"] for c in ate_o_terceiro)
+    assert expandidos == [Hit("998101_PAUTA_3", rank=1)]

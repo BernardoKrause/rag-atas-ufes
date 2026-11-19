@@ -16,6 +16,25 @@ def ancorar(hits_lexico: list[Hit], hits_vetorial: list[Hit], top_n: int = 10) -
     return sorted(candidatos.values(), key=lambda hit: hit.rank)
 
 
+def pontuar_rrf(
+    hits_lexico: list[Hit],
+    hits_vetorial: list[Hit],
+    hits_grafo: list[Hit],
+    rrf_k: int = RRF_K,
+    profundidade: int = PROFUNDIDADE_FUSAO,
+) -> list[dict]:
+    pontuados: dict[str, dict] = {}
+    for nome, lista in (("lexico", hits_lexico), ("vetorial", hits_vetorial), ("grafo", hits_grafo)):
+        for hit in lista[:profundidade]:
+            linha = pontuados.setdefault(
+                hit.item_id_canonico,
+                {"item_id_canonico": hit.item_id_canonico, "pontuacao": 0.0, "posicoes": {}},
+            )
+            linha["pontuacao"] += 1.0 / (rrf_k + hit.rank)
+            linha["posicoes"][nome] = hit.rank
+    return sorted(pontuados.values(), key=lambda linha: linha["pontuacao"], reverse=True)
+
+
 def fundir_rrf(
     hits_lexico: list[Hit],
     hits_vetorial: list[Hit],
@@ -24,10 +43,5 @@ def fundir_rrf(
     rrf_k: int = RRF_K,
     profundidade: int = PROFUNDIDADE_FUSAO,
 ) -> list[str]:
-    pontuacao: dict[str, float] = {}
-    for lista in (hits_lexico, hits_vetorial, hits_grafo):
-        for hit in lista[:profundidade]:
-            pontuacao[hit.item_id_canonico] = pontuacao.get(hit.item_id_canonico, 0.0) + 1.0 / (rrf_k + hit.rank)
-
-    ordenados = sorted(pontuacao.items(), key=lambda par: par[1], reverse=True)
-    return [item_id for item_id, _ in ordenados[:k]]
+    pontuados = pontuar_rrf(hits_lexico, hits_vetorial, hits_grafo, rrf_k, profundidade)
+    return [linha["item_id_canonico"] for linha in pontuados[:k]]

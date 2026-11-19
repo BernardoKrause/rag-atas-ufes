@@ -15,7 +15,7 @@ from app.geracao.tipos import ErroGeracao, RespostaDetalhada
 logger = logging.getLogger(__name__)
 
 CONFIGURACOES = {
-    "A": frozenset({"lexico", "vetorial", "grafo"}),
+    "A": frozenset({"lexico", "vetorial", "grafo", "campos_grafo"}),
     "B": frozenset({"lexico", "vetorial"}),
     "C": frozenset({"lexico"}),
     "D": frozenset({"vetorial"}),
