@@ -113,3 +113,30 @@ def obter_contextos_grafo(item_ids: list[str], driver: Driver) -> dict[str, dict
             "deliberacoes_relacionadas": relacionadas_por_item[item_id],
         }
     return contextos
+
+
+def rastrear_expansao(ancoras: list[Hit], driver: Driver) -> list[dict]:
+    if not ancoras:
+        return []
+
+    linhas = executar_leitura(
+        driver,
+        """
+        UNWIND $ancoras AS ancora
+        CALL (ancora) {
+            MATCH (:ItemPauta {item_id_canonico: ancora.item_id})-[:TRATA_DE]->(assunto:Assunto)
+                  <-[:TRATA_DE]-(relacionado:ItemPauta)
+            WHERE relacionado.item_id_canonico <> ancora.item_id
+            RETURN relacionado.item_id_canonico AS item_id_canonico, 'TRATA_DE' AS relacao,
+                   assunto.assunto_id AS via
+            UNION
+            MATCH (:ItemPauta {item_id_canonico: ancora.item_id})-[:GERA]->(:Deliberação)
+                  -[r:revoga|altera|substitui]-(outra:Deliberação)
+            RETURN outra.item_id_canonico AS item_id_canonico, type(r) AS relacao, null AS via
+        }
+        RETURN ancora.item_id AS ancora, ancora.rank AS rank_ancora, item_id_canonico, relacao, via
+        ORDER BY rank_ancora, item_id_canonico
+        """,
+        ancoras=[{"item_id": hit.item_id_canonico, "rank": hit.rank} for hit in ancoras],
+    )
+    return [dict(linha) for linha in linhas]

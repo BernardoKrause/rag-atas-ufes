@@ -84,3 +84,42 @@ def test_detalhada_guarda_a_saida_da_resposta_direta(db_session, recuperacao_fal
 
     assert detalhada.saida_resposta is not None
     assert detalhada.saida_resposta.tokens_saida == 5
+
+
+def test_registro_guarda_contexto_chamadas_e_texto_final(db_session, recuperacao_falsa):
+    item, _ = recuperacao_falsa
+    registro = {}
+
+    detalhada = responder_detalhado("p?", db_session, None, None, LLMFalso(RELEVANTE), registro=registro)
+
+    assert registro["contexto"][0]["item_id_canonico"] == item.item_id_canonico
+    assert registro["contexto"][0]["texto"] == "texto A"
+    chamada = registro["chamadas_eventos"][0]
+    assert chamada["saida_bruta"] == RELEVANTE
+    assert chamada["situacao"] == "ok"
+    assert "texto A" in chamada["usuario"]
+    assert chamada["eventos_aceitos"] == [{"evidencia": 1, "descricao": "Resposta."}]
+    assert registro["chamada_resposta"]["saida_bruta"] == RELEVANTE
+    assert registro["texto_final"] == detalhada.resposta.texto
+    assert registro["fontes"] == [item.item_id_canonico]
+
+
+def test_registro_guarda_evento_descartado_e_termo(db_session, recuperacao_falsa):
+    saida = json.dumps({"eventos": [{"evidencia": 1, "relevante": True, "descricao": "Aprovado no DQF."}]})
+    registro = {}
+
+    detalhada = responder_detalhado("O que houve no DQF?", db_session, None, None, LLMFalso(saida), registro=registro)
+
+    assert detalhada.resposta.abstencao is True
+    descartado = registro["chamadas_eventos"][0]["eventos_descartados"][0]
+    assert descartado["termos_sem_apoio"] == ["DQF"]
+    assert registro["chamada_resposta"] is None
+    assert registro["abstencao"] is True
+
+
+def test_registro_marca_json_invalido(db_session, recuperacao_falsa):
+    registro = {}
+
+    responder_detalhado("p?", db_session, None, None, LLMFalso("não é json"), registro=registro)
+
+    assert registro["chamadas_eventos"][0]["situacao"] == "json_invalido"
