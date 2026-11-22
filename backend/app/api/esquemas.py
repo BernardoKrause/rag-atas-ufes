@@ -7,10 +7,39 @@ from pydantic import BaseModel, StringConstraints
 from app.geracao.tipos import Resposta
 
 Pergunta = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=1000)]
+Opcao = Annotated[str, StringConstraints(strip_whitespace=True, max_length=100)]
 
 
 class PedidoConsulta(BaseModel):
     pergunta: Pergunta
+    orgao: Opcao | None = None
+    modelo: Opcao | None = None
+
+
+class ConfiguracaoSaida(BaseModel):
+    provedor: str
+    modelo: str
+    max_tokens: int
+    temperatura: float | None = None
+    num_ctx: int | None = None
+    orgao: str | None
+    escopo: str
+
+
+class OrgaoSaida(BaseModel):
+    sigla: str
+    nome: str | None
+    atas: int
+
+
+class ModeloSaida(BaseModel):
+    nome: str
+    disponivel: bool
+
+
+class ModelosSaida(BaseModel):
+    padrao: str
+    modelos: list[ModeloSaida]
 
 
 class FonteSaida(BaseModel):
@@ -26,10 +55,12 @@ class RespostaConsulta(BaseModel):
     texto: str
     abstencao: bool
     fontes: list[FonteSaida]
+    configuracao: ConfiguracaoSaida
 
 
-def para_resposta_consulta(resposta: Resposta) -> RespostaConsulta:
+def para_resposta_consulta(resposta: Resposta, configuracao: dict) -> RespostaConsulta:
     return RespostaConsulta(
+        configuracao=ConfiguracaoSaida(**configuracao),
         texto=resposta.texto,
         abstencao=resposta.abstencao,
         fontes=[

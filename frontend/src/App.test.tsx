@@ -23,6 +23,23 @@ function respostaHttp(status: number, corpo: unknown) {
   return new Response(JSON.stringify(corpo), { status })
 }
 
+const orgaos = [{ sigla: 'CCENS_DQF', nome: 'Departamento de Química e Física', atas: 10 }]
+const modelos = {
+  padrao: 'qwen2.5:7b',
+  modelos: [
+    { nome: 'qwen2.5:7b', disponivel: true },
+    { nome: 'qwen2.5:14b', disponivel: true },
+  ],
+}
+
+function fetchComOpcoes(consulta: () => Promise<Response>) {
+  return vi.fn((url: string) => {
+    if (url.endsWith('/orgaos')) return Promise.resolve(respostaHttp(200, orgaos))
+    if (url.endsWith('/modelos')) return Promise.resolve(respostaHttp(200, modelos))
+    return consulta()
+  })
+}
+
 afterEach(() => {
   vi.unstubAllGlobals()
 })
@@ -37,7 +54,7 @@ describe('App', () => {
   })
 
   it('consulta a API e mostra a resposta com a fonte', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respostaHttp(200, resposta)))
+    vi.stubGlobal('fetch', fetchComOpcoes(() => Promise.resolve(respostaHttp(200, resposta))))
     const usuario = userEvent.setup()
     render(<App />)
 
@@ -51,7 +68,7 @@ describe('App', () => {
   })
 
   it('mostra o carregamento enquanto a API responde', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise(() => {})))
+    vi.stubGlobal('fetch', fetchComOpcoes(() => new Promise(() => {})))
     const usuario = userEvent.setup()
     render(<App />)
 
@@ -65,7 +82,7 @@ describe('App', () => {
     [503, 'O serviço de geração está indisponível. Tente novamente em instantes.'],
     [500, 'Ocorreu um erro interno. Tente novamente.'],
   ])('mostra a mensagem do status %i', async (status, mensagem) => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respostaHttp(status, { detail: 'x' })))
+    vi.stubGlobal('fetch', fetchComOpcoes(() => Promise.resolve(respostaHttp(status, { detail: 'x' }))))
     const usuario = userEvent.setup()
     render(<App />)
 
@@ -75,12 +92,38 @@ describe('App', () => {
   })
 
   it('avisa quando a API está fora do ar', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+    vi.stubGlobal('fetch', fetchComOpcoes(() => Promise.reject(new TypeError('Failed to fetch'))))
     const usuario = userEvent.setup()
     render(<App />)
 
     await usuario.type(screen.getByLabelText('Pergunta'), 'Pergunta{Enter}')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível conectar à API.')
+  })
+
+  it('envia o órgão e o modelo escolhidos e mostra a configuração usada', async () => {
+    const comConfiguracao = {
+      ...resposta,
+      configuracao: {
+        provedor: 'ollama', modelo: 'qwen2.5:14b', max_tokens: 4096, temperatura: 0, num_ctx: 16384,
+        orgao: 'CCENS_DQF', escopo: 'selecao',
+      },
+    }
+    const fetchMock = fetchComOpcoes(() => Promise.resolve(respostaHttp(200, comConfiguracao)))
+    vi.stubGlobal('fetch', fetchMock)
+    const usuario = userEvent.setup()
+    render(<App />)
+
+    await usuario.selectOptions(await screen.findByLabelText('Órgão'), 'CCENS_DQF')
+    await usuario.selectOptions(screen.getByLabelText('Modelo de geração'), 'qwen2.5:14b')
+    await usuario.type(screen.getByLabelText('Pergunta'), 'O que foi aprovado?{Enter}')
+
+    expect(await screen.findByText('Modelo: qwen2.5:14b · Busca: CCENS / DQF (órgão selecionado)')).toBeInTheDocument()
+    const chamada = fetchMock.mock.calls.find(([url]) => url.endsWith('/consultas')) as unknown as [string, RequestInit]
+    expect(JSON.parse(chamada[1].body as string)).toEqual({
+      pergunta: 'O que foi aprovado?',
+      orgao: 'CCENS_DQF',
+      modelo: 'qwen2.5:14b',
+    })
   })
 })

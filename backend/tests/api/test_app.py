@@ -7,7 +7,7 @@ from app.main import criar_app
 
 
 def test_api_nao_sobe_com_config_de_llm_invalida():
-    def fabrica_invalida():
+    def fabrica_invalida(modelo=None):
         raise ErroGeracao("LLM_MODELO vazio no .env")
 
     with pytest.raises(ErroGeracao, match="LLM_MODELO vazio"):
@@ -16,7 +16,7 @@ def test_api_nao_sobe_com_config_de_llm_invalida():
 
 
 def test_lifespan_guarda_clientes_no_estado(llm_falso):
-    app = criar_app(fabrica_llm=lambda: llm_falso)
+    app = criar_app(fabrica_llm=lambda modelo=None: llm_falso)
     with TestClient(app):
         assert app.state.cliente_llm is llm_falso
         assert app.state.cliente_qdrant is not None
@@ -27,7 +27,7 @@ def test_lifespan_guarda_clientes_no_estado(llm_falso):
 def test_lifespan_aquece_modelo_de_embedding(llm_falso, monkeypatch):
     chamadas = []
     monkeypatch.setattr("app.api.dependencias.carregar_modelo", lambda: chamadas.append(1))
-    with TestClient(criar_app(fabrica_llm=lambda: llm_falso)):
+    with TestClient(criar_app(fabrica_llm=lambda modelo=None: llm_falso)):
         assert chamadas == [1]
 
 
@@ -47,7 +47,7 @@ def test_lifespan_fecha_qdrant_se_startup_falha_depois(llm_falso, monkeypatch):
     monkeypatch.setattr("app.api.dependencias.obter_driver", driver_quebrado)
 
     with pytest.raises(RuntimeError, match="neo4j indisponivel"):
-        with TestClient(criar_app(fabrica_llm=lambda: llm_falso)):
+        with TestClient(criar_app(fabrica_llm=lambda modelo=None: llm_falso)):
             pass
     assert qdrant.fechado
 

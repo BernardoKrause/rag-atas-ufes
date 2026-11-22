@@ -25,9 +25,30 @@ def llm_falso():
     return LLMFalso()
 
 
+@pytest.fixture(autouse=True)
+def registro_temporario(tmp_path, monkeypatch):
+    caminho = tmp_path / "consultas.jsonl"
+    monkeypatch.setattr("app.api.rotas.settings.consultas_registro", caminho)
+    return caminho
+
+
 @pytest.fixture()
-def cliente_api(db_session, llm_falso):
-    app = criar_app(fabrica_llm=lambda: llm_falso)
+def modelos_instalados():
+    return {"qwen2.5:7b", "qwen2.5:14b"}
+
+
+@pytest.fixture()
+def fabricados():
+    return []
+
+
+@pytest.fixture()
+def cliente_api(db_session, llm_falso, modelos_instalados, fabricados):
+    def fabrica(modelo=None):
+        fabricados.append(modelo)
+        return llm_falso
+
+    app = criar_app(fabrica_llm=fabrica, verificar_modelos=lambda: modelos_instalados)
     app.dependency_overrides[obter_sessao] = lambda: db_session
     with TestClient(app, raise_server_exceptions=False) as cliente:
         yield cliente

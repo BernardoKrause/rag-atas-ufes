@@ -43,10 +43,12 @@ def responder_detalhado(
     camadas: frozenset[str] = CAMADAS_TODAS,
     k: int = K_PADRAO,
     registro: dict | None = None,
+    orgao: str | None = None,
 ) -> RespostaDetalhada:
     rastreio_recuperacao = {} if registro is not None else None
     evidencias = recuperar(
-        pergunta, sessao, cliente_qdrant, driver, k=k, camadas=camadas, registro=rastreio_recuperacao
+        pergunta, sessao, cliente_qdrant, driver, k=k, camadas=camadas, registro=rastreio_recuperacao,
+        orgao=orgao,
     )
     numeradas = montar_contexto(evidencias, sessao) if evidencias else []
     chamadas: list[dict] = []
@@ -180,5 +182,6 @@ def responder(
     cliente_qdrant: QdrantClient,
     driver: Driver,
     cliente_llm: ClienteLLM,
+    orgao: str | None = None,
 ) -> Resposta:
-    return responder_detalhado(pergunta, sessao, cliente_qdrant, driver, cliente_llm).resposta
+    return responder_detalhado(pergunta, sessao, cliente_qdrant, driver, cliente_llm, orgao=orgao).resposta
