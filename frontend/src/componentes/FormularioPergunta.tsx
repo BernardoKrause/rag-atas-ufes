@@ -58,7 +58,11 @@ export function FormularioPergunta({ carregando, aoEnviar, orgaos = [], modelos 
           {orgaos.length > 0 && (
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
               Órgão
-              <select value={orgao} onChange={(evento) => setOrgao(evento.target.value)} className={CLASSE_SELETOR}>
+              <select
+                value={orgao}
+                onChange={(evento) => setOrgao(evento.target.value)}
+                className={`${CLASSE_SELETOR} w-80 max-w-full`}
+              >
                 <option value="">Todo o acervo</option>
                 {orgaos.map((item) => (
                   <option key={item.sigla} value={item.sigla}>
