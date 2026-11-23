@@ -100,9 +100,34 @@ class ClienteAnthropic:
         )
 
 
-def criar_cliente_llm(config: Settings = settings) -> ClienteLLM:
+def modelos_permitidos(config: Settings = settings) -> list[str]:
+    padrao = config.llm_modelo.strip()
+    if config.llm_provedor.strip().lower() != "ollama":
+        return [padrao]
+    nomes = [padrao] + [nome.strip() for nome in config.llm_modelos if nome.strip()]
+    return list(dict.fromkeys(nomes))
+
+
+def modelos_instalados(config: Settings = settings, transport: httpx.BaseTransport | None = None) -> set[str] | None:
+    try:
+        with httpx.Client(base_url=config.ollama_base_url, timeout=5.0, transport=transport) as cliente:
+            resposta = cliente.get("/api/tags")
+            resposta.raise_for_status()
+            return {modelo["name"] for modelo in resposta.json().get("models", [])}
+    except (httpx.HTTPError, json.JSONDecodeError, KeyError, TypeError, AttributeError):
+        return None
+
+
+def parametros_geracao(modelo: str, config: Settings = settings) -> dict:
+    parametros = {"provedor": config.llm_provedor.strip().lower(), "modelo": modelo, "max_tokens": config.llm_max_tokens}
+    if parametros["provedor"] == "ollama":
+        parametros |= {"temperatura": 0, "num_ctx": config.llm_num_ctx}
+    return parametros
+
+
+def criar_cliente_llm(config: Settings = settings, modelo: str | None = None) -> ClienteLLM:
     provedor = config.llm_provedor.strip().lower()
-    modelo = config.llm_modelo.strip()
+    modelo = (modelo or config.llm_modelo).strip()
     if not modelo:
         raise ErroGeracao("LLM_MODELO vazio no .env")
     if provedor == "ollama":

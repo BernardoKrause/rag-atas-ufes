@@ -1,7 +1,7 @@
 from app.ingestion.indexador import indexar_e_persistir
 from app.recuperacao.lexico import buscar_lexico
 from app.recuperacao.orquestrador import recuperar
-from app.recuperacao.setor import identificar_orgao
+from app.recuperacao.setor import identificar_orgao, listar_orgaos
 from app.recuperacao.tipos import Hit
 from app.recuperacao.vetorial import buscar_vetorial
 from tests.recuperacao.conftest import criar_documento, criar_item, limpar_pontos_qdrant
@@ -77,3 +77,34 @@ def test_recuperar_so_traz_itens_do_setor_citado(db_session, qdrant_cliente, gra
     finally:
         limpar_pontos_qdrant(qdrant_cliente, deal.id_documento)
         limpar_pontos_qdrant(qdrant_cliente, dpv.id_documento)
+
+
+def test_orgao_selecionado_prevalece_sobre_o_setor_da_pergunta(db_session, qdrant_cliente, grafo_driver, monkeypatch):
+    (deal, item_deal), (dpv, item_dpv) = _dois_orgaos(db_session)
+    monkeypatch.setattr("app.recuperacao.orquestrador.expandir_grafo", lambda ancoras, driver: [])
+    try:
+        indexar_e_persistir(deal.id_documento, [item_deal], qdrant_cliente)
+        indexar_e_persistir(dpv.id_documento, [item_dpv], qdrant_cliente)
+        registro = {}
+
+        selecionado = recuperar(
+            "reforma do laboratório no setor CCAE / DEAL?", db_session, qdrant_cliente, grafo_driver,
+            orgao="CCAE_DPV", registro=registro,
+        )
+
+        assert [e.item_id_canonico for e in selecionado] == ["setor_dpv"]
+        assert registro["orgao"] == "CCAE_DPV"
+        assert registro["origem_orgao"] == "selecao"
+    finally:
+        limpar_pontos_qdrant(qdrant_cliente, deal.id_documento)
+        limpar_pontos_qdrant(qdrant_cliente, dpv.id_documento)
+
+
+def test_listar_orgaos_conta_as_atas_de_cada_orgao(db_session):
+    _dois_orgaos(db_session)
+    criar_documento(db_session, nome_arquivo="setor_deal_2.pdf", orgao="CCAE_DEAL")
+
+    contagem = dict(listar_orgaos(db_session))
+
+    assert contagem["CCAE_DEAL"] == 2
+    assert contagem["CCAE_DPV"] == 1

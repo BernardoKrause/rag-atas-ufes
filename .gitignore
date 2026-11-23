@@ -51,3 +51,6 @@ docs/superpowers/
 # --- OS ---
 .DS_Store
 Thumbs.db
+
+# --- Registro das consultas da API ---
+registros/

@@ -12,36 +12,10 @@ from app.avaliacao import manifesto
 from app.avaliacao.jsonl import anexar_jsonl, ler_jsonl
 from app.avaliacao.metricas_rodada import agregar, avaliar_ranking, ranking_logico, relevantes_da_referencia
 from app.avaliacao.rodada import CONDICOES, K, carregar_referencia, contexto_da_execucao, registrar_etapa
-from app.recuperacao.setor import RE_SETOR
+from app.recuperacao.setor import NOMES_POR_EXTENSO, RE_SETOR
 
 logger = logging.getLogger(__name__)
 
-NOMES_POR_EXTENSO = {
-    "CAR": "Centro de Artes",
-    "CCAE": "Centro de Ciências Agrárias e Engenharias",
-    "CCE": "Centro de Ciências Exatas",
-    "CCHN": "Centro de Ciências Humanas e Naturais",
-    "CE": "Centro de Educação",
-    "CEFD": "Centro de Educação Física e Desportos",
-    "CEUNES": "Centro Universitário Norte do Espírito Santo",
-    "CT": "Centro Tecnológico",
-    "CCAE_DEAL": "Departamento de Engenharia de Alimentos",
-    "CCAE_DER": "Departamento de Engenharia Rural",
-    "CCAE_DPV": "Departamento de Produção Vegetal",
-    "CCENS_DB": "Departamento de Biologia",
-    "CCENS_DC": "Departamento de Computação",
-    "CCENS_DFN": "Departamento de Farmácia e Nutrição",
-    "CCENS_DG": "Departamento de Geologia",
-    "CCENS_DMPA": "Departamento de Matemática Pura e Aplicada",
-    "CCENS_DQF": "Departamento de Química e Física",
-    "CEUNES_DCE": "Departamento de Computação e Eletrônica",
-    "CEUNES_DCN": "Departamento de Ciências Naturais",
-    "CEUNES_DCS": "Departamento de Ciências da Saúde",
-    "CEUNES_DET": "Departamento de Engenharia e Tecnologia",
-    "CEUNES_DMA": "Departamento de Matemática Aplicada",
-    "CCHN_CamaraLocal_Graduacao": "Câmara Local de Graduação do Centro de Ciências Humanas e Naturais",
-    "CE_Colegiado_Pedagogia": "Colegiado do Curso de Pedagogia",
-}
 MODOS_SETOR = ("hibrida", "expandida")
 
 
@@ -60,19 +34,27 @@ def variantes_setor(enunciado: str, orgao: str | None) -> dict[str, str]:
     return variantes
 
 
-def etapa_setor(referencias: list[dict], saida: Path, sessao, qdrant, driver) -> int:
+VARIANTES_SELETOR = ("original", "sem_setor")
+
+
+def etapa_setor(referencias: list[dict], saida: Path, sessao, qdrant, driver, seletor: bool = False) -> int:
     from app.recuperacao.orquestrador import recuperar
 
-    arquivo = saida / "setor.jsonl"
+    arquivo = saida / ("seletor.jsonl" if seletor else "setor.jsonl")
     feitos = {(r["pergunta_id"], r["variante"], r["modo"]) for r in ler_jsonl(arquivo)}
     total = 0
     for referencia in referencias:
         for variante, enunciado in variantes_setor(referencia["enunciado"], referencia["orgao"]).items():
+            if seletor and variante not in VARIANTES_SELETOR:
+                continue
             for modo in MODOS_SETOR:
                 if (referencia["identificador"], variante, modo) in feitos:
                     continue
                 rastreio = {}
-                recuperar(enunciado, sessao, qdrant, driver, k=K, camadas=CONDICOES[modo], registro=rastreio)
+                recuperar(
+                    enunciado, sessao, qdrant, driver, k=K, camadas=CONDICOES[modo], registro=rastreio,
+                    orgao=referencia["orgao"] if seletor else None,
+                )
                 anexar_jsonl(arquivo, {
                     "pergunta_id": referencia["identificador"], "variante": variante, "modo": modo,
                     "enunciado": enunciado, "orgao_esperado": referencia["orgao"],
@@ -82,10 +64,10 @@ def etapa_setor(referencias: list[dict], saida: Path, sessao, qdrant, driver) ->
     return total
 
 
-def resumir_setor(referencias: list[dict], saida: Path, mapa: dict[str, str]) -> dict:
+def resumir_setor(referencias: list[dict], saida: Path, mapa: dict[str, str], nome: str = "setor") -> dict:
     relevantes = {r["identificador"]: relevantes_da_referencia(r, mapa)[0] for r in referencias}
     grupos, linhas = defaultdict(list), []
-    for registro in ler_jsonl(saida / "setor.jsonl"):
+    for registro in ler_jsonl(saida / f"{nome}.jsonl"):
         g = relevantes.get(registro["pergunta_id"])
         if g is None:
             continue
@@ -105,10 +87,10 @@ def resumir_setor(referencias: list[dict], saida: Path, mapa: dict[str, str]) ->
             "sem_orgao": sum(1 for linha, _ in itens if linha["orgao_identificado"] is None),
             **agregar([a for _, a in itens]),
         }
-    (saida / "setor_por_pergunta.jsonl").write_text(
+    (saida / f"{nome}_por_pergunta.jsonl").write_text(
         "".join(json.dumps(linha, ensure_ascii=False) + "\n" for linha in linhas), encoding="utf-8"
     )
-    (saida / "setor_resumo.json").write_text(json.dumps(resumo, ensure_ascii=False, indent=1), encoding="utf-8")
+    (saida / f"{nome}_resumo.json").write_text(json.dumps(resumo, ensure_ascii=False, indent=1), encoding="utf-8")
     return resumo
 
 
@@ -144,7 +126,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.WARNING, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     logging.getLogger("neo4j.notifications").setLevel(logging.ERROR)
     parser = argparse.ArgumentParser(description="Experimentos complementares: filtro por setor e abstenção.")
-    parser.add_argument("etapa", choices=("setor", "abstencao"))
+    parser.add_argument("etapa", choices=("setor", "seletor", "abstencao"))
     parser.add_argument("--referencia", type=Path, required=True)
     parser.add_argument("--saida", type=Path, required=True)
     parser.add_argument("--perguntas", type=Path, help="JSONL com as perguntas sem resposta (etapa abstencao)")
@@ -165,9 +147,10 @@ def main(argv: list[str] | None = None) -> int:
         with Sessao() as sessao:
             extras["ambiente"] = contexto_da_execucao(argumentos.referencia, sessao, qdrant, driver, MODELO_JUIZ)
             sessao.rollback()
-            if argumentos.etapa == "setor":
-                extras["registros_novos"] = etapa_setor(referencias, saida, sessao, qdrant, driver)
-                extras["resumo"] = resumir_setor(referencias, saida, mapa_item_logico(sessao))
+            if argumentos.etapa in ("setor", "seletor"):
+                seletor = argumentos.etapa == "seletor"
+                extras["registros_novos"] = etapa_setor(referencias, saida, sessao, qdrant, driver, seletor=seletor)
+                extras["resumo"] = resumir_setor(referencias, saida, mapa_item_logico(sessao), nome=argumentos.etapa)
             else:
                 from app.geracao.llm import criar_cliente_llm
 

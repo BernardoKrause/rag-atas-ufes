@@ -34,7 +34,7 @@ describe('useConsulta', () => {
 
     await act(async () => resolver(resposta))
     expect(result.current.estado).toEqual({ fase: 'sucesso', resposta })
-    expect(consultarMock).toHaveBeenCalledWith('pergunta', expect.any(AbortSignal))
+    expect(consultarMock).toHaveBeenCalledWith('pergunta', expect.any(AbortSignal), {})
   })
 
   it('termina em erro com o tipo do ErroConsulta', async () => {

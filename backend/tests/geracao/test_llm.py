@@ -6,7 +6,14 @@ import pytest
 from pydantic import SecretStr
 
 from app.core.config import settings
-from app.geracao.llm import ClienteAnthropic, ClienteOllama, criar_cliente_llm
+from app.geracao.llm import (
+    ClienteAnthropic,
+    ClienteOllama,
+    criar_cliente_llm,
+    modelos_instalados,
+    modelos_permitidos,
+    parametros_geracao,
+)
 from app.geracao.tipos import ErroGeracao, SaidaLLM
 
 MODELO_ANTHROPIC_TESTE = "claude-opus-5"
@@ -296,3 +303,39 @@ def test_criar_cliente_llm_repassa_esforco_ao_anthropic():
     cliente = criar_cliente_llm(config)
 
     assert cliente._esforco == "medium"
+
+
+def test_modelos_permitidos_comeca_pelo_padrao_sem_repetir():
+    config = settings.model_copy(
+        update={"llm_provedor": "ollama", "llm_modelo": "qwen2.5:7b", "llm_modelos": ["qwen2.5:14b", "qwen2.5:7b"]}
+    )
+    assert modelos_permitidos(config) == ["qwen2.5:7b", "qwen2.5:14b"]
+
+
+def test_modelos_permitidos_fora_do_ollama_e_so_o_padrao():
+    config = settings.model_copy(update={"llm_provedor": "anthropic", "llm_modelo": MODELO_ANTHROPIC_TESTE})
+    assert modelos_permitidos(config) == [MODELO_ANTHROPIC_TESTE]
+
+
+def test_modelos_instalados_le_as_tags_do_ollama():
+    transporte = httpx.MockTransport(
+        lambda request: httpx.Response(200, json={"models": [{"name": "qwen2.5:7b"}, {"name": "qwen2.5:14b"}]})
+    )
+    assert modelos_instalados(settings, transport=transporte) == {"qwen2.5:7b", "qwen2.5:14b"}
+
+
+def test_modelos_instalados_sem_ollama_devolve_none():
+    transporte = httpx.MockTransport(lambda request: httpx.Response(503))
+    assert modelos_instalados(settings, transport=transporte) is None
+
+
+def test_criar_cliente_llm_usa_o_modelo_pedido():
+    config = settings.model_copy(update={"llm_provedor": "ollama", "llm_modelo": "qwen2.5:7b"})
+    assert criar_cliente_llm(config, modelo="qwen2.5:14b")._modelo == "qwen2.5:14b"
+
+
+def test_parametros_geracao_do_ollama():
+    config = settings.model_copy(update={"llm_provedor": "ollama", "llm_max_tokens": 4096, "llm_num_ctx": 16384})
+    assert parametros_geracao("qwen2.5:7b", config) == {
+        "provedor": "ollama", "modelo": "qwen2.5:7b", "max_tokens": 4096, "temperatura": 0, "num_ctx": 16384,
+    }

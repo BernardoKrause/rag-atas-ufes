@@ -22,7 +22,7 @@ describe('FormularioPergunta', () => {
     await usuario.type(screen.getByLabelText('Pergunta'), '  O que foi aprovado?  ')
     await usuario.click(screen.getByRole('button', { name: 'Perguntar' }))
 
-    expect(aoEnviar).toHaveBeenCalledExactlyOnceWith('O que foi aprovado?')
+    expect(aoEnviar).toHaveBeenCalledExactlyOnceWith('O que foi aprovado?', {})
   })
 
   it('envia com Enter e quebra a linha com Shift+Enter', async () => {
@@ -36,7 +36,7 @@ describe('FormularioPergunta', () => {
     expect(campo).toHaveValue('Linha 1\nLinha 2')
 
     await usuario.type(campo, '{Enter}')
-    expect(aoEnviar).toHaveBeenCalledExactlyOnceWith('Linha 1\nLinha 2')
+    expect(aoEnviar).toHaveBeenCalledExactlyOnceWith('Linha 1\nLinha 2', {})
   })
 
   it('não envia durante o carregamento', async () => {
@@ -53,5 +53,30 @@ describe('FormularioPergunta', () => {
   it('limita a pergunta a 1000 caracteres', () => {
     render(<FormularioPergunta carregando={false} aoEnviar={vi.fn()} />)
     expect(screen.getByLabelText('Pergunta')).toHaveAttribute('maxLength', '1000')
+  })
+
+  it('não mostra os seletores sem opções e não envia o modelo padrão', async () => {
+    const usuario = userEvent.setup()
+    const aoEnviar = vi.fn()
+    const modelos = { padrao: 'qwen2.5:7b', modelos: [{ nome: 'qwen2.5:7b', disponivel: true }] }
+    render(<FormularioPergunta carregando={false} aoEnviar={aoEnviar} modelos={modelos} />)
+
+    expect(screen.queryByLabelText('Órgão')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Modelo de geração')).toHaveValue('qwen2.5:7b')
+    await usuario.type(screen.getByLabelText('Pergunta'), 'Pergunta?{Enter}')
+    expect(aoEnviar).toHaveBeenCalledExactlyOnceWith('Pergunta?', {})
+  })
+
+  it('desabilita modelo indisponível', () => {
+    const modelos = {
+      padrao: 'qwen2.5:7b',
+      modelos: [
+        { nome: 'qwen2.5:7b', disponivel: true },
+        { nome: 'qwen2.5:14b', disponivel: false },
+      ],
+    }
+    render(<FormularioPergunta carregando={false} aoEnviar={vi.fn()} modelos={modelos} />)
+
+    expect(screen.getByRole('option', { name: 'qwen2.5:14b (indisponível)' })).toBeDisabled()
   })
 })

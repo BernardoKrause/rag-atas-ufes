@@ -3,6 +3,7 @@ import {
   consultar,
   ehCancelamento,
   ErroConsulta,
+  type OpcoesConsulta,
   type RespostaConsulta,
   type TipoErroConsulta,
 } from '../api/consultas'
@@ -19,13 +20,13 @@ export function useConsulta() {
 
   useEffect(() => () => controladorRef.current?.abort(), [])
 
-  const perguntar = useCallback(async (pergunta: string) => {
+  const perguntar = useCallback(async (pergunta: string, opcoes: OpcoesConsulta = {}) => {
     controladorRef.current?.abort()
     const controlador = new AbortController()
     controladorRef.current = controlador
     setEstado({ fase: 'carregando' })
     try {
-      const resposta = await consultar(pergunta, controlador.signal)
+      const resposta = await consultar(pergunta, controlador.signal, opcoes)
       if (controlador.signal.aborted) return
       setEstado({ fase: 'sucesso', resposta })
     } catch (erro) {

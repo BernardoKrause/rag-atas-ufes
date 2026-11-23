@@ -9,11 +9,18 @@ from app.api.dependencias import criar_lifespan
 from app.api.erros import registrar_tratadores
 from app.api.rotas import roteador
 from app.core.config import settings
-from app.geracao.llm import ClienteLLM, criar_cliente_llm
+from app.geracao.llm import ClienteLLM, criar_cliente_llm, modelos_instalados
 
 
-def criar_app(fabrica_llm: Callable[[], ClienteLLM] = criar_cliente_llm) -> FastAPI:
-    app = FastAPI(title="RAG Atas UFES", lifespan=criar_lifespan(fabrica_llm))
+def _fabrica_padrao(modelo: str | None) -> ClienteLLM:
+    return criar_cliente_llm(modelo=modelo)
+
+
+def criar_app(
+    fabrica_llm: Callable[[str | None], ClienteLLM] = _fabrica_padrao,
+    verificar_modelos: Callable[[], set[str] | None] = modelos_instalados,
+) -> FastAPI:
+    app = FastAPI(title="RAG Atas UFES", lifespan=criar_lifespan(fabrica_llm, verificar_modelos))
     registrar_tratadores(app)
     app.add_middleware(
         CORSMiddleware,

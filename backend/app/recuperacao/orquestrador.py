@@ -32,12 +32,16 @@ def recuperar(
     top_n_ancora: int = TOP_N_ANCORA_PADRAO,
     camadas: frozenset[str] = CAMADAS_TODAS,
     registro: dict | None = None,
+    orgao: str | None = None,
 ) -> list[Evidencia]:
     if camadas - CAMADAS_TODAS or not camadas & {"lexico", "vetorial"}:
         raise ValueError(f"camadas inválidas: {sorted(camadas)}")
 
     falhas: list[str] = []
-    orgao = identificar_orgao(pergunta, sessao)
+    origem_orgao = "selecao" if orgao else None
+    if orgao is None:
+        orgao = identificar_orgao(pergunta, sessao)
+        origem_orgao = "pergunta" if orgao else None
     documentos = documentos_do_orgao(orgao, sessao) if orgao else None
 
     hits_lexico = []
@@ -92,6 +96,7 @@ def recuperar(
             "k": k,
             "top_n_ancora": top_n_ancora,
             "orgao": orgao,
+            "origem_orgao": origem_orgao,
             "documentos_do_orgao": len(documentos) if documentos is not None else None,
             "lexico": _hits(hits_lexico),
             "vetorial": _hits(hits_vetorial),

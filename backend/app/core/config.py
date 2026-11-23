@@ -35,12 +35,14 @@ class Settings(BaseSettings):
 
     llm_provedor: str = "ollama"
     llm_modelo: str = "qwen2.5:7b"
+    llm_modelos: list[str] = ["qwen2.5:7b", "qwen2.5:14b"]
     llm_timeout: float = 120.0
     llm_max_tokens: int = 4096
     llm_num_ctx: int = 16384
     llm_esforco: str | None = None
     anthropic_api_key: SecretStr | None = None
     cors_origens: list[str] = ["http://localhost:5173"]
+    consultas_registro: Path | None = REPO_ROOT / "registros" / "consultas.jsonl"
 
     anonymization_secret_key: SecretStr
     atas_corpus_path: Path
