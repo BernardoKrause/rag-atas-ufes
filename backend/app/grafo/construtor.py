@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+from datetime import date
 
 from neo4j import Driver
 
@@ -90,47 +91,172 @@ class UnionFind:
             self._pai[raiz_x] = raiz_y
 
 
-def _normalizar_assunto(texto: str) -> str:
-    sem_acento = remover_acentos_maiusculo(texto)
-    return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", sem_acento)).strip()
+RE_TOKEN_PESSOA = re.compile(r"PESSOA_\d+")
+RE_LISTA_DE_PAUTA = re.compile(r"INCLUS[AÃ]O|EXCLUS[AÃ]O|INVERS[AÃ]O|ORDEM D[AO] (?:DIA|PAUTA)", re.IGNORECASE)
+SECOES_DE_LISTA = {"EXPEDIENTE", "EXCLUSÃO DE PAUTA", "COMUNICAÇÕES", "INFORMES"}
+
+RE_MARCADOR_ITEM = re.compile(
+    r"^\s*(?:\[\d+\]|(?:PAUTA|INFORMES?)\s*\d+\s*:|PONTO\s+(?:\d+(?:\.\d+)?|[UÚ]NICO)\s*[-–:]?"
+    r"|\d{1,2}(?:\.\d{1,2})*\s*[.)–-]?)\s*",
+    re.IGNORECASE,
+)
+RE_PREFIXO_PROCESSO = re.compile(
+    r"^(?:(?:PROCESSO DIGITAL|PROC\.? DIGITAL|DOCUMENTO AVULSO|DOC\.? AVULSO|PROCESSO|PROC\.?|PROT(?:OC)?\.?)"
+    r"\s*(?:N[º°O.]*\s*)?(?:PROCESSO_\d+)?\s*[-–.:]?\s*)+",
+    re.IGNORECASE,
+)
+RE_FIM_DO_TITULO = re.compile(
+    r"(?<!\bprof)(?<!\bprofa)(?<!\bdr)(?<!\bdra)(?<!\bdrª)(?<!\bsr)(?<!\bsra)(?<!\bn)(?<!\bnº)(?<!\bart)"
+    r"\.\s|\s[-–]\s|:\s",
+    re.IGNORECASE,
+)
+RE_TITULO_GENERICO = re.compile(
+    r"^(?:FOI|FORAM|EM|APOS|O|A|OS|AS|INCLUSAO|EXCLUSAO|INVERSAO|RETIRADA|NAO HOUVE)\b"
+    r"|^(?:DEPARTAMENTO|CENTRO|COORDENACAO|COLEGIADO|PROGRAMA|INTERESSAD[OA])\b(?:\s+\S+){0,5}$"
+)
+MIN_PALAVRAS_TITULO = 6
+MAX_PALAVRAS_TITULO = 30
+JANELA_TITULO_DIAS = 300
+JANELA_PEDIDO_DIAS = 548
+
+PEDIDOS_DE_PESSOA = (
+    ("LICENCA", re.compile(r"LICENCA\s+(?:PARA\s+)?CAPACITA\w*")),
+    ("AFASTAMENTO", re.compile(
+        r"AFASTAMENTO\s+(?:\w+\s+){0,3}(?:POS\s*-?\s*DOUTOR\w*|DOUTORADO|MESTRADO|CAPACITA\w*|QUALIFICA\w*)"
+    )),
+)
+ALCANCE_PESSOA = 80
+ALCANCE_PEDIDO = 500
 
 
-MIN_PALAVRAS_ASSUNTO = 3
-MIN_CARACTERES_ASSUNTO = 20
+def processo_principal(texto: str, secao: str) -> str | None:
+    processos = list(dict.fromkeys(RE_TOKEN_PROCESSO.findall(texto)))
+    if not processos or len(processos) >= 3:
+        return None
+    if len(processos) == 2 and (secao in SECOES_DE_LISTA or RE_LISTA_DE_PAUTA.search(texto[:400])):
+        return None
+    return processos[0]
 
 
-def _assunto_e_sinal_util(chave: str) -> bool:
-    """Assunto curto demais e residuo de segmentacao ("4", "PROC", "FOI
-    APRECIADA E"), nao tema: usar como sinal fraco juntaria itens sem
-    relacao nenhuma. Calibrado no corpus real — este corte descarta os 8
-    grupos degenerados e preserva os 31 legitimos."""
-    return len(chave) >= MIN_CARACTERES_ASSUNTO and len(chave.split()) >= MIN_PALAVRAS_ASSUNTO
+def titulo_do_item(texto: str) -> str:
+    restante = RE_PREFIXO_PROCESSO.sub("", RE_MARCADOR_ITEM.sub("", texto, count=1), count=1)
+    restante = RE_TOKEN_PROCESSO.sub(" ", restante)
+    primeira_frase = RE_FIM_DO_TITULO.split(restante, maxsplit=1)[0]
+    palavras = re.sub(r"[^\w\s]", " ", remover_acentos_maiusculo(primeira_frase)).split()
+    return " ".join(palavras[:MAX_PALAVRAS_TITULO])
 
 
-def agrupar_assuntos(itens: list[ItemPauta]) -> dict[str, list[ItemPauta]]:
-    """Componentes conectados: dois itens caem no mesmo Assunto se
-    compartilham um token de Processo (sinal forte) ou tem assunto
-    normalizado identico e suficientemente especifico (sinal fraco, risco de
-    falso-positivo medido na validacao manual — ver Task 15)."""
+def _titulo_util(titulo: str) -> bool:
+    palavras = titulo.split()
+    if len(palavras) < MIN_PALAVRAS_TITULO or RE_TITULO_GENERICO.search(titulo):
+        return False
+    return not re.search(r"\bATAS?\b", " ".join(palavras[:10]))
+
+
+RE_ROTULO_RELATOR = re.compile(r"(?:RELATOR\w*|PARECER\w*)(?:\(A\))?\W{0,6}$")
+
+
+def _pessoas_sem_relator(texto: str, inicio: int, fim: int) -> list[str]:
+    return [
+        m.group(0) for m in RE_TOKEN_PESSOA.finditer(texto, max(inicio, 0), fim)
+        if not RE_ROTULO_RELATOR.search(texto[max(0, m.start() - 20):m.start()])
+    ]
+
+
+def pedidos_de_pessoa(texto: str) -> set[tuple[str, str]]:
+    inicio = remover_acentos_maiusculo(texto[:ALCANCE_PEDIDO])
+    pedidos = set()
+    for nome, padrao in PEDIDOS_DE_PESSOA:
+        for match in padrao.finditer(inicio):
+            depois = _pessoas_sem_relator(inicio, match.end(), match.end() + ALCANCE_PESSOA)
+            antes = _pessoas_sem_relator(inicio, match.start() - ALCANCE_PESSOA, match.start())
+            pessoa = depois[0] if depois else (antes[-1] if antes else None)
+            if pessoa:
+                pedidos.add((nome, pessoa))
+    return pedidos
+
+
+def _um_prefixo_do_outro(a: str, b: str) -> bool:
+    curto, longo = sorted((a.split(), b.split()), key=len)
+    return longo[:len(curto)] == curto
+
+
+def _dentro_da_janela(data_a: date | None, data_b: date | None, dias: int) -> bool:
+    return data_a is None or data_b is None or abs((data_b - data_a).days) <= dias
+
+
+def agrupar_assuntos(
+    itens: list[ItemPauta], contexto: dict[int, tuple[str, date]] | None = None
+) -> dict[str, list[ItemPauta]]:
+    contexto = contexto or {}
     uniao = UnionFind()
-    for item in itens:
-        uniao.find(item.item_id_canonico)
-
-    por_processo: dict[str, list[ItemPauta]] = {}
-    por_assunto: dict[str, list[ItemPauta]] = {}
     por_item_logico: dict[tuple, list[ItemPauta]] = {}
     for item in itens:
+        uniao.find(item.item_id_canonico)
         por_item_logico.setdefault(_chave_item_logico(item), []).append(item)
-        for token in set(RE_TOKEN_PROCESSO.findall(item.texto)):
-            por_processo.setdefault(token, []).append(item)
-        if item.assunto:
-            chave = _normalizar_assunto(item.assunto)
-            if _assunto_e_sinal_util(chave):
-                por_assunto.setdefault(chave, []).append(item)
 
-    for grupo in [*por_processo.values(), *por_assunto.values(), *por_item_logico.values()]:
+    logicos = []
+    for fragmentos in por_item_logico.values():
+        fragmentos.sort(key=lambda i: i.fragmento_indice or 0)
+        for outro in fragmentos[1:]:
+            uniao.union(fragmentos[0].item_id_canonico, outro.item_id_canonico)
+        texto = " ".join(f.texto or "" for f in fragmentos)
+        orgao, data = contexto.get(fragmentos[0].documento_id, ("", None))
+        logicos.append({
+            "id": fragmentos[0].item_id_canonico, "orgao": orgao, "data": data,
+            "processo": processo_principal(texto, fragmentos[0].secao),
+            "titulo": titulo_do_item(fragmentos[0].texto or ""),
+            "pedidos": pedidos_de_pessoa(fragmentos[0].texto or ""),
+        })
+
+    por_processo: dict[str, list[dict]] = {}
+    for logico in logicos:
+        if logico["processo"]:
+            por_processo.setdefault(logico["processo"], []).append(logico)
+    for grupo in por_processo.values():
         for outro in grupo[1:]:
-            uniao.union(grupo[0].item_id_canonico, outro.item_id_canonico)
+            uniao.union(grupo[0]["id"], outro["id"])
+
+    processos_do_componente: dict[str, set[str]] = {}
+    for logico in logicos:
+        if logico["processo"]:
+            processos_do_componente.setdefault(uniao.find(logico["id"]), set()).add(logico["processo"])
+
+    def unir_sem_conflito(a: str, b: str) -> None:
+        raiz_a, raiz_b = uniao.find(a), uniao.find(b)
+        if raiz_a == raiz_b:
+            return
+        processos_a = processos_do_componente.get(raiz_a, set())
+        processos_b = processos_do_componente.get(raiz_b, set())
+        if processos_a and processos_b and processos_a != processos_b:
+            return
+        uniao.union(a, b)
+        processos_do_componente[uniao.find(a)] = processos_a | processos_b
+
+    por_titulo: dict[tuple, list[dict]] = {}
+    for logico in logicos:
+        if _titulo_util(logico["titulo"]):
+            chave = (logico["orgao"], " ".join(logico["titulo"].split()[:MIN_PALAVRAS_TITULO]))
+            por_titulo.setdefault(chave, []).append(logico)
+    for grupo in por_titulo.values():
+        grupo.sort(key=lambda logico: (logico["data"] or date.min, logico["id"]))
+        for j, atual in enumerate(grupo):
+            for anterior in reversed(grupo[:j]):
+                if not _dentro_da_janela(anterior["data"], atual["data"], JANELA_TITULO_DIAS):
+                    break
+                if _um_prefixo_do_outro(anterior["titulo"], atual["titulo"]):
+                    unir_sem_conflito(anterior["id"], atual["id"])
+                    break
+
+    por_pedido: dict[tuple, list[dict]] = {}
+    for logico in logicos:
+        for pedido in logico["pedidos"]:
+            por_pedido.setdefault((logico["orgao"], *pedido), []).append(logico)
+    for grupo in por_pedido.values():
+        grupo.sort(key=lambda logico: (logico["data"] or date.min, logico["id"]))
+        for anterior, atual in zip(grupo, grupo[1:]):
+            if _dentro_da_janela(anterior["data"], atual["data"], JANELA_PEDIDO_DIAS):
+                uniao.union(anterior["id"], atual["id"])
 
     componentes: dict[str, list[ItemPauta]] = {}
     for item in itens:
@@ -283,7 +409,8 @@ def construir_grafo(documentos_com_itens: list[tuple[Documento, list[ItemPauta]]
         if not _e_primeiro_fragmento(item) and primeiro is not None and primeiro.tipo_desfecho is not None:
             ligar_fragmento_a_deliberacao(driver, item, primeiro.item_id_canonico)
 
-    agrupamento = agrupar_assuntos(todos_itens)
+    contexto = {documento.id_documento: (documento.orgao, documento.data_reuniao) for documento, _ in documentos_com_itens}
+    agrupamento = agrupar_assuntos(todos_itens, contexto)
     criar_nos_assunto(driver, agrupamento)
     resolver_citacoes_deliberacao(driver, todos_itens)
     criar_relacao_mesmo_assunto(driver, agrupamento)
