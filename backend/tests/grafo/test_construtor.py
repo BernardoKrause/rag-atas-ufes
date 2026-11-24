@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from app.grafo.cliente import executar_escrita, executar_leitura, obter_driver
 from app.grafo.construtor import UnionFind, criar_no_ata, limpar_grafo
 from app.models.documento import Documento
@@ -969,3 +971,80 @@ def test_agrupar_assuntos_titulo_que_se_repete_a_cada_ano_nao_liga():
     contexto = {1: ("CCE", date(2011, 5, 30)), 2: ("CCE", date(2012, 5, 29))}
 
     assert len(agrupar_assuntos([a, b], contexto)) == 2
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    ("Encaminha, para homologação, o novo regimento e solicita a revogação da Resolução CCAE/UFES Nº 028, "
+     "de 24 de junho de 2022.", [("revoga", "RESOLUCAO_28_2022")]),
+    ("Encaminha, para aprovação, solicitação de alteração da Decisão nº 148/2024/ CD/CCAE.",
+     [("altera", "DECISAO_148_2024")]),
+    ("Revoga-se a Resolução CCAE/Ufes nº 62, de 21 de fevereiro de 2024, deste Conselho.",
+     [("revoga", "RESOLUCAO_62_2024")]),
+    ("Sugestões de alteração do regimento interno do departamento.", []),
+])
+def test_citacoes_de_atos(texto, esperado):
+    from app.grafo.construtor import citacoes_de_atos
+    assert citacoes_de_atos(texto) == esperado
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    ("3.1 Documento avulso nº PROCESSO_1. Retificação da Ata da 10ª Reunião Ordinária do DQF realizada em "
+     "08/08/2024. Interessado: Coordenação.", [(date(2024, 8, 8), None)]),
+    ("3.4 Apreciação da retificação da Ata da 8ª reunião de caráter ordinário do DFN, realizada no dia "
+     "07/06/2024. A chefe apresentou.", [(date(2024, 6, 7), None)]),
+    ("PAUTA 2: Apreciação das atas da 5ª reunião ordinária do corrente ano e da ata retificada da 4ª reunião "
+     "ordinária de 2023 o qual foi incluído o nome dos cursos.", [(None, (4, 2023))]),
+    ("O relator retificou seu parecer, corrigindo a data da reunião de 30/02/2022 para 30/03/2022.", []),
+])
+def test_citacoes_de_retificacao(texto, esperado):
+    from app.grafo.construtor import citacoes_de_retificacao
+    assert citacoes_de_retificacao(texto) == esperado
+
+
+def test_construir_grafo_cria_retificacao_e_so_liga_ato_do_mesmo_orgao(db_session):
+    from app.grafo.construtor import construir_grafo
+
+    def documento(id_documento, orgao, data, numero):
+        return Documento(
+            id_documento=id_documento, nome_arquivo=f"{id_documento}.pdf", url_origem="x.pdf", centro="CCENS",
+            campus="Alegre", tipo_orgao="A", orgao=orgao, data_reuniao=data, numero_reuniao=numero,
+            tipo_reuniao="Ordinaria", texto_limpo="texto",
+        )
+
+    original = documento(999101, "CCENS_DQF", date(2024, 8, 8), 10)
+    retificadora = documento(999102, "CCENS_DQF", date(2025, 5, 22), 5)
+    outro_orgao = documento(999103, "CCAE", date(2025, 1, 10), 1)
+    item_original = ItemPauta(
+        item_id_canonico="999101_PAUTA_1", documento_id=999101, secao="PAUTA", numero_item="1",
+        texto="1 Oferta de disciplinas. Aprovado.", tipo_desfecho="Aprovado", ato_emitido="DECISAO_5_2024",
+    )
+    item_retificador = ItemPauta(
+        item_id_canonico="999102_PAUTA_3.1", documento_id=999102, secao="PAUTA", numero_item="3.1",
+        texto="3.1 Retificação da Ata da 10ª Reunião Ordinária do DQF realizada em 08/08/2024. Aprovado.",
+        tipo_desfecho="Aprovado",
+    )
+    item_outro_orgao = ItemPauta(
+        item_id_canonico="999103_PAUTA_1", documento_id=999103, secao="PAUTA", numero_item="1",
+        texto="1 Altera-se a Decisão Nº 5/2024. Aprovado.", tipo_desfecho="Aprovado",
+    )
+
+    driver = obter_driver()
+    try:
+        resumo = construir_grafo(
+            [(original, [item_original]), (retificadora, [item_retificador]), (outro_orgao, [item_outro_orgao])],
+            driver,
+        )
+        retifica = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: '999102_PAUTA_3.1'})-[:RETIFICA]->(a:Ata) RETURN a.documento_id AS id",
+        )
+        altera = executar_leitura(driver, "MATCH ()-[r:altera]->() RETURN count(r) AS total")
+        assert retifica == [{"id": 999101}]
+        assert altera == [{"total": 0}]
+        assert resumo == {
+            "citacoes_de_atos": 1, "atos_no_grafo": 0,
+            "citacoes_de_retificacao": 1, "retificacoes_no_grafo": 1,
+        }
+    finally:
+        limpar_grafo(driver)
+        driver.close()

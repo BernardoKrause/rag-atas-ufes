@@ -132,6 +132,13 @@ RE_ENCAMINHAMENTO_DESTINO = re.compile(
 )
 
 
+RE_ENCAMINHAMENTO_PASSIVO = re.compile(
+    r"\b(?:foi|foram|ser[áa]|ser[ãa]o|sejam?|aprovad[oa]s?\s+e)\s+(?P<inicio>encaminhad[oa]s?)\b"
+    r"(?=\s+(?:[àa]s?\b|ao\b|aos\b|para\b|ad[\s-]referendum|[“\"]ad))",
+    re.IGNORECASE,
+)
+
+
 def extrair_encaminhamento(corpo: str) -> str | None:
     for padrao in (RE_ENCAMINHAMENTO_DOIS_PONTOS, RE_ENCAMINHAMENTO_DESTINO):
         match = padrao.search(corpo)
@@ -140,6 +147,11 @@ def extrair_encaminhamento(corpo: str) -> str | None:
         fim = _limites_da_frase(corpo, match.end())[1]
         inicio = match.end() if padrao is RE_ENCAMINHAMENTO_DOIS_PONTOS else match.start("inicio")
         return corpo[inicio:fim].strip(" .") or None
+    passivos = list(RE_ENCAMINHAMENTO_PASSIVO.finditer(corpo))
+    if passivos:
+        ultimo = passivos[-1]
+        fim = _limites_da_frase(corpo, ultimo.end())[1]
+        return corpo[ultimo.start("inicio"):fim].strip(" .") or None
     return None
 
 
