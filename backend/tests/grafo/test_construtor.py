@@ -153,7 +153,7 @@ def _grupos(agrupamento):
     return sorted(sorted(i.item_id_canonico for i in g) for g in agrupamento.values())
 
 
-def test_agrupar_assuntos_liga_titulo_igual_no_mesmo_orgao_dentro_de_doze_meses():
+def test_agrupar_assuntos_liga_titulo_igual_no_mesmo_orgao_dentro_da_janela():
     from app.grafo.construtor import agrupar_assuntos
 
     a = _item("1_P6", 1, "1.2 Homologação da composição das Comissões Permanentes e da Representação "
@@ -165,7 +165,7 @@ def test_agrupar_assuntos_liga_titulo_igual_no_mesmo_orgao_dentro_de_doze_meses(
     assert _grupos(agrupar_assuntos([a, b], contexto)) == [["1_P6", "2_P6"]]
 
 
-def test_agrupar_assuntos_nao_liga_titulo_igual_a_mais_de_doze_meses_ou_em_outro_orgao():
+def test_agrupar_assuntos_nao_liga_titulo_igual_fora_da_janela_ou_em_outro_orgao():
     from app.grafo.construtor import agrupar_assuntos
 
     titulo = "Homologação da eleição de chefe e subchefe do Departamento de Física. Aprovado."
@@ -961,6 +961,39 @@ def test_pedidos_de_pessoa_ignora_relator_e_usa_interessado_antes_do_termo():
              "entre 14/03/2025 a 11/06/2025. Relator(a): PESSOA_8907. Decisão: Aprovado(a).")
 
     assert pedidos_de_pessoa(texto) == {("LICENCA", "PESSOA_8935")}
+
+
+@pytest.mark.parametrize("antes", ["", "x" * 398])
+def test_pedidos_de_pessoa_nao_corta_o_pseudonimo(antes):
+    from app.grafo.construtor import pedidos_de_pessoa
+
+    texto = antes + "3.18 Licença Capacitação. " + "y" * 66 + " PESSOA_163574 solicita a licença."
+
+    assert pedidos_de_pessoa(texto) == {("LICENCA", "PESSOA_163574")}
+
+
+def test_pedidos_de_pessoa_ignora_relatora_com_tratamento():
+    from app.grafo.construtor import pedidos_de_pessoa
+
+    texto = ("5) Proc. digital n PROCESSO_30980. Prof. PESSOA_163164 solicitando licença para capacitação "
+             "que terá início em 22/04/2025. Relatora: Conselheira PESSOA_8833. Aprovado.")
+
+    assert pedidos_de_pessoa(texto) == {("LICENCA", "PESSOA_163164")}
+
+
+def test_agrupar_assuntos_lista_de_inclusoes_nao_e_ponte_de_pedido():
+    from app.grafo.construtor import agrupar_assuntos
+
+    lista = _item("1_L", 1, "PAUTA 2: Expediente: Inclusões e Exclusões na pauta - Foi apresentada a inclusão do "
+                            "relatório de licença para capacitação de PESSOA_1 e do processo PROCESSO_0002.")
+    a = _item("1_A", 1, "PAUTA 7: Processo: PROCESSO_0001 - relatório licença capacitação - PESSOA_1. Aprovado.",
+              numero="7")
+    b = _item("1_B", 1, "PAUTA 6: Processo PROCESSO_0002 - Licença para capacitação - relatório - PESSOA_2. "
+                        "Aprovado.", numero="6")
+    contexto = {1: ("CCE_DEPT", date(2024, 8, 8))}
+
+    grupos = _grupos(agrupar_assuntos([lista, a, b], contexto))
+    assert not any({"1_A", "1_B"} <= set(g) for g in grupos)
 
 
 def test_agrupar_assuntos_titulo_que_se_repete_a_cada_ano_nao_liga():

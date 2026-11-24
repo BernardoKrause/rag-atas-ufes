@@ -93,7 +93,9 @@ class UnionFind:
 
 
 RE_TOKEN_PESSOA = re.compile(r"PESSOA_\d+")
-RE_LISTA_DE_PAUTA = re.compile(r"INCLUS[AÃ]O|EXCLUS[AÃ]O|INVERS[AÃ]O|ORDEM D[AO] (?:DIA|PAUTA)", re.IGNORECASE)
+RE_LISTA_DE_PAUTA = re.compile(
+    r"INCLUS(?:[AÃ]O|[OÕ]ES)|EXCLUS(?:[AÃ]O|[OÕ]ES)|INVERS(?:[AÃ]O|[OÕ]ES)|ORDEM D[AO] (?:DIA|PAUTA)", re.IGNORECASE
+)
 SECOES_DE_LISTA = {"EXPEDIENTE", "EXCLUSÃO DE PAUTA", "COMUNICAÇÕES", "INFORMES"}
 
 RE_MARCADOR_ITEM = re.compile(
@@ -154,23 +156,29 @@ def _titulo_util(titulo: str) -> bool:
     return not re.search(r"\bATAS?\b", " ".join(palavras[:10]))
 
 
-RE_ROTULO_RELATOR = re.compile(r"(?:RELATOR\w*|PARECER\w*)(?:\(A\))?\W{0,6}$")
+RE_ROTULO_RELATOR = re.compile(
+    r"(?:RELATOR\w*|PARECER\w*)(?:\(A\))?(?:\W+(?:CONSELHEIR[OA]|PROF\w*|DR\w*|SR\w*|FAVORAVEL|D[AEO]))*\W{0,6}$"
+)
+ALCANCE_ROTULO = 45
 
 
 def _pessoas_sem_relator(texto: str, inicio: int, fim: int) -> list[str]:
     return [
-        m.group(0) for m in RE_TOKEN_PESSOA.finditer(texto, max(inicio, 0), fim)
-        if not RE_ROTULO_RELATOR.search(texto[max(0, m.start() - 20):m.start()])
+        m.group(0) for m in RE_TOKEN_PESSOA.finditer(texto)
+        if max(inicio, 0) <= m.start() < fim
+        and not RE_ROTULO_RELATOR.search(texto[max(0, m.start() - ALCANCE_ROTULO):m.start()])
     ]
 
 
 def pedidos_de_pessoa(texto: str) -> set[tuple[str, str]]:
-    inicio = remover_acentos_maiusculo(texto[:ALCANCE_PEDIDO])
+    normalizado = remover_acentos_maiusculo(texto)
     pedidos = set()
     for nome, padrao in PEDIDOS_DE_PESSOA:
-        for match in padrao.finditer(inicio):
-            depois = _pessoas_sem_relator(inicio, match.end(), match.end() + ALCANCE_PESSOA)
-            antes = _pessoas_sem_relator(inicio, match.start() - ALCANCE_PESSOA, match.start())
+        for match in padrao.finditer(normalizado):
+            if match.start() >= ALCANCE_PEDIDO:
+                break
+            depois = _pessoas_sem_relator(normalizado, match.end(), match.end() + ALCANCE_PESSOA)
+            antes = _pessoas_sem_relator(normalizado, match.start() - ALCANCE_PESSOA, match.start())
             pessoa = depois[0] if depois else (antes[-1] if antes else None)
             if pessoa:
                 pedidos.add((nome, pessoa))
@@ -207,7 +215,7 @@ def agrupar_assuntos(
             "id": fragmentos[0].item_id_canonico, "orgao": orgao, "data": data,
             "processo": processo_principal(texto, fragmentos[0].secao),
             "titulo": titulo_do_item(fragmentos[0].texto or ""),
-            "pedidos": pedidos_de_pessoa(fragmentos[0].texto or ""),
+            "pedidos": set() if RE_LISTA_DE_PAUTA.search(texto[:400]) else pedidos_de_pessoa(fragmentos[0].texto or ""),
         })
 
     por_processo: dict[str, list[dict]] = {}
