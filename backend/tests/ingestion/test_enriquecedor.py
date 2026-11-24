@@ -966,3 +966,32 @@ def test_extrair_generico_rejeicao_fora_da_forma_de_veredito_sem_marca_de_votaca
 
     campos = extrair_generico(f"1.1 Pedido de afastamento do professor PESSOA_0001. {frase}", None, secao="PAUTA")
     assert campos.tipo_desfecho is None
+
+
+@pytest.mark.parametrize("corpo,esperado", [
+    (
+        "O processo do Professor PESSOA_1 foi encaminhado à direção do CCE, Ad Referendum do Departamento. "
+        "Devido à exigüidade do prazo o processo foi encaminhado Ad Referendum do Conselho à PRPPG. "
+        "Em votação, aprovado por unanimidade.",
+        "encaminhado Ad Referendum do Conselho à PRPPG",
+    ),
+    (
+        "O processo foi encaminhado ao Gabinete do Reitor, com o de acordo do Diretor do CCE. Em votação, aprovado.",
+        "encaminhado ao Gabinete do Reitor, com o de acordo do Diretor do CCE",
+    ),
+    (
+        "Eleitos os professores PESSOA_1 e PESSOA_2. Aprovado e encaminhado “ad referendum”. Em votação.",
+        "encaminhado “ad referendum”",
+    ),
+])
+def test_encaminhamento_registrado_na_forma_passiva(corpo, esperado):
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(corpo) == esperado
+
+
+def test_encaminhamento_feito_pelo_interessado_antes_da_reuniao_nao_conta():
+    from app.ingestion.enriquecedor import extrair_encaminhamento
+    assert extrair_encaminhamento(
+        "O Chefe do Departamento encaminhou à direção do CCE o Memorando nº 10 solicitando a homologação. "
+        "Em votação, aprovado por unanimidade."
+    ) is None

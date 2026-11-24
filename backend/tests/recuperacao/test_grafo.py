@@ -24,7 +24,7 @@ def test_expandir_grafo_descobre_item_relacionado_por_assunto(grafo_driver):
     )
     item_relacionado = ItemPauta(
         item_id_canonico="998001_PAUTA_2", documento_id=998001, secao="PAUTA", numero_item="2",
-        texto="PROCESSO_9002 retomada do mesmo assunto em outra sessao.",
+        texto="PROCESSO_9001 retomada do mesmo assunto em outra sessao.",
         assunto="Reforma do laboratório de química",
     )
     construir_grafo([(documento, [item_ancora, item_relacionado])], grafo_driver)
@@ -38,11 +38,11 @@ def test_expandir_grafo_nao_reinclui_ancoras(grafo_driver):
     documento = _documento(998002)
     item_a = ItemPauta(
         item_id_canonico="998002_PAUTA_1", documento_id=998002, secao="PAUTA", numero_item="1",
-        texto="texto a.", assunto="Bolsas de iniciação científica",
+        texto="1 Bolsas de iniciação científica do edital de 2025. Aprovado.", assunto="Bolsas de iniciação científica",
     )
     item_b = ItemPauta(
         item_id_canonico="998002_PAUTA_2", documento_id=998002, secao="PAUTA", numero_item="2",
-        texto="texto b.", assunto="Bolsas de iniciação científica",
+        texto="2 Bolsas de iniciação científica do edital de 2025. Aprovado.", assunto="Bolsas de iniciação científica",
     )
     construir_grafo([(documento, [item_a, item_b])], grafo_driver)
 
@@ -55,15 +55,15 @@ def test_expandir_grafo_usa_menor_rank_entre_ancoras_que_descobrem_mesmo_item(gr
     documento = _documento(998003)
     item_a = ItemPauta(
         item_id_canonico="998003_PAUTA_1", documento_id=998003, secao="PAUTA", numero_item="1",
-        texto="texto a.", assunto="Calendário acadêmico do próximo ano",
+        texto="1 Calendário acadêmico do próximo ano letivo da graduação. Aprovado.", assunto="Calendário acadêmico do próximo ano",
     )
     item_b = ItemPauta(
         item_id_canonico="998003_PAUTA_2", documento_id=998003, secao="PAUTA", numero_item="2",
-        texto="texto b.", assunto="Calendário acadêmico do próximo ano",
+        texto="2 Calendário acadêmico do próximo ano letivo da graduação. Aprovado.", assunto="Calendário acadêmico do próximo ano",
     )
     item_c = ItemPauta(
         item_id_canonico="998003_PAUTA_3", documento_id=998003, secao="PAUTA", numero_item="3",
-        texto="texto c.", assunto="Calendário acadêmico do próximo ano",
+        texto="3 Calendário acadêmico do próximo ano letivo da graduação. Aprovado.", assunto="Calendário acadêmico do próximo ano",
     )
     construir_grafo([(documento, [item_a, item_b, item_c])], grafo_driver)
 
@@ -215,7 +215,7 @@ def test_rastrear_expansao_mostra_cada_ancora_que_chega_ao_item(grafo_driver):
     itens = [
         ItemPauta(
             item_id_canonico=f"998101_PAUTA_{n}", documento_id=998101, secao="PAUTA", numero_item=str(n),
-            texto=f"texto {n}.", assunto="Calendário de provas do semestre",
+            texto=f"{n} Calendário de provas do semestre letivo de 2025. Aprovado.", assunto="Calendário de provas do semestre",
         )
         for n in (1, 2, 3)
     ]
@@ -231,3 +231,24 @@ def test_rastrear_expansao_mostra_cada_ancora_que_chega_ao_item(grafo_driver):
     ]
     assert all(c["via"] for c in ate_o_terceiro)
     assert expandidos == [Hit("998101_PAUTA_3", rank=1)]
+
+
+def test_expandir_grafo_nao_devolve_fragmento_do_proprio_item_ancora(grafo_driver):
+    documento = _documento(998201)
+    fragmento0 = ItemPauta(
+        item_id_canonico="998201_PAUTA_1", documento_id=998201, secao="PAUTA", numero_item="1",
+        texto="1 PROCESSO_9101 relatório longo, primeira parte.", assunto="Relatório", fragmento_indice=0,
+    )
+    fragmento1 = ItemPauta(
+        item_id_canonico="998201_PAUTA_1_F1", documento_id=998201, secao="PAUTA", numero_item="1",
+        texto="segunda parte do relatório.", assunto="Relatório", fragmento_indice=1,
+    )
+    outro = ItemPauta(
+        item_id_canonico="998201_PAUTA_2", documento_id=998201, secao="PAUTA", numero_item="2",
+        texto="2 PROCESSO_9101 homologação do relatório.", assunto="Relatório",
+    )
+    construir_grafo([(documento, [fragmento0, fragmento1, outro])], grafo_driver)
+
+    resultado = expandir_grafo([Hit("998201_PAUTA_1", rank=2)], grafo_driver)
+
+    assert resultado == [Hit("998201_PAUTA_2", rank=2)]

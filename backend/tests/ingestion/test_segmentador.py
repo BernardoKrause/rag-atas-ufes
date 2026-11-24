@@ -814,3 +814,99 @@ def test_detectar_itens_car_aceita_processo_em_minuscula_e_ignora_enumeracao_int
     )
     itens = detectar_itens_car(texto)
     assert [i.numero_item for i in itens] == ["12", "02", "03", "17"]
+
+
+def test_detectar_itens_car_aceita_marcador_com_hifen():
+    texto = (
+        "PAUTA: 01- Aprovação da Ata: 28/03/2025. Em discussão. Aprovada a unanimidade. "
+        "02- Proc. digital n PROCESSO_30995. Eleição da coordenação. Aprovado e encaminhado “ad referendum”. "
+        "03) Proc. digital n PROCESSO_30994. Eleição da coordenação."
+    )
+    itens = detectar_itens_car(texto)
+    assert [i.numero_item for i in itens] == ["01", "02", "03"]
+    assert itens[1].texto.startswith("02- Proc. digital")
+
+
+def test_detectar_itens_car_hifen_de_um_digito_ou_no_meio_da_frase_nao_vira_item():
+    texto = "PAUTA: 1) Item com Resolução nº 66- CEPE e prazo 5- Dias citados. 2) Outro item."
+    itens = detectar_itens_car(texto)
+    assert [i.numero_item for i in itens] == ["1", "2"]
+
+
+def test_detectar_itens_car_texto_antes_do_primeiro_marcador_vira_item():
+    texto = (
+        "PAUTA: Aprovação das Atas: 30/09 e 10/10/2025. Em discussão. Não havendo manifestação "
+        "contraria foram colocadas em votação. Aprovadas a unanimidade. 02) Proc. digital n PROCESSO_1. Outro."
+    )
+    itens = detectar_itens_car(texto)
+    assert [i.numero_item for i in itens] == ["SN1", "02"]
+    assert itens[0].texto.startswith("Aprovação das Atas")
+
+
+BLOCO_AD_REFERENDA = (
+    "O professor PESSOA_1 iniciou a reunião com a apreciação das aprovações por meio de Ad referenda, "
+    "quais sejam: Relatório de concessão de Licença para Capacitação do professor PESSOA_2. Após "
+    "apreciação, foi aprovado por unanimidade. Processo seletivo para professor substituto, em "
+    "decorrência do afastamento para pós-doutoramento da professora PESSOA_3. Aprovado por unanimidade. "
+)
+
+
+def test_segmentar_texto_lacuna_antes_do_primeiro_item_vira_item_sem_numero():
+    texto = "Havendo número legal, deu início à reunião. Em Pauta: " + BLOCO_AD_REFERENDA + (
+        "COMUNICAÇÕES: com a palavra a professora PESSOA_4 comunicou que foi aberto edital. "
+        "PROCESSOS/PROJETOS: [1] Solicitação de licença. Aprovado."
+    )
+    itens, _ = segmentar_texto("B", "CEFD", texto)
+    assert [(i.secao, i.numero_item) for i in itens][0] == (SECAO_PAUTA, "SN1")
+    assert "Processo seletivo para professor substituto" in itens[0].texto
+    assert itens[0].texto.startswith("O professor PESSOA_1")
+
+
+def test_segmentar_texto_abertura_curta_terminada_em_dois_pontos_nao_vira_item():
+    texto = (
+        "EM PAUTA: Com a palavra, o professor PESSOA_1 iniciou a reunião com a apreciação das "
+        "solicitações aprovadas por meio de ad-referendum: [1] Solicitação de autorização. Aprovado. "
+        "PROCESSOS/PROJETOS: [1] Outro processo. Aprovado."
+    )
+    itens, _ = segmentar_texto("B", "CEFD", texto)
+    assert all(not i.numero_item.startswith("SN") for i in itens)
+
+
+def test_segmentar_texto_lacuna_entre_itens_vira_item_com_secao_do_cabecalho():
+    texto = (
+        "1. APROVAÇÃO DE ATA: 1.1 Ata da reunião anterior. Aprovada por unanimidade. "
+        "2. COMUNICAÇÃO: O Presidente comunicou que a Diretora do Centro retornará das férias no dia "
+        "5 de março e que o calendário de reuniões do semestre será enviado aos conselheiros na "
+        "próxima semana, com as datas propostas pela secretaria. "
+        "3. ORDEM DO DIA: 3.1 Processo digital nº PROCESSO_1. Aprovado por unanimidade."
+    )
+    itens, _ = segmentar_texto("B", "CCAE", texto)
+    assert [(i.secao, i.numero_item) for i in itens] == [
+        (SECAO_APROVACAO_ATA, "1.1"),
+        (SECAO_COMUNICACOES, "SN1"),
+        (SECAO_ORDEM_DO_DIA, "3.1"),
+    ]
+
+
+def test_segmentar_texto_encerramento_nao_vira_item():
+    texto = (
+        "1. ORDEM DO DIA: 1.1 Item único aprovado por unanimidade. Nada mais havendo a tratar, "
+        "o Presidente encerrou a sessão, e eu, secretária, lavrei a presente ata, que após lida e "
+        "aprovada segue assinada pelos presentes, com as assinaturas de todos os membros do conselho "
+        "e da secretaria geral do centro, no dia e local indicados acima."
+    )
+    itens, _ = segmentar_texto("A", "CCENS", texto)
+    assert [i.numero_item for i in itens] == ["1.1"]
+
+
+def test_segmentar_texto_palavra_pauta_no_meio_da_frase_nao_e_cabecalho():
+    texto = (
+        "1. APROVAÇÃO DE ATA: 1.1 Ata da reunião anterior. Aprovada por unanimidade. "
+        "2. EXPEDIENTE: inclusão, exclusão ou inversão de pauta. Inclusão: 3.04 Processo digital nº "
+        "PROCESSO_1. Homologação da designação de coordenação; 3.05 Processo digital nº PROCESSO_2, "
+        "renumerando os demais pontos da pauta conforme a solicitação da direção. "
+        "3. PAUTA: 3.01 Aprovação de ata. Aprovada."
+    )
+    itens, _ = segmentar_texto("B", "CCHN", texto)
+    lacuna = [i for i in itens if i.numero_item.startswith("SN")]
+    assert [(i.secao, i.numero_item) for i in lacuna] == [(SECAO_EXPEDIENTE, "SN1")]

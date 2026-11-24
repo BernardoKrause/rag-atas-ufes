@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from neo4j import Driver
 
 from app.grafo.cliente import executar_leitura
@@ -31,12 +33,19 @@ def expandir_grafo(ancoras: list[Hit], driver: Driver) -> list[Hit]:
         ancoras=[{"item_id": hit.item_id_canonico, "rank": hit.rank} for hit in ancoras],
     )
 
-    ids_ancoras = {hit.item_id_canonico for hit in ancoras}
+    itens_ancora = {_item_logico(hit.item_id_canonico) for hit in ancoras}
     return [
         Hit(item_id_canonico=linha["item_id_canonico"], rank=linha["rank"])
         for linha in linhas
-        if linha["item_id_canonico"] not in ids_ancoras
+        if _item_logico(linha["item_id_canonico"]) not in itens_ancora
     ]
+
+
+RE_SUFIXO_FRAGMENTO = re.compile(r"_F\d+$")
+
+
+def _item_logico(item_id: str) -> str:
+    return RE_SUFIXO_FRAGMENTO.sub("", item_id)
 
 
 def obter_contextos_grafo(item_ids: list[str], driver: Driver) -> dict[str, dict]:

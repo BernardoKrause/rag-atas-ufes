@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from app.grafo.cliente import executar_escrita, executar_leitura, obter_driver
 from app.grafo.construtor import UnionFind, criar_no_ata, limpar_grafo
 from app.models.documento import Documento
@@ -140,21 +142,124 @@ def test_agrupar_assuntos_por_processo_compartilhado():
     assert {i.item_id_canonico for i in grupo_com_dois} == {"1_A", "2_A"}
 
 
-def test_agrupar_assuntos_por_texto_normalizado_identico():
+def _item(item_id, documento_id, texto, secao="PAUTA", numero="1", fragmento=0):
+    return ItemPauta(
+        item_id_canonico=item_id, documento_id=documento_id, secao=secao, numero_item=numero,
+        texto=texto, assunto=texto[:200], fragmento_indice=fragmento, ocorrencia_indice=0,
+    )
+
+
+def _grupos(agrupamento):
+    return sorted(sorted(i.item_id_canonico for i in g) for g in agrupamento.values())
+
+
+def test_agrupar_assuntos_liga_titulo_igual_no_mesmo_orgao_dentro_da_janela():
     from app.grafo.construtor import agrupar_assuntos
 
-    item1 = ItemPauta(
-        item_id_canonico="1_B", documento_id=1, secao="PAUTA", numero_item="1",
-        texto="sem processo", assunto="Aprovação do Calendário Acadêmico",
-    )
-    item2 = ItemPauta(
-        item_id_canonico="2_B", documento_id=2, secao="PAUTA", numero_item="1",
-        texto="sem processo", assunto="aprovação do calendário acadêmico",
-    )
+    a = _item("1_P6", 1, "1.2 Homologação da composição das Comissões Permanentes e da Representação "
+                         "Estudantil do PPG em Agronomia. Em esclarecimento. Adiado.")
+    b = _item("2_P6", 2, "2.1 Homologação da composição das Comissões Permanentes e da Representação "
+                         "Estudantil do PPG em Agronomia, conforme documentos em anexo. Aprovado.")
+    contexto = {1: ("CCAE_DPV", date(2024, 11, 22)), 2: ("CCAE_DPV", date(2024, 12, 6))}
 
-    agrupamento = agrupar_assuntos([item1, item2])
+    assert _grupos(agrupar_assuntos([a, b], contexto)) == [["1_P6", "2_P6"]]
 
-    assert len(agrupamento) == 1
+
+def test_agrupar_assuntos_nao_liga_titulo_igual_fora_da_janela_ou_em_outro_orgao():
+    from app.grafo.construtor import agrupar_assuntos
+
+    titulo = "Homologação da eleição de chefe e subchefe do Departamento de Física. Aprovado."
+    a, b, c = _item("1_E", 1, titulo), _item("2_E", 2, titulo), _item("3_E", 3, titulo)
+    contexto = {
+        1: ("CCE", date(2011, 3, 21)), 2: ("CCE", date(2013, 4, 30)), 3: ("CCHN", date(2011, 4, 1)),
+    }
+
+    assert len(agrupar_assuntos([a, b, c], contexto)) == 3
+
+
+def test_agrupar_assuntos_titulo_nao_e_cortado_na_abreviacao_de_professor():
+    from app.grafo.construtor import agrupar_assuntos, titulo_do_item
+
+    a = _item("1_R", 1, "Ponto 7 – Relatório semestral de atividades em nível de doutorado do Prof. PESSOA_1. Aprovado.")
+    b = _item("2_R", 2, "Ponto 9 – Relatório semestral de atividades em nível de doutorado do Prof. PESSOA_2. Aprovado.")
+    contexto = {1: ("CCE", date(2010, 9, 29)), 2: ("CCE", date(2011, 2, 25))}
+
+    assert "PESSOA_1" in titulo_do_item(a.texto)
+    assert len(agrupar_assuntos([a, b], contexto)) == 2
+
+
+def test_agrupar_assuntos_titulo_generico_nao_liga():
+    from app.grafo.construtor import agrupar_assuntos
+
+    a = _item("1_G", 1, "1.1 Aprovação da Ata da reunião ordinária realizada no dia 10 de março de 2025. Aprovada.")
+    b = _item("2_G", 2, "1.1 Aprovação da Ata da reunião ordinária realizada no dia 10 de março de 2025. Aprovada.")
+    c = _item("3_G", 1, "1.1 Inclusão de ponto de pauta referente ao processo de monitoria do semestre. Aprovado.",
+              secao="EXPEDIENTE")
+    d = _item("4_G", 2, "1.1 Inclusão de ponto de pauta referente ao processo de monitoria do semestre. Aprovado.",
+              secao="EXPEDIENTE")
+    contexto = {1: ("CCENS_DG", date(2024, 3, 11)), 2: ("CCENS_DG", date(2024, 4, 1))}
+
+    assert len(agrupar_assuntos([a, b, c, d], contexto)) == 4
+
+
+def test_agrupar_assuntos_titulo_nao_junta_processos_principais_diferentes():
+    from app.grafo.construtor import agrupar_assuntos
+
+    a = _item("1_B", 1, "2.2 Processo digital nº PROCESSO_0001. Solicitação de aprovação da composição de banca "
+                        "examinadora para defesa de tese. Aprovado.")
+    b = _item("2_B", 2, "2.4 Processo digital nº PROCESSO_0002. Solicitação de aprovação da composição de banca "
+                        "examinadora para defesa de tese. Aprovado.")
+    ponte = _item("3_B", 3, "2.1 Solicitação de aprovação da composição de banca examinadora para defesa de tese. "
+                            "Aprovado.")
+    contexto = {1: ("CCAE_DPV", date(2024, 12, 6)), 2: ("CCAE_DPV", date(2025, 2, 1)),
+                3: ("CCAE_DPV", date(2025, 1, 10))}
+
+    grupos = _grupos(agrupar_assuntos([a, b, ponte], contexto))
+    assert ["1_B", "2_B"] not in grupos
+    assert not any({"1_B", "2_B"} <= set(g) for g in grupos)
+
+
+def test_agrupar_assuntos_item_que_lista_processos_nao_e_ponte():
+    from app.grafo.construtor import agrupar_assuntos
+
+    lista = _item("1_L", 1, "1.4 A Presidente solicitou a alteração da ordem do dia: 3.1 Documento avulso nº "
+                            "PROCESSO_0010; 3.2 Documento avulso nº PROCESSO_0011; 3.3 Documento avulso nº "
+                            "PROCESSO_0012.", secao="EXPEDIENTE")
+    a = _item("1_M", 1, "3.1 Documento avulso nº PROCESSO_0010. Relatório final do projeto de tutoria. Aprovado.",
+              numero="3.1")
+    b = _item("1_N", 1, "3.2 Documento avulso nº PROCESSO_0011. Adequação bibliográfica do curso. Aprovado.",
+              numero="3.2")
+    contexto = {1: ("CCENS_DMPA", date(2024, 5, 15))}
+
+    grupos = _grupos(agrupar_assuntos([lista, a, b], contexto))
+    assert not any({"1_M", "1_N"} <= set(g) for g in grupos)
+
+
+def test_agrupar_assuntos_liga_licenca_da_mesma_pessoa_no_pedido_e_no_relatorio():
+    from app.grafo.construtor import agrupar_assuntos
+
+    pedido = _item("1_P28", 1, "[3] Solicitação de licença para capacitação da professora Dra PESSOA_164027 por "
+                               "um período de 90 dias. Relatora: PESSOA_9. Aprovado.", secao="PROCESSOS/PROJETOS")
+    relatorio = _item("2_P28", 2, "[1] Relatório de Licença para Capacitação da professora Dra PESSOA_164027 "
+                                  "realizada entre 17/04/2023 e 15/07/2023. Aprovado.", secao="PROCESSOS/PROJETOS")
+    outra = _item("3_P28", 3, "[2] Relatório de Licença para Capacitação do professor PESSOA_555. Relator: "
+                              "PESSOA_164027. Aprovado.", secao="PROCESSOS/PROJETOS")
+    contexto = {1: ("CEFD", date(2023, 2, 15)), 2: ("CEFD", date(2023, 8, 30)), 3: ("CEFD", date(2023, 9, 1))}
+
+    assert _grupos(agrupar_assuntos([pedido, relatorio, outra], contexto)) == [["1_P28", "2_P28"], ["3_P28"]]
+
+
+def test_agrupar_assuntos_liga_afastamento_e_substituto_com_pos_doutorado_quebrado():
+    from app.grafo.construtor import agrupar_assuntos
+
+    afastamento = _item("1_P29", 1, "[5] Homologação da aprovação ad referendum da solicitação de afastamento para "
+                                    "cursar pós-doutorado da Professora Drª. PESSOA_164050. Aprovado.")
+    comunicado = _item("2_P29", 2, "com a palavra a professora PESSOA_164084 comunicou que foi aberto edital para "
+                                   "processo seletivo para professor substituto, tendo em vista o afastamento para "
+                                   "pós- doutorado da professora Drª. PESSOA_164050.", secao="COMUNICAÇÕES")
+    contexto = {1: ("CEFD", date(2023, 4, 26)), 2: ("CEFD", date(2023, 5, 31))}
+
+    assert _grupos(agrupar_assuntos([afastamento, comunicado], contexto)) == [["1_P29", "2_P29"]]
 
 
 def test_agrupar_assuntos_ignora_assunto_degenerado_como_sinal_fraco():
@@ -843,6 +948,136 @@ def test_construir_grafo_resolve_citacao_presente_em_fragmento_posterior(db_sess
             "(:Deliberação {item_id_canonico: '999001_PAUTA_9'}) RETURN count(*) AS total",
         )
         assert resultado == [{"total": 1}]
+    finally:
+        limpar_grafo(driver)
+        driver.close()
+
+
+def test_pedidos_de_pessoa_ignora_relator_e_usa_interessado_antes_do_termo():
+    from app.grafo.construtor import pedidos_de_pessoa
+
+    texto = ("PAUTA 12: Processo digital nº PROCESSO_31471 - Departamento de Informática - A professora "
+             "PESSOA_8935 solicita aprovação do Relatório de Licença para Capacitação, realizada no período "
+             "entre 14/03/2025 a 11/06/2025. Relator(a): PESSOA_8907. Decisão: Aprovado(a).")
+
+    assert pedidos_de_pessoa(texto) == {("LICENCA", "PESSOA_8935")}
+
+
+@pytest.mark.parametrize("antes", ["", "x" * 398])
+def test_pedidos_de_pessoa_nao_corta_o_pseudonimo(antes):
+    from app.grafo.construtor import pedidos_de_pessoa
+
+    texto = antes + "3.18 Licença Capacitação. " + "y" * 66 + " PESSOA_163574 solicita a licença."
+
+    assert pedidos_de_pessoa(texto) == {("LICENCA", "PESSOA_163574")}
+
+
+def test_pedidos_de_pessoa_ignora_relatora_com_tratamento():
+    from app.grafo.construtor import pedidos_de_pessoa
+
+    texto = ("5) Proc. digital n PROCESSO_30980. Prof. PESSOA_163164 solicitando licença para capacitação "
+             "que terá início em 22/04/2025. Relatora: Conselheira PESSOA_8833. Aprovado.")
+
+    assert pedidos_de_pessoa(texto) == {("LICENCA", "PESSOA_163164")}
+
+
+def test_agrupar_assuntos_lista_de_inclusoes_nao_e_ponte_de_pedido():
+    from app.grafo.construtor import agrupar_assuntos
+
+    lista = _item("1_L", 1, "PAUTA 2: Expediente: Inclusões e Exclusões na pauta - Foi apresentada a inclusão do "
+                            "relatório de licença para capacitação de PESSOA_1 e do processo PROCESSO_0002.")
+    a = _item("1_A", 1, "PAUTA 7: Processo: PROCESSO_0001 - relatório licença capacitação - PESSOA_1. Aprovado.",
+              numero="7")
+    b = _item("1_B", 1, "PAUTA 6: Processo PROCESSO_0002 - Licença para capacitação - relatório - PESSOA_2. "
+                        "Aprovado.", numero="6")
+    contexto = {1: ("CCE_DEPT", date(2024, 8, 8))}
+
+    grupos = _grupos(agrupar_assuntos([lista, a, b], contexto))
+    assert not any({"1_A", "1_B"} <= set(g) for g in grupos)
+
+
+def test_agrupar_assuntos_titulo_que_se_repete_a_cada_ano_nao_liga():
+    from app.grafo.construtor import agrupar_assuntos
+
+    titulo = "Ponto 3 – Eleição de Representante do CCE no CEPE para o mandato seguinte. Aprovado."
+    a, b = _item("1_A", 1, titulo), _item("2_A", 2, titulo)
+    contexto = {1: ("CCE", date(2011, 5, 30)), 2: ("CCE", date(2012, 5, 29))}
+
+    assert len(agrupar_assuntos([a, b], contexto)) == 2
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    ("Encaminha, para homologação, o novo regimento e solicita a revogação da Resolução CCAE/UFES Nº 028, "
+     "de 24 de junho de 2022.", [("revoga", "RESOLUCAO_28_2022")]),
+    ("Encaminha, para aprovação, solicitação de alteração da Decisão nº 148/2024/ CD/CCAE.",
+     [("altera", "DECISAO_148_2024")]),
+    ("Revoga-se a Resolução CCAE/Ufes nº 62, de 21 de fevereiro de 2024, deste Conselho.",
+     [("revoga", "RESOLUCAO_62_2024")]),
+    ("Sugestões de alteração do regimento interno do departamento.", []),
+])
+def test_citacoes_de_atos(texto, esperado):
+    from app.grafo.construtor import citacoes_de_atos
+    assert citacoes_de_atos(texto) == esperado
+
+
+@pytest.mark.parametrize("texto,esperado", [
+    ("3.1 Documento avulso nº PROCESSO_1. Retificação da Ata da 10ª Reunião Ordinária do DQF realizada em "
+     "08/08/2024. Interessado: Coordenação.", [(date(2024, 8, 8), None)]),
+    ("3.4 Apreciação da retificação da Ata da 8ª reunião de caráter ordinário do DFN, realizada no dia "
+     "07/06/2024. A chefe apresentou.", [(date(2024, 6, 7), None)]),
+    ("PAUTA 2: Apreciação das atas da 5ª reunião ordinária do corrente ano e da ata retificada da 4ª reunião "
+     "ordinária de 2023 o qual foi incluído o nome dos cursos.", [(None, (4, 2023))]),
+    ("O relator retificou seu parecer, corrigindo a data da reunião de 30/02/2022 para 30/03/2022.", []),
+])
+def test_citacoes_de_retificacao(texto, esperado):
+    from app.grafo.construtor import citacoes_de_retificacao
+    assert citacoes_de_retificacao(texto) == esperado
+
+
+def test_construir_grafo_cria_retificacao_e_so_liga_ato_do_mesmo_orgao(db_session):
+    from app.grafo.construtor import construir_grafo
+
+    def documento(id_documento, orgao, data, numero):
+        return Documento(
+            id_documento=id_documento, nome_arquivo=f"{id_documento}.pdf", url_origem="x.pdf", centro="CCENS",
+            campus="Alegre", tipo_orgao="A", orgao=orgao, data_reuniao=data, numero_reuniao=numero,
+            tipo_reuniao="Ordinaria", texto_limpo="texto",
+        )
+
+    original = documento(999101, "CCENS_DQF", date(2024, 8, 8), 10)
+    retificadora = documento(999102, "CCENS_DQF", date(2025, 5, 22), 5)
+    outro_orgao = documento(999103, "CCAE", date(2025, 1, 10), 1)
+    item_original = ItemPauta(
+        item_id_canonico="999101_PAUTA_1", documento_id=999101, secao="PAUTA", numero_item="1",
+        texto="1 Oferta de disciplinas. Aprovado.", tipo_desfecho="Aprovado", ato_emitido="DECISAO_5_2024",
+    )
+    item_retificador = ItemPauta(
+        item_id_canonico="999102_PAUTA_3.1", documento_id=999102, secao="PAUTA", numero_item="3.1",
+        texto="3.1 Retificação da Ata da 10ª Reunião Ordinária do DQF realizada em 08/08/2024. Aprovado.",
+        tipo_desfecho="Aprovado",
+    )
+    item_outro_orgao = ItemPauta(
+        item_id_canonico="999103_PAUTA_1", documento_id=999103, secao="PAUTA", numero_item="1",
+        texto="1 Altera-se a Decisão Nº 5/2024. Aprovado.", tipo_desfecho="Aprovado",
+    )
+
+    driver = obter_driver()
+    try:
+        resumo = construir_grafo(
+            [(original, [item_original]), (retificadora, [item_retificador]), (outro_orgao, [item_outro_orgao])],
+            driver,
+        )
+        retifica = executar_leitura(
+            driver,
+            "MATCH (:ItemPauta {item_id_canonico: '999102_PAUTA_3.1'})-[:RETIFICA]->(a:Ata) RETURN a.documento_id AS id",
+        )
+        altera = executar_leitura(driver, "MATCH ()-[r:altera]->() RETURN count(r) AS total")
+        assert retifica == [{"id": 999101}]
+        assert altera == [{"total": 0}]
+        assert resumo == {
+            "citacoes_de_atos": 1, "atos_no_grafo": 0,
+            "citacoes_de_retificacao": 1, "retificacoes_no_grafo": 1,
+        }
     finally:
         limpar_grafo(driver)
         driver.close()
