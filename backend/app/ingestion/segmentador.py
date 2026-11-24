@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
-from app.core.texto import slugificar
+from app.core.texto import remover_acentos_maiusculo, slugificar
 from app.models.documento import Documento
 from app.models.item_pauta import ItemPauta
 
@@ -155,7 +155,11 @@ def detectar_itens_ct(texto_normalizado: str) -> list[ItemDetectado]:
     return itens
 
 
-RE_ITEM_CAR = re.compile(r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])(?=\s*(?:[A-ZÀ-Ý]|(?i:proc)))')
+RE_ITEM_CAR = re.compile(
+    r'(?<![\d"“])(\d{1,2})\)(?!\d)(?!["”])(?=\s*(?:[A-ZÀ-Ý]|(?i:proc)))'
+    r'|(?:(?<=[.:;]\s)|(?<=\A\s)|\A)(\d{2})-(?=\s+(?:[A-ZÀ-Ý]|(?i:proc)))'
+)
+MINIMO_PREAMBULO_CAR = 40
 
 
 def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
@@ -163,18 +167,32 @@ def detectar_itens_car(texto_normalizado: str) -> list[ItemDetectado]:
     if indice_pauta == -1:
         return []
 
-    corpo = texto_normalizado[indice_pauta + len("PAUTA:"):]
+    deslocamento = indice_pauta + len("PAUTA:")
+    corpo = texto_normalizado[deslocamento:]
     matches = list(RE_ITEM_CAR.finditer(corpo))
     itens = []
+    inicio_primeiro = matches[0].start() if matches else len(corpo)
+    preambulo = corpo[:inicio_primeiro]
+    if len(preambulo.strip()) >= MINIMO_PREAMBULO_CAR:
+        inicio = len(preambulo) - len(preambulo.lstrip())
+        itens.append(
+            ItemDetectado(
+                secao=SECAO_PAUTA,
+                numero_item="SN1",
+                inicio=deslocamento + inicio,
+                fim=deslocamento + inicio_primeiro,
+                texto=preambulo.strip(),
+            )
+        )
     for i, m in enumerate(matches):
         inicio = m.start()
         fim = matches[i + 1].start() if i + 1 < len(matches) else len(corpo)
         itens.append(
             ItemDetectado(
                 secao=SECAO_PAUTA,
-                numero_item=m.group(1),
-                inicio=indice_pauta + len("PAUTA:") + inicio,
-                fim=indice_pauta + len("PAUTA:") + fim,
+                numero_item=m.group(1) or m.group(2),
+                inicio=deslocamento + inicio,
+                fim=deslocamento + fim,
                 texto=corpo[inicio:fim].strip(),
             )
         )
@@ -357,12 +375,110 @@ def _aparar_encerramento(texto_normalizado: str, itens: list[ItemDetectado]) -> 
     return resultado
 
 
+MINIMO_LACUNA = 100
+MINIMO_LACUNA_ABERTURA = 200
+
+_NOMES_CABECALHO = (
+    r"EM PAUTA|ORDEM DO DIA|PAUTAS?|EXPEDIENTE|PROCESSOS/PROJETOS"
+    r"|COMUNICA(?:[CÇ][AÃ]O|[CÇ][OÕ]ES)|COMUNICADOS?|INFORMES?|PALAVRA[\s-]LIVRE"
+    r"|APR(?:OVA|ECIA)[CÇ][AÃ]O D[AE] ATAS?"
+)
+RE_CABECALHO_SECAO = re.compile(
+    rf"(?<!\d)\d{{1,2}}\s*[.)-]\s*(?P<nome>{_NOMES_CABECALHO})\s*[:.]"
+    rf"|\b(?P<nome_sem_numero>{_NOMES_CABECALHO})\s*:",
+    re.IGNORECASE,
+)
+
+
+def _nome_do_cabecalho(cabecalho: re.Match) -> str:
+    return cabecalho.group("nome") or cabecalho.group("nome_sem_numero")
+
+
+def _secao_do_cabecalho(nome: str) -> str:
+    nome = remover_acentos_maiusculo(nome)
+    if nome.startswith(("COMUNICA", "COMUNICADO")):
+        return SECAO_COMUNICACOES
+    if nome.startswith("INFORME"):
+        return SECAO_INFORMES
+    if nome.startswith("EXPEDIENTE"):
+        return SECAO_EXPEDIENTE
+    if nome.startswith("ORDEM"):
+        return SECAO_ORDEM_DO_DIA
+    if nome.startswith("PROCESSOS"):
+        return SECAO_PROCESSOS_PROJETOS
+    if nome.startswith("PALAVRA"):
+        return SECAO_PALAVRA_LIVRE
+    if nome.startswith("APR"):
+        return SECAO_APROVACAO_ATA
+    return SECAO_PAUTA
+
+
+def _trecho_relevante(trecho: str) -> bool:
+    conteudo = trecho.strip()
+    if len(conteudo) < MINIMO_LACUNA:
+        return False
+    return not (conteudo.endswith(":") and len(conteudo) < MINIMO_LACUNA_ABERTURA)
+
+
+def _cortar_por_cabecalhos(
+    cabecalhos: list[re.Match], inicio: int, fim: int, secao_inicial: str
+) -> list[tuple[int, int, str]]:
+    trechos = []
+    posicao, secao = inicio, secao_inicial
+    for cabecalho in cabecalhos:
+        if cabecalho.start() < inicio or cabecalho.end() > fim:
+            continue
+        trechos.append((posicao, cabecalho.start(), secao))
+        posicao, secao = cabecalho.end(), _secao_do_cabecalho(_nome_do_cabecalho(cabecalho))
+    trechos.append((posicao, fim, secao))
+    return trechos
+
+
+def preencher_lacunas(texto_normalizado: str, itens: list[ItemDetectado]) -> list[ItemDetectado]:
+    if not itens:
+        return itens
+    ordenados = sorted(itens, key=lambda item: item.inicio)
+    cabecalhos = list(RE_CABECALHO_SECAO.finditer(texto_normalizado))
+    lacunas: list[tuple[int, int, str]] = []
+
+    anteriores = [c for c in cabecalhos if c.end() <= ordenados[0].inicio]
+    if anteriores:
+        lacunas += _cortar_por_cabecalhos(cabecalhos, anteriores[0].start(), ordenados[0].inicio, SECAO_PAUTA)
+
+    for anterior, seguinte in zip(ordenados, ordenados[1:]):
+        if seguinte.inicio > anterior.fim:
+            lacunas += _cortar_por_cabecalhos(cabecalhos, anterior.fim, seguinte.inicio, anterior.secao)
+
+    novos = []
+    for inicio, fim, secao in lacunas:
+        encerramento = RE_ENCERRAMENTO_ATA.search(texto_normalizado, inicio, fim)
+        if encerramento:
+            fim = encerramento.start()
+        trecho = texto_normalizado[inicio:fim]
+        if not _trecho_relevante(trecho):
+            continue
+        inicio += len(trecho) - len(trecho.lstrip())
+        novos.append((inicio, fim, secao))
+
+    for k, (inicio, fim, secao) in enumerate(novos, start=1):
+        ordenados.append(
+            ItemDetectado(
+                secao=secao,
+                numero_item=f"SN{k}",
+                inicio=inicio,
+                fim=fim,
+                texto=texto_normalizado[inicio:fim].strip(),
+            )
+        )
+    return sorted(ordenados, key=lambda item: item.inicio)
+
+
 def segmentar_texto(tipo_orgao: str, centro: str, texto_limpo: str) -> tuple[list[ItemDetectado], list[int]]:
     detector = _obter_detector(tipo_orgao, centro)
 
     texto_normalizado, mapa = _normalizar_com_mapa(texto_limpo)
     itens = _aparar_encerramento(texto_normalizado, detector(texto_normalizado))
-    return itens, mapa
+    return preencher_lacunas(texto_normalizado, itens), mapa
 
 
 def dividir_fragmentos(texto: str) -> list[str]:
