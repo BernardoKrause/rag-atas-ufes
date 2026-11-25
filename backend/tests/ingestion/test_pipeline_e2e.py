@@ -42,8 +42,6 @@ def test_pipeline_preenche_campos_organizacionais_e_estruturais(db_session):
 
 
 def test_pipeline_status_aprovacao_reflete_marca_dagua_das_fixtures(db_session):
-    # 10-2025.pdf (CT) traz "ATA EM APROVAÇÃO" no cabeçalho de verdade —
-    # as outras 5 atas da fixture nao tem marca d'agua e ficam aprovadas
     documentos = executar_pipeline(FIXTURES, SECRET_KEY, db_session)
     por_arquivo = {d.nome_arquivo: d for d in documentos}
 

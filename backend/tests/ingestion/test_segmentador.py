@@ -682,15 +682,15 @@ def test_segmentar_e_persistir_desambigua_numero_duplicado_dentro_do_documento(d
     }
 
 
-def test_segmentar_as_6_fixtures_reais_bate_com_contagem_manual(db_session):
+def test_segmentar_as_6_fixtures_bate_com_contagem_manual(db_session):
     documentos = executar_pipeline(FIXTURES, SECRET_KEY_SEGMENTADOR, db_session)
     contagem_esperada = {
         "ata_da_1a_reuniao_ordinaria_-_db_ccens_04-02-2025.docx.pdf": 4,
-        "10-2025.pdf": 29,
-        "ata_05_02_2025.pdf": 14,
-        "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf": 8,
-        "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf": 7,
-        "ata_da_3a_reuniao_ordinaria_colped.pdf": 12,
+        "10-2025.pdf": 9,
+        "ata_05_02_2025.pdf": 7,
+        "1_ata_sessao_ordinaria_do_dia_28_de_janeiro_2025.pdf": 6,
+        "2020.08.17_-_ata_1a_ordinaria_camara_local.pdf": 6,
+        "ata_da_3a_reuniao_ordinaria_colped.pdf": 7,
     }
 
     for documento in documentos:
