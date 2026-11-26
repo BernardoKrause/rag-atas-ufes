@@ -276,7 +276,7 @@ def test_extrair_texto_bruto_remove_cabecalho_institucional_repetido_da_pagina_s
     pagina2 = texto[offsets[1]:]
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
-    assert pagina2.lstrip().startswith("Pós-Graduação em Agroquímica")
+    assert pagina2.lstrip().startswith("Programa de Pós-Graduação em Ciências Fictícias")
 
 
 def test_extrair_texto_bruto_preserva_cabecalho_da_primeira_pagina():
@@ -309,15 +309,15 @@ def test_extrair_texto_bruto_remove_rodape_com_timestamp_fixo_e_contador_de_pagi
     texto, _offsets, _paginas_ocr = extrair_texto_bruto(CT)
 
     assert "Emissão: 11/03/2026 12:00:13" not in texto
-    assert "Página 1/8" not in texto
-    assert "Página 8/8" not in texto
+    assert "Página 1/3" not in texto
+    assert "Página 3/3" not in texto
 
 
 def test_extrair_texto_bruto_nao_remove_nada_quando_paginas_nao_repetem_conteudo():
     texto, offsets, _paginas_ocr = extrair_texto_bruto(CAR)
     pagina2 = texto[offsets[1]:]
 
-    assert pagina2.lstrip().startswith("concessão da solicitação")
+    assert pagina2.lstrip().startswith("concessão da solicitação pela chefia")
 
 
 def test_extrair_texto_bruto_remove_cabecalho_mesmo_com_linha_em_branco_extra_na_primeira_pagina():
@@ -330,7 +330,7 @@ def test_extrair_texto_bruto_remove_cabecalho_mesmo_com_linha_em_branco_extra_na
     pagina2 = texto[offsets[1]:]
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
-    assert pagina2.lstrip().startswith("Campus e também sobre os cursos")
+    assert pagina2.lstrip().startswith("Campus e sobre os cursos de graduação")
 
 
 def test_extrair_texto_bruto_remove_cabecalho_com_linha_em_branco_extra_em_documento_de_2_paginas():
@@ -341,7 +341,7 @@ def test_extrair_texto_bruto_remove_cabecalho_com_linha_em_branco_extra_em_docum
     pagina2 = texto[offsets[1]:]
 
     assert "Universidade Federal do Espírito Santo" not in pagina2
-    assert pagina2.lstrip().startswith("exoneração oficialmente")
+    assert pagina2.lstrip().startswith("exoneração do cargo")
 
 
 def test_neutralizar_numeracao_de_margem_remove_linhas_que_se_repetem_na_pagina():

@@ -217,7 +217,7 @@ def test_extrair_ct_departamento_terminado_por_dois_pontos():
     assert campos.departamento_origem == "ENGENHARIA_AMBIENTAL"
 
 
-def test_extrair_ct_contra_fixture_real(db_session):
+def test_extrair_ct_contra_fixture(db_session):
     from pathlib import Path
     from app.ingestion.pipeline import executar_pipeline
     from app.ingestion.segmentador import segmentar_e_persistir
@@ -352,7 +352,7 @@ def test_extrair_ccae_sem_ato_emitido():
     assert campos.ato_emitido is None
 
 
-def test_extrair_ccae_contra_fixture_real(db_session):
+def test_extrair_ccae_contra_fixture(db_session):
     from pathlib import Path
     from app.ingestion.pipeline import executar_pipeline
     from app.ingestion.segmentador import segmentar_e_persistir
@@ -370,7 +370,7 @@ def test_extrair_ccae_contra_fixture_real(db_session):
     assert any(a.startswith("DECISAO_") for a in atos)
 
 
-def test_extrair_generico_contra_fixtures_reais(db_session):
+def test_extrair_generico_contra_fixtures(db_session):
     from pathlib import Path
     from app.ingestion.pipeline import executar_pipeline
     from app.ingestion.segmentador import segmentar_e_persistir
